@@ -56,7 +56,7 @@ export type NavItemDataProps = Pick<NavItemStateProps, 'disabled'> & {
   /**
    * Permission key (`<resource>:<action>`) required to render this item.
    * If absent, the item is always visible. Filtered upstream in `useNavData`
-   * via `usePermission().can(...)` (super-admin auto-bypass).
+   * via the optional navigation permission predicate.
    */
   permission?: string;
   /** Like `permission`, but renders if user has at least one of the listed keys. */

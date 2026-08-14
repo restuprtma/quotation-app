@@ -1,0 +1,201 @@
+{
+  "title": "Quotation",
+  "subtitle": "Manage project proposals and prepare documents for clients.",
+  "buttons": {
+    "new": "Quotation",
+    "generateAI": "Generate AI",
+    "save": "Save",
+    "edit": "Edit quotation",
+    "submitSignature": "Agree & Sign",
+    "clearSignature": "Clear signature"
+  },
+  "table": {
+    "number": "Number",
+    "client": "Client Name",
+    "budget": "Budget",
+    "projectType": "Project Type",
+    "status": "Status",
+    "createdAt": "Created Date",
+    "revision": "Revision",
+    "revisionValue": "Rev {{number}}",
+    "actions": "Actions"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Search client name or quotation number...",
+    "status": "Status",
+    "allStatuses": "All statuses"
+  },
+  "statuses": {
+    "draft": "Draft",
+    "shared": "Shared",
+    "signed": "Signed",
+    "contract_created": "Contract created"
+  },
+  "projectTypes": {
+    "product_based": "Product Based",
+    "project_based": "Project Based"
+  },
+  "rowActions": {
+    "viewDetail": "View detail",
+    "edit": "Edit"
+  },
+  "form": {
+    "newTitle": "New quotation",
+    "editTitle": "Edit quotation",
+    "clientId": "Client ID",
+    "clientName": "Client Name",
+    "clientIndustry": "Client Industry",
+    "projectType": "Project Type",
+    "budget": "Client Budget",
+    "requirements": "Feature Requirements",
+    "description": "Project Description",
+    "scope": "Scope of Work",
+    "maintenance": "Maintenance Info",
+    "hosting": "Hosting Info",
+    "notes": "Notes",
+    "blueprint": "Blueprint JSON",
+    "blueprintPreview": "Blueprint Preview",
+    "clientIdPlaceholder": "Client UUID",
+    "requirementsPlaceholder": "One requirement per line",
+    "blueprintPlaceholder": "Enter blueprint JSON...",
+    "aiHint": "AI helps write the draft. Review and edit it before saving.",
+    "fallbackClientName": "Quotation client",
+    "fallbackIndustry": "general",
+    "validationFailed": "Review the form fields.",
+    "aiFailed": "AI draft generation failed. Your input was preserved.",
+    "saveFailed": "Quotation could not be saved."
+  },
+  "detail": {
+    "title": "Quotation detail",
+    "client": "Client",
+    "projectType": "Project type",
+    "budget": "Budget",
+    "revision": "Active revision",
+    "createdAt": "Created",
+    "description": "Project description",
+    "scope": "Scope of work",
+    "maintenance": "Maintenance",
+    "hosting": "Hosting",
+    "notes": "Notes",
+    "empty": "No content yet."
+  },
+  "list": {
+    "emptyTitle": "No quotations yet",
+    "emptySubtitle": "Create your first quotation to start preparing a proposal.",
+    "searchEmpty": "No matching quotations found."
+  },
+  "public": {
+    "fallbackNotice": "This preview uses sample data until the public endpoint is available.",
+    "demoNotice": "Demo mode: sample data is shown because the demo token is not connected to the backend.",
+    "loading": "Loading quotation...",
+    "loadFailed": "The public quotation could not be loaded.",
+    "signing": "Saving signature...",
+    "signFailed": "The signature could not be saved. Please try again.",
+    "notFound": "The quotation link was not found or is no longer valid.",
+    "preparedFor": "Prepared for",
+    "quotationDate": "Quotation date",
+    "projectOverview": "Project overview",
+    "scope": "Scope of work",
+    "investment": "Project investment",
+    "serviceInfo": "Service information",
+    "maintenance": "Maintenance",
+    "hosting": "Hosting",
+    "notes": "Notes",
+    "approval": "Client approval",
+    "signatureHint": "Draw your signature inside the box.",
+    "signatureSuccess": "Thank you, the quotation has been approved.",
+    "signatureRequired": "A signature is required before approving the quotation.",
+    "signatureCanvas": "Signature area"
+  },
+  "blueprint": {
+    "title": "Project blueprint",
+    "actors": "System roles",
+    "activities": "Activities",
+    "action": "Action",
+    "response": "System response",
+    "channel": "Channel",
+    "output": "Output",
+    "empty": "No blueprint available."
+  },
+  "feedback": {
+    "saved": "Quotation saved successfully.",
+    "aiGenerated": "AI draft generated successfully."
+  },
+  "errors": {
+    "loadData": "Quotation list could not be loaded.",
+    "loadDetail": "Quotation detail could not be loaded.",
+    "invalidBlueprint": "Blueprint JSON is invalid."
+  },
+  "pricing": {
+    "sections": "Sections",
+    "addSection": "Add Section",
+    "sectionName": "Section Name",
+    "sectionType": "Section Type",
+    "items": "Items",
+    "addItem": "Add Item",
+    "itemName": "Item Name",
+    "pricingMode": "Pricing Mode",
+    "unitLabel": "Unit Label",
+    "unitPrice": "Unit Price",
+    "quantity": "Quantity",
+    "employeeCount": "Employee Count",
+    "duration": "Duration",
+    "durationUnit": "Duration Unit",
+    "billingPeriod": "Billing Period",
+    "lineTotal": "Line Total",
+    "oneTimeTotal": "One-time Total",
+    "recurringTotal": "Recurring Total"
+  },
+  "sectionTypes": {
+    "package": "Package",
+    "service": "Service",
+    "phase": "Phase",
+    "resource_group": "Resource Group",
+    "other": "Other"
+  },
+  "pricingModes": {
+    "unit": "Unit",
+    "resource": "Resource",
+    "fixed": "Fixed"
+  },
+  "billingPeriods": {
+    "one_time": "One Time",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "custom": "Custom"
+  },
+  "confirmTypeSwitch": {
+    "title": "Change Project Type?",
+    "description": "Changing the project type will reset all your existing pricing sections. Are you sure you want to proceed?",
+    "confirm": "Yes, reset pricing"
+  },
+  "narrative": {
+    "title": "Project Narrative",
+    "introduction": "Introduction",
+    "scope": "Scope",
+    "addScope": "Add Scope"
+  },
+  "details": {
+    "productTitle": "Product Details",
+    "projectTitle": "Project Details",
+    "modules": "Modules",
+    "addModule": "Add Module",
+    "moduleName": "Module Name",
+    "features": "Features",
+    "addFeature": "Add Feature",
+    "goals": "Goals",
+    "addGoal": "Add Goal",
+    "deliverables": "Deliverables",
+    "addDeliverable": "Add Deliverable"
+  },
+  "blueprint": {
+    "title": "System Blueprint"
+  },
+  "detail": {
+    "title": "Product/Project Details",
+    "introduction": "Introduction",
+    "modules": "System Modules",
+    "goals": "Project Goals",
+    "deliverables": "Deliverables"
+  }
+}

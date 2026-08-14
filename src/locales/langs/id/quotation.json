@@ -1,0 +1,201 @@
+{
+  "title": "Quotation",
+  "subtitle": "Kelola penawaran proyek dan siapkan dokumen untuk klien.",
+  "buttons": {
+    "new": "Quotation",
+    "generateAI": "Generate AI",
+    "save": "Simpan",
+    "edit": "Ubah quotation",
+    "submitSignature": "Setuju & Tandatangani",
+    "clearSignature": "Hapus tanda tangan"
+  },
+  "table": {
+    "number": "Nomor",
+    "client": "Nama Klien",
+    "budget": "Budget",
+    "projectType": "Tipe Proyek",
+    "status": "Status",
+    "createdAt": "Tanggal Buat",
+    "revision": "Revisi",
+    "revisionValue": "Rev {{number}}",
+    "actions": "Aksi"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Cari nama klien atau nomor quotation...",
+    "status": "Status",
+    "allStatuses": "Semua status"
+  },
+  "statuses": {
+    "draft": "Draft",
+    "shared": "Dibagikan",
+    "signed": "Ditandatangani",
+    "contract_created": "Kontrak dibuat"
+  },
+  "projectTypes": {
+    "product_based": "Product Based",
+    "project_based": "Project Based"
+  },
+  "rowActions": {
+    "viewDetail": "Lihat detail",
+    "edit": "Ubah"
+  },
+  "form": {
+    "newTitle": "Quotation baru",
+    "editTitle": "Ubah quotation",
+    "clientId": "ID Klien",
+    "clientName": "Nama Klien",
+    "clientIndustry": "Industri Klien",
+    "projectType": "Tipe Proyek",
+    "budget": "Budget Klien",
+    "requirements": "Kebutuhan Fitur",
+    "description": "Deskripsi Proyek",
+    "scope": "Scope of Work",
+    "maintenance": "Info Maintenance",
+    "hosting": "Info Hosting",
+    "notes": "Catatan",
+    "blueprint": "Blueprint JSON",
+    "blueprintPreview": "Pratinjau Blueprint",
+    "clientIdPlaceholder": "UUID klien",
+    "requirementsPlaceholder": "Satu kebutuhan per baris",
+    "blueprintPlaceholder": "Masukkan JSON blueprint...",
+    "aiHint": "AI membantu menulis draf. Periksa dan edit hasilnya sebelum disimpan.",
+    "fallbackClientName": "Klien quotation",
+    "fallbackIndustry": "general",
+    "validationFailed": "Periksa kembali isian form.",
+    "aiFailed": "Gagal membuat draf AI. Isian Anda tetap dipertahankan.",
+    "saveFailed": "Quotation gagal disimpan."
+  },
+  "detail": {
+    "title": "Detail quotation",
+    "client": "Klien",
+    "projectType": "Tipe proyek",
+    "budget": "Budget",
+    "revision": "Revisi aktif",
+    "createdAt": "Dibuat",
+    "description": "Deskripsi proyek",
+    "scope": "Scope of work",
+    "maintenance": "Maintenance",
+    "hosting": "Hosting",
+    "notes": "Catatan",
+    "empty": "Belum ada isi."
+  },
+  "list": {
+    "emptyTitle": "Belum ada quotation",
+    "emptySubtitle": "Buat quotation pertama untuk mulai menyusun penawaran.",
+    "searchEmpty": "Tidak ada quotation yang cocok."
+  },
+  "public": {
+    "fallbackNotice": "Pratinjau menggunakan data contoh sampai endpoint publik tersedia.",
+    "demoNotice": "Mode demo: data contoh digunakan karena token demo belum tersambung ke backend.",
+    "loading": "Memuat quotation...",
+    "loadFailed": "Quotation publik tidak dapat dimuat.",
+    "signing": "Menyimpan tanda tangan...",
+    "signFailed": "Tanda tangan gagal disimpan. Silakan coba lagi.",
+    "notFound": "Link quotation tidak ditemukan atau sudah tidak berlaku.",
+    "preparedFor": "Disiapkan untuk",
+    "quotationDate": "Tanggal quotation",
+    "projectOverview": "Ringkasan proyek",
+    "scope": "Ruang lingkup pekerjaan",
+    "investment": "Investasi proyek",
+    "serviceInfo": "Informasi layanan",
+    "maintenance": "Maintenance",
+    "hosting": "Hosting",
+    "notes": "Catatan",
+    "approval": "Persetujuan klien",
+    "signatureHint": "Gambar tanda tangan Anda di dalam kotak.",
+    "signatureSuccess": "Terima kasih, penawaran telah disetujui.",
+    "signatureRequired": "Tanda tangan diperlukan sebelum menyetujui quotation.",
+    "signatureCanvas": "Area tanda tangan"
+  },
+  "blueprint": {
+    "title": "Blueprint proyek",
+    "actors": "Peran dalam sistem",
+    "activities": "Aktivitas",
+    "action": "Aksi",
+    "response": "Respons sistem",
+    "channel": "Kanal",
+    "output": "Output",
+    "empty": "Blueprint belum tersedia."
+  },
+  "feedback": {
+    "saved": "Quotation berhasil disimpan.",
+    "aiGenerated": "Draf AI berhasil dibuat."
+  },
+  "errors": {
+    "loadData": "Gagal memuat daftar quotation.",
+    "loadDetail": "Gagal memuat detail quotation.",
+    "invalidBlueprint": "Blueprint JSON tidak valid."
+  },
+  "pricing": {
+    "sections": "Bagian (Sections)",
+    "addSection": "Tambah Bagian",
+    "sectionName": "Nama Bagian",
+    "sectionType": "Tipe Bagian",
+    "items": "Item",
+    "addItem": "Tambah Item",
+    "itemName": "Nama Item",
+    "pricingMode": "Mode Harga",
+    "unitLabel": "Label Unit",
+    "unitPrice": "Harga Satuan",
+    "quantity": "Kuantitas",
+    "employeeCount": "Jumlah Karyawan",
+    "duration": "Durasi",
+    "durationUnit": "Unit Durasi",
+    "billingPeriod": "Periode Tagihan",
+    "lineTotal": "Total Baris",
+    "oneTimeTotal": "Total Sekali Bayar",
+    "recurringTotal": "Total Langganan"
+  },
+  "sectionTypes": {
+    "package": "Paket",
+    "service": "Layanan",
+    "phase": "Fase",
+    "resource_group": "Grup Sumber Daya",
+    "other": "Lainnya"
+  },
+  "pricingModes": {
+    "unit": "Satuan",
+    "resource": "Sumber Daya",
+    "fixed": "Tetap"
+  },
+  "billingPeriods": {
+    "one_time": "Sekali Bayar",
+    "monthly": "Bulanan",
+    "yearly": "Tahunan",
+    "custom": "Kustom"
+  },
+  "confirmTypeSwitch": {
+    "title": "Ubah Tipe Proyek?",
+    "description": "Mengubah tipe proyek akan mereset semua bagian harga (pricing sections) Anda. Anda yakin ingin melanjutkan?",
+    "confirm": "Ya, reset harga"
+  },
+  "narrative": {
+    "title": "Narasi Proyek",
+    "introduction": "Pendahuluan",
+    "scope": "Ruang Lingkup",
+    "addScope": "Tambah Ruang Lingkup"
+  },
+  "details": {
+    "productTitle": "Detail Produk",
+    "projectTitle": "Detail Proyek",
+    "modules": "Modul",
+    "addModule": "Tambah Modul",
+    "moduleName": "Nama Modul",
+    "features": "Fitur",
+    "addFeature": "Tambah Fitur",
+    "goals": "Tujuan",
+    "addGoal": "Tambah Tujuan",
+    "deliverables": "Hasil Kerja (Deliverables)",
+    "addDeliverable": "Tambah Hasil Kerja"
+  },
+  "blueprint": {
+    "title": "Cetak Biru Sistem"
+  },
+  "detail": {
+    "title": "Detail Produk/Proyek",
+    "introduction": "Pendahuluan",
+    "modules": "Modul Sistem",
+    "goals": "Tujuan Proyek",
+    "deliverables": "Keluaran/Hasil"
+  }
+}

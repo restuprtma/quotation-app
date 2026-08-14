@@ -131,34 +131,22 @@ export const endpoints = {
     companies: '/core/v1/auth/companies',
   },
   core: {
-    companies: {
-      list: '/core/v1/companies',
-      byId: (id: string) => `/core/v1/companies/${id}`,
+  },
+  quotation: {
+    quotations: {
+      list: '/quotation/v1/quotations',
+      byId: (id: string) => `/quotation/v1/quotations/${id}`,
+      create: '/quotation/v1/quotations',
+      update: (id: string) => `/quotation/v1/quotations/${id}`,
     },
-    branches: {
-      list: '/core/v1/branches',
-      byCompanies: '/core/v1/branches/by-companies',
-      byId: (id: string) => `/core/v1/branches/${id}`,
+    ai: {
+      generate: '/quotation/v1/ai/generate',
     },
-    roles: {
-      list: '/core/v1/roles',
-      byId: (id: string) => `/core/v1/roles/${id}`,
-      permissions: (id: string) => `/core/v1/roles/${id}/permissions`,
-    },
-    users: {
-      list: '/core/v1/users',
-      byId: (id: string) => `/core/v1/users/${id}`,
-      branches: (id: string) => `/core/v1/users/${id}/branches`,
-      companies: (id: string) => `/core/v1/users/${id}/companies`,
-    },
-    auditLogs: {
-      root: '/core/v1/audit-logs',
-    },
-    translationOverrides: {
-      base: (clientId: string) => `/core/v1/admin/clients/${clientId}/translation-overrides`,
-      byKey: (clientId: string, key: string) =>
-        `/core/v1/admin/clients/${clientId}/translation-overrides/${encodeURIComponent(key)}`,
-      public: '/core/v1/translation-overrides',
+    public: {
+      byToken: (token: string) => `/p/q/${token}`,
+      sign: (token: string) => `/p/q/${token}/sign`,
+      blueprint: (token: string) => `/p/b/${token}`,
+      detail: (token: string) => `/p/d/${token}`,
     },
   },
 } as const;

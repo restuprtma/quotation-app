@@ -1,12 +1,11 @@
 import type { Breakpoint } from '@mui/material/styles';
-import type { NavItemProps, NavSectionProps } from 'src/shared/ui/nav-section';
+import type { NavSectionProps } from 'src/shared/ui/nav-section';
 import type { MainSectionProps, HeaderSectionProps, LayoutSectionProps } from '../core';
 
 import { merge } from 'es-toolkit';
 import { useBoolean } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
-import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 import { iconButtonClasses } from '@mui/material/IconButton';
 
@@ -19,13 +18,10 @@ import { NavMobile } from './nav-mobile';
 import { VerticalDivider } from './content';
 import { NavVertical } from './nav-vertical';
 import { NavHorizontal } from './nav-horizontal';
-import { Searchbar } from '../components/searchbar';
 import { useNavData } from '../nav-config-dashboard';
 import { MenuButton } from '../components/menu-button';
 import { AccountDrawer } from '../components/account-drawer';
 // import { LanguagePopover } from '../components/language-popover';
-import { HeaderBreadcrumbs } from '../components/header-breadcrumbs';
-// import { WorkspacesPopover } from '../components/workspaces-popover';
 import { dashboardLayoutVars, dashboardNavColorVars } from './css-vars';
 import { MainSection, layoutClasses, HeaderSection, LayoutSection } from '../core';
 
@@ -53,7 +49,7 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   const theme = useTheme();
 
-  const { roles, company, authenticated } = useAuthContext();
+  const { company, authenticated } = useAuthContext();
 
   const settings = useSettingsContext();
 
@@ -67,9 +63,6 @@ export function DashboardLayout({
   const isNavMini = settings.state.navLayout === 'mini';
   const isNavHorizontal = settings.state.navLayout === 'horizontal';
   const isNavVertical = isNavMini || settings.state.navLayout === 'vertical';
-
-  const canDisplayItemByRole = (allowedRoles: NavItemProps['allowedRoles']): boolean =>
-    !allowedRoles || allowedRoles.length === 0 || roles.some((r) => allowedRoles.includes(r));
 
   const renderHeader = () => {
     const headerSlotProps: HeaderSectionProps['slotProps'] = {
@@ -92,17 +85,11 @@ export function DashboardLayout({
     };
 
     const headerSlots: HeaderSectionProps['slots'] = {
-      topArea: (
-        <Alert severity="info" sx={{ display: 'none', borderRadius: 0 }}>
-          This is an info Alert.
-        </Alert>
-      ),
       bottomArea: isNavHorizontal ? (
         <NavHorizontal
           data={navData}
           layoutQuery={layoutQuery}
           cssVars={navVars.section}
-          checkPermissions={canDisplayItemByRole}
         />
       ) : null,
       leftArea: (
@@ -117,7 +104,6 @@ export function DashboardLayout({
             open={open}
             onClose={onClose}
             cssVars={navVars.section}
-            checkPermissions={canDisplayItemByRole}
             slots={{ bottomArea: renderNavAccountFooter(false) }}
           />
 
@@ -145,32 +131,10 @@ export function DashboardLayout({
             <VerticalDivider sx={{ [theme.breakpoints.up(layoutQuery)]: { display: 'flex' } }} />
           )}
 
-          {/** @slot Workspace popover */}
-          {/* <WorkspacesPopover
-            sx={{ ...(isNavHorizontal && { color: 'var(--layout-nav-text-primary-color)' }) }}
-          /> */}
-
-          {/** @slot Breadcrumbs (derived from nav data) */}
-          <VerticalDivider sx={{ display: 'none' }} />
-          <HeaderBreadcrumbs data={navData} sx={{ display: 'none' }} />
         </>
       ),
       rightArea: (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0, sm: 0.75 } }}>
-          {/** @slot Searchbar — hidden but mounted (keeps Cmd+K binding wired) */}
-          <Box sx={{ display: 'none' }}>
-            <Searchbar data={navData} />
-          </Box>
-
-          {/** @slot Language popover */}
-          {/* <LanguagePopover data={allLangs} /> */}
-
-          {/** @slot Notifications popover */}
-          {/* <NotificationsDrawer data={_notifications} /> */}
-
-          {/** @slot Contacts popover */}
-          {/* <ContactsPopover data={_contacts} /> */}
-        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0, sm: 0.75 } }} />
       ),
     };
 
@@ -217,7 +181,6 @@ export function DashboardLayout({
       isNavMini={isNavMini}
       layoutQuery={layoutQuery}
       cssVars={navVars.section}
-      checkPermissions={canDisplayItemByRole}
       slots={{ bottomArea: renderNavAccountFooter(isNavMini) }}
       onToggleNav={() =>
         settings.setField(

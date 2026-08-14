@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Product Documentation
+
+Before coding, read [AGENTS.md](AGENTS.md), the short [PRD.md](PRD.md), and the active phase file linked by `D:\venturo\Quotation-generator\todo.md`. Read only the relevant `docs/product/` file named by that phase. Do not read the full roadmap or every product document.
+
 ## Commands
 
 Requires Node ≥22. Package manager is `yarn` (v1). Dev server runs on port **8081**.
@@ -27,7 +31,7 @@ Config is read in [src/shared/config/index.ts](src/shared/config/index.ts):
 
 ## Architecture
 
-This is the **Minimals MUI starter (v7.6.1)** adapted into a multi-tenant finance product ("Tuai"). Stack: Vite 7 + React 19 + React Router 7 (data router) + MUI v7 + Emotion + React Hook Form/Zod + Axios. No Redux / no SWR / no React Query — state is local + context.
+This is a focused Quotation & Contract Generator frontend built on the Minimals MUI foundation. Stack: Vite 7 + React 19 + React Router 7 + MUI v7 + Emotion + React Hook Form/Zod + Axios. No Redux / no SWR / no React Query; state is local + context.
 
 ### Path alias
 
@@ -38,7 +42,8 @@ Imports under `src/...` resolve via both the Vite alias ([vite.config.ts](vite.c
 Code is split into **domain modules** under [src/module/](src/module/):
 
 - [module/core/](src/module/core/) — cross-cutting: `auth`, `settings`, `error`
-- [module/finance/](src/module/finance/) — business domain (currently `dashboard` scaffold only)
+- [module/quotation/](src/module/quotation/) — quotation, pricing, AI bundle, blueprint, and public artifacts
+- [module/contract/](src/module/contract/) — Contract Generator foundation and future contract feature
 
 Each `features/<feature>/` folder follows a consistent shape: `api/`, `components/`, `context/`, `guard/`, `hooks/`, `pages/`, `types/`, `views/`. `pages/` are the lazy-loaded route leaves; `views/` hold the page body component so pages stay thin. Stick to this layout when adding features.
 
@@ -53,7 +58,7 @@ Everything else lives in [src/shared/](src/shared/) (`api`, `config`, `constants
 
 ### App shell
 
-[src/app.tsx](src/app.tsx) wires providers in this order: `I18nProvider → AuthProvider → SettingsProvider → ThemeProvider → LocalizationProvider → MotionLazy`, plus global `<ProgressBar>`, `<SettingsDrawer>`, `<OnboardingDialog>`. New global overlays/providers belong here.
+[src/app.tsx](src/app.tsx) wires providers in this order: `I18nProvider → AuthProvider → SettingsProvider → ThemeProvider → LocalizationProvider → MotionLazy`, plus product-relevant global overlays. New global overlays/providers belong here only when required by quotation or contract.
 
 ### Internationalization (i18n)
 
@@ -87,13 +92,10 @@ Everything else lives in [src/shared/](src/shared/) (`api`, `config`, `constants
 
 ### Guards
 
-Three composable guards in [src/module/core/features/auth/guard/](src/module/core/features/auth/guard/):
+Two active guards in [src/module/core/features/auth/guard/](src/module/core/features/auth/guard/):
 
 - `AuthGuard` — redirects unauthenticated users to sign-in (wraps dashboard routes)
 - `GuestGuard` — redirects authenticated users away from auth pages
-- `PermissionGuard` — declarative permission check driven by [use-permission.ts](src/module/core/features/auth/hooks/use-permission.ts) (`can`, `canAll`, `canAny`, with `isSuperAdmin` bypass). Accepts `require: string | string[]`, `mode: 'all' | 'any'`, optional `fallback` and `showForbidden`.
-
-For permission-gating UI elements, prefer `PermissionGuard` or `usePermission()` over bespoke checks.
 
 ### Layouts
 
@@ -118,10 +120,9 @@ Proyek ini punya standarisasi terdokumentasi di [docs/](docs/). **Baca ini sebel
   - `i18n.md` — `useTranslate`, language popover, namespace per feature (id default + en)
   - `reports.md` — read-only report pages (filter bar, shared table, JWT-protected print/export via axios blob — **jangan** `window.open(fullUrl)`)
 
-### Canonical references
+### Canonical reference
 
-- **Single-entity + flat attachments**: [src/module/finance/features/fund-transfer/](src/module/finance/features/fund-transfer/)
-- **Multi-line entity + per-line attachments**: [src/module/finance/features/cash-transactions/](src/module/finance/features/cash-transactions/)
+- **Quotation feature:** [src/module/quotation/features/quotations/](src/module/quotation/features/quotations/)
 
 Saat ragu:
 1. Baca implementasi di referensi yang paling mendekati kebutuhan
@@ -135,9 +136,9 @@ Saat ragu:
 - **Fast dialog transition** — `transitionDuration={{ enter: shortest, exit: shortest - 80 }}` (default MUI 225/195ms terasa lambat)
 - **Dialog tanpa tombol "Batal"** — X di title cukup
 - **Module-level cache untuk reference data** — hindari N+1 fetch di table row
-- **Tidak ada mock data di feature** — selalu real BE endpoint via cached hook
+- **Tidak ada generic skeleton/mock data di feature** — gunakan endpoint backend atau fixture test yang eksplisit
 - **`RHFNumericField` untuk amount/currency** — `Field.Text type="number"` tidak format thousand separator
-- **Multilanguage wajib** — semua label via `t()`, tidak ada string hardcoded; fund-transfer sebagai contoh lengkap
+- **Multilanguage wajib** — semua label via `t()`, tidak ada string hardcoded; quotation feature sebagai contoh utama
 
 ## Conventions enforced by ESLint
 

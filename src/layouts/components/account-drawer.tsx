@@ -1,6 +1,5 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 
-import { varAlpha } from 'minimal-shared/utils';
 import { useBoolean } from 'minimal-shared/hooks';
 import { useRef, useState, useCallback } from 'react';
 
@@ -10,35 +9,22 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Drawer from '@mui/material/Drawer';
 import Divider from '@mui/material/Divider';
-import Popover from '@mui/material/Popover';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import ButtonBase from '@mui/material/ButtonBase';
 
-import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
 import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
-import { PERM } from 'src/shared/lib/permissions';
 import { Scrollbar } from 'src/shared/ui/scrollbar';
 import { AnimateBorder } from 'src/shared/ui/animate';
 import { ConfirmDialog } from 'src/shared/ui/confirm-dialog';
 import { useAuthContext } from 'src/module/core/features/auth/hooks';
 import { useSettingsContext } from 'src/module/core/features/settings';
-import { usePermission } from 'src/module/core/features/auth/hooks/use-permission';
 
 // ----------------------------------------------------------------------
-
-const SETTINGS_ICONS = {
-  branches: 'mingcute:location-fill',
-  roles: 'solar:shield-keyhole-bold-duotone',
-  users: 'solar:users-group-rounded-bold-duotone',
-  translationOverride: 'solar:chat-round-dots-bold',
-} as const;
-
-type SettingsKey = keyof typeof SETTINGS_ICONS;
 
 export type AccountDrawerProps = IconButtonProps & {
   compact?: boolean;
@@ -48,21 +34,7 @@ export function AccountDrawer({ compact, sx, ...other }: AccountDrawerProps) {
   const router = useRouter();
   const settings = useSettingsContext();
   const { user, signOut } = useAuthContext();
-  const { can } = usePermission();
   const { t } = useTranslate('navigation');
-
-  const settingsItems = (
-    [
-      { key: 'branches', path: paths.dashboard.settings.branches, perm: PERM.branches.read },
-      { key: 'roles', path: paths.dashboard.settings.roles, perm: PERM.roles.read },
-      { key: 'users', path: paths.dashboard.settings.users, perm: PERM.userManagement.read },
-      {
-        key: 'translationOverride',
-        path: paths.dashboard.settings.translationOverride,
-        perm: PERM.translationOverrides.read,
-      },
-    ] satisfies { key: SettingsKey; path: string; perm: string }[]
-  ).filter((it) => can(it.perm));
 
   const displayName = user?.full_name || user?.username || '';
   const email = user?.email ?? '';
@@ -84,18 +56,10 @@ export function AccountDrawer({ compact, sx, ...other }: AccountDrawerProps) {
   };
   const closeMenu = () => setMenuOpen(false);
 
-  const [notifAnchor, setNotifAnchor] = useState<HTMLElement | null>(null);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const openNotif = (e: React.MouseEvent<HTMLElement>) => {
-    setNotifAnchor(e.currentTarget);
-    setNotifOpen(true);
-  };
-  const closeNotif = () => setNotifOpen(false);
-
   const [profileHovered, setProfileHovered] = useState(false);
   const showCaret = profileHovered || menuOpen;
   const caretIcon = menuOpen ? 'eva:chevron-down-fill' : 'eva:arrow-ios-upward-fill';
-  const rightIcon = showCaret ? caretIcon : 'solar:bell-bing-bold-duotone';
+  const rightIcon = showCaret ? caretIcon : 'eva:chevron-down-fill';
 
   const handleProfile = () => {
     closeMenu();
@@ -105,11 +69,6 @@ export function AccountDrawer({ compact, sx, ...other }: AccountDrawerProps) {
   const handleTheme = () => {
     closeMenu();
     settings.onToggleDrawer();
-  };
-
-  const handleNavigate = (path: string) => {
-    closeMenu();
-    router.push(path);
   };
 
   const handleLogout = () => {
@@ -203,25 +162,7 @@ export function AccountDrawer({ compact, sx, ...other }: AccountDrawerProps) {
           )}
         </ButtonBase>
 
-        {!compact && (
-          <IconButton
-            aria-label="Notifications"
-            onClick={openNotif}
-            sx={{
-              width: 36,
-              height: 36,
-              flexShrink: 0,
-              color: 'text.secondary',
-              transition: (theme) =>
-                theme.transitions.create(['color', 'background-color'], {
-                  duration: theme.transitions.duration.shortest,
-                }),
-              '&:hover': { color: 'text.primary' },
-            }}
-          >
-            <Iconify icon={rightIcon} width={20} />
-          </IconButton>
-        )}
+        {!compact && <Iconify icon={rightIcon} width={20} sx={{ color: 'text.secondary' }} />}
       </Box>
 
       <Menu
@@ -249,82 +190,12 @@ export function AccountDrawer({ compact, sx, ...other }: AccountDrawerProps) {
           {t('account.theme')}
         </MenuItem>
 
-        {settingsItems.length > 0 && <Divider sx={{ my: 0.5 }} />}
-        {settingsItems.map((item) => (
-          <MenuItem key={item.key} onClick={() => handleNavigate(item.path)} sx={{ gap: 1 }}>
-            <Iconify icon={SETTINGS_ICONS[item.key]} />
-            {t(`settings.${item.key}`)}
-          </MenuItem>
-        ))}
-
         <Divider sx={{ my: 0.5 }} />
         <MenuItem onClick={handleLogout} sx={{ gap: 1, color: 'error.main' }}>
           <Iconify icon="ic:round-power-settings-new" />
           {t('account.logout')}
         </MenuItem>
       </Menu>
-
-      <Popover
-        anchorEl={notifAnchor}
-        open={notifOpen && Boolean(notifAnchor)}
-        onClose={closeNotif}
-        anchorOrigin={{ vertical: 'top', horizontal: 44 }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        slotProps={{
-          transition: { onExited: () => setNotifAnchor(null) },
-          paper: {
-            sx: {
-              width: 320,
-              display: 'flex',
-              flexDirection: 'column',
-            },
-          },
-        }}
-      >
-        <Box sx={{ p: 2 }}>
-          <Typography variant="subtitle1">{t('account.notifications.title')}</Typography>
-        </Box>
-        <Divider />
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            py: 5,
-            px: 3,
-            gap: 1.5,
-          }}
-        >
-          <Box
-            sx={{
-              width: 72,
-              height: 72,
-              display: 'flex',
-              borderRadius: '50%',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'text.disabled',
-              bgcolor: (theme) => varAlpha(theme.vars.palette.grey['500Channel'], 0.08),
-            }}
-          >
-            <Iconify width={34} icon="solar:bell-off-bold" />
-          </Box>
-          <Typography variant="body2" color="text.secondary">
-            {t('account.notifications.empty')}
-          </Typography>
-        </Box>
-        <Divider />
-        <Box sx={{ display: 'flex' }}>
-          <Button fullWidth color="inherit" sx={{ borderRadius: 0, py: 1.5 }}>
-            {t('account.notifications.markAllRead')}
-          </Button>
-          <Divider orientation="vertical" flexItem />
-          <Button fullWidth color="inherit" sx={{ borderRadius: 0, py: 1.5 }}>
-            {t('account.notifications.seeAll')}
-          </Button>
-        </Box>
-      </Popover>
 
       <Drawer
         open={drawerOpen}
