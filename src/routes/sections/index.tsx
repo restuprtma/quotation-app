@@ -2,6 +2,7 @@ import type { RouteObject } from 'react-router';
 
 import { lazy } from 'react';
 
+import { rndRoutes } from './rnd';
 import { authRoutes } from './auth';
 import { publicRoutes } from './public';
 import { dashboardRoutes } from './dashboard';
@@ -19,6 +20,9 @@ export const routesSection: RouteObject[] = [
 
   // Dashboard (mounted at '/')
   ...dashboardRoutes,
+
+  // Development-only R&D tools
+  ...rndRoutes,
 
   // No match
   { path: '*', element: <Page404 /> },

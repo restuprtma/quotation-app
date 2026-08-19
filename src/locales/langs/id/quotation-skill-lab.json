@@ -1,0 +1,80 @@
+{
+  "title": "Lab Skill Quotation",
+  "subtitle": "Validasi R&D untuk round-trip HTML TipTap dan workflow kandidat legal.",
+  "scenarioSelector": "Pilih skenario round-trip",
+  "scenarios": {
+    "simple": "Sederhana",
+    "table-heavy": "Tabel kompleks",
+    "legal": "Legal"
+  },
+  "actions": {
+    "reset": "Reset skenario",
+    "run": "Jalankan round-trip"
+  },
+  "toolbar": {
+    "paragraph-edited": "Tambahkan teks pada paragraf terpilih",
+    "heading-edited": "Ubah paragraf terpilih menjadi heading H2",
+    "list-edited": "Ubah blok terpilih menjadi daftar bullet",
+    "row-added": "Tambah baris setelah pilihan",
+    "row-deleted": "Hapus baris terpilih",
+    "column-added": "Tambah kolom setelah pilihan",
+    "column-deleted": "Hapus kolom terpilih",
+    "cell-merged": "Gabungkan sel terpilih",
+    "cell-split": "Pisahkan sel terpilih",
+    "column-resized": "Geser batas kolom di editor untuk menyelesaikan operasi resize"
+  },
+  "editor": {
+    "source": "Editor sumber",
+    "sourceAriaLabel": "Editor sumber quotation",
+    "recreated": "Pratinjau hasil rekreasi",
+    "recreatedEmpty": "Jalankan round-trip untuk membuat pratinjau read-only.",
+    "appendedText": " Teks uji deterministik."
+  },
+  "legal": {
+    "candidateStatus": "Kandidat R&D, menunggu persetujuan BA",
+    "pendingNotice": "Blok ini belum merupakan ketentuan legal yang disetujui dan dimulai dalam keadaan terkunci.",
+    "locked": "Legal terkunci",
+    "unlocked": "Legal terbuka",
+    "actions": {
+      "unlock": "Buka kunci",
+      "editWord": "Ubah satu kata",
+      "restore": "Pulihkan kandidat"
+    },
+    "dialog": {
+      "title": "Buka kandidat legal?",
+      "description": "Perubahan pada blok kandidat akan menandainya sebagai telah dimodifikasi. Tindakan ini hanya untuk validasi R&D.",
+      "cancel": "Batal",
+      "confirm": "Buka dan lanjutkan"
+    }
+  },
+  "report": {
+    "status": {
+      "passed": "Round-trip lulus",
+      "failed": "Round-trip belum lulus"
+    },
+    "evidence": {
+      "title": "Bukti HTML kanonis",
+      "source": "Sumber",
+      "recreated": "Hasil rekreasi"
+    },
+    "invariants": {
+      "required_operations": "Semua operasi wajib selesai",
+      "section_order_and_count": "Urutan dan jumlah section tetap",
+      "element_hierarchy": "Hierarki elemen tetap",
+      "normalized_text": "Teks ternormalisasi tetap",
+      "heading_levels": "Level heading tetap",
+      "list_type_and_order": "Jenis dan urutan daftar tetap",
+      "table_dimensions_and_cell_order": "Dimensi tabel dan urutan sel tetap",
+      "table_spans": "Span sel tabel tetap",
+      "allowed_links": "Tautan sesuai allowlist",
+      "section_markers": "Marker section tetap",
+      "legal_state": "Subtree dan status legal valid",
+      "forbidden_elements": "Tidak ada elemen terlarang",
+      "forbidden_attributes": "Tidak ada atribut terlarang",
+      "editor_recreation": "Editor verifikasi berhasil dibuat ulang"
+    }
+  },
+  "errors": {
+    "unknown": "Terjadi kegagalan editor yang tidak diketahui."
+  }
+}

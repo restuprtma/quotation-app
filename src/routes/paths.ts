@@ -20,9 +20,6 @@ export const paths = {
     },
   },
   public: {
-    quotation: (token: string) => `/p/q/${token}`,
-    blueprint: (token: string) => `/p/b/${token}`,
-    detail: (token: string) => `/p/d/${token}`,
     contract: (token: string) => `/p/c/${token}`,
   },
 };

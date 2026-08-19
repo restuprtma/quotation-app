@@ -46,10 +46,7 @@ export function ContractListView() {
 
   return (
     <DashboardContent maxWidth="xl">
-      <PageHeader
-        title="Contracts"
-        subtitle="Manage your contracts"
-      />
+      <PageHeader title="Contracts" subtitle="Manage your contracts" />
       <Card>
         <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
           <Scrollbar>
@@ -63,23 +60,35 @@ export function ContractListView() {
                     <TableRow key={row.id}>
                       <TableCell>{row.contract_number}</TableCell>
                       <TableCell>
-                        <Label color={row.status === 'signed' ? 'success' : row.status === 'draft' ? 'default' : 'info'}>
+                        <Label
+                          color={
+                            row.status === 'signed'
+                              ? 'success'
+                              : row.status === 'draft'
+                                ? 'default'
+                                : 'info'
+                          }
+                        >
                           {row.status}
                         </Label>
                       </TableCell>
                       <TableCell>{formatDate(row.created_at)}</TableCell>
                       <TableCell align="right">
                         <Tooltip title="Edit">
-                          <IconButton onClick={() => router.push(paths.dashboard.contract.edit(row.id))}>
+                          <IconButton
+                            onClick={() => router.push(paths.dashboard.contract.edit(row.id))}
+                          >
                             <Iconify icon="solar:pen-bold" />
                           </IconButton>
                         </Tooltip>
                         {row.status !== 'draft' && (
                           <Tooltip title="View Link">
-                            <IconButton onClick={() => {
-                              const url = `${window.location.origin}${paths.public.contract(row.public_token)}`;
-                              navigator.clipboard.writeText(url);
-                            }}>
+                            <IconButton
+                              onClick={() => {
+                                const url = `${window.location.origin}${paths.public.contract(row.public_token)}`;
+                                navigator.clipboard.writeText(url);
+                              }}
+                            >
                               <Iconify icon="eva:link-2-fill" />
                             </IconButton>
                           </Tooltip>

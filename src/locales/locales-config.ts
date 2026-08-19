@@ -43,9 +43,41 @@ export const allLangs: LangOption[] = [
 
 // ----------------------------------------------------------------------
 
-export const i18nResourceLoader = resourcesToBackend(
-  (lang: LangCode, namespace: string) => import(`./langs/${lang}/${namespace}.json`)
+const productionNamespaces = new Set([
+  'auth',
+  'common',
+  'contract',
+  'error',
+  'messages',
+  'navigation',
+  'quotation',
+  'settings',
+]);
+
+const productionLocaleModules = import.meta.glob(
+  ['./langs/*/*.json', '!./langs/*/quotation-skill-lab.json'],
+  { import: 'default' }
 );
+
+export const i18nResourceLoader = resourcesToBackend((lang: LangCode, namespace: string) => {
+  if (import.meta.env.DEV && !productionNamespaces.has(namespace)) {
+    return fetch(`/src/locales/langs/${lang}/${namespace}.json`).then((response) =>
+      response.json()
+    );
+  }
+
+  if (!productionNamespaces.has(namespace)) {
+    return Promise.reject(new Error(`Unknown locale namespace: ${namespace}`));
+  }
+
+  const loader = productionLocaleModules[`./langs/${lang}/${namespace}.json`];
+
+  if (!loader) {
+    return Promise.reject(new Error(`Unknown locale resource: ${lang}/${namespace}`));
+  }
+
+  return loader();
+});
 
 export function i18nOptions(
   lang: LangCode = fallbackLng,

@@ -1,4 +1,10 @@
-import type { Contract, PublicContract, SignContractPayload, CreateContractPayload, UpdateContractPayload } from '../../../types';
+import type {
+  Contract,
+  PublicContract,
+  SignContractPayload,
+  CreateContractPayload,
+  UpdateContractPayload,
+} from '../../../types';
 
 import { useState, useEffect, useCallback } from 'react';
 
@@ -105,8 +111,9 @@ export function usePublicContract(token: string) {
     if (!token) return undefined;
     let active = true;
     setIsLoading(true);
-    
-    contractApi.getPublic(token)
+
+    contractApi
+      .getPublic(token)
       .then((res) => {
         if (active) setData(res);
       })
@@ -115,7 +122,9 @@ export function usePublicContract(token: string) {
         if (active) setIsLoading(false);
       });
 
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [token]);
 
   return { data, isLoading };

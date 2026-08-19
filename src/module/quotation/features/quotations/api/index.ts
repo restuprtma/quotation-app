@@ -1,18 +1,12 @@
 import type {
   Quotation,
   PaginationMeta,
-  PublicQuotation,
-  AIGeneratePayload,
-  AIGenerateResponse,
   QuotationListParams,
-  PublicDetailResponse,
   CreateQuotationPayload,
   UpdateQuotationPayload,
-  PublicBlueprintResponse,
-  SignPublicQuotationPayload,
 } from '../types';
 
-import axios, { endpoints, withoutAuthRefresh } from 'src/shared/lib/axios';
+import axios, { endpoints } from 'src/shared/lib/axios';
 
 type ApiEnvelope<T> = {
   data?: T;
@@ -64,24 +58,4 @@ export function createQuotation(payload: CreateQuotationPayload) {
 
 export function updateQuotation(id: string, payload: UpdateQuotationPayload) {
   return unwrap<Quotation>(axios.put(endpoints.quotation.quotations.update(id), payload));
-}
-
-export function generateQuotationAI(payload: AIGeneratePayload) {
-  return unwrap<AIGenerateResponse>(axios.post(endpoints.quotation.ai.generate, payload));
-}
-
-export function getPublicQuotation(token: string) {
-  return unwrap<PublicQuotation>(axios.get(endpoints.quotation.public.byToken(token), withoutAuthRefresh()));
-}
-
-export function signPublicQuotation(token: string, payload: SignPublicQuotationPayload) {
-  return unwrap<PublicQuotation>(axios.post(endpoints.quotation.public.sign(token), payload, withoutAuthRefresh()));
-}
-
-export function getPublicBlueprint(token: string) {
-  return unwrap<PublicBlueprintResponse>(axios.get(endpoints.quotation.public.blueprint(token), withoutAuthRefresh()));
-}
-
-export function getPublicDetail(token: string) {
-  return unwrap<PublicDetailResponse>(axios.get(endpoints.quotation.public.detail(token), withoutAuthRefresh()));
 }

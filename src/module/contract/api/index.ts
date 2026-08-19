@@ -1,9 +1,9 @@
-import type { 
-  Contract, 
-  PublicContract, 
+import type {
+  Contract,
+  PublicContract,
   SignContractPayload,
   CreateContractPayload,
-  UpdateContractPayload
+  UpdateContractPayload,
 } from '../types';
 
 import axios, { withoutAuthRefresh } from 'src/shared/lib/axios';
@@ -33,22 +33,19 @@ export const contractApi = {
   create: (payload: CreateContractPayload) =>
     unwrap<Contract>(axios.post('/contract/v1/contracts', payload)),
 
-  list: () =>
-    unwrap<Contract[]>(axios.get('/contract/v1/contracts')),
+  list: () => unwrap<Contract[]>(axios.get('/contract/v1/contracts')),
 
-  get: (id: string) =>
-    unwrap<Contract>(axios.get(`/contract/v1/contracts/${id}`)),
+  get: (id: string) => unwrap<Contract>(axios.get(`/contract/v1/contracts/${id}`)),
 
   update: (id: string, payload: UpdateContractPayload) =>
     unwrap<Contract>(axios.put(`/contract/v1/contracts/${id}`, payload)),
 
-  share: (id: string) =>
-    unwrap<Contract>(axios.post(`/contract/v1/contracts/${id}/share`)),
+  share: (id: string) => unwrap<Contract>(axios.post(`/contract/v1/contracts/${id}/share`)),
 
   // Public API
   getPublic: (token: string) =>
-    unwrap<PublicContract>(axios.get(`/contract/v1/p/c/${token}`, withoutAuthRefresh())),
+    unwrap<PublicContract>(axios.get(`/p/c/${token}`, withoutAuthRefresh())),
 
   signPublic: (token: string, payload: SignContractPayload) =>
-    unwrap<null>(axios.post(`/contract/v1/p/c/${token}/sign`, payload, withoutAuthRefresh())),
+    unwrap<null>(axios.post(`/p/c/${token}/sign`, payload, withoutAuthRefresh())),
 };

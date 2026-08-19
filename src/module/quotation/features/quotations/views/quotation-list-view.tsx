@@ -46,7 +46,7 @@ export function QuotationListView() {
   const dialog = useQuotationDialog();
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<QuotationStatus | ''>('');
-  
+
   const createContract = useCreateContract();
 
   const params = useMemo(
@@ -87,7 +87,7 @@ export function QuotationListView() {
         dialog.close();
         refresh();
         // Option 1: navigate to contracts list
-        // router.push(paths.dashboard.contract.root); 
+        // router.push(paths.dashboard.contract.root);
       } catch (err: any) {
         toast.error(err.message || 'Failed to create contract');
       }

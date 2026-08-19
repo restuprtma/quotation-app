@@ -22,7 +22,7 @@ import { usePublicContract, useSignPublicContract } from '../hooks/use-contracts
 export function PublicContractView({ token }: { token: string }) {
   const { data: contract, isLoading } = usePublicContract(token);
   const signContract = useSignPublicContract(token);
-  
+
   const [signatureOpen, setSignatureOpen] = useState(false);
   const signaturePad = useRef<SignaturePad>(null);
 
@@ -68,16 +68,33 @@ export function PublicContractView({ token }: { token: string }) {
     <Container maxWidth="md" sx={{ py: 5 }}>
       <Card sx={{ p: 5 }}>
         <Stack spacing={4}>
-          <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            justifyContent="space-between"
+            alignItems={{ xs: 'flex-start', md: 'center' }}
+            spacing={2}
+          >
             <Box>
-              <Typography variant="h4" sx={{ mb: 1 }}>Contract Agreement</Typography>
+              <Typography variant="h4" sx={{ mb: 1 }}>
+                Contract Agreement
+              </Typography>
               <Typography variant="body2" color="text.secondary">
                 Contract No: {contract.contract_number}
               </Typography>
             </Box>
-            
+
             {isSigned ? (
-              <Box sx={{ p: 1.5, bgcolor: 'success.alpha8', borderRadius: 1, color: 'success.dark', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{
+                  p: 1.5,
+                  bgcolor: 'success.alpha8',
+                  borderRadius: 1,
+                  color: 'success.dark',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
                 <Iconify icon="solar:check-circle-bold" />
                 <Typography variant="subtitle2">Signed</Typography>
               </Box>
@@ -97,7 +114,6 @@ export function PublicContractView({ token }: { token: string }) {
           <Section title="Payment Terms" content={contract.payment_terms} />
           <Section title="Timeline" content={contract.timeline_data} />
           <Section title="Additional Terms" content={contract.additional_terms} />
-          
         </Stack>
       </Card>
 
@@ -107,14 +123,21 @@ export function PublicContractView({ token }: { token: string }) {
           <Typography variant="body2" sx={{ mb: 2 }}>
             Please sign below to accept the terms of this contract.
           </Typography>
-          <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, bgcolor: 'background.neutral' }}>
+          <Box
+            sx={{
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              bgcolor: 'background.neutral',
+            }}
+          >
             <SignaturePad
               ref={signaturePad}
               canvasProps={{
                 width: 500,
                 height: 200,
                 className: 'signature-canvas',
-                style: { width: '100%', height: '100%' }
+                style: { width: '100%', height: '100%' },
               }}
             />
           </Box>
@@ -137,7 +160,9 @@ function Section({ title, content }: { title: string; content?: string }) {
   if (!content) return null;
   return (
     <Box>
-      <Typography variant="h6" sx={{ mb: 1.5 }}>{title}</Typography>
+      <Typography variant="h6" sx={{ mb: 1.5 }}>
+        {title}
+      </Typography>
       <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
         {content}
       </Typography>

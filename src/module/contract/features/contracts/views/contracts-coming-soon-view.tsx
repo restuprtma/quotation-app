@@ -24,7 +24,12 @@ export function ContractsComingSoonView() {
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 520 }}>
             {t('description')}
           </Typography>
-          <Button component={RouterLink} href={paths.dashboard.quotation.root} variant="contained" startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}>
+          <Button
+            component={RouterLink}
+            href={paths.dashboard.quotation.root}
+            variant="contained"
+            startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+          >
             {t('backToQuotation')}
           </Button>
         </Stack>

@@ -18,7 +18,6 @@ import { MotionDialog } from 'src/shared/ui/animate';
 import { ErrorDialog } from 'src/shared/ui/error-dialog';
 
 import { useQuotation } from '../hooks/use-quotation';
-import { BlueprintRenderer } from './blueprint-renderer';
 import { formatDate, formatCurrency } from '../utils/format';
 import { QuotationStatusLabel } from './quotation-status-label';
 
@@ -101,12 +100,6 @@ export function QuotationDetailDialog({ open, id, onClose, onEdit, onCreateContr
                 <Info label={t('detail.hosting')} value={valueOrEmpty(revision?.hosting_info)} />
               </Grid>
               <Content title={t('detail.notes')} value={valueOrEmpty(revision?.notes)} />
-              <Box>
-                <Typography variant="h6" sx={{ mb: 1.5 }}>
-                  {t('blueprint.title')}
-                </Typography>
-                <BlueprintRenderer blueprint={revision?.blueprint_data} />
-              </Box>
             </Stack>
           )}
         </DialogContent>

@@ -40,12 +40,12 @@ export const dashboardRoutes: RouteObject[] = [
     children: [
       { index: true, element: <Navigate to="/quotation" replace /> },
       { path: 'quotation', element: <QuotationListPage /> },
-      { 
-        path: 'contract', 
+      {
+        path: 'contract',
         children: [
           { index: true, element: <ContractListPage /> },
           { path: ':id/edit', element: <ContractEditPage /> },
-        ] 
+        ],
       },
     ],
   },

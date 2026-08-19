@@ -130,23 +130,13 @@ export const endpoints = {
     me: '/core/v1/auth/me',
     companies: '/core/v1/auth/companies',
   },
-  core: {
-  },
+  core: {},
   quotation: {
     quotations: {
       list: '/quotation/v1/quotations',
       byId: (id: string) => `/quotation/v1/quotations/${id}`,
       create: '/quotation/v1/quotations',
       update: (id: string) => `/quotation/v1/quotations/${id}`,
-    },
-    ai: {
-      generate: '/quotation/v1/ai/generate',
-    },
-    public: {
-      byToken: (token: string) => `/p/q/${token}`,
-      sign: (token: string) => `/p/q/${token}/sign`,
-      blueprint: (token: string) => `/p/b/${token}`,
-      detail: (token: string) => `/p/d/${token}`,
     },
   },
 } as const;

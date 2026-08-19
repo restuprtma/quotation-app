@@ -30,12 +30,17 @@ type FormValues = {
 
 export function ContractEditView({ id }: { id: string }) {
   const router = useRouter();
-  
+
   const { data: contract, isLoading } = useContract(id);
   const updateContract = useUpdateContract(id);
   const shareContract = useShareContract(id);
 
-  const { register, handleSubmit, reset, formState: { isSubmitting, isDirty } } = useForm<FormValues>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting, isDirty },
+  } = useForm<FormValues>({
     defaultValues: {
       scope_data: '',
       deliverables_data: '',
@@ -102,7 +107,10 @@ export function ContractEditView({ id }: { id: string }) {
     <DashboardContent maxWidth="md">
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
         <Stack direction="row" alignItems="center" spacing={1}>
-          <Button startIcon={<Iconify icon="eva:arrow-ios-back-fill" />} onClick={() => router.push(paths.dashboard.contract.root)}>
+          <Button
+            startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+            onClick={() => router.push(paths.dashboard.contract.root)}
+          >
             Back
           </Button>
           <Typography variant="h4">Edit Contract {contract.contract_number}</Typography>
@@ -168,7 +176,12 @@ export function ContractEditView({ id }: { id: string }) {
 
             {isDraft && (
               <Box display="flex" justifyContent="flex-end">
-                <LoadingButton type="submit" variant="contained" loading={isSubmitting || updateContract.isPending} disabled={!isDirty}>
+                <LoadingButton
+                  type="submit"
+                  variant="contained"
+                  loading={isSubmitting || updateContract.isPending}
+                  disabled={!isDirty}
+                >
                   Save Changes
                 </LoadingButton>
               </Box>

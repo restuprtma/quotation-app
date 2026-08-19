@@ -1,14 +1,15 @@
 import { useTranslate } from 'src/locales';
 import { CONFIG } from 'src/shared/config';
 
-import { QuotationPublicView } from '../views/quotation-public-view';
+import { QuotationSkillLab } from '../components/quotation-skill-lab';
 
 export default function Page() {
-  const { t } = useTranslate('quotation');
+  const { t } = useTranslate('quotation-skill-lab');
+
   return (
     <>
       <title>{`${t('title')} - ${CONFIG.appName}`}</title>
-      <QuotationPublicView />
+      <QuotationSkillLab />
     </>
   );
 }

@@ -1,0 +1,80 @@
+{
+  "title": "Quotation Skill Lab",
+  "subtitle": "R&D validation for TipTap HTML round trips and the candidate legal workflow.",
+  "scenarioSelector": "Select a round-trip scenario",
+  "scenarios": {
+    "simple": "Simple",
+    "table-heavy": "Table-heavy",
+    "legal": "Legal"
+  },
+  "actions": {
+    "reset": "Reset scenario",
+    "run": "Run round trip"
+  },
+  "toolbar": {
+    "paragraph-edited": "Append text to the selected paragraph",
+    "heading-edited": "Change the selected paragraph to an H2 heading",
+    "list-edited": "Change the selected block to a bullet list",
+    "row-added": "Add a row after the selection",
+    "row-deleted": "Delete the selected row",
+    "column-added": "Add a column after the selection",
+    "column-deleted": "Delete the selected column",
+    "cell-merged": "Merge selected cells",
+    "cell-split": "Split the selected cell",
+    "column-resized": "Drag a column boundary in the editor to complete the resize operation"
+  },
+  "editor": {
+    "source": "Source editor",
+    "sourceAriaLabel": "Quotation source editor",
+    "recreated": "Recreated preview",
+    "recreatedEmpty": "Run the round trip to create a read-only preview.",
+    "appendedText": " Deterministic test text."
+  },
+  "legal": {
+    "candidateStatus": "R&D candidate, pending BA approval",
+    "pendingNotice": "This block is not approved legal wording and starts in a locked state.",
+    "locked": "Legal locked",
+    "unlocked": "Legal unlocked",
+    "actions": {
+      "unlock": "Unlock",
+      "editWord": "Change one word",
+      "restore": "Restore candidate"
+    },
+    "dialog": {
+      "title": "Unlock the legal candidate?",
+      "description": "Changing the candidate block will mark it as modified. This action is for R&D validation only.",
+      "cancel": "Cancel",
+      "confirm": "Unlock and continue"
+    }
+  },
+  "report": {
+    "status": {
+      "passed": "Round trip passed",
+      "failed": "Round trip has not passed"
+    },
+    "evidence": {
+      "title": "Canonical HTML evidence",
+      "source": "Source",
+      "recreated": "Recreated"
+    },
+    "invariants": {
+      "required_operations": "All required operations completed",
+      "section_order_and_count": "Section order and count preserved",
+      "element_hierarchy": "Element hierarchy preserved",
+      "normalized_text": "Normalized text preserved",
+      "heading_levels": "Heading levels preserved",
+      "list_type_and_order": "List type and order preserved",
+      "table_dimensions_and_cell_order": "Table dimensions and cell order preserved",
+      "table_spans": "Table cell spans preserved",
+      "allowed_links": "Links comply with the allowlist",
+      "section_markers": "Section markers preserved",
+      "legal_state": "Legal subtree and state are valid",
+      "forbidden_elements": "No forbidden elements",
+      "forbidden_attributes": "No forbidden attributes",
+      "editor_recreation": "Verification editor recreated successfully"
+    }
+  },
+  "errors": {
+    "unknown": "An unknown editor failure occurred."
+  }
+}
