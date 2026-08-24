@@ -32,5 +32,11 @@
   },
   "fontSize": {
     "ariaLabel": "Ubah ukuran font"
-  }
+  },
+  "provider": "Penyedia AI",
+  "model": "Model",
+  "api_key": "Kunci API",
+  "test_connection": "Tes Koneksi",
+  "credential_configured": "Kredensial Dikonfigurasi",
+  "save_changes": "Simpan Perubahan"
 }

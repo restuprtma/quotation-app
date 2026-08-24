@@ -1,6 +1,7 @@
 {
   "quotation": "Quotation",
   "contract": "Contract Generator",
+  "ai_settings": "Pengaturan AI",
   "account": {
     "profile": "Profil",
     "theme": "Tema",

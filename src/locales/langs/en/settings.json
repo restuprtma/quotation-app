@@ -32,5 +32,11 @@
   },
   "fontSize": {
     "ariaLabel": "Change font size"
-  }
+  },
+  "provider": "AI Provider",
+  "model": "Model",
+  "api_key": "API Key",
+  "test_connection": "Test Connection",
+  "credential_configured": "Credential Configured",
+  "save_changes": "Save Changes"
 }

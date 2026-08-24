@@ -1,0 +1,22 @@
+{
+  "title": "Lab Visual Skill Blueprint",
+  "subtitle": "Prototipe interaktif User Journey & Diagram Arsitektur Sistem untuk SKILL /blueprint (Fase 3 R&D).",
+  "fixtureSelector": "Pilih Fixture",
+  "fixtures": {
+    "queue": "01. Sistem Antrian Publik (Kompleks)",
+    "simple": "10. Buku Tamu Sederhana (Baseline)"
+  },
+  "actions": {
+    "runRoundTrip": "Jalankan Tes Round-Trip",
+    "exportJson": "Ekspor JSON",
+    "reset": "Reset ke Fixture Asal"
+  },
+  "tabs": {
+    "journey": "1. User Journey",
+    "architecture": "2. System Architecture",
+    "stateMachine": "3. State Machine",
+    "workflows": "4. Business Workflows",
+    "wbs": "5. WBS Hierarchy",
+    "report": "6. Bundle Report"
+  }
+}

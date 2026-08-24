@@ -1,6 +1,7 @@
 {
   "quotation": "Quotation",
   "contract": "Contract Generator",
+  "ai_settings": "AI Settings",
   "account": {
     "profile": "Profile",
     "theme": "Theme",

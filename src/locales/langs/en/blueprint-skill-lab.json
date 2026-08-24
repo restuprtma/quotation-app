@@ -1,0 +1,22 @@
+{
+  "title": "Blueprint Skill Visual Lab",
+  "subtitle": "Interactive prototype for User Journey & System Architecture diagram editor for SKILL /blueprint (Phase 3 R&D).",
+  "fixtureSelector": "Select Fixture",
+  "fixtures": {
+    "queue": "01. Public Service Queue (Complex)",
+    "simple": "10. Guestbook (Baseline)"
+  },
+  "actions": {
+    "runRoundTrip": "Run Round-Trip Test",
+    "exportJson": "Export JSON",
+    "reset": "Reset to Original Fixture"
+  },
+  "tabs": {
+    "journey": "1. User Journey",
+    "architecture": "2. System Architecture",
+    "stateMachine": "3. State Machine",
+    "workflows": "4. Business Workflows",
+    "wbs": "5. WBS Hierarchy",
+    "report": "6. Bundle Report"
+  }
+}
