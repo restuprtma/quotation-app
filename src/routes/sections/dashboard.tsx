@@ -15,6 +15,7 @@ import { usePathname } from '../hooks';
 const QuotationListPage = lazy(() => import('src/module/quotation/features/quotations/pages/list'));
 const ContractListPage = lazy(() => import('src/module/contract/features/contracts/pages/list'));
 const ContractEditPage = lazy(() => import('src/module/contract/features/contracts/pages/edit'));
+const AISettingsPage = lazy(() => import('src/module/quotation/features/ai-settings/pages/index'));
 
 // ----------------------------------------------------------------------
 
@@ -40,6 +41,7 @@ export const dashboardRoutes: RouteObject[] = [
     children: [
       { index: true, element: <Navigate to="/quotation" replace /> },
       { path: 'quotation', element: <QuotationListPage /> },
+      { path: 'ai-settings', element: <AISettingsPage /> },
       {
         path: 'contract',
         children: [

@@ -17,7 +17,8 @@ export const SkillEditor = ({ skillId }: { skillId: string }) => {
     } : undefined
   });
 
-  if (isLoading || !skill) return <div>Loading Skill...</div>;
+  if (isLoading) return <div>Loading Skill...</div>;
+  if (!skill) return <div>Skill not found.</div>;
 
   const onSubmit = (data: Partial<AISkillResponse>) => {
     updateSkill.mutate({ id: skillId, data });
