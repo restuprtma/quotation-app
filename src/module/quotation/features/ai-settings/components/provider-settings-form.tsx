@@ -1,6 +1,14 @@
 import React, { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useGetAISettings, useUpdateAISettings, useTestAIConnection } from '../hooks/use-ai-settings';
+
+const schema = z.object({
+  provider: z.string().min(1, 'Provider is required'),
+  model: z.string().min(1, 'Model is required'),
+  api_key: z.string().optional().default(''), // Explicitly allow empty string
+});
 
 interface FormValues {
   provider: string;
@@ -13,7 +21,8 @@ export const ProviderSettingsForm = () => {
   const updateSettings = useUpdateAISettings();
   const testConnection = useTestAIConnection();
 
-  const { control, handleSubmit, reset, getValues } = useForm<FormValues>({
+  const { control, handleSubmit, reset, getValues, formState: { errors } } = useForm<FormValues>({
+    resolver: zodResolver(schema),
     defaultValues: {
       provider: 'gemini',
       model: '',
@@ -54,23 +63,36 @@ export const ProviderSettingsForm = () => {
       <Controller
         name="provider"
         control={control}
-        render={({ field }) => <input {...field} placeholder="Provider (e.g. gemini)" />}
+        render={({ field }) => (
+          <div>
+            <input {...field} placeholder="Provider (e.g. gemini)" />
+            {errors.provider && <span style={{ color: 'red' }}>{errors.provider.message}</span>}
+          </div>
+        )}
       />
       <Controller
         name="model"
         control={control}
-        render={({ field }) => <input {...field} placeholder="Model (e.g. gemini-1.5-flash)" />}
+        render={({ field }) => (
+          <div>
+            <input {...field} placeholder="Model (e.g. gemini-1.5-flash)" />
+            {errors.model && <span style={{ color: 'red' }}>{errors.model.message}</span>}
+          </div>
+        )}
       />
       <Controller
         name="api_key"
         control={control}
         render={({ field }) => (
-          <input 
-            {...field} 
-            type="password" 
-            placeholder={settings?.credential_configured ? "Leave blank to keep current key" : "Enter API Key"} 
-            autoComplete="new-password"
-          />
+          <div>
+            <input 
+              {...field} 
+              type="password" 
+              placeholder={settings?.credential_configured ? "Leave blank to keep current key" : "Enter API Key"} 
+              autoComplete="new-password"
+            />
+            {errors.api_key && <span style={{ color: 'red' }}>{errors.api_key.message}</span>}
+          </div>
         )}
       />
 

@@ -17,9 +17,14 @@ export const AISettingsView = () => {
       <Divider sx={{ my: 4 }} />
       <Typography variant="h5" gutterBottom>Skills</Typography>
       {skills?.map(skill => (
-        <Box key={skill.id} sx={{ mb: 2, p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-          <SkillEditor skillId={skill.id} />
-        </Box>
+        <details key={skill.id} style={{ marginBottom: '1rem' }}>
+          <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>
+            Edit Skill: {skill.command}
+          </summary>
+          <div style={{ padding: '1rem', border: '1px solid #ccc' }}>
+            <SkillEditor skillId={skill.id} />
+          </div>
+        </details>
       ))}
       {(!skills || skills.length === 0) && <Typography>No skills found.</Typography>}
       
