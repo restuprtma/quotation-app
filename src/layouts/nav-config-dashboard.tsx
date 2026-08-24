@@ -34,6 +34,11 @@ export function useNavData(): NavSectionProps['data'] {
             icon: ICONS.quotation,
           },
           {
+            title: t('ai_settings', { defaultValue: 'AI Settings' }),
+            path: paths.dashboard.quotation.aiSettings,
+            icon: icon('ic-setting'),
+          },
+          {
             title: t('contract'),
             path: paths.dashboard.contract.root,
             icon: ICONS.contract,

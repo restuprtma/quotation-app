@@ -40,8 +40,13 @@ export const dashboardRoutes: RouteObject[] = [
     element: CONFIG.auth.skip ? dashboardLayout() : <AuthGuard>{dashboardLayout()}</AuthGuard>,
     children: [
       { index: true, element: <Navigate to="/quotation" replace /> },
-      { path: 'quotation', element: <QuotationListPage /> },
-      { path: 'ai-settings', element: <AISettingsPage /> },
+      {
+        path: 'quotation',
+        children: [
+          { index: true, element: <QuotationListPage /> },
+          { path: 'ai-settings', element: <AISettingsPage /> },
+        ]
+      },
       {
         path: 'contract',
         children: [
