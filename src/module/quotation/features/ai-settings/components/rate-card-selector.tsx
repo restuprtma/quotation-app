@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from 'src/shared/lib/axios';
 
+interface RateCard {
+  id: string;
+  name: string;
+  status: string;
+}
+
 export const RateCardSelector = () => {
-  const [rateCards, setRateCards] = useState<any[]>([]);
+  const [rateCards, setRateCards] = useState<RateCard[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Attempt to fetch rate cards if an endpoint exists, fallback gracefully
-    axiosInstance.get('/quotation/v1/rate-cards')
+    axiosInstance.get('/quotation/v1/rate-cards?status=active')
       .then(res => {
         setRateCards(res.data?.data || res.data || []);
       })
@@ -34,9 +40,9 @@ export const RateCardSelector = () => {
         <table border={1} cellPadding={5} style={{ borderCollapse: 'collapse', width: '100%', marginBottom: '1rem' }}>
           <thead>
             <tr>
-              <th textAlign="left">ID</th>
-              <th textAlign="left">Name</th>
-              <th textAlign="left">Status</th>
+              <th style={{ textAlign: 'left' }}>ID</th>
+              <th style={{ textAlign: 'left' }}>Name</th>
+              <th style={{ textAlign: 'left' }}>Status</th>
             </tr>
           </thead>
           <tbody>

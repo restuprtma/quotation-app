@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from 'src/shared/lib/axios';
 
+interface LegalTemplate {
+  id: string;
+  title: string;
+  version: string;
+}
+
 export const LegalTemplateViewer = () => {
-  const [templates, setTemplates] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<LegalTemplate[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Attempt to fetch legal templates, fallback gracefully
-    axiosInstance.get('/quotation/v1/legal-templates')
+    axiosInstance.get('/quotation/v1/legal-templates?status=active')
       .then(res => {
         setTemplates(res.data?.data || res.data || []);
       })
@@ -34,9 +40,9 @@ export const LegalTemplateViewer = () => {
         <table border={1} cellPadding={5} style={{ borderCollapse: 'collapse', width: '100%' }}>
           <thead>
             <tr>
-              <th textAlign="left">ID</th>
-              <th textAlign="left">Title</th>
-              <th textAlign="left">Version</th>
+              <th style={{ textAlign: 'left' }}>ID</th>
+              <th style={{ textAlign: 'left' }}>Title</th>
+              <th style={{ textAlign: 'left' }}>Version</th>
             </tr>
           </thead>
           <tbody>

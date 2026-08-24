@@ -1,4 +1,5 @@
 import React from 'react';
+import { Box, Typography, Divider } from '@mui/material';
 import { ProviderSettingsForm } from '../components/provider-settings-form';
 import { SkillEditor } from '../components/skill-editor';
 import { RateCardSelector } from '../components/rate-card-selector';
@@ -9,23 +10,23 @@ export const AISettingsView = () => {
   const { data: skills } = useGetAISkills();
   
   return (
-    <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-      <h2>AI Settings</h2>
+    <Box sx={{ p: 4, maxWidth: 800, mx: 'auto' }}>
+      <Typography variant="h4" gutterBottom>AI Settings</Typography>
       <ProviderSettingsForm />
       
-      <hr style={{ margin: '2rem 0' }} />
-      <h3>Skills</h3>
+      <Divider sx={{ my: 4 }} />
+      <Typography variant="h5" gutterBottom>Skills</Typography>
       {skills?.map(skill => (
-        <div key={skill.id} style={{ marginBottom: '1rem', padding: '1rem', border: '1px solid #ccc' }}>
+        <Box key={skill.id} sx={{ mb: 2, p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
           <SkillEditor skillId={skill.id} />
-        </div>
+        </Box>
       ))}
-      {(!skills || skills.length === 0) && <p>No skills found.</p>}
+      {(!skills || skills.length === 0) && <Typography>No skills found.</Typography>}
       
-      <hr style={{ margin: '2rem 0' }} />
-      <h3>Assets (Read-Only)</h3>
+      <Divider sx={{ my: 4 }} />
+      <Typography variant="h5" gutterBottom>Assets (Read-Only)</Typography>
       <RateCardSelector />
       <LegalTemplateViewer />
-    </div>
+    </Box>
   );
 };

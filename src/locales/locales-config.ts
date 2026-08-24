@@ -55,7 +55,11 @@ const productionNamespaces = new Set([
 ]);
 
 const productionLocaleModules = import.meta.glob(
-  ['./langs/*/*.json', '!./langs/*/quotation-skill-lab.json'],
+  [
+    './langs/*/*.json',
+    '!./langs/*/quotation-skill-lab.json',
+    '!./langs/*/blueprint-skill-lab.json',
+  ],
   { import: 'default' }
 );
 

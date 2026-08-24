@@ -11,12 +11,26 @@ if (import.meta.env.DEV) {
     () => import('src/module/quotation/features/rnd/quotation-skill-lab/pages')
   );
 
-  rndRoutes.push({
-    path: '/rnd/quotation-skill-lab',
-    element: (
-      <Suspense fallback={<LoadingScreen />}>
-        <QuotationSkillLabPage />
-      </Suspense>
-    ),
-  });
+  const BlueprintSkillLabPage = lazy(
+    () => import('src/module/quotation/features/rnd/blueprint-skill-lab/pages')
+  );
+
+  rndRoutes.push(
+    {
+      path: '/rnd/quotation-skill-lab',
+      element: (
+        <Suspense fallback={<LoadingScreen />}>
+          <QuotationSkillLabPage />
+        </Suspense>
+      ),
+    },
+    {
+      path: '/rnd/blueprint-skill-lab',
+      element: (
+        <Suspense fallback={<LoadingScreen />}>
+          <BlueprintSkillLabPage />
+        </Suspense>
+      ),
+    }
+  );
 }

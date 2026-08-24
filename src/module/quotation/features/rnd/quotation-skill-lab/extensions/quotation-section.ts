@@ -183,9 +183,7 @@ export function replaceLegalSection(editor: Editor, html: string): void {
   const sectionEl = div.querySelector('section');
   if (!sectionEl) return;
 
-  const node = ProseMirrorDOMParser.fromSchema(editor.schema).parse(div, {
-    preserveWhitespace: 'full',
-  }).firstChild;
+  const node = ProseMirrorDOMParser.fromSchema(editor.schema).parse(div).firstChild;
 
   if (!node) return;
 
