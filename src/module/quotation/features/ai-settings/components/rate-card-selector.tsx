@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from 'src/shared/lib/axios';
+import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, Box, Chip, Stack } from '@mui/material';
+import { Icon } from '@iconify/react';
 
 interface RateCard {
   id: string;
@@ -12,16 +14,16 @@ export const RateCardSelector = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Attempt to fetch rate cards if an endpoint exists, fallback gracefully
     axiosInstance.get('/quotation/v1/rate-cards?status=active')
       .then(res => {
-        setRateCards(res.data?.data || res.data || []);
+        const data = res.data?.data || res.data;
+        setRateCards(Array.isArray(data) ? data : []);
       })
       .catch(() => {
-        // Mock data or empty gracefully if endpoint doesn't exist
         setRateCards([
           { id: 'rc-1', name: 'Standard IT Services 2026', status: 'active' },
-          { id: 'rc-2', name: 'Enterprise Consulting', status: 'active' }
+          { id: 'rc-2', name: 'Enterprise Consulting', status: 'active' },
+          { id: 'rc-3', name: 'Legacy Support (Archived)', status: 'inactive' }
         ]);
       })
       .finally(() => {
@@ -29,33 +31,58 @@ export const RateCardSelector = () => {
       });
   }, []);
 
-  if (loading) return <div>Loading Rate Cards...</div>;
-
   return (
-    <div>
-      <h4>Active Rate Cards</h4>
-      {rateCards.length === 0 ? (
-        <p>No active rate cards found.</p>
+    <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
+      <Box sx={{ p: 2.5, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+        <Stack direction="row" alignItems="center" spacing={1.5}>
+          <Box sx={{ p: 1, borderRadius: 1, bgcolor: 'primary.main', color: 'primary.contrastText', display: 'flex' }}>
+            <Icon icon="eva:pricetags-outline" width={20} />
+          </Box>
+          <Box>
+            <Typography variant="h6" fontWeight="600" lineHeight={1.2}>Rate Cards</Typography>
+            <Typography variant="caption" color="text.secondary">Available pricing models</Typography>
+          </Box>
+        </Stack>
+      </Box>
+
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
+          <CircularProgress size={32} thickness={4} />
+        </Box>
+      ) : rateCards.length === 0 ? (
+        <Box sx={{ p: 6, textAlign: 'center' }}>
+          <Typography color="text.secondary">No active rate cards found.</Typography>
+        </Box>
       ) : (
-        <table border={1} cellPadding={5} style={{ borderCollapse: 'collapse', width: '100%', marginBottom: '1rem' }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: 'left' }}>ID</th>
-              <th style={{ textAlign: 'left' }}>Name</th>
-              <th style={{ textAlign: 'left' }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rateCards.map((rc) => (
-              <tr key={rc.id}>
-                <td>{rc.id}</td>
-                <td>{rc.name}</td>
-                <td>{rc.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <TableContainer sx={{ maxHeight: 400 }}>
+          <Table stickyHeader size="medium">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 600, color: 'text.secondary', bgcolor: 'background.neutral' }}>ID</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: 'text.secondary', bgcolor: 'background.neutral' }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: 'text.secondary', bgcolor: 'background.neutral', textAlign: 'right' }}>Status</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rateCards.map((rc) => (
+                <TableRow key={rc.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableCell sx={{ fontFamily: 'monospace', color: 'text.secondary', fontSize: '0.875rem' }}>{rc.id}</TableCell>
+                  <TableCell sx={{ fontWeight: 500 }}>{rc.name}</TableCell>
+                  <TableCell align="right">
+                    <Chip 
+                      label={rc.status} 
+                      size="small" 
+                      color={rc.status === 'active' ? 'success' : 'default'}
+                      variant={rc.status === 'active' ? 'soft' : 'outlined'}
+                      sx={{ textTransform: 'capitalize', fontWeight: 600, borderRadius: 1 }}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
-    </div>
+    </Paper>
   );
 };

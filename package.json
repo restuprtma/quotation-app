@@ -6,7 +6,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "start": "vite preview",
     "build": "tsc && vite build",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
@@ -46,6 +46,7 @@
     "@mui/x-data-grid": "^8.22.0",
     "@mui/x-date-pickers": "^8.22.0",
     "@mui/x-tree-view": "^8.22.0",
+    "@tanstack/react-query": "^5.102.2",
     "@tiptap/extension-link": "^3.30.1",
     "@tiptap/extension-table": "^3.30.1",
     "@tiptap/extension-table-cell": "^3.30.1",

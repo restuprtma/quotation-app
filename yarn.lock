@@ -1552,6 +1552,18 @@
   dependencies:
     "@swc/counter" "^0.1.3"
 
+"@tanstack/query-core@5.102.2":
+  version "5.102.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.102.2.tgz#b320ef63aadf55d0ab55ee4f92b602f72521a9ed"
+  integrity sha512-zQ5794PXBlV5Wl7N23SR1/Ss+wPE/h2Ye4XlKpm3omN8i8b/Fd4DAdqpLS2AXj5M/RMObt3k5qy3E7kzt/AvBA==
+
+"@tanstack/react-query@^5.102.2":
+  version "5.102.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.102.2.tgz#e336b8e9da552f052de67e24b380c7502764a820"
+  integrity sha512-KxU8ZyOEuJ81eTSgXa8GQbk/jO/rz0elYtNKt3VMtM2pRjeO8ADIu7sqqmEjFKJKqco9h2N1ojIDuHs6VfDItQ==
+  dependencies:
+    "@tanstack/query-core" "5.102.2"
+
 "@tiptap/core@3.30.1":
   version "3.30.1"
   resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-3.30.1.tgz#74e7fca7dfdf3b1cc878ce7647aded90f885d63f"

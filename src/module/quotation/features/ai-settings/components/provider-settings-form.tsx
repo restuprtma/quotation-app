@@ -1,33 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Card, CardHeader, CardContent, TextField, Button, Stack, Alert, InputAdornment, IconButton, Typography, Box } from '@mui/material';
+import { Icon } from '@iconify/react';
 import { useGetAISettings, useUpdateAISettings, useTestAIConnection } from '../hooks/use-ai-settings';
 
 const schema = z.object({
   provider: z.string().min(1, 'Provider is required'),
   model: z.string().min(1, 'Model is required'),
-  api_key: z.string().optional().default(''), // Explicitly allow empty string
+  api_key: z.string().optional(), // Explicitly allow empty string
 });
 
-interface FormValues {
-  provider: string;
-  model: string;
-  api_key: string;
-}
+type FormValues = z.infer<typeof schema>;
 
 export const ProviderSettingsForm = () => {
   const { data: settings, isLoading } = useGetAISettings();
   const updateSettings = useUpdateAISettings();
   const testConnection = useTestAIConnection();
+  const [showPassword, setShowPassword] = useState(false);
 
   const { control, handleSubmit, reset, getValues, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      provider: 'gemini',
-      model: '',
-      api_key: '', // MUST ALWAYS INIT EMPTY
-    }
+    defaultValues: { provider: 'gemini', model: '', api_key: '' }
   });
 
   useEffect(() => {
@@ -35,76 +30,172 @@ export const ProviderSettingsForm = () => {
       reset({
         provider: settings.provider,
         model: settings.model,
-        api_key: '', // Explicitly ensure API key is never populated from backend
+        api_key: '', 
       });
     }
   }, [settings, reset]);
 
-  const onSubmit = (data: FormValues) => {
-    // If api_key is empty string, backend preserves current key
-    updateSettings.mutate(data);
-  };
-
+  const onSubmit = (data: FormValues) => updateSettings.mutate({
+    ...data,
+    api_key: data.api_key || '',
+  });
   const handleTestConnection = () => {
     const data = getValues();
-    testConnection.mutate(data);
+    testConnection.mutate({
+      ...data,
+      api_key: data.api_key || '',
+    });
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return (
+    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+      <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', p: 6 }}>
+        <Typography color="text.secondary">Loading settings...</Typography>
+      </CardContent>
+    </Card>
+  );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      {/* Assume standard UI library components here for input fields */}
-      <h3>AI Provider Settings</h3>
-      {settings?.credential_configured && (
-        <p>Credential Configured (Hint: {settings.key_hint})</p>
-      )}
-      
-      <Controller
-        name="provider"
-        control={control}
-        render={({ field }) => (
-          <div>
-            <input {...field} placeholder="Provider (e.g. gemini)" />
-            {errors.provider && <span style={{ color: 'red' }}>{errors.provider.message}</span>}
-          </div>
-        )}
+    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+      <CardHeader 
+        title={<Typography variant="h6" fontWeight="600">Connection Details</Typography>}
+        subheader={
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1 }}>
+            {settings?.credential_configured ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'success.main', fontSize: '0.875rem' }}>
+                <Icon icon="eva:checkmark-circle-2-fill" />
+                <Typography variant="body2" color="success.main" fontWeight="500">
+                  Credential Configured (Hint: {settings.key_hint})
+                </Typography>
+              </Box>
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'warning.main', fontSize: '0.875rem' }}>
+                <Icon icon="eva:alert-triangle-fill" />
+                <Typography variant="body2" color="warning.main" fontWeight="500">
+                  No credential configured
+                </Typography>
+              </Box>
+            )}
+          </Stack>
+        }
+        sx={{ borderBottom: 1, borderColor: 'divider', pb: 2 }}
       />
-      <Controller
-        name="model"
-        control={control}
-        render={({ field }) => (
-          <div>
-            <input {...field} placeholder="Model (e.g. gemini-1.5-flash)" />
-            {errors.model && <span style={{ color: 'red' }}>{errors.model.message}</span>}
-          </div>
-        )}
-      />
-      <Controller
-        name="api_key"
-        control={control}
-        render={({ field }) => (
-          <div>
-            <input 
-              {...field} 
-              type="password" 
-              placeholder={settings?.credential_configured ? "Leave blank to keep current key" : "Enter API Key"} 
-              autoComplete="new-password"
+      <CardContent sx={{ pt: 4 }}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
+              <Controller
+                name="provider"
+                control={control}
+                render={({ field }) => (
+                  <TextField 
+                    {...field} 
+                    label="Provider" 
+                    placeholder="e.g. gemini" 
+                    error={!!errors.provider} 
+                    helperText={errors.provider?.message} 
+                    fullWidth 
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Icon icon="eva:cloud-upload-outline" />
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+                )}
+              />
+              <Controller
+                name="model"
+                control={control}
+                render={({ field }) => (
+                  <TextField 
+                    {...field} 
+                    label="Model" 
+                    placeholder="e.g. gemini-1.5-flash" 
+                    error={!!errors.model} 
+                    helperText={errors.model?.message} 
+                    fullWidth 
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Icon icon="eva:layers-outline" />
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+                )}
+              />
+            </Stack>
+            
+            <Controller
+              name="api_key"
+              control={control}
+              render={({ field }) => (
+                <TextField 
+                  {...field} 
+                  type={showPassword ? 'text' : 'password'}
+                  label="API Key"
+                  placeholder={settings?.credential_configured ? "Leave blank to keep current key" : "Enter API Key"} 
+                  autoComplete="new-password"
+                  error={!!errors.api_key} 
+                  helperText={errors.api_key?.message || "Keep this secure. Will not be visible after saving."} 
+                  fullWidth 
+                  variant="outlined"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Icon icon="eva:lock-outline" />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                          <Icon icon={showPassword ? "eva:eye-fill" : "eva:eye-off-fill"} />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
             />
-            {errors.api_key && <span style={{ color: 'red' }}>{errors.api_key.message}</span>}
-          </div>
-        )}
-      />
 
-      <button type="button" onClick={handleTestConnection} disabled={testConnection.isPending}>
-        {testConnection.isPending ? 'Testing...' : 'Test Connection'}
-      </button>
-      <button type="submit" disabled={updateSettings.isPending}>
-        Save
-      </button>
-      
-      {testConnection.isSuccess && <p style={{color: 'green'}}>Connection Successful</p>}
-      {testConnection.isError && <p style={{color: 'red'}}>Connection Failed</p>}
-    </form>
+            {testConnection.isSuccess && (
+              <Alert severity="success" icon={<Icon icon="eva:checkmark-circle-2-outline" width={24} />}>
+                Connection to {getValues('provider')} successful!
+              </Alert>
+            )}
+            {testConnection.isError && (
+              <Alert severity="error" icon={<Icon icon="eva:alert-triangle-outline" width={24} />}>
+                Failed to connect to AI provider. Please check your credentials.
+              </Alert>
+            )}
+
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+              <Button 
+                variant="outlined" 
+                color="inherit" 
+                onClick={handleTestConnection} 
+                disabled={testConnection.isPending}
+                startIcon={<Icon icon="eva:wifi-outline" />}
+              >
+                {testConnection.isPending ? 'Testing...' : 'Test Connection'}
+              </Button>
+              <Button 
+                type="submit" 
+                variant="contained" 
+                disabled={updateSettings.isPending}
+                startIcon={<Icon icon="eva:save-outline" />}
+                disableElevation
+              >
+                Save Configuration
+              </Button>
+            </Box>
+          </Stack>
+        </form>
+      </CardContent>
+    </Card>
   );
 };

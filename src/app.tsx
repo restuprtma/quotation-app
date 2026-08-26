@@ -1,6 +1,7 @@
 import 'src/global.css';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { usePathname } from 'src/routes/hooks';
 
@@ -23,28 +24,31 @@ type AppProps = {
 };
 
 export default function App({ children }: AppProps) {
+  const [queryClient] = useState(() => new QueryClient());
   useScrollToTop();
 
   return (
-    <I18nProvider>
-      <AuthProvider>
-        <SettingsProvider defaultSettings={defaultSettings}>
-          <ThemeProvider
-            modeStorageKey={themeConfig.modeStorageKey}
-            defaultMode={themeConfig.defaultMode}
-          >
-            <LocalizationProvider>
-              <MotionLazy>
-                <ProgressBar />
-                <Snackbar />
-                <SettingsDrawer defaultSettings={defaultSettings} />
-                {children}
-              </MotionLazy>
-            </LocalizationProvider>
-          </ThemeProvider>
-        </SettingsProvider>
-      </AuthProvider>
-    </I18nProvider>
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>
+        <AuthProvider>
+          <SettingsProvider defaultSettings={defaultSettings}>
+            <ThemeProvider
+              modeStorageKey={themeConfig.modeStorageKey}
+              defaultMode={themeConfig.defaultMode}
+            >
+              <LocalizationProvider>
+                <MotionLazy>
+                  <ProgressBar />
+                  <Snackbar />
+                  <SettingsDrawer defaultSettings={defaultSettings} />
+                  {children}
+                </MotionLazy>
+              </LocalizationProvider>
+            </ThemeProvider>
+          </SettingsProvider>
+        </AuthProvider>
+      </I18nProvider>
+    </QueryClientProvider>
   );
 }
 

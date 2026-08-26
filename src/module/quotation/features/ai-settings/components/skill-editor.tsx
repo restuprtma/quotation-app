@@ -2,6 +2,8 @@ import React from 'react';
 import { useGetAISkills, useUpdateAISkill } from '../hooks/use-ai-skills';
 import { useForm, Controller } from 'react-hook-form';
 import { AISkillResponse } from '../types';
+import { Stack, TextField, Button, Typography, Alert, Box } from '@mui/material';
+import { Icon } from '@iconify/react';
 
 export const SkillEditor = ({ skillId }: { skillId: string }) => {
   const { data: skills, isLoading } = useGetAISkills();
@@ -17,8 +19,11 @@ export const SkillEditor = ({ skillId }: { skillId: string }) => {
     } : undefined
   });
 
-  if (isLoading) return <div>Loading Skill...</div>;
-  if (!skill) return <div>Skill not found.</div>;
+  if (isLoading || !skill) return (
+    <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
+      <Typography color="text.secondary">Loading Skill...</Typography>
+    </Box>
+  );
 
   const onSubmit = (data: Partial<AISkillResponse>) => {
     updateSkill.mutate({ id: skillId, data });
@@ -26,15 +31,107 @@ export const SkillEditor = ({ skillId }: { skillId: string }) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <h4>Edit Skill: {skill.command}</h4>
-      <p><em>Safety rules and constraints are managed by the system and cannot be edited.</em></p>
-      
-      <Controller name="tone" control={control} render={({ field }) => <textarea {...field} placeholder="Tone" />} />
-      <Controller name="domain_vocabulary" control={control} render={({ field }) => <textarea {...field} placeholder="Domain Vocabulary" />} />
-      <Controller name="content_instruction" control={control} render={({ field }) => <textarea {...field} placeholder="Content Instruction" />} />
-      <Controller name="section_emphasis" control={control} render={({ field }) => <textarea {...field} placeholder="Section Emphasis" />} />
-      
-      <button type="submit" disabled={updateSkill.isPending}>Update Skill</button>
+      <Stack spacing={3.5}>
+        <Alert 
+          severity="info" 
+          icon={<Icon icon="eva:shield-outline" width={24} />}
+          sx={{ borderRadius: 1.5 }}
+        >
+          Safety rules and constraints are automatically managed by the system and cannot be edited.
+        </Alert>
+        
+        <Box>
+          <Typography variant="subtitle2" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Icon icon="eva:message-circle-outline" width={18} /> Tone
+          </Typography>
+          <Controller 
+            name="tone" 
+            control={control} 
+            render={({ field }) => (
+              <TextField 
+                {...field} 
+                placeholder="e.g. Professional and concise"
+                multiline 
+                minRows={2} 
+                fullWidth 
+                variant="outlined" 
+              />
+            )} 
+          />
+        </Box>
+
+        <Box>
+          <Typography variant="subtitle2" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Icon icon="eva:book-outline" width={18} /> Domain Vocabulary
+          </Typography>
+          <Controller 
+            name="domain_vocabulary" 
+            control={control} 
+            render={({ field }) => (
+              <TextField 
+                {...field} 
+                placeholder="e.g. SLA, MSA, Enterprise"
+                multiline 
+                minRows={2} 
+                fullWidth 
+                variant="outlined" 
+              />
+            )} 
+          />
+        </Box>
+
+        <Box>
+          <Typography variant="subtitle2" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Icon icon="eva:clipboard-outline" width={18} /> Content Instruction
+          </Typography>
+          <Controller 
+            name="content_instruction" 
+            control={control} 
+            render={({ field }) => (
+              <TextField 
+                {...field} 
+                placeholder="Specific instructions for what to include..."
+                multiline 
+                minRows={3} 
+                fullWidth 
+                variant="outlined" 
+              />
+            )} 
+          />
+        </Box>
+
+        <Box>
+          <Typography variant="subtitle2" fontWeight="600" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Icon icon="eva:star-outline" width={18} /> Section Emphasis
+          </Typography>
+          <Controller 
+            name="section_emphasis" 
+            control={control} 
+            render={({ field }) => (
+              <TextField 
+                {...field} 
+                placeholder="Which sections to highlight..."
+                multiline 
+                minRows={2} 
+                fullWidth 
+                variant="outlined" 
+              />
+            )} 
+          />
+        </Box>
+        
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', pt: 2, borderTop: 1, borderColor: 'divider' }}>
+          <Button 
+            type="submit" 
+            variant="contained" 
+            disabled={updateSkill.isPending}
+            startIcon={<Icon icon="eva:save-outline" />}
+            disableElevation
+          >
+            Update Skill
+          </Button>
+        </Box>
+      </Stack>
     </form>
   );
 };
