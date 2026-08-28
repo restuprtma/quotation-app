@@ -332,7 +332,7 @@ export function QuotationGenerationForm({
                   name="client_id"
                   label="Client Identifier (UUID)"
                   disabled
-                  helperText="Auto-generated Client UUID"
+                  helperText={client?.name ? `Active Client Context: ${client.name}` : 'Auto-generated Client UUID'}
                 />
               </Grid>
 
