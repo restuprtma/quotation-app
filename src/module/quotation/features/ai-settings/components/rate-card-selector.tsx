@@ -24,6 +24,12 @@ interface RateCard {
   status: string;
 }
 
+interface ApiRateCard {
+  id: string;
+  name: string;
+  is_active?: boolean;
+}
+
 export const RateCardSelector = () => {
   const [rateCards, setRateCards] = useState<RateCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,8 +39,9 @@ export const RateCardSelector = () => {
       .get('/quotation/v1/rate-cards?status=active')
       .then((res) => {
         const data = res.data?.data || res.data;
-        const mapped = (Array.isArray(data) ? data : []).map((item: any) => ({
-          ...item,
+        const mapped = (Array.isArray(data) ? data : []).map((item: ApiRateCard) => ({
+          id: item.id,
+          name: item.name,
           status: item.is_active ? 'active' : 'inactive',
         }));
         setRateCards(mapped);
