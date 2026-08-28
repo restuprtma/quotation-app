@@ -68,6 +68,29 @@ export function QuotationPromptView() {
     }
   };
 
+  const resolveQuotationSkill = useCallback(
+    (command = '/quotation'): ActiveSkill => {
+      const match = activeSkills.find(
+        (s) =>
+          s.command === command ||
+          s.command === command.replace(/^\//, '') ||
+          `/${s.command}` === command
+      );
+      if (match && match.id && !match.id.startsWith('cmd-')) {
+        return match;
+      }
+      return (
+        activeSkills[0] || {
+          id: '',
+          name: 'Quotation AI (Dedicated Squad)',
+          command: '/quotation',
+          is_active: true,
+        }
+      );
+    },
+    [activeSkills]
+  );
+
   // Keyboard navigation for prompt input
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (!isMenuOpen) {
@@ -78,12 +101,7 @@ export function QuotationPromptView() {
         event.preventDefault();
         const trimmed = promptText.trim().toLowerCase();
         if (trimmed === '/quotation') {
-          handleExecuteSkill({
-            id: 'cmd-quotation',
-            name: 'Quotation AI (Dedicated Squad)',
-            command: '/quotation',
-            is_active: true,
-          });
+          handleExecuteSkill(resolveQuotationSkill('/quotation'));
         } else if (trimmed === '/blueprint') {
           toast.info('Blueprint generation will be available in Phase 8.');
         } else if (trimmed) {
@@ -108,18 +126,22 @@ export function QuotationPromptView() {
     }
   };
 
-  const handleExecuteSkill = useCallback((skill: ActiveSkill) => {
-    setIsMenuOpen(false);
-    setPromptText(skill.command);
+  const handleExecuteSkill = useCallback(
+    (skill: ActiveSkill) => {
+      setIsMenuOpen(false);
+      setPromptText(skill.command);
 
-    if (skill.command === '/blueprint') {
-      toast.info('Blueprint generator is scheduled for Phase 8. Please select /quotation.');
-      return;
-    }
+      if (skill.command === '/blueprint') {
+        toast.info('Blueprint generator is scheduled for Phase 8. Please select /quotation.');
+        return;
+      }
 
-    setActiveSkill(skill);
-    setIsFormOpen(true);
-  }, []);
+      const resolved = resolveQuotationSkill(skill.command);
+      setActiveSkill(resolved.id ? resolved : skill);
+      setIsFormOpen(true);
+    },
+    [resolveQuotationSkill]
+  );
 
   // Submit Handler
   const handleFormSubmit = async (payload: GenerateQuotationPayload) => {
@@ -307,12 +329,7 @@ export function QuotationPromptView() {
                             size="small"
                             onClick={() => {
                               if (promptText.trim().toLowerCase() === '/quotation') {
-                                handleExecuteSkill({
-                                  id: 'cmd-quotation',
-                                  name: 'Quotation AI (Dedicated Squad)',
-                                  command: '/quotation',
-                                  is_active: true,
-                                });
+                                handleExecuteSkill(resolveQuotationSkill('/quotation'));
                               } else {
                                 setIsMenuOpen(true);
                               }
@@ -346,14 +363,7 @@ export function QuotationPromptView() {
                 clickable
                 color="primary"
                 variant="outlined"
-                onClick={() =>
-                  handleExecuteSkill({
-                    id: 'cmd-quotation',
-                    name: 'Quotation AI (Dedicated Squad)',
-                    command: '/quotation',
-                    is_active: true,
-                  })
-                }
+                onClick={() => handleExecuteSkill(resolveQuotationSkill('/quotation'))}
                 sx={{ fontWeight: 600 }}
               />
               <Chip

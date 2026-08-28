@@ -19,9 +19,9 @@ import CardContent from '@mui/material/CardContent';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { Iconify } from 'src/shared/ui/iconify';
-import { useAuthContext } from 'src/module/core/features/auth/hooks/use-auth-context';
 import { Form, RHFSelect, RHFTextField, RHFNumericField } from 'src/shared/ui/hook-form';
 
+import { useActiveSkills } from '../hooks/use-active-skills';
 import { useActiveRateCards } from '../hooks/use-active-rate-cards';
 
 // ----------------------------------------------------------------------
@@ -150,7 +150,7 @@ export function QuotationGenerationForm({
   onSubmit,
   onCancel,
 }: Props) {
-  useAuthContext();
+  const { data: activeSkills = [] } = useActiveSkills();
   const { data: rateCards = [], isLoading: isLoadingRateCards } = useActiveRateCards();
 
   const defaultValues: FormValues = useMemo(() => {
@@ -235,8 +235,24 @@ export function QuotationGenerationForm({
   const isPercentageValid = currentTotalPercentage === 100;
 
   const handleFormSubmit = handleSubmit((data: FormValues) => {
+    // Resolve valid skill UUID
+    let skillId = selectedSkill?.id;
+    if (
+      !skillId ||
+      skillId.startsWith('cmd-') ||
+      skillId === '00000000-0000-0000-0000-000000000000'
+    ) {
+      const match = activeSkills.find(
+        (s) =>
+          s.command === '/quotation' ||
+          s.command === 'quotation' ||
+          s.command === selectedSkill?.command
+      );
+      skillId = match?.id || activeSkills[0]?.id || '00000000-0000-0000-0000-000000000000';
+    }
+
     const payload: GenerateQuotationPayload = {
-      skill_id: selectedSkill?.id || '00000000-0000-0000-0000-000000000000',
+      skill_id: skillId,
       client_id: data.client_id,
       subject: data.subject.trim(),
       solution_type: data.solution_type,

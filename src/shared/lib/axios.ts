@@ -93,11 +93,27 @@ axiosInstance.interceptors.response.use(
 function normalizeError(error: unknown): Error {
   if (axios.isAxiosError(error)) {
     const payload = error.response?.data as
-      | { message?: string; errors?: string | null }
+      | { message?: string; errors?: string | { detail?: string[] } | null }
       | undefined;
-    const detail = payload?.errors || payload?.message || error.message || 'Something went wrong!';
+    let detail = 'Something went wrong!';
+    if (typeof payload?.errors === 'string') {
+      detail = payload.errors;
+    } else if (
+      payload?.errors &&
+      typeof payload.errors === 'object' &&
+      Array.isArray((payload.errors as any).detail) &&
+      (payload.errors as any).detail.length > 0
+    ) {
+      detail = (payload.errors as any).detail[0];
+    } else if (payload?.message) {
+      detail = payload.message;
+    } else if (error.message) {
+      detail = error.message;
+    }
+
     const wrapped = new Error(detail);
-    (wrapped as Error & { status?: number }).status = error.response?.status;
+    (wrapped as Error & { status?: number; response?: any }).status = error.response?.status;
+    (wrapped as any).response = error.response;
     return wrapped;
   }
   if (error instanceof Error) return error;

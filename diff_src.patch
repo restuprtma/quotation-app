@@ -1,0 +1,1338 @@
+diff --git a/src/locales/langs/en/quotation.json b/src/locales/langs/en/quotation.json
+index cb21b28..a17ed40 100644
+--- a/src/locales/langs/en/quotation.json
++++ b/src/locales/langs/en/quotation.json
+@@ -251,5 +251,44 @@
+     "retry": "Retry Generation",
+     "backToForm": "Back to Form",
+     "waiting": "Please wait while the AI generates and validates the draft..."
++  },
++  "editor": {
++    "backToPrompt": "Back to Prompt",
++    "saveDraft": "Save Draft",
++    "saving": "Saving...",
++    "saved": "Saved",
++    "saveFailed": "Failed to save draft",
++    "dirty": "Unsaved changes",
++    "regenerate": "Regenerate Document",
++    "regenerating": "Regenerating...",
++    "legalLocked": "Legal Locked",
++    "legalUnlocked": "Legal Unlocked",
++    "unlockLegal": "Unlock Legal Block",
++    "lockLegal": "Lock Legal Block",
++    "restoreTemplate": "Restore Official Template",
++    "restoring": "Restoring...",
++    "restoreSuccess": "Official legal clause successfully restored.",
++    "restoreFailed": "Failed to restore official legal clause.",
++    "legalModifiedBadge": "Legal content modified",
++    "commercialModifiedBadge": "Commercial pricing adjusted",
++    "version": "Version {{version}}",
++    "quotationNumber": "Quotation Number: {{number}}",
++    "dialog": {
++      "unlockTitle": "Unlock Legal Block?",
++      "unlockWarning": "Legal terms and conditions are standardized clauses. Unlocking and modifying this content will be recorded as 'Legal content modified' in the audit trail.",
++      "unlockConfirm": "I Understand, Unlock",
++      "unlockCancel": "Cancel",
++      "regenerateTitle": "Regenerate Document with AI?",
++      "regenerateWarning": "Regeneration will re-invoke AI to compose the quotation document based on initial parameters. Any current unsaved edits will be replaced with the new draft.",
++      "regenerateConfirm": "Regenerate Now",
++      "regenerateCancel": "Cancel",
++      "conflictTitle": "Document Outdated (409 Conflict)",
++      "conflictMessage": "This quotation draft version has been modified by another session. To prevent stale overwrite, editing is locked. Please reload the page to get the latest canonical version.",
++      "conflictReload": "Reload Document",
++      "unsavedTitle": "Unsaved Changes",
++      "unsavedMessage": "You have unsaved changes in this draft. Are you sure you want to leave?",
++      "unsavedLeave": "Leave Page",
++      "unsavedStay": "Stay on Page"
++    }
+   }
+ }
+diff --git a/src/locales/langs/id/quotation.json b/src/locales/langs/id/quotation.json
+index 3f14e51..dd38390 100644
+--- a/src/locales/langs/id/quotation.json
++++ b/src/locales/langs/id/quotation.json
+@@ -251,5 +251,44 @@
+     "retry": "Coba Lagi",
+     "backToForm": "Kembali ke Form",
+     "waiting": "Mohon tunggu sementara AI menyusun dan memvalidasi draf dokumen..."
++  },
++  "editor": {
++    "backToPrompt": "Kembali ke Form Prompt",
++    "saveDraft": "Simpan Draf",
++    "saving": "Menyimpan...",
++    "saved": "Tersimpan",
++    "saveFailed": "Gagal menyimpan draf",
++    "dirty": "Perubahan belum disimpan",
++    "regenerate": "Regenerasi Dokumen",
++    "regenerating": "Sedang meregenerasi...",
++    "legalLocked": "Legal Terkunci",
++    "legalUnlocked": "Legal Terbuka",
++    "unlockLegal": "Buka Kunci Legal",
++    "lockLegal": "Kunci Klausul Legal",
++    "restoreTemplate": "Pulihkan Klausul Resmi",
++    "restoring": "Memulihkan...",
++    "restoreSuccess": "Klausul legal berhasil dikembalikan ke template resmi.",
++    "restoreFailed": "Gagal memulihkan klausul legal resmi.",
++    "legalModifiedBadge": "Klausul legal termodifikasi",
++    "commercialModifiedBadge": "Harga komersial disesuaikan",
++    "version": "Versi {{version}}",
++    "quotationNumber": "Nomor Quotation: {{number}}",
++    "dialog": {
++      "unlockTitle": "Buka Kunci Klausul Legal?",
++      "unlockWarning": "Klausul legal adalah klausul kontrak standar perusahaan. Membuka kunci dan mengubah teks ini akan mencatat status 'Legal content modified' pada jejak audit sistem.",
++      "unlockConfirm": "Saya Mengerti, Buka Kunci",
++      "unlockCancel": "Batal",
++      "regenerateTitle": "Regenerasi Dokumen dengan AI?",
++      "regenerateWarning": "Regenerasi akan memanggil AI untuk menyusun ulang dokumen berdasarkan parameter awal. Perubahan manual yang belum disimpan atau editan saat ini akan ditimpa dengan draf baru.",
++      "regenerateConfirm": "Regenerasi Sekarang",
++      "regenerateCancel": "Batal",
++      "conflictTitle": "Dokumen Telah Diperbarui (Konflik 409)",
++      "conflictMessage": "Versi draf quotation ini telah diperbarui oleh sesi lain atau proses baru. Untuk menghindari penimpaan data (stale-save), pengeditan saat ini diblokir. Silakan muat ulang halaman untuk mendapatkan versi terbaru.",
++      "conflictReload": "Muat Ulang Dokumen",
++      "unsavedTitle": "Perubahan Belum Disimpan",
++      "unsavedMessage": "Anda memiliki perubahan draf yang belum disimpan. Apakah Anda yakin ingin meninggalkan halaman ini?",
++      "unsavedLeave": "Tinggalkan Halaman",
++      "unsavedStay": "Tetap di Sini"
++    }
+   }
+ }
+diff --git a/src/module/quotation/features/quotations/api/generation.ts b/src/module/quotation/features/quotations/api/generation.ts
+index 60ff140..3130c89 100644
+--- a/src/module/quotation/features/quotations/api/generation.ts
++++ b/src/module/quotation/features/quotations/api/generation.ts
+@@ -43,6 +43,12 @@ export function getGenerationStatus(id: string) {
+   );
+ }
+ 
++export function regenerateQuotation(id: string) {
++  return unwrap<GenerationStateResponse>(
++    axios.post(endpoints.quotation.quotations.regenerate(id))
++  );
++}
++
+ export function getQuotationDetail(id: string) {
+   return unwrap<QuotationGenerationDetail>(axios.get(endpoints.quotation.quotations.byId(id)));
+ }
+diff --git a/src/module/quotation/features/quotations/components/document-canvas.tsx b/src/module/quotation/features/quotations/components/document-canvas.tsx
+index d60a6e0..afb2c69 100644
+--- a/src/module/quotation/features/quotations/components/document-canvas.tsx
++++ b/src/module/quotation/features/quotations/components/document-canvas.tsx
+@@ -66,6 +66,24 @@ export function DocumentCanvas({ children }: Props) {
+               opacity: 0.12,
+               pointerEvents: 'none',
+             },
++            '& .qtr-legal-block': {
++              position: 'relative',
++              p: { xs: 2, sm: 2.5 },
++              my: 2.5,
++              borderRadius: 1,
++              border: 1,
++              borderStyle: 'dashed',
++              borderColor: 'divider',
++              bgcolor: 'background.neutral',
++            },
++            '& .qtr-legal-locked': {
++              borderColor: 'divider',
++            },
++            '& .qtr-legal-unlocked': {
++              borderColor: 'warning.main',
++              bgcolor: (theme) =>
++                theme.palette.mode === 'light' ? '#fffdf5' : 'rgba(255, 171, 0, 0.08)',
++            },
+           },
+         }}
+       >
+diff --git a/src/module/quotation/features/quotations/components/editor-toolbar.tsx b/src/module/quotation/features/quotations/components/editor-toolbar.tsx
+index 9455b12..716c62c 100644
+--- a/src/module/quotation/features/quotations/components/editor-toolbar.tsx
++++ b/src/module/quotation/features/quotations/components/editor-toolbar.tsx
+@@ -11,7 +11,13 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+ 
+ import { Iconify } from 'src/shared/ui/iconify';
+ 
+-type Props = { editor: Editor };
++type Props = {
++  editor: Editor;
++  isUnlocked?: boolean;
++  onToggleUnlock?: () => void;
++  onRestoreOfficial?: () => void;
++  disabled?: boolean;
++};
+ 
+ function ToolbarIcon({ icon }: { icon: string }) {
+   return <Iconify icon={icon as IconifyName} width={18} />;
+@@ -51,7 +57,13 @@ function ToolButton({
+   );
+ }
+ 
+-export function EditorToolbar({ editor }: Props) {
++export function EditorToolbar({
++  editor,
++  isUnlocked = false,
++  onToggleUnlock,
++  onRestoreOfficial,
++  disabled = false,
++}: Props) {
+   const run = (command: () => boolean) => command();
+   const setHeading = (value: string) => {
+     const level = Number(value);
+@@ -90,14 +102,14 @@ export function EditorToolbar({ editor }: Props) {
+       <ToggleButtonGroup size="small" sx={{ mr: 0.5 }}>
+         <ToolButton
+           label="Undo"
+-          disabled={!editor.can().undo()}
++          disabled={disabled || !editor.can().undo()}
+           onClick={() => run(() => editor.chain().focus().undo().run())}
+         >
+           <ToolbarIcon icon="solar:undo-left-round-bold" />
+         </ToolButton>
+         <ToolButton
+           label="Redo"
+-          disabled={!editor.can().redo()}
++          disabled={disabled || !editor.can().redo()}
+           onClick={() => run(() => editor.chain().focus().redo().run())}
+         >
+           <ToolbarIcon icon="solar:undo-right-round-bold" />
+@@ -105,6 +117,7 @@ export function EditorToolbar({ editor }: Props) {
+       </ToggleButtonGroup>
+       <Select
+         size="small"
++        disabled={disabled}
+         value={
+           editor.isActive('heading', { level: 1 })
+             ? '1'
+@@ -126,6 +139,7 @@ export function EditorToolbar({ editor }: Props) {
+       <ToggleButtonGroup size="small">
+         <ToolButton
+           label="Bold"
++          disabled={disabled}
+           active={editor.isActive('bold')}
+           onClick={() => run(() => editor.chain().focus().toggleBold().run())}
+         >
+@@ -133,6 +147,7 @@ export function EditorToolbar({ editor }: Props) {
+         </ToolButton>
+         <ToolButton
+           label="Italic"
++          disabled={disabled}
+           active={editor.isActive('italic')}
+           onClick={() => run(() => editor.chain().focus().toggleItalic().run())}
+         >
+@@ -140,6 +155,7 @@ export function EditorToolbar({ editor }: Props) {
+         </ToolButton>
+         <ToolButton
+           label="Underline"
++          disabled={disabled}
+           active={editor.isActive('underline')}
+           onClick={() => run(() => editor.chain().focus().toggleUnderline().run())}
+         >
+@@ -147,6 +163,7 @@ export function EditorToolbar({ editor }: Props) {
+         </ToolButton>
+         <ToolButton
+           label="Strike"
++          disabled={disabled}
+           active={editor.isActive('strike')}
+           onClick={() => run(() => editor.chain().focus().toggleStrike().run())}
+         >
+@@ -157,6 +174,7 @@ export function EditorToolbar({ editor }: Props) {
+         {alignments.map(([alignment, icon]) => (
+           <ToolButton
+             key={alignment}
++            disabled={disabled}
+             label={`Align ${alignment}`}
+             active={editor.isActive({ textAlign: alignment })}
+             onClick={() => run(() => editor.chain().focus().setTextAlign(alignment).run())}
+@@ -168,6 +186,7 @@ export function EditorToolbar({ editor }: Props) {
+       <ToggleButtonGroup size="small">
+         <ToolButton
+           label="Bulleted list"
++          disabled={disabled}
+           active={editor.isActive('bulletList')}
+           onClick={() => run(() => editor.chain().focus().toggleBulletList().run())}
+         >
+@@ -175,6 +194,7 @@ export function EditorToolbar({ editor }: Props) {
+         </ToolButton>
+         <ToolButton
+           label="Numbered list"
++          disabled={disabled}
+           active={editor.isActive('orderedList')}
+           onClick={() => run(() => editor.chain().focus().toggleOrderedList().run())}
+         >
+@@ -182,6 +202,7 @@ export function EditorToolbar({ editor }: Props) {
+         </ToolButton>
+         <ToolButton
+           label="Insert table"
++          disabled={disabled}
+           onClick={() =>
+             run(() =>
+               editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+@@ -190,22 +211,49 @@ export function EditorToolbar({ editor }: Props) {
+         >
+           <ToolbarIcon icon="solar:table-bold" />
+         </ToolButton>
+-        <ToolButton label="Link" active={editor.isActive('link')} onClick={setLink}>
++        <ToolButton label="Link" disabled={disabled} active={editor.isActive('link')} onClick={setLink}>
+           <ToolbarIcon icon="solar:link-bold" />
+         </ToolButton>
+         <ToolButton
+           label="Horizontal rule"
++          disabled={disabled}
+           onClick={() => run(() => editor.chain().focus().setHorizontalRule().run())}
+         >
+           <ToolbarIcon icon="solar:minus-circle-bold" />
+         </ToolButton>
+         <ToolButton
+           label="Clear formatting"
++          disabled={disabled}
+           onClick={() => run(() => editor.chain().focus().clearNodes().unsetAllMarks().run())}
+         >
+           <ToolbarIcon icon="solar:eraser-bold" />
+         </ToolButton>
+       </ToggleButtonGroup>
++
++      {/* Legal Block Actions */}
++      <ToggleButtonGroup size="small" sx={{ ml: 'auto' }}>
++        {onToggleUnlock && (
++          <ToolButton
++            label={isUnlocked ? 'Lock Legal Block' : 'Unlock Legal Block'}
++            active={isUnlocked}
++            disabled={disabled}
++            onClick={onToggleUnlock}
++          >
++            <ToolbarIcon
++              icon={isUnlocked ? 'solar:lock-unlocked-bold' : 'solar:lock-keyhole-bold'}
++            />
++          </ToolButton>
++        )}
++        {onRestoreOfficial && (
++          <ToolButton
++            label="Restore Official Legal Template"
++            disabled={disabled}
++            onClick={onRestoreOfficial}
++          >
++            <ToolbarIcon icon="solar:restart-bold" />
++          </ToolButton>
++        )}
++      </ToggleButtonGroup>
+     </Stack>
+   );
+ }
+diff --git a/src/module/quotation/features/quotations/components/legal-block-extension.test.ts b/src/module/quotation/features/quotations/components/legal-block-extension.test.ts
+new file mode 100644
+index 0000000..61fc5c1
+--- /dev/null
++++ b/src/module/quotation/features/quotations/components/legal-block-extension.test.ts
+@@ -0,0 +1,129 @@
++import { Editor } from '@tiptap/core';
++import assert from 'node:assert/strict';
++import { it, describe } from 'node:test';
++import StarterKit from '@tiptap/starter-kit';
++import { Selection } from '@tiptap/pm/state';
++
++import { LegalBlockExtension } from './legal-block-extension.ts';
++
++describe('LegalBlockExtension', () => {
++  const initialContent = {
++    type: 'doc',
++    content: [
++      {
++        type: 'paragraph',
++        content: [{ type: 'text', text: 'Opening paragraph before legal block' }],
++      },
++      {
++        type: 'legalBlock',
++        attrs: { 'data-block-type': 'legal' },
++        content: [
++          {
++            type: 'paragraph',
++            content: [{ type: 'text', text: 'Official legal terms and conditions.' }],
++          },
++        ],
++      },
++      {
++        type: 'paragraph',
++        content: [{ type: 'text', text: 'Closing paragraph after legal block' }],
++      },
++    ],
++  };
++
++  function createTestEditor(options: { unlocked: boolean }) {
++    const editor = new Editor({
++      extensions: [
++        StarterKit,
++        LegalBlockExtension.configure({ unlocked: options.unlocked }),
++      ],
++      content: initialContent,
++    });
++    // In headless test mode without DOM mount, activate plugins on editor state
++    const stateWithPlugins = editor.state.reconfigure({
++      plugins: editor.extensionManager.plugins,
++    });
++    editor.view.updateState(stateWithPlugins);
++    return editor;
++  }
++
++  it('rejects text insertion inside legal block when locked', () => {
++    const editor = createTestEditor({ unlocked: false });
++
++    let legalPos = -1;
++    editor.state.doc.descendants((node, pos) => {
++      if (node.type.name === 'legalBlock') {
++        legalPos = pos + 2; // inside the inner paragraph text
++      }
++    });
++    assert.ok(legalPos > 0, 'legalBlock node must be found in doc');
++
++    const jsonBefore = JSON.stringify(editor.getJSON());
++    
++    // Attempt to insert text inside legal block
++    const tr = editor.state.tr.insertText('TAMPERED ', legalPos);
++    (editor as any).dispatchTransaction(tr);
++
++    const jsonAfter = JSON.stringify(editor.getJSON());
++    assert.equal(jsonAfter, jsonBefore, 'Content inside legal block must NOT change when locked');
++    assert.ok(!jsonAfter.includes('TAMPERED'), 'Document must not contain tampered text');
++    
++    editor.destroy();
++  });
++
++  it('allows text insertion outside legal block when locked', () => {
++    const editor = createTestEditor({ unlocked: false });
++
++    const jsonBefore = JSON.stringify(editor.getJSON());
++
++    // Insert text in the first paragraph (pos = 1)
++    const tr = editor.state.tr.insertText('EDITED ', 1);
++    (editor as any).dispatchTransaction(tr);
++
++    const jsonAfter = JSON.stringify(editor.getJSON());
++    assert.notEqual(jsonAfter, jsonBefore, 'Content outside legal block must change when edited');
++    assert.ok(jsonAfter.includes('EDITED Opening paragraph'), 'Document must contain edited opening text');
++
++    editor.destroy();
++  });
++
++  it('allows text insertion inside legal block when unlocked', () => {
++    const editor = createTestEditor({ unlocked: true });
++
++    let legalPos = -1;
++    editor.state.doc.descendants((node, pos) => {
++      if (node.type.name === 'legalBlock') {
++        legalPos = pos + 2;
++      }
++    });
++    assert.ok(legalPos > 0, 'legalBlock node must be found in doc');
++
++    const tr = editor.state.tr.insertText('UNLOCKED_EDIT ', legalPos);
++    (editor as any).dispatchTransaction(tr);
++
++    const jsonAfter = JSON.stringify(editor.getJSON());
++    assert.ok(jsonAfter.includes('UNLOCKED_EDIT Official legal'), 'Document must contain modified legal text when unlocked');
++
++    editor.destroy();
++  });
++
++  it('allows selection and cursor transactions inside legal block when locked', () => {
++    const editor = createTestEditor({ unlocked: false });
++
++    let legalPos = -1;
++    editor.state.doc.descendants((node, pos) => {
++      if (node.type.name === 'legalBlock') {
++        legalPos = pos + 2;
++      }
++    });
++
++    // Move selection into legal block
++    const tr = editor.state.tr.setSelection(
++      Selection.near(editor.state.doc.resolve(legalPos))
++    );
++    (editor as any).dispatchTransaction(tr);
++    assert.equal(editor.state.selection.from, legalPos, 'Cursor selection inside legal block must be allowed');
++
++    editor.destroy();
++  });
++});
+diff --git a/src/module/quotation/features/quotations/components/legal-block-extension.ts b/src/module/quotation/features/quotations/components/legal-block-extension.ts
+new file mode 100644
+index 0000000..554aa1c
+--- /dev/null
++++ b/src/module/quotation/features/quotations/components/legal-block-extension.ts
+@@ -0,0 +1,155 @@
++import { Node, mergeAttributes } from '@tiptap/core';
++import { Plugin, PluginKey } from '@tiptap/pm/state';
++
++export interface LegalBlockOptions {
++  unlocked: boolean;
++  HTMLAttributes: Record<string, any>;
++}
++
++declare module '@tiptap/core' {
++  interface Commands<ReturnType> {
++    legalBlock: {
++      setLegalUnlocked: (unlocked: boolean) => ReturnType;
++    };
++  }
++}
++
++export const LegalBlockPluginKey = new PluginKey('legalBlockLock');
++
++export const LegalBlockExtension = Node.create<LegalBlockOptions>({
++  name: 'legalBlock',
++
++  group: 'block',
++
++  content: 'block+',
++
++  defining: true,
++
++  isolating: true,
++
++  addOptions() {
++    return {
++      unlocked: false,
++      HTMLAttributes: {},
++    };
++  },
++
++  addAttributes() {
++    return {
++      'data-block-type': {
++        default: 'legal',
++        parseHTML: (element) => element.getAttribute('data-block-type') || 'legal',
++        renderHTML: (attributes) => ({
++          'data-block-type': attributes['data-block-type'] || 'legal',
++        }),
++      },
++      'data-template-code': {
++        default: null,
++        parseHTML: (element) => element.getAttribute('data-template-code'),
++        renderHTML: (attributes) => {
++          if (!attributes['data-template-code']) return {};
++          return { 'data-template-code': attributes['data-template-code'] };
++        },
++      },
++      'data-modified': {
++        default: null,
++        parseHTML: (element) => element.getAttribute('data-modified'),
++        renderHTML: (attributes) => {
++          if (!attributes['data-modified']) return {};
++          return { 'data-modified': attributes['data-modified'] };
++        },
++      },
++    };
++  },
++
++  parseHTML() {
++    return [
++      {
++        tag: 'section[data-block-type="legal"]',
++        priority: 60,
++      },
++      {
++        tag: 'div[data-block-type="legal"]',
++        priority: 60,
++      },
++    ];
++  },
++
++  renderHTML({ HTMLAttributes }) {
++    return [
++      'section',
++      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
++        'data-block-type': 'legal',
++        class: `qtr-legal-block ${this.options.unlocked ? 'qtr-legal-unlocked' : 'qtr-legal-locked'}`,
++      }),
++      0,
++    ];
++  },
++
++  addCommands() {
++    return {
++      setLegalUnlocked:
++        (unlocked: boolean) =>
++        ({ tr, dispatch }) => {
++          this.options.unlocked = unlocked;
++          if (dispatch) {
++            tr.setMeta(LegalBlockPluginKey, { unlocked });
++          }
++          return true;
++        },
++    };
++  },
++
++  addProseMirrorPlugins() {
++    return [
++      new Plugin({
++        key: LegalBlockPluginKey,
++        filterTransaction: (tr, state) => {
++          // If extension option is unlocked, permit all transactions
++          if (this.options.unlocked) {
++            return true;
++          }
++
++          // If transaction does not change document content, permit (selection, cursor, meta)
++          if (!tr.docChanged) {
++            return true;
++          }
++
++          // Check if transaction has meta override
++          const meta = tr.getMeta(LegalBlockPluginKey);
++          if (meta?.unlocked) {
++            return true;
++          }
++
++          // Find all legal block ranges in current document
++          const legalRanges: Array<{ from: number; to: number }> = [];
++          state.doc.descendants((node, pos) => {
++            if (node.type.name === this.name) {
++              legalRanges.push({ from: pos, to: pos + node.nodeSize });
++            }
++          });
++
++          if (legalRanges.length === 0) {
++            return true;
++          }
++
++          // Check if any step touches any legal block range
++          let touchesLegal = false;
++          tr.steps.forEach((step) => {
++            const stepMap = step.getMap();
++            stepMap.forEach((oldStart, oldEnd) => {
++              for (const range of legalRanges) {
++                if (oldStart <= range.to && oldEnd >= range.from) {
++                  touchesLegal = true;
++                  break;
++                }
++              }
++            });
++          });
++
++          return !touchesLegal;
++        },
++      }),
++    ];
++  },
++});
+diff --git a/src/module/quotation/features/quotations/components/legal-unlock-dialog.tsx b/src/module/quotation/features/quotations/components/legal-unlock-dialog.tsx
+new file mode 100644
+index 0000000..85d8a97
+--- /dev/null
++++ b/src/module/quotation/features/quotations/components/legal-unlock-dialog.tsx
+@@ -0,0 +1,53 @@
++import Stack from '@mui/material/Stack';
++import Button from '@mui/material/Button';
++import Dialog from '@mui/material/Dialog';
++import Typography from '@mui/material/Typography';
++import DialogTitle from '@mui/material/DialogTitle';
++import DialogActions from '@mui/material/DialogActions';
++import DialogContent from '@mui/material/DialogContent';
++import DialogContentText from '@mui/material/DialogContentText';
++
++import { useTranslate } from 'src/locales';
++import { Iconify } from 'src/shared/ui/iconify';
++
++type Props = {
++  open: boolean;
++  onClose: () => void;
++  onConfirm: () => void;
++};
++
++export function LegalUnlockDialog({ open, onClose, onConfirm }: Props) {
++  const { t } = useTranslate('quotation');
++
++  return (
++    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
++      <DialogTitle sx={{ pb: 1 }}>
++        <Stack direction="row" alignItems="center" spacing={1}>
++          <Iconify icon="eva:alert-triangle-fill" width={24} sx={{ color: 'warning.main' }} />
++          <Typography variant="h6">{t('editor.dialog.unlockTitle')}</Typography>
++        </Stack>
++      </DialogTitle>
++      <DialogContent>
++        <DialogContentText color="text.secondary" sx={{ typography: 'body2' }}>
++          {t('editor.dialog.unlockWarning')}
++        </DialogContentText>
++      </DialogContent>
++      <DialogActions>
++        <Button variant="outlined" color="inherit" onClick={onClose}>
++          {t('editor.dialog.unlockCancel')}
++        </Button>
++        <Button
++          variant="contained"
++          color="warning"
++          startIcon={<Iconify icon="eva:unlock-fill" />}
++          onClick={() => {
++            onConfirm();
++            onClose();
++          }}
++        >
++          {t('editor.dialog.unlockConfirm')}
++        </Button>
++      </DialogActions>
++    </Dialog>
++  );
++}
+diff --git a/src/module/quotation/features/quotations/components/quotation-editor.tsx b/src/module/quotation/features/quotations/components/quotation-editor.tsx
+index a4bc0ca..8835d80 100644
+--- a/src/module/quotation/features/quotations/components/quotation-editor.tsx
++++ b/src/module/quotation/features/quotations/components/quotation-editor.tsx
+@@ -14,13 +14,25 @@ import TableHeader from '@tiptap/extension-table-header';
+ import { TableToolbar } from './table-toolbar';
+ import { EditorToolbar } from './editor-toolbar';
+ import { DocumentCanvas } from './document-canvas';
++import { LegalBlockExtension } from './legal-block-extension';
+ 
+ type Props = {
+   content: string;
++  isUnlocked?: boolean;
++  disabled?: boolean;
++  onToggleUnlock?: () => void;
++  onRestoreOfficial?: () => void;
+   onChange?: (state: { html: string; json: JSONContent }) => void;
+ };
+ 
+-export function QuotationEditor({ content, onChange }: Props) {
++export function QuotationEditor({
++  content,
++  isUnlocked = false,
++  disabled = false,
++  onToggleUnlock,
++  onRestoreOfficial,
++  onChange,
++}: Props) {
+   const lastContent = useRef(content);
+   const editor = useEditor({
+     extensions: [
+@@ -32,13 +44,25 @@ export function QuotationEditor({ content, onChange }: Props) {
+       TableRow,
+       TableHeader,
+       TableCell,
++      LegalBlockExtension.configure({ unlocked: isUnlocked }),
+     ],
+     content,
+     immediatelyRender: false,
++    editable: !disabled,
+     onUpdate: ({ editor: currentEditor }) =>
+       onChange?.({ html: currentEditor.getHTML(), json: currentEditor.getJSON() }),
+   });
+ 
++  useEffect(() => {
++    if (!editor) return;
++    editor.commands.setLegalUnlocked(isUnlocked);
++  }, [isUnlocked, editor]);
++
++  useEffect(() => {
++    if (!editor) return;
++    editor.setEditable(!disabled);
++  }, [disabled, editor]);
++
+   useEffect(() => {
+     if (!editor || content === lastContent.current || content === editor.getHTML()) return;
+     lastContent.current = content;
+@@ -49,7 +73,13 @@ export function QuotationEditor({ content, onChange }: Props) {
+ 
+   return (
+     <DocumentCanvas>
+-      <EditorToolbar editor={editor} />
++      <EditorToolbar
++        editor={editor}
++        isUnlocked={isUnlocked}
++        onToggleUnlock={onToggleUnlock}
++        onRestoreOfficial={onRestoreOfficial}
++        disabled={disabled}
++      />
+       <TableToolbar editor={editor} />
+       <EditorContent editor={editor} />
+     </DocumentCanvas>
+diff --git a/src/module/quotation/features/quotations/components/regenerate-dialog.tsx b/src/module/quotation/features/quotations/components/regenerate-dialog.tsx
+new file mode 100644
+index 0000000..00a7a1b
+--- /dev/null
++++ b/src/module/quotation/features/quotations/components/regenerate-dialog.tsx
+@@ -0,0 +1,59 @@
++import Stack from '@mui/material/Stack';
++import Button from '@mui/material/Button';
++import Dialog from '@mui/material/Dialog';
++import Typography from '@mui/material/Typography';
++import DialogTitle from '@mui/material/DialogTitle';
++import DialogActions from '@mui/material/DialogActions';
++import DialogContent from '@mui/material/DialogContent';
++import CircularProgress from '@mui/material/CircularProgress';
++import DialogContentText from '@mui/material/DialogContentText';
++
++import { useTranslate } from 'src/locales';
++import { Iconify } from 'src/shared/ui/iconify';
++
++type Props = {
++  open: boolean;
++  loading?: boolean;
++  onClose: () => void;
++  onConfirm: () => void;
++};
++
++export function RegenerateDialog({ open, loading, onClose, onConfirm }: Props) {
++  const { t } = useTranslate('quotation');
++
++  return (
++    <Dialog open={open} onClose={loading ? undefined : onClose} maxWidth="sm" fullWidth>
++      <DialogTitle sx={{ pb: 1 }}>
++        <Stack direction="row" alignItems="center" spacing={1}>
++          <Iconify icon="eva:refresh-fill" width={24} sx={{ color: 'info.main' }} />
++          <Typography variant="h6">{t('editor.dialog.regenerateTitle')}</Typography>
++        </Stack>
++      </DialogTitle>
++      <DialogContent>
++        <DialogContentText color="text.secondary" sx={{ typography: 'body2' }}>
++          {t('editor.dialog.regenerateWarning')}
++        </DialogContentText>
++      </DialogContent>
++      <DialogActions>
++        <Button variant="outlined" color="inherit" onClick={onClose} disabled={loading}>
++          {t('editor.dialog.regenerateCancel')}
++        </Button>
++        <Button
++          variant="contained"
++          color="info"
++          startIcon={
++            loading ? (
++              <CircularProgress size={16} color="inherit" />
++            ) : (
++              <Iconify icon="eva:refresh-fill" />
++            )
++          }
++          onClick={onConfirm}
++          disabled={loading}
++        >
++          {loading ? t('editor.regenerating') : t('editor.dialog.regenerateConfirm')}
++        </Button>
++      </DialogActions>
++    </Dialog>
++  );
++}
+diff --git a/src/module/quotation/features/quotations/hooks/use-draft-save.ts b/src/module/quotation/features/quotations/hooks/use-draft-save.ts
+index d317c71..c3cdee7 100644
+--- a/src/module/quotation/features/quotations/hooks/use-draft-save.ts
++++ b/src/module/quotation/features/quotations/hooks/use-draft-save.ts
+@@ -6,7 +6,7 @@ import type {
+ 
+ import { useMutation, useQueryClient } from '@tanstack/react-query';
+ 
+-import { saveQuotationDraft } from '../api';
++import { saveQuotationDraft, regenerateQuotation } from '../api';
+ 
+ export function useSaveDraft(quotationId: string) {
+   const queryClient = useQueryClient();
+@@ -22,6 +22,34 @@ export function useSaveDraft(quotationId: string) {
+             ...old,
+             content_html: result.content_html,
+             content_version: result.content_version,
++            legal_content_modified: result.legal_content_modified,
++            commercial_content_modified: result.commercial_content_modified,
++            updated_at: result.updated_at.toString(),
++          };
++        }
++      );
++      queryClient.invalidateQueries({ queryKey: ['quotations'] });
++    },
++  });
++}
++
++export function useRegenerateQuotation(quotationId: string) {
++  const queryClient = useQueryClient();
++
++  return useMutation({
++    mutationFn: () => regenerateQuotation(quotationId),
++    onSuccess: (result) => {
++      queryClient.setQueryData<QuotationGenerationDetail | undefined>(
++        ['quotation', 'detail', quotationId],
++        (old) => {
++          if (!old) return old;
++          return {
++            ...old,
++            content_html: result.content_html,
++            content_version: result.content_version,
++            generation_status: result.generation_status,
++            legal_content_modified: false,
++            commercial_content_modified: false,
+             updated_at: result.updated_at.toString(),
+           };
+         }
+diff --git a/src/module/quotation/features/quotations/types/generation.ts b/src/module/quotation/features/quotations/types/generation.ts
+index 1413e29..7d62a40 100644
+--- a/src/module/quotation/features/quotations/types/generation.ts
++++ b/src/module/quotation/features/quotations/types/generation.ts
+@@ -52,6 +52,12 @@ export type GenerationStateResponse = {
+   updated_at: string;
+ };
+ 
++export type LegalTemplateSnapshot = {
++  code?: string;
++  version?: number;
++  content_html?: string;
++};
++
+ export type QuotationGenerationDetail = {
+   quotation_id: string;
+   company_id: string;
+@@ -59,11 +65,15 @@ export type QuotationGenerationDetail = {
+   quotation_number: string;
+   subject: string;
+   status: string;
++  revision_id: string;
+   created_at: string;
+   updated_at: string;
+   generation_status: GenerationRevisionStatus;
+   content_version: number;
+   content_html: string;
++  legal_template_snapshot?: LegalTemplateSnapshot | string;
++  legal_content_modified?: boolean;
++  commercial_content_modified?: boolean;
+   generated_at?: string;
+ };
+ 
+diff --git a/src/module/quotation/features/quotations/views/quotation-editor-view.tsx b/src/module/quotation/features/quotations/views/quotation-editor-view.tsx
+index ccc264d..85b223c 100644
+--- a/src/module/quotation/features/quotations/views/quotation-editor-view.tsx
++++ b/src/module/quotation/features/quotations/views/quotation-editor-view.tsx
+@@ -1,31 +1,229 @@
+-import { useNavigate } from 'react-router';
++import type { JSONContent } from '@tiptap/core';
++
++import { toast } from 'sonner';
++import { useState, useEffect, useCallback } from 'react';
++import { useNavigate, useBeforeUnload } from 'react-router';
+ 
+ import Box from '@mui/material/Box';
+ import Card from '@mui/material/Card';
++import Chip from '@mui/material/Chip';
+ import Stack from '@mui/material/Stack';
+ import Button from '@mui/material/Button';
++import Dialog from '@mui/material/Dialog';
+ import Typography from '@mui/material/Typography';
++import DialogTitle from '@mui/material/DialogTitle';
++import DialogActions from '@mui/material/DialogActions';
++import DialogContent from '@mui/material/DialogContent';
+ import CircularProgress from '@mui/material/CircularProgress';
++import DialogContentText from '@mui/material/DialogContentText';
+ 
+ import { paths } from 'src/routes/paths';
+ 
++import { useTranslate } from 'src/locales';
+ import { Iconify } from 'src/shared/ui/iconify';
+ import { DashboardContent } from 'src/layouts/dashboard';
+ 
+-import { useQuotationDraft } from '../hooks/use-quotation-draft';
+ import { QuotationEditor } from '../components/quotation-editor';
++import { useQuotationDraft } from '../hooks/use-quotation-draft';
++import { RegenerateDialog } from '../components/regenerate-dialog';
++import { LegalUnlockDialog } from '../components/legal-unlock-dialog';
++import { useSaveDraft, useRegenerateQuotation } from '../hooks/use-draft-save';
+ 
+ type Props = {
+   id?: string;
+ };
+ 
+-export function QuotationEditorView({ id }: Props) {
++type SessionState = {
++  contentHtml: string;
++  canonicalVersion: number;
++  revisionId: string;
++  isUnlocked: boolean;
++  isDirty: boolean;
++  isConflict: boolean;
++  legalModified: boolean;
++  commercialModified: boolean;
++};
++
++export function QuotationEditorView({ id = '' }: Props) {
+   const navigate = useNavigate();
+-  const { data, isLoading, error } = useQuotationDraft(id);
++  const { t } = useTranslate('quotation');
++
++  const { data, isLoading, error, refetch } = useQuotationDraft(id);
++  const saveMutation = useSaveDraft(id);
++  const regenerateMutation = useRegenerateQuotation(id);
++
++  const [session, setSession] = useState<SessionState | null>(null);
++  const [currentHtml, setCurrentHtml] = useState<string>('');
++  const [isUnlockDialogOpen, setIsUnlockDialogOpen] = useState(false);
++  const [isRegenerateDialogOpen, setIsRegenerateDialogOpen] = useState(false);
++  const [isUnsavedDialogOpen, setIsUnsavedDialogOpen] = useState(false);
++
++  // Initialize session state once data is loaded
++  useEffect(() => {
++    if (data) {
++      setSession({
++        contentHtml: data.content_html || '',
++        canonicalVersion: data.content_version || 1,
++        revisionId: data.revision_id || '',
++        isUnlocked: false,
++        isDirty: false,
++        isConflict: false,
++        legalModified: data.legal_content_modified ?? false,
++        commercialModified: data.commercial_content_modified ?? false,
++      });
++      setCurrentHtml(data.content_html || '');
++    }
++  }, [data]);
++
++  // Browser beforeunload guard when dirty
++  useBeforeUnload(
++    useCallback(
++      (event) => {
++        if (session?.isDirty) {
++          event.preventDefault();
++        }
++      },
++      [session?.isDirty]
++    )
++  );
++
++  const handleEditorChange = useCallback(({ html }: { html: string; json: JSONContent }) => {
++    setCurrentHtml(html);
++    setSession((prev) => {
++      if (!prev) return prev;
++      const dirty = html !== prev.contentHtml;
++      return { ...prev, isDirty: dirty };
++    });
++  }, []);
++
++  // Save Draft Action
++  const handleSaveDraft = async () => {
++    if (!session || session.isConflict || saveMutation.isPending) return;
++
++    try {
++      const result = await saveMutation.mutateAsync({
++        revision_id: session.revisionId,
++        content_html: currentHtml,
++        content_version: session.canonicalVersion,
++      });
++
++      setSession((prev) => {
++        if (!prev) return prev;
++        return {
++          ...prev,
++          contentHtml: result.content_html,
++          canonicalVersion: result.content_version,
++          legalModified: result.legal_content_modified,
++          commercialModified: result.commercial_content_modified,
++          isDirty: false,
++        };
++      });
++
++      toast.success(t('editor.saved'));
++    } catch (err: any) {
++      if (err.status === 409 || err.message?.includes('409') || err.message?.includes('conflict')) {
++        setSession((prev) => (prev ? { ...prev, isConflict: true, isUnlocked: false } : prev));
++        toast.error(t('editor.dialog.conflictTitle'));
++      } else {
++        toast.error(err.message || t('editor.saveFailed'));
++      }
++    }
++  };
++
++  // Unlock Legal Dialog Confirmation
++  const handleConfirmUnlock = () => {
++    setSession((prev) => (prev ? { ...prev, isUnlocked: true } : prev));
++    toast.info(t('editor.legalUnlocked'));
++  };
++
++  // Toggle Legal Lock
++  const handleToggleUnlock = () => {
++    if (!session) return;
++    if (session.isUnlocked) {
++      setSession((prev) => (prev ? { ...prev, isUnlocked: false } : prev));
++      toast.info(t('editor.legalLocked'));
++    } else {
++      setIsUnlockDialogOpen(true);
++    }
++  };
++
++  // Restore Official Template Action
++  const handleRestoreOfficial = () => {
++    if (!data || !session) return;
++
++    let snapshotHtml = '';
++    const snapshot = data.legal_template_snapshot;
++    if (typeof snapshot === 'string') {
++      try {
++        const parsed = JSON.parse(snapshot);
++        snapshotHtml = parsed.content_html || snapshot;
++      } catch {
++        snapshotHtml = snapshot;
++      }
++    } else if (snapshot && typeof snapshot === 'object' && 'content_html' in snapshot) {
++      snapshotHtml = (snapshot as { content_html?: string }).content_html || '';
++    }
++
++    if (!snapshotHtml) {
++      toast.error(t('editor.restoreFailed'));
++      return;
++    }
++
++    // Replace legal section in HTML
++    const legalBlockRegex = /<section\s+[^>]*data-block-type=["']legal["'][^>]*>[\s\S]*?<\/section>/i;
++    let newHtml = currentHtml;
++    if (legalBlockRegex.test(newHtml)) {
++      newHtml = newHtml.replace(legalBlockRegex, snapshotHtml.trim());
++    } else {
++      // Append if not found
++      newHtml = `${newHtml}\n${snapshotHtml.trim()}`;
++    }
++
++    setCurrentHtml(newHtml);
++    setSession((prev) => (prev ? { ...prev, isDirty: true } : prev));
++    toast.success(t('editor.restoreSuccess'));
++  };
++
++  // Regenerate Confirmation
++  const handleConfirmRegenerate = async () => {
++    if (!id || regenerateMutation.isPending) return;
++
++    try {
++      const result = await regenerateMutation.mutateAsync();
++      setSession((prev) => {
++        if (!prev) return prev;
++        return {
++          ...prev,
++          contentHtml: result.content_html,
++          canonicalVersion: result.content_version,
++          legalModified: false,
++          commercialModified: false,
++          isUnlocked: false,
++          isDirty: false,
++          isConflict: false,
++        };
++      });
++      setCurrentHtml(result.content_html);
++      setIsRegenerateDialogOpen(false);
++      toast.success(t('generationProgress.titleSuccess'));
++    } catch (err: any) {
++      toast.error(err.message || 'Regeneration failed');
++    }
++  };
++
++  // In-app navigation guard
++  const handleBackToPrompt = () => {
++    if (session?.isDirty) {
++      setIsUnsavedDialogOpen(true);
++    } else {
++      navigate(paths.dashboard.quotation.root);
++    }
++  };
+ 
+   return (
+     <DashboardContent maxWidth="xl">
+       <Stack spacing={3}>
++        {/* Header toolbar */}
+         <Stack
+           direction="row"
+           alignItems="center"
+@@ -39,35 +237,178 @@ export function QuotationEditorView({ id }: Props) {
+               variant="outlined"
+               color="inherit"
+               startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+-              onClick={() => navigate(paths.dashboard.quotation.root)}
++              onClick={handleBackToPrompt}
+             >
+-              Back to Prompt
++              {t('editor.backToPrompt')}
+             </Button>
+             <Typography variant="h4">{data?.subject || 'Quotation Editor'}</Typography>
+           </Stack>
+-          {data && (
+-            <Typography variant="body2" color="text.secondary">
+-              Nomor: <strong>{data.quotation_number}</strong> (v{data.content_version})
+-            </Typography>
++
++          {data && session && (
++            <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
++              {session.legalModified && (
++                <Chip
++                  size="small"
++                  label={t('editor.legalModifiedBadge')}
++                  color="warning"
++                  variant="soft"
++                  icon={<Iconify icon="eva:alert-circle-fill" />}
++                />
++              )}
++              {session.commercialModified && (
++                <Chip
++                  size="small"
++                  label={t('editor.commercialModifiedBadge')}
++                  color="info"
++                  variant="soft"
++                />
++              )}
++              {session.isDirty && (
++                <Chip
++                  size="small"
++                  label={t('editor.dirty')}
++                  color="default"
++                  variant="outlined"
++                  sx={{ borderStyle: 'dashed' }}
++                />
++              )}
++              <Typography variant="body2" color="text.secondary" sx={{ mx: 1 }}>
++                <strong>{data.quotation_number}</strong> (v{session.canonicalVersion})
++              </Typography>
++
++              <Button
++                variant="outlined"
++                color="inherit"
++                startIcon={<Iconify icon="solar:restart-bold" />}
++                onClick={() => setIsRegenerateDialogOpen(true)}
++                disabled={session.isConflict || regenerateMutation.isPending}
++              >
++                {t('editor.regenerate')}
++              </Button>
++
++              <Button
++                variant="contained"
++                color="primary"
++                startIcon={
++                  saveMutation.isPending ? (
++                    <CircularProgress size={16} color="inherit" />
++                  ) : (
++                    <Iconify icon="eva:save-fill" />
++                  )
++                }
++                onClick={handleSaveDraft}
++                disabled={
++                  session.isConflict ||
++                  !session.isDirty ||
++                  saveMutation.isPending ||
++                  regenerateMutation.isPending
++                }
++              >
++                {saveMutation.isPending ? t('editor.saving') : t('editor.saveDraft')}
++              </Button>
++            </Stack>
+           )}
+         </Stack>
+ 
++        {/* Content Body */}
+         {isLoading ? (
+           <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
+             <CircularProgress />
+           </Box>
+         ) : error ? (
+           <Card sx={{ p: 4, textAlign: 'center' }}>
+-            <Typography color="error" variant="subtitle1">
++            <Typography color="error" variant="subtitle1" sx={{ mb: 2 }}>
+               Failed to load draft: {error.message}
+             </Typography>
++            <Button variant="outlined" onClick={() => refetch()}>
++              Retry Load
++            </Button>
+           </Card>
+-        ) : (
++        ) : session ? (
+           <QuotationEditor
+-            content={data?.content_html || '<p>No document content generated.</p>'}
++            content={currentHtml}
++            isUnlocked={session.isUnlocked}
++            disabled={session.isConflict}
++            onToggleUnlock={handleToggleUnlock}
++            onRestoreOfficial={handleRestoreOfficial}
++            onChange={handleEditorChange}
+           />
+-        )}
++        ) : null}
+       </Stack>
++
++      {/* Legal Block Unlock Confirmation Modal */}
++      <LegalUnlockDialog
++        open={isUnlockDialogOpen}
++        onClose={() => setIsUnlockDialogOpen(false)}
++        onConfirm={handleConfirmUnlock}
++      />
++
++      {/* Regenerate Confirmation Modal */}
++      <RegenerateDialog
++        open={isRegenerateDialogOpen}
++        loading={regenerateMutation.isPending}
++        onClose={() => setIsRegenerateDialogOpen(false)}
++        onConfirm={handleConfirmRegenerate}
++      />
++
++      {/* 409 Conflict Modal */}
++      <Dialog open={Boolean(session?.isConflict)} maxWidth="sm" fullWidth>
++        <DialogTitle sx={{ pb: 1 }}>
++          <Stack direction="row" alignItems="center" spacing={1}>
++            <Iconify icon="eva:alert-triangle-fill" width={24} sx={{ color: 'error.main' }} />
++            <Typography variant="h6">{t('editor.dialog.conflictTitle')}</Typography>
++          </Stack>
++        </DialogTitle>
++        <DialogContent>
++          <DialogContentText color="text.secondary" sx={{ typography: 'body2' }}>
++            {t('editor.dialog.conflictMessage')}
++          </DialogContentText>
++        </DialogContent>
++        <DialogActions>
++          <Button
++            variant="contained"
++            color="primary"
++            startIcon={<Iconify icon="solar:restart-bold" />}
++            onClick={() => window.location.reload()}
++          >
++            {t('editor.dialog.conflictReload')}
++          </Button>
++        </DialogActions>
++      </Dialog>
++
++      {/* Unsaved Changes Navigation Confirmation Modal */}
++      <Dialog
++        open={isUnsavedDialogOpen}
++        onClose={() => setIsUnsavedDialogOpen(false)}
++        maxWidth="xs"
++        fullWidth
++      >
++        <DialogTitle>{t('editor.dialog.unsavedTitle')}</DialogTitle>
++        <DialogContent>
++          <DialogContentText sx={{ typography: 'body2' }}>
++            {t('editor.dialog.unsavedMessage')}
++          </DialogContentText>
++        </DialogContent>
++        <DialogActions>
++          <Button
++            variant="outlined"
++            color="inherit"
++            onClick={() => setIsUnsavedDialogOpen(false)}
++          >
++            {t('editor.dialog.unsavedStay')}
++          </Button>
++          <Button
++            variant="contained"
++            color="error"
++            onClick={() => {
++              setIsUnsavedDialogOpen(false);
++              navigate(paths.dashboard.quotation.root);
++            }}
++          >
++            {t('editor.dialog.unsavedLeave')}
++          </Button>
++        </DialogActions>
++      </Dialog>
+     </DashboardContent>
+   );
+ }
+diff --git a/src/shared/ui/iconify/iconify.tsx b/src/shared/ui/iconify/iconify.tsx
+index c6012b5..c36f2e9 100644
+--- a/src/shared/ui/iconify/iconify.tsx
++++ b/src/shared/ui/iconify/iconify.tsx
+@@ -14,13 +14,13 @@ import { allIconNames, registerIcons } from './register-icons';
+ 
+ export type IconifyProps = React.ComponentProps<typeof IconRoot> &
+   Omit<IconProps, 'icon'> & {
+-    icon: IconifyName;
++    icon: IconifyName | (string & {});
+   };
+ 
+ export function Iconify({ className, icon, width = 20, height, sx, ...other }: IconifyProps) {
+   const uniqueId = useId();
+ 
+-  if (!allIconNames.includes(icon)) {
++  if (!allIconNames.includes(icon as IconifyName)) {
+     console.warn(
+       [
+         `Icon "${icon}" is currently loaded online, which may cause flickering effects.`,
