@@ -155,7 +155,7 @@ export function QuotationGenerationForm({
 
   const defaultValues: FormValues = useMemo(() => {
     // Default fallback client ID if present
-    const fallbackClientId = client?.id || '00000000-0000-0000-0000-000000000001';
+    const fallbackClientId = client?.id || crypto.randomUUID();
 
     return {
       client_id: fallbackClientId,
@@ -331,13 +331,8 @@ export function QuotationGenerationForm({
                 <RHFTextField
                   name="client_id"
                   label="Client Identifier (UUID)"
-                  placeholder="UUID (e.g. 00000000-0000-0000-0000-000000000001)"
-                  helperText={
-                    client?.name
-                      ? `Active Client Context: ${client.name}`
-                      : 'Platform registered client UUID'
-                  }
-                  disabled={isSubmitting}
+                  disabled
+                  helperText="Auto-generated Client UUID"
                 />
               </Grid>
 
