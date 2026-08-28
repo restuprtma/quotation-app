@@ -14,13 +14,25 @@ import TableHeader from '@tiptap/extension-table-header';
 import { TableToolbar } from './table-toolbar';
 import { EditorToolbar } from './editor-toolbar';
 import { DocumentCanvas } from './document-canvas';
+import { LegalBlockExtension } from './legal-block-extension';
 
 type Props = {
   content: string;
+  isUnlocked?: boolean;
+  disabled?: boolean;
+  onToggleUnlock?: () => void;
+  onRestoreOfficial?: () => void;
   onChange?: (state: { html: string; json: JSONContent }) => void;
 };
 
-export function QuotationEditor({ content, onChange }: Props) {
+export function QuotationEditor({
+  content,
+  isUnlocked = false,
+  disabled = false,
+  onToggleUnlock,
+  onRestoreOfficial,
+  onChange,
+}: Props) {
   const lastContent = useRef(content);
   const editor = useEditor({
     extensions: [
@@ -32,12 +44,24 @@ export function QuotationEditor({ content, onChange }: Props) {
       TableRow,
       TableHeader,
       TableCell,
+      LegalBlockExtension.configure({ unlocked: isUnlocked }),
     ],
     content,
     immediatelyRender: false,
+    editable: !disabled,
     onUpdate: ({ editor: currentEditor }) =>
       onChange?.({ html: currentEditor.getHTML(), json: currentEditor.getJSON() }),
   });
+
+  useEffect(() => {
+    if (!editor) return;
+    editor.commands.setLegalUnlocked(isUnlocked);
+  }, [isUnlocked, editor]);
+
+  useEffect(() => {
+    if (!editor) return;
+    editor.setEditable(!disabled);
+  }, [disabled, editor]);
 
   useEffect(() => {
     if (!editor || content === lastContent.current || content === editor.getHTML()) return;
@@ -49,7 +73,13 @@ export function QuotationEditor({ content, onChange }: Props) {
 
   return (
     <DocumentCanvas>
-      <EditorToolbar editor={editor} />
+      <EditorToolbar
+        editor={editor}
+        isUnlocked={isUnlocked}
+        onToggleUnlock={onToggleUnlock}
+        onRestoreOfficial={onRestoreOfficial}
+        disabled={disabled}
+      />
       <TableToolbar editor={editor} />
       <EditorContent editor={editor} />
     </DocumentCanvas>

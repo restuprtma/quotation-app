@@ -66,6 +66,24 @@ export function DocumentCanvas({ children }: Props) {
               opacity: 0.12,
               pointerEvents: 'none',
             },
+            '& .qtr-legal-block': {
+              position: 'relative',
+              p: { xs: 2, sm: 2.5 },
+              my: 2.5,
+              borderRadius: 1,
+              border: 1,
+              borderStyle: 'dashed',
+              borderColor: 'divider',
+              bgcolor: 'background.neutral',
+            },
+            '& .qtr-legal-locked': {
+              borderColor: 'divider',
+            },
+            '& .qtr-legal-unlocked': {
+              borderColor: 'warning.main',
+              bgcolor: (theme) =>
+                theme.palette.mode === 'light' ? '#fffdf5' : 'rgba(255, 171, 0, 0.08)',
+            },
           },
         }}
       >

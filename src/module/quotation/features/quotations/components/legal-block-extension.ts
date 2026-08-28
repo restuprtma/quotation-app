@@ -101,14 +101,12 @@ export const LegalBlockExtension = Node.create<LegalBlockOptions>({
   },
 
   addProseMirrorPlugins() {
-    const extension = this;
-
     return [
       new Plugin({
         key: LegalBlockPluginKey,
-        filterTransaction(tr, state) {
+        filterTransaction: (tr, state) => {
           // If extension option is unlocked, permit all transactions
-          if (extension.options.unlocked) {
+          if (this.options.unlocked) {
             return true;
           }
 
@@ -126,7 +124,7 @@ export const LegalBlockExtension = Node.create<LegalBlockOptions>({
           // Find all legal block ranges in current document
           const legalRanges: Array<{ from: number; to: number }> = [];
           state.doc.descendants((node, pos) => {
-            if (node.type.name === extension.name) {
+            if (node.type.name === this.name) {
               legalRanges.push({ from: pos, to: pos + node.nodeSize });
             }
           });

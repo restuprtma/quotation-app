@@ -52,6 +52,12 @@ export type GenerationStateResponse = {
   updated_at: string;
 };
 
+export type LegalTemplateSnapshot = {
+  code?: string;
+  version?: number;
+  content_html?: string;
+};
+
 export type QuotationGenerationDetail = {
   quotation_id: string;
   company_id: string;
@@ -59,11 +65,15 @@ export type QuotationGenerationDetail = {
   quotation_number: string;
   subject: string;
   status: string;
+  revision_id: string;
   created_at: string;
   updated_at: string;
   generation_status: GenerationRevisionStatus;
   content_version: number;
   content_html: string;
+  legal_template_snapshot?: LegalTemplateSnapshot | string;
+  legal_content_modified?: boolean;
+  commercial_content_modified?: boolean;
   generated_at?: string;
 };
 

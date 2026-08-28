@@ -1,8 +1,8 @@
+import { Editor } from '@tiptap/core';
 import assert from 'node:assert/strict';
 import { it, describe } from 'node:test';
-
-import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
+import { Selection } from '@tiptap/pm/state';
 
 import { LegalBlockExtension } from './legal-block-extension.ts';
 
@@ -62,7 +62,7 @@ describe('LegalBlockExtension', () => {
     
     // Attempt to insert text inside legal block
     const tr = editor.state.tr.insertText('TAMPERED ', legalPos);
-    editor.dispatchTransaction(tr);
+    (editor as any).dispatchTransaction(tr);
 
     const jsonAfter = JSON.stringify(editor.getJSON());
     assert.equal(jsonAfter, jsonBefore, 'Content inside legal block must NOT change when locked');
@@ -78,7 +78,7 @@ describe('LegalBlockExtension', () => {
 
     // Insert text in the first paragraph (pos = 1)
     const tr = editor.state.tr.insertText('EDITED ', 1);
-    editor.dispatchTransaction(tr);
+    (editor as any).dispatchTransaction(tr);
 
     const jsonAfter = JSON.stringify(editor.getJSON());
     assert.notEqual(jsonAfter, jsonBefore, 'Content outside legal block must change when edited');
@@ -99,7 +99,7 @@ describe('LegalBlockExtension', () => {
     assert.ok(legalPos > 0, 'legalBlock node must be found in doc');
 
     const tr = editor.state.tr.insertText('UNLOCKED_EDIT ', legalPos);
-    editor.dispatchTransaction(tr);
+    (editor as any).dispatchTransaction(tr);
 
     const jsonAfter = JSON.stringify(editor.getJSON());
     assert.ok(jsonAfter.includes('UNLOCKED_EDIT Official legal'), 'Document must contain modified legal text when unlocked');
@@ -119,9 +119,9 @@ describe('LegalBlockExtension', () => {
 
     // Move selection into legal block
     const tr = editor.state.tr.setSelection(
-      editor.state.selection.constructor.near(editor.state.doc.resolve(legalPos))
+      Selection.near(editor.state.doc.resolve(legalPos))
     );
-    editor.dispatchTransaction(tr);
+    (editor as any).dispatchTransaction(tr);
     assert.equal(editor.state.selection.from, legalPos, 'Cursor selection inside legal block must be allowed');
 
     editor.destroy();

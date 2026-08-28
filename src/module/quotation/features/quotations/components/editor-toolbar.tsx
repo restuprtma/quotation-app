@@ -11,7 +11,13 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { Iconify } from 'src/shared/ui/iconify';
 
-type Props = { editor: Editor };
+type Props = {
+  editor: Editor;
+  isUnlocked?: boolean;
+  onToggleUnlock?: () => void;
+  onRestoreOfficial?: () => void;
+  disabled?: boolean;
+};
 
 function ToolbarIcon({ icon }: { icon: string }) {
   return <Iconify icon={icon as IconifyName} width={18} />;
@@ -51,7 +57,13 @@ function ToolButton({
   );
 }
 
-export function EditorToolbar({ editor }: Props) {
+export function EditorToolbar({
+  editor,
+  isUnlocked = false,
+  onToggleUnlock,
+  onRestoreOfficial,
+  disabled = false,
+}: Props) {
   const run = (command: () => boolean) => command();
   const setHeading = (value: string) => {
     const level = Number(value);
@@ -90,14 +102,14 @@ export function EditorToolbar({ editor }: Props) {
       <ToggleButtonGroup size="small" sx={{ mr: 0.5 }}>
         <ToolButton
           label="Undo"
-          disabled={!editor.can().undo()}
+          disabled={disabled || !editor.can().undo()}
           onClick={() => run(() => editor.chain().focus().undo().run())}
         >
           <ToolbarIcon icon="solar:undo-left-round-bold" />
         </ToolButton>
         <ToolButton
           label="Redo"
-          disabled={!editor.can().redo()}
+          disabled={disabled || !editor.can().redo()}
           onClick={() => run(() => editor.chain().focus().redo().run())}
         >
           <ToolbarIcon icon="solar:undo-right-round-bold" />
@@ -105,6 +117,7 @@ export function EditorToolbar({ editor }: Props) {
       </ToggleButtonGroup>
       <Select
         size="small"
+        disabled={disabled}
         value={
           editor.isActive('heading', { level: 1 })
             ? '1'
@@ -126,6 +139,7 @@ export function EditorToolbar({ editor }: Props) {
       <ToggleButtonGroup size="small">
         <ToolButton
           label="Bold"
+          disabled={disabled}
           active={editor.isActive('bold')}
           onClick={() => run(() => editor.chain().focus().toggleBold().run())}
         >
@@ -133,6 +147,7 @@ export function EditorToolbar({ editor }: Props) {
         </ToolButton>
         <ToolButton
           label="Italic"
+          disabled={disabled}
           active={editor.isActive('italic')}
           onClick={() => run(() => editor.chain().focus().toggleItalic().run())}
         >
@@ -140,6 +155,7 @@ export function EditorToolbar({ editor }: Props) {
         </ToolButton>
         <ToolButton
           label="Underline"
+          disabled={disabled}
           active={editor.isActive('underline')}
           onClick={() => run(() => editor.chain().focus().toggleUnderline().run())}
         >
@@ -147,6 +163,7 @@ export function EditorToolbar({ editor }: Props) {
         </ToolButton>
         <ToolButton
           label="Strike"
+          disabled={disabled}
           active={editor.isActive('strike')}
           onClick={() => run(() => editor.chain().focus().toggleStrike().run())}
         >
@@ -157,6 +174,7 @@ export function EditorToolbar({ editor }: Props) {
         {alignments.map(([alignment, icon]) => (
           <ToolButton
             key={alignment}
+            disabled={disabled}
             label={`Align ${alignment}`}
             active={editor.isActive({ textAlign: alignment })}
             onClick={() => run(() => editor.chain().focus().setTextAlign(alignment).run())}
@@ -168,6 +186,7 @@ export function EditorToolbar({ editor }: Props) {
       <ToggleButtonGroup size="small">
         <ToolButton
           label="Bulleted list"
+          disabled={disabled}
           active={editor.isActive('bulletList')}
           onClick={() => run(() => editor.chain().focus().toggleBulletList().run())}
         >
@@ -175,6 +194,7 @@ export function EditorToolbar({ editor }: Props) {
         </ToolButton>
         <ToolButton
           label="Numbered list"
+          disabled={disabled}
           active={editor.isActive('orderedList')}
           onClick={() => run(() => editor.chain().focus().toggleOrderedList().run())}
         >
@@ -182,6 +202,7 @@ export function EditorToolbar({ editor }: Props) {
         </ToolButton>
         <ToolButton
           label="Insert table"
+          disabled={disabled}
           onClick={() =>
             run(() =>
               editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
@@ -190,21 +211,48 @@ export function EditorToolbar({ editor }: Props) {
         >
           <ToolbarIcon icon="solar:table-bold" />
         </ToolButton>
-        <ToolButton label="Link" active={editor.isActive('link')} onClick={setLink}>
+        <ToolButton label="Link" disabled={disabled} active={editor.isActive('link')} onClick={setLink}>
           <ToolbarIcon icon="solar:link-bold" />
         </ToolButton>
         <ToolButton
           label="Horizontal rule"
+          disabled={disabled}
           onClick={() => run(() => editor.chain().focus().setHorizontalRule().run())}
         >
           <ToolbarIcon icon="solar:minus-circle-bold" />
         </ToolButton>
         <ToolButton
           label="Clear formatting"
+          disabled={disabled}
           onClick={() => run(() => editor.chain().focus().clearNodes().unsetAllMarks().run())}
         >
           <ToolbarIcon icon="solar:eraser-bold" />
         </ToolButton>
+      </ToggleButtonGroup>
+
+      {/* Legal Block Actions */}
+      <ToggleButtonGroup size="small" sx={{ ml: 'auto' }}>
+        {onToggleUnlock && (
+          <ToolButton
+            label={isUnlocked ? 'Lock Legal Block' : 'Unlock Legal Block'}
+            active={isUnlocked}
+            disabled={disabled}
+            onClick={onToggleUnlock}
+          >
+            <ToolbarIcon
+              icon={isUnlocked ? 'solar:lock-unlocked-bold' : 'solar:lock-keyhole-bold'}
+            />
+          </ToolButton>
+        )}
+        {onRestoreOfficial && (
+          <ToolButton
+            label="Restore Official Legal Template"
+            disabled={disabled}
+            onClick={onRestoreOfficial}
+          >
+            <ToolbarIcon icon="solar:restart-bold" />
+          </ToolButton>
+        )}
       </ToggleButtonGroup>
     </Stack>
   );

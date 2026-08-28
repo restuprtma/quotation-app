@@ -43,6 +43,12 @@ export function getGenerationStatus(id: string) {
   );
 }
 
+export function regenerateQuotation(id: string) {
+  return unwrap<GenerationStateResponse>(
+    axios.post(endpoints.quotation.quotations.regenerate(id))
+  );
+}
+
 export function getQuotationDetail(id: string) {
   return unwrap<QuotationGenerationDetail>(axios.get(endpoints.quotation.quotations.byId(id)));
 }
