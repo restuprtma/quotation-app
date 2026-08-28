@@ -160,10 +160,44 @@ export function QuotationPromptView() {
       clearTimeout(timer4);
       clearTimeout(timer5);
 
-      const errCode = err?.message?.includes(':') ? err.message.split(':')[0].trim() : err?.message;
+      const responseData = err.response?.data;
+      let errCode = 'generation_failed';
+      let errMessage = err?.message || 'Failed to generate quotation draft';
+
+      if (
+        responseData?.errors?.detail &&
+        Array.isArray(responseData.errors.detail) &&
+        responseData.errors.detail.length > 0
+      ) {
+        errCode = responseData.errors.detail[0];
+      } else if (typeof responseData?.errors === 'string') {
+        errCode = responseData.errors;
+      } else if (responseData?.message) {
+        errMessage = responseData.message;
+      } else {
+        const extractedCode = err?.message?.includes(':')
+          ? err.message.split(':')[0].trim()
+          : null;
+        if (extractedCode) errCode = extractedCode;
+      }
+
+      const errorMap: Record<string, string> = {
+        invalid_rate_card:
+          'Rate card tidak valid atau belum memiliki role (kosong). Silakan periksa Rate Card di AI Settings.',
+        settings_incomplete:
+          'Pengaturan AI tidak lengkap (Model atau API Key salah/belum diatur).',
+        budget_unfeasible:
+          'Budget maksimum yang Anda tentukan tidak mencukupi untuk memenuhi ekspektasi durasi dan scope yang diminta.',
+        settings_invalid: 'Pengaturan AI tidak valid, pastikan model dan provider sesuai.',
+      };
+
+      if (errorMap[errCode]) {
+        errMessage = errorMap[errCode];
+      }
+
       setGenerationError({
-        code: errCode || 'generation_failed',
-        message: err?.message || 'Failed to generate quotation draft',
+        code: errCode,
+        message: errMessage,
       });
     }
   };
