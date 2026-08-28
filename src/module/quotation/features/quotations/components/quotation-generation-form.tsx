@@ -150,7 +150,7 @@ export function QuotationGenerationForm({
   onSubmit,
   onCancel,
 }: Props) {
-  const { client } = useAuthContext();
+  useAuthContext();
   const { data: rateCards = [], isLoading: isLoadingRateCards } = useActiveRateCards();
 
   const defaultValues: FormValues = useMemo(() => {
@@ -195,7 +195,7 @@ export function QuotationGenerationForm({
       },
       additional_notes: '',
     };
-  }, [client?.id, rateCards]);
+  }, [rateCards]);
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(quotationGenerationSchema),
@@ -331,7 +331,7 @@ export function QuotationGenerationForm({
                 <RHFTextField
                   name="client_id"
                   label="Client Identifier (UUID)"
-                  disabled={true}
+                  disabled
                   helperText="Auto-generated valid UUID"
                 />
               </Grid>
