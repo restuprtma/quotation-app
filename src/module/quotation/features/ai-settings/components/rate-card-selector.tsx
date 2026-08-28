@@ -33,7 +33,11 @@ export const RateCardSelector = () => {
       .get('/quotation/v1/rate-cards?status=active')
       .then((res) => {
         const data = res.data?.data || res.data;
-        setRateCards(Array.isArray(data) ? data : []);
+        const mapped = (Array.isArray(data) ? data : []).map((item: any) => ({
+          ...item,
+          status: item.is_active ? 'active' : 'inactive',
+        }));
+        setRateCards(mapped);
       })
       .catch(() => {
         setRateCards([
