@@ -1,7 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import axiosInstance from 'src/shared/lib/axios';
-import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, Box, Chip, Stack } from '@mui/material';
 import { Icon } from '@iconify/react';
+import React, { useState, useEffect } from 'react';
+
+import {
+  Box,
+  Chip,
+  Table,
+  Paper,
+  Stack,
+  TableRow,
+  TableBody,
+  TableCell,
+  TableHead,
+  Typography,
+  TableContainer,
+  CircularProgress,
+} from '@mui/material';
+
+import axiosInstance from 'src/shared/lib/axios';
 
 interface RateCard {
   id: string;
@@ -14,8 +29,9 @@ export const RateCardSelector = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axiosInstance.get('/quotation/v1/rate-cards?status=active')
-      .then(res => {
+    axiosInstance
+      .get('/quotation/v1/rate-cards?status=active')
+      .then((res) => {
         const data = res.data?.data || res.data;
         setRateCards(Array.isArray(data) ? data : []);
       })
@@ -23,7 +39,7 @@ export const RateCardSelector = () => {
         setRateCards([
           { id: 'rc-1', name: 'Standard IT Services 2026', status: 'active' },
           { id: 'rc-2', name: 'Enterprise Consulting', status: 'active' },
-          { id: 'rc-3', name: 'Legacy Support (Archived)', status: 'inactive' }
+          { id: 'rc-3', name: 'Legacy Support (Archived)', status: 'inactive' },
         ]);
       })
       .finally(() => {
@@ -35,12 +51,24 @@ export const RateCardSelector = () => {
     <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
       <Box sx={{ p: 2.5, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
         <Stack direction="row" alignItems="center" spacing={1.5}>
-          <Box sx={{ p: 1, borderRadius: 1, bgcolor: 'primary.main', color: 'primary.contrastText', display: 'flex' }}>
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: 1,
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              display: 'flex',
+            }}
+          >
             <Icon icon="eva:pricetags-outline" width={20} />
           </Box>
           <Box>
-            <Typography variant="h6" fontWeight="600" lineHeight={1.2}>Rate Cards</Typography>
-            <Typography variant="caption" color="text.secondary">Available pricing models</Typography>
+            <Typography variant="h6" fontWeight="600" lineHeight={1.2}>
+              Rate Cards
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Available pricing models
+            </Typography>
           </Box>
         </Stack>
       </Box>
@@ -58,20 +86,45 @@ export const RateCardSelector = () => {
           <Table stickyHeader size="medium">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 600, color: 'text.secondary', bgcolor: 'background.neutral' }}>ID</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: 'text.secondary', bgcolor: 'background.neutral' }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: 'text.secondary', bgcolor: 'background.neutral', textAlign: 'right' }}>Status</TableCell>
+                <TableCell
+                  sx={{ fontWeight: 600, color: 'text.secondary', bgcolor: 'background.neutral' }}
+                >
+                  ID
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: 600, color: 'text.secondary', bgcolor: 'background.neutral' }}
+                >
+                  Name
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 600,
+                    color: 'text.secondary',
+                    bgcolor: 'background.neutral',
+                    textAlign: 'right',
+                  }}
+                >
+                  Status
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {rateCards.map((rc) => (
-                <TableRow key={rc.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell sx={{ fontFamily: 'monospace', color: 'text.secondary', fontSize: '0.875rem' }}>{rc.id}</TableCell>
+                <TableRow
+                  key={rc.id}
+                  hover
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell
+                    sx={{ fontFamily: 'monospace', color: 'text.secondary', fontSize: '0.875rem' }}
+                  >
+                    {rc.id}
+                  </TableCell>
                   <TableCell sx={{ fontWeight: 500 }}>{rc.name}</TableCell>
                   <TableCell align="right">
-                    <Chip 
-                      label={rc.status} 
-                      size="small" 
+                    <Chip
+                      label={rc.status}
+                      size="small"
                       color={rc.status === 'active' ? 'success' : 'default'}
                       variant={rc.status === 'active' ? 'soft' : 'outlined'}
                       sx={{ textTransform: 'capitalize', fontWeight: 600, borderRadius: 1 }}

@@ -13,6 +13,8 @@ export const paths = {
     root: '/',
     quotation: {
       root: '/quotation',
+      prompt: '/quotation',
+      edit: (id: string) => `/quotation/${id}/edit`,
       aiSettings: '/quotation/ai-settings',
     },
     contract: {

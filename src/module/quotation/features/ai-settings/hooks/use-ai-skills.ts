@@ -1,18 +1,19 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { aiSettingsApi } from '../api';
-import { AISkillResponse } from '../types';
+import type { AISkillResponse } from '../types';
 
-export const useGetAISkills = () => {
-  return useQuery({
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { aiSettingsApi } from '../api';
+
+export const useGetAISkills = () =>
+  useQuery({
     queryKey: ['ai-skills'],
     queryFn: aiSettingsApi.getSkills,
   });
-};
 
 export const useUpdateAISkill = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<AISkillResponse> }) => 
+    mutationFn: ({ id, data }: { id: string; data: Partial<AISkillResponse> }) =>
       aiSettingsApi.updateSkill(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai-skills'] });

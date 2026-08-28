@@ -59,3 +59,5 @@ export function createQuotation(payload: CreateQuotationPayload) {
 export function updateQuotation(id: string, payload: UpdateQuotationPayload) {
   return unwrap<Quotation>(axios.put(endpoints.quotation.quotations.update(id), payload));
 }
+
+export * from './generation';

@@ -137,6 +137,18 @@ export const endpoints = {
       byId: (id: string) => `/quotation/v1/quotations/${id}`,
       create: '/quotation/v1/quotations',
       update: (id: string) => `/quotation/v1/quotations/${id}`,
+      generate: '/quotation/v1/quotations/generate',
+      regenerate: (id: string) => `/quotation/v1/quotations/${id}/regenerate`,
+      generationStatus: (id: string) => `/quotation/v1/quotations/${id}/generation-status`,
+      saveDraft: (id: string) => `/quotation/v1/quotations/${id}/draft`,
+    },
+    ai: {
+      skills: '/quotation/v1/ai/skills',
+      settings: '/quotation/v1/ai/settings',
+    },
+    rateCards: {
+      list: '/quotation/v1/rate-cards',
+      byId: (id: string) => `/quotation/v1/rate-cards/${id}`,
     },
   },
 } as const;

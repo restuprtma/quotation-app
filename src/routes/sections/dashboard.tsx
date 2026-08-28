@@ -12,6 +12,12 @@ import { usePathname } from '../hooks';
 
 // ----------------------------------------------------------------------
 
+const QuotationPromptPage = lazy(
+  () => import('src/module/quotation/features/quotations/pages/prompt')
+);
+const QuotationEditorPage = lazy(
+  () => import('src/module/quotation/features/quotations/pages/editor')
+);
 const QuotationListPage = lazy(() => import('src/module/quotation/features/quotations/pages/list'));
 const ContractListPage = lazy(() => import('src/module/contract/features/contracts/pages/list'));
 const ContractEditPage = lazy(() => import('src/module/contract/features/contracts/pages/edit'));
@@ -43,9 +49,11 @@ export const dashboardRoutes: RouteObject[] = [
       {
         path: 'quotation',
         children: [
-          { index: true, element: <QuotationListPage /> },
+          { index: true, element: <QuotationPromptPage /> },
+          { path: ':id/edit', element: <QuotationEditorPage /> },
+          { path: 'list', element: <QuotationListPage /> },
           { path: 'ai-settings', element: <AISettingsPage /> },
-        ]
+        ],
       },
       {
         path: 'contract',

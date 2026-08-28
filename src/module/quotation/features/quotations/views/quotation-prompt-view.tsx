@@ -1,0 +1,404 @@
+import type { ActiveSkill, GenerateQuotationPayload } from '../types';
+
+import { useNavigate } from 'react-router';
+import { useRef, useState, useCallback } from 'react';
+
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import InputAdornment from '@mui/material/InputAdornment';
+
+import { paths } from 'src/routes/paths';
+
+import { useTranslate } from 'src/locales';
+import { toast } from 'src/shared/ui/snackbar';
+import { Iconify } from 'src/shared/ui/iconify';
+import { DashboardContent } from 'src/layouts/dashboard';
+
+import { useActiveSkills } from '../hooks/use-active-skills';
+import { SlashCommandMenu } from '../components/slash-command-menu';
+import { useGenerateQuotation } from '../hooks/use-quotation-generation';
+import { QuotationGenerationForm } from '../components/quotation-generation-form';
+import { GENERATION_STAGES, GenerationProgressCard } from '../components/generation-progress-card';
+
+// ----------------------------------------------------------------------
+
+export function QuotationPromptView() {
+  const { t } = useTranslate('quotation');
+  const navigate = useNavigate();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { data: activeSkills = [], isLoading: isLoadingSkills } = useActiveSkills();
+  const generateMutation = useGenerateQuotation();
+
+  // Prompt state
+  const [promptText, setPromptText] = useState('');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [selectedMenuIndex, setSelectedMenuIndex] = useState(0);
+
+  // Form view state
+  const [activeSkill, setActiveSkill] = useState<ActiveSkill | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
+  // Generation state machine
+  const [isProgressOpen, setIsProgressOpen] = useState(false);
+  const [activeStageIndex, setActiveStageIndex] = useState(0);
+  const [generationError, setGenerationError] = useState<{
+    code?: string;
+    message?: string;
+  } | null>(null);
+  const [generatedQuotationId, setGeneratedQuotationId] = useState<string | null>(null);
+  const [lastSubmittedPayload, setLastSubmittedPayload] = useState<GenerateQuotationPayload | null>(
+    null
+  );
+
+  // Check input change to trigger menu
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setPromptText(value);
+
+    if (value.startsWith('/')) {
+      setIsMenuOpen(true);
+    } else {
+      setIsMenuOpen(false);
+    }
+  };
+
+  // Keyboard navigation for prompt input
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isMenuOpen) {
+      if (event.key === '/' && promptText === '') {
+        setIsMenuOpen(true);
+      }
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const trimmed = promptText.trim().toLowerCase();
+        if (trimmed === '/quotation') {
+          handleExecuteSkill({
+            id: 'cmd-quotation',
+            name: 'Quotation AI (Dedicated Squad)',
+            command: '/quotation',
+            is_active: true,
+          });
+        } else if (trimmed === '/blueprint') {
+          toast.info('Blueprint generation will be available in Phase 8.');
+        } else if (trimmed) {
+          toast.warning('Unrecognized slash command. Type / to see available AI skills.');
+        }
+      }
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setSelectedMenuIndex((prev) => prev + 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setSelectedMenuIndex((prev) => (prev > 0 ? prev - 1 : 0));
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      setIsMenuOpen(false);
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      // Let menu item execution handle this via menu index
+    }
+  };
+
+  const handleExecuteSkill = useCallback((skill: ActiveSkill) => {
+    setIsMenuOpen(false);
+    setPromptText(skill.command);
+
+    if (skill.command === '/blueprint') {
+      toast.info('Blueprint generator is scheduled for Phase 8. Please select /quotation.');
+      return;
+    }
+
+    setActiveSkill(skill);
+    setIsFormOpen(true);
+  }, []);
+
+  // Submit Handler
+  const handleFormSubmit = async (payload: GenerateQuotationPayload) => {
+    setLastSubmittedPayload(payload);
+    setIsProgressOpen(true);
+    setActiveStageIndex(0);
+    setGenerationError(null);
+    setGeneratedQuotationId(null);
+
+    // Step progression animation ticker
+    const timer1 = setTimeout(() => setActiveStageIndex(1), 400);
+    const timer2 = setTimeout(() => setActiveStageIndex(2), 1200);
+    const timer3 = setTimeout(() => setActiveStageIndex(3), 2200);
+    const timer4 = setTimeout(() => setActiveStageIndex(4), 3200);
+    const timer5 = setTimeout(() => setActiveStageIndex(5), 4200);
+
+    try {
+      const response = await generateMutation.mutateAsync(payload);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+      clearTimeout(timer4);
+      clearTimeout(timer5);
+
+      setActiveStageIndex(GENERATION_STAGES.length - 1); // Completed
+      setGeneratedQuotationId(response.quotation_id);
+
+      toast.success('Quotation draft generated successfully!');
+
+      // Auto-navigate to editor after short delay
+      setTimeout(() => {
+        navigate(paths.dashboard.quotation.edit(response.quotation_id));
+      }, 1200);
+    } catch (err: any) {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+      clearTimeout(timer4);
+      clearTimeout(timer5);
+
+      const errCode = err?.message?.includes(':') ? err.message.split(':')[0].trim() : err?.message;
+      setGenerationError({
+        code: errCode || 'generation_failed',
+        message: err?.message || 'Failed to generate quotation draft',
+      });
+    }
+  };
+
+  const handleRetry = () => {
+    if (lastSubmittedPayload) {
+      handleFormSubmit(lastSubmittedPayload);
+    }
+  };
+
+  return (
+    <DashboardContent maxWidth="lg">
+      <Stack spacing={4} sx={{ py: { xs: 2, md: 4 } }}>
+        {/* If Form is NOT open -> Show Prompt-First Search Hero */}
+        {!isFormOpen ? (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 500,
+              textAlign: 'center',
+              px: 2,
+            }}
+          >
+            {/* AI Icon Header */}
+            <Box
+              sx={{
+                mb: 3,
+                p: 2,
+                borderRadius: '50%',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'light' ? 'primary.lighter' : 'primary.dark',
+                color: 'primary.main',
+                display: 'inline-flex',
+                boxShadow: (theme) => `0 0 32px 4px ${theme.palette.primary.main}22`,
+              }}
+            >
+              <Iconify icon="solar:atom-bold-duotone" width={48} />
+            </Box>
+
+            <Typography variant="h3" fontWeight={800} sx={{ mb: 1.5 }}>
+              {t('prompt.heroTitle')}
+            </Typography>
+
+            <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 540, mb: 4 }}>
+              {t('prompt.heroSubtitle')}
+            </Typography>
+
+            {/* Prompt Input Box Container */}
+            <Box sx={{ position: 'relative', width: '100%', maxWidth: 680 }}>
+              <SlashCommandMenu
+                open={isMenuOpen}
+                filterText={promptText}
+                selectedIndex={selectedMenuIndex}
+                onSelectIndex={setSelectedMenuIndex}
+                onExecute={handleExecuteSkill}
+                onClose={() => setIsMenuOpen(false)}
+                skills={activeSkills}
+                isLoading={isLoadingSkills}
+              />
+
+              <Card
+                elevation={3}
+                sx={{
+                  p: 0.75,
+                  borderRadius: 2.5,
+                  border: (theme) => `1.5px solid ${theme.palette.divider}`,
+                  transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
+                  '&:focus-within': {
+                    borderColor: 'primary.main',
+                    boxShadow: (theme) => `0 0 0 4px ${theme.palette.primary.main}18`,
+                  },
+                }}
+              >
+                <TextField
+                  inputRef={inputRef}
+                  fullWidth
+                  value={promptText}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  placeholder={t('prompt.placeholder')}
+                  variant="standard"
+                  slotProps={{
+                    input: {
+                      disableUnderline: true,
+                      sx: {
+                        px: 2,
+                        py: 1.5,
+                        fontSize: '1.0625rem',
+                      },
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Iconify
+                            icon="solar:atom-bold-duotone"
+                            width={24}
+                            sx={{ color: promptText ? 'primary.main' : 'text.disabled' }}
+                          />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={() => {
+                              if (promptText.trim().toLowerCase() === '/quotation') {
+                                handleExecuteSkill({
+                                  id: 'cmd-quotation',
+                                  name: 'Quotation AI (Dedicated Squad)',
+                                  command: '/quotation',
+                                  is_active: true,
+                                });
+                              } else {
+                                setIsMenuOpen(true);
+                              }
+                            }}
+                            sx={{ borderRadius: 1.5, px: 2 }}
+                          >
+                            {t('prompt.start')}
+                          </Button>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+              </Card>
+            </Box>
+
+            {/* Quick Chips Suggestions */}
+            <Stack
+              direction="row"
+              spacing={1.5}
+              flexWrap="wrap"
+              justifyContent="center"
+              sx={{ mt: 3 }}
+            >
+              <Typography variant="caption" color="text.disabled" sx={{ alignSelf: 'center' }}>
+                {t('prompt.quickSkills')}
+              </Typography>
+              <Chip
+                icon={<Iconify icon="solar:atom-bold-duotone" width={16} />}
+                label="/quotation — Dedicated Squad"
+                clickable
+                color="primary"
+                variant="outlined"
+                onClick={() =>
+                  handleExecuteSkill({
+                    id: 'cmd-quotation',
+                    name: 'Quotation AI (Dedicated Squad)',
+                    command: '/quotation',
+                    is_active: true,
+                  })
+                }
+                sx={{ fontWeight: 600 }}
+              />
+              <Chip
+                icon={<Iconify icon="solar:file-bold-duotone" width={16} />}
+                label="/blueprint — System Blueprint"
+                variant="outlined"
+                onClick={() => toast.info('Blueprint generator will be available in Phase 8.')}
+                sx={{ color: 'text.secondary', borderColor: 'divider' }}
+              />
+            </Stack>
+
+            {/* Link to Historical List or Settings */}
+            <Stack direction="row" spacing={2} sx={{ mt: 6 }}>
+              <Button
+                variant="text"
+                color="inherit"
+                size="small"
+                startIcon={<Iconify icon="solar:file-text-bold" />}
+                onClick={() => navigate('/quotation/list')}
+              >
+                {t('prompt.archiveLink')}
+              </Button>
+              <Button
+                variant="text"
+                color="inherit"
+                size="small"
+                startIcon={<Iconify icon="solar:settings-bold-duotone" />}
+                onClick={() => navigate(paths.dashboard.quotation.aiSettings)}
+              >
+                {t('prompt.settingsLink')}
+              </Button>
+            </Stack>
+          </Box>
+        ) : (
+          /* When Form is Open -> Render Dedicated Squad Form */
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+                onClick={() => {
+                  setIsFormOpen(false);
+                  setPromptText('');
+                }}
+              >
+                {t('prompt.backToPrompt')}
+              </Button>
+              <Typography variant="h5" fontWeight={700}>
+                {t('dedicatedSquadForm.title')}
+              </Typography>
+            </Stack>
+
+            <QuotationGenerationForm
+              selectedSkill={activeSkill}
+              isSubmitting={generateMutation.isPending}
+              onSubmit={handleFormSubmit}
+              onCancel={() => {
+                setIsFormOpen(false);
+                setPromptText('');
+              }}
+            />
+          </Box>
+        )}
+      </Stack>
+
+      {/* Generation Progress State UI Modal */}
+      <GenerationProgressCard
+        open={isProgressOpen}
+        activeStageIndex={activeStageIndex}
+        isError={Boolean(generationError)}
+        errorCode={generationError?.code}
+        errorMessage={generationError?.message}
+        quotationId={generatedQuotationId}
+        onRetry={handleRetry}
+        onClose={() => setIsProgressOpen(false)}
+        onOpenEditor={(id) => navigate(paths.dashboard.quotation.edit(id))}
+      />
+    </DashboardContent>
+  );
+}
