@@ -13,6 +13,7 @@ import { Iconify } from 'src/shared/ui/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { useQuotationDraft } from '../hooks/use-quotation-draft';
+import { QuotationEditor } from '../components/quotation-editor';
 
 type Props = {
   id?: string;
@@ -62,36 +63,9 @@ export function QuotationEditorView({ id }: Props) {
             </Typography>
           </Card>
         ) : (
-          <Card sx={{ p: 3, minHeight: 600 }}>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
-              Document Editor Canvas (TipTap WYSIWYG & Toolbar active in Session 3 & 4)
-            </Typography>
-            <Box
-              sx={{
-                p: 3,
-                border: (theme) => `1px dashed ${theme.palette.divider}`,
-                borderRadius: 1,
-                bgcolor: 'background.neutral',
-                minHeight: 400,
-                '& table': {
-                  width: '100%',
-                  borderCollapse: 'collapse',
-                  my: 2,
-                },
-                '& th, & td': {
-                  border: (theme) => `1px solid ${theme.palette.divider}`,
-                  p: 1.5,
-                },
-                '& th': {
-                  bgcolor: 'action.hover',
-                  fontWeight: 600,
-                },
-              }}
-              dangerouslySetInnerHTML={{
-                __html: data?.content_html || '<p>No document content generated.</p>',
-              }}
-            />
-          </Card>
+          <QuotationEditor
+            content={data?.content_html || '<p>No document content generated.</p>'}
+          />
         )}
       </Stack>
     </DashboardContent>
