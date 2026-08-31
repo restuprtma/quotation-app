@@ -2,7 +2,6 @@ import type { Quotation } from '../types';
 
 import { useState } from 'react';
 
-import Divider from '@mui/material/Divider';
 import MenuItem from '@mui/material/MenuItem';
 import MenuList from '@mui/material/MenuList';
 import TableRow from '@mui/material/TableRow';
@@ -20,13 +19,17 @@ import { QuotationStatusLabel } from './quotation-status-label';
 type Props = {
   row: Quotation;
   onView: (id: string) => void;
-  onEdit: (id: string) => void;
+  onEdit?: (id: string) => void;
 };
 
 export function QuotationTableRow({ row, onView, onEdit }: Props) {
   const { t } = useTranslate('quotation');
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const closeMenu = () => setAnchorEl(null);
+
+  const rawBudget = row.budget_maximum ?? row.revision?.budget;
+  const budget = typeof rawBudget === 'number' && !Number.isNaN(rawBudget) ? rawBudget : null;
+  const displayBudget = budget !== null ? formatCurrency(budget) : '—';
 
   return (
     <>
@@ -43,7 +46,7 @@ export function QuotationTableRow({ row, onView, onEdit }: Props) {
         </TableCell>
         <TableCell>
           <Typography variant="body2" noWrap>
-            {row.revision ? formatCurrency(row.revision.budget) : '—'}
+            {displayBudget}
           </Typography>
         </TableCell>
         <TableCell>
@@ -82,22 +85,16 @@ export function QuotationTableRow({ row, onView, onEdit }: Props) {
           <MenuItem
             onClick={() => {
               closeMenu();
-              onView(row.id);
-            }}
-          >
-            <Iconify icon="solar:eye-bold" />
-            {t('rowActions.viewDetail')}
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              closeMenu();
-              onEdit(row.id);
+              if (onEdit) {
+                onEdit(row.id);
+              } else {
+                onView(row.id);
+              }
             }}
           >
             <Iconify icon="solar:pen-bold" />
             {t('rowActions.edit')}
           </MenuItem>
-          <Divider sx={{ borderStyle: 'dashed' }} />
         </MenuList>
       </CustomPopover>
     </>

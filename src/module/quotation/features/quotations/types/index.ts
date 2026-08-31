@@ -28,6 +28,7 @@ export type Quotation = {
   current_revision: number;
   created_at: string;
   updated_at: string;
+  budget_maximum?: number | null;
   revision?: QuotationRevision | null;
 };
 

@@ -16,14 +16,15 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import TableContainer from '@mui/material/TableContainer';
 
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
+
 import { useTranslate } from 'src/locales';
-import { toast } from 'src/shared/ui/snackbar';
 import { Iconify } from 'src/shared/ui/iconify';
 import { Scrollbar } from 'src/shared/ui/scrollbar';
 import { PageHeader } from 'src/shared/ui/page-header';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { SearchNotFound } from 'src/shared/ui/search-not-found';
-import { useCreateContract } from 'src/module/contract/features/contracts/hooks/use-contracts';
 import {
   useTable,
   TableSkeleton,
@@ -32,28 +33,23 @@ import {
 } from 'src/shared/ui/table';
 
 import { useQuotationList } from '../hooks/use-quotation-list';
-import { useQuotationDialog } from '../hooks/use-quotation-dialog';
 import { QuotationTableRow } from '../components/quotation-table-row';
-import { QuotationFormDialog } from '../components/quotation-form-dialog';
-import { QuotationDetailDialog } from '../components/quotation-detail-dialog';
 
 const STATUSES: QuotationStatus[] = ['draft', 'shared', 'signed', 'contract_created'];
 
 export function QuotationListView() {
   const { t } = useTranslate('quotation');
   const { t: tCommon } = useTranslate('common');
+  const router = useRouter();
   const table = useTable({ defaultRowsPerPage: 25, defaultDense: true });
-  const dialog = useQuotationDialog();
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<QuotationStatus | ''>('');
-
-  const createContract = useCreateContract();
 
   const params = useMemo(
     () => ({ page: table.page + 1, limit: table.rowsPerPage, search, status }),
     [search, status, table.page, table.rowsPerPage]
   );
-  const { data, meta, loading, error, refresh } = useQuotationList(params);
+  const { data, meta, loading, error } = useQuotationList(params);
 
   const TABLE_HEAD = useMemo(
     () => [
@@ -69,30 +65,11 @@ export function QuotationListView() {
     [t]
   );
 
-  const handleSaved = useCallback(
-    (quotation: { id: string }) => {
-      dialog.close();
-      refresh();
-      dialog.open('view', quotation.id);
-      toast.success(t('feedback.saved'));
+  const handleEditRow = useCallback(
+    (id: string) => {
+      router.push(paths.dashboard.quotation.edit(id));
     },
-    [dialog, refresh, t]
-  );
-
-  const handleCreateContract = useCallback(
-    async (id: string) => {
-      try {
-        await createContract.mutateAsync({ quotation_id: id });
-        toast.success(t('feedback.contractCreated'));
-        dialog.close();
-        refresh();
-        // Option 1: navigate to contracts list
-        // router.push(paths.dashboard.contract.root);
-      } catch (err: any) {
-        toast.error(err.message || 'Failed to create contract');
-      }
-    },
-    [createContract, dialog, refresh, t]
+    [router]
   );
 
   const showSkeletons = loading && data.length === 0;
@@ -105,10 +82,10 @@ export function QuotationListView() {
         subtitle={t('subtitle')}
         action={
           <Button
-            variant="outlined"
-            color="inherit"
+            variant="contained"
+            color="primary"
             startIcon={<Iconify icon="mingcute:add-line" />}
-            onClick={() => dialog.open('new')}
+            onClick={() => router.push(paths.dashboard.quotation.prompt)}
           >
             {t('buttons.new')}
           </Button>
@@ -175,8 +152,8 @@ export function QuotationListView() {
                   <QuotationTableRow
                     key={row.id}
                     row={row}
-                    onView={(id) => dialog.open('view', id)}
-                    onEdit={(id) => dialog.open('edit', id)}
+                    onView={handleEditRow}
+                    onEdit={handleEditRow}
                   />
                 ))}
                 {isEmpty && (
@@ -208,21 +185,6 @@ export function QuotationListView() {
           labelRowsPerPage={tCommon('pagination.rowsPerPage')}
         />
       </Card>
-
-      <QuotationFormDialog
-        open={dialog.mode === 'new' || dialog.mode === 'edit'}
-        mode={dialog.mode === 'edit' ? 'edit' : 'new'}
-        id={dialog.mode === 'edit' ? dialog.id : null}
-        onClose={dialog.close}
-        onSaved={handleSaved}
-      />
-      <QuotationDetailDialog
-        open={dialog.mode === 'view'}
-        id={dialog.mode === 'view' ? dialog.id : null}
-        onClose={dialog.close}
-        onEdit={(id) => dialog.open('edit', id)}
-        onCreateContract={handleCreateContract}
-      />
     </DashboardContent>
   );
 }
