@@ -92,7 +92,8 @@ const paymentTermItemSchema = z.object({
 });
 
 const quotationGenerationSchema = z.object({
-  client_id: z.string().uuid('Valid client UUID is required'),
+  client_id: z.string().optional(),
+  client_name: z.string().min(1, 'Client name is required'),
   subject: z.string().trim().min(1, 'Subject is required').max(200, 'Max 200 characters'),
   solution_type: z.string().min(1, 'Solution type is required'),
   commercial_scheme: z.literal('dedicated_squad'),
@@ -157,6 +158,7 @@ export function QuotationGenerationForm({
 
   const defaultValues: FormValues = useMemo(() => ({
     client_id: clients[0]?.id || '',
+    client_name: clients[0]?.name || '',
     subject: '',
     solution_type: 'Web Application',
     commercial_scheme: 'dedicated_squad',
@@ -209,8 +211,9 @@ export function QuotationGenerationForm({
   } = methods;
 
   useEffect(() => {
-    if (!watch('client_id') && clients.length > 0) {
+    if (!watch('client_id') && !watch('client_name') && clients.length > 0) {
       setValue('client_id', clients[0].id, { shouldValidate: true });
+      setValue('client_name', clients[0].name, { shouldValidate: true });
     }
   }, [clients, setValue, watch]);
 
@@ -256,7 +259,8 @@ export function QuotationGenerationForm({
 
     const payload: GenerateQuotationPayload = {
       skill_id: skillId,
-      client_id: data.client_id,
+      client_id: data.client_id || '',
+      client_name: data.client_name,
       subject: data.subject.trim(),
       solution_type: data.solution_type,
       commercial_scheme: 'dedicated_squad',
@@ -348,32 +352,50 @@ export function QuotationGenerationForm({
 
               <Grid size={{ xs: 12, md: 6 }}>
                 <RHFAutocomplete
-                  name="client_id"
+                  name="client_name"
                   label="Client"
-                  placeholder="Select a client..."
+                  placeholder="Select or type a client..."
+                  freeSolo
                   options={clients}
                   getOptionLabel={(option) => {
-                    if (typeof option === 'string') {
-                      const found = clients.find((c) => c.id === option);
-                      return found ? found.name : option;
-                    }
+                    if (typeof option === 'string') return option;
                     return option?.name || '';
                   }}
                   isOptionEqualToValue={(option, value) => {
                     if (typeof value === 'string') {
-                      return option.id === value;
+                      return option.name === value;
                     }
                     return option.id === value?.id;
                   }}
-                  value={clients.find((c) => c.id === watch('client_id')) || null}
+                  value={
+                    watch('client_id')
+                      ? clients.find((c) => c.id === watch('client_id')) || watch('client_name')
+                      : watch('client_name') || ''
+                  }
                   onChange={(_event, newValue) => {
-                    const selectedId =
-                      typeof newValue === 'object' && newValue ? newValue.id : newValue || '';
-                    setValue('client_id', selectedId, { shouldValidate: true });
+                    if (typeof newValue === 'string') {
+                      setValue('client_id', '', { shouldValidate: true });
+                      setValue('client_name', newValue, { shouldValidate: true });
+                    } else if (newValue && typeof newValue === 'object') {
+                      setValue('client_id', newValue.id, { shouldValidate: true });
+                      setValue('client_name', newValue.name, { shouldValidate: true });
+                    } else {
+                      setValue('client_id', '', { shouldValidate: true });
+                      setValue('client_name', '', { shouldValidate: true });
+                    }
+                  }}
+                  onInputChange={(_event, newInputValue) => {
+                    setValue('client_name', newInputValue, { shouldValidate: true });
+                    const foundClient = clients.find((c) => c.name === newInputValue);
+                    if (foundClient) {
+                      setValue('client_id', foundClient.id, { shouldValidate: true });
+                    } else {
+                      setValue('client_id', '', { shouldValidate: true });
+                    }
                   }}
                   loading={isLoadingClients}
                   disabled={isSubmitting || isLoadingClients}
-                  helperText={errors.client_id?.message || 'Select client organization'}
+                  helperText={errors.client_name?.message || 'Select or type client organization'}
                 />
               </Grid>
 

@@ -12,7 +12,8 @@ export type PaymentTermsInput = {
 export type GenerateQuotationPayload = {
   idempotency_key?: string;
   skill_id: string;
-  client_id: string;
+  client_id?: string;
+  client_name?: string;
   subject: string;
   solution_type: string;
   commercial_scheme: 'dedicated_squad';
