@@ -259,7 +259,7 @@ export function QuotationGenerationForm({
 
     const payload: GenerateQuotationPayload = {
       skill_id: skillId,
-      client_id: data.client_id || '',
+      client_id: data.client_id || undefined,
       client_name: data.client_name,
       subject: data.subject.trim(),
       solution_type: data.solution_type,
