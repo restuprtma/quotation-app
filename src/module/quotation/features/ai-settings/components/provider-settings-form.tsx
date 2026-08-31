@@ -27,6 +27,7 @@ import {
 const schema = z.object({
   provider: z.string().min(1, 'Provider is required'),
   model: z.string().min(1, 'Model is required'),
+  base_url: z.string().optional(),
   api_key: z.string().optional(), // Explicitly allow empty string
 });
 
@@ -46,7 +47,7 @@ export const ProviderSettingsForm = () => {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { provider: 'gemini', model: '', api_key: '' },
+    defaultValues: { provider: 'gemini', model: '', base_url: '', api_key: '' },
   });
 
   useEffect(() => {
@@ -54,6 +55,7 @@ export const ProviderSettingsForm = () => {
       reset({
         provider: settings.provider,
         model: settings.model,
+        base_url: settings.base_url || '',
         api_key: '',
       });
     }
@@ -137,9 +139,9 @@ export const ProviderSettingsForm = () => {
                   <TextField
                     {...field}
                     label="Provider"
-                    placeholder="e.g. gemini"
+                    placeholder="e.g. gemini, agentrouter"
                     error={!!errors.provider}
-                    helperText={errors.provider?.message}
+                    helperText={errors.provider?.message || "Format protocol (contoh: 'agentrouter', 'gemini', 'openai')"}
                     fullWidth
                     variant="outlined"
                     InputProps={{
@@ -175,6 +177,22 @@ export const ProviderSettingsForm = () => {
                 )}
               />
             </Stack>
+
+            <Controller
+              name="base_url"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Custom Base URL (Optional)"
+                  placeholder="e.g. https://api.proxy.com/v1beta"
+                  error={!!errors.base_url}
+                  helperText={errors.base_url?.message}
+                  fullWidth
+                  variant="outlined"
+                />
+              )}
+            />
 
             <Controller
               name="api_key"

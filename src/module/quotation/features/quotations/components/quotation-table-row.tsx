@@ -47,7 +47,7 @@ export function QuotationTableRow({ row, onView, onEdit }: Props) {
           </Typography>
         </TableCell>
         <TableCell>
-          <Typography variant="body2">{t(`projectTypes.${row.project_type}`)}</Typography>
+          <Typography variant="body2">{t(`projectTypes.${row.solution_type}`)}</Typography>
         </TableCell>
         <TableCell>
           <QuotationStatusLabel status={row.status} />

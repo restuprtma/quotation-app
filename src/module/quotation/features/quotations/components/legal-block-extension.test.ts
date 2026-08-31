@@ -1,10 +1,10 @@
+import { it, describe } from 'vitest';
 import { Editor } from '@tiptap/core';
 import assert from 'node:assert/strict';
-import { it, describe } from 'node:test';
 import StarterKit from '@tiptap/starter-kit';
 import { Selection } from '@tiptap/pm/state';
 
-import { LegalBlockExtension } from './legal-block-extension.ts';
+import { LegalBlockExtension } from './legal-block-extension';
 
 describe('LegalBlockExtension', () => {
   const initialContent = {

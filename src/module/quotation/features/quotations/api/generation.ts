@@ -1,5 +1,6 @@
 import type {
   ActiveSkill,
+  ClientSummary,
   RateCardSummary,
   SaveDraftPayload,
   SaveDraftResultResponse,
@@ -68,3 +69,17 @@ export function getActiveRateCards() {
     axios.get(endpoints.quotation.rateCards.list, { params: { status: 'active' } })
   );
 }
+
+export async function getClients(): Promise<ClientSummary[]> {
+  const res = await unwrap<ClientSummary[] | { items: ClientSummary[]; total: number }>(
+    axios.get(endpoints.core.clients)
+  );
+  if (Array.isArray(res)) {
+    return res;
+  }
+  if (res && Array.isArray((res as any).items)) {
+    return (res as any).items;
+  }
+  return [];
+}
+

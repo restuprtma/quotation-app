@@ -146,7 +146,9 @@ export const endpoints = {
     me: '/core/v1/auth/me',
     companies: '/core/v1/auth/companies',
   },
-  core: {},
+  core: {
+    clients: '/core/v1/admin/clients',
+  },
   quotation: {
     quotations: {
       list: '/quotation/v1/quotations',

@@ -109,3 +109,11 @@ export type RateCardSummary = {
   currency: string;
   is_active: boolean;
 };
+
+export type ClientSummary = {
+  id: string;
+  name: string;
+  slug?: string;
+  is_active?: boolean;
+};
+

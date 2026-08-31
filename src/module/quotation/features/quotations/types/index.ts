@@ -23,7 +23,7 @@ export type Quotation = {
   client_id: string;
   client_name?: string | null;
   quotation_number: string;
-  project_type: ProjectType;
+  solution_type: string;
   status: QuotationStatus;
   current_revision: number;
   created_at: string;

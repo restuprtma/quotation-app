@@ -1,6 +1,7 @@
 export interface AISettingsResponse {
   provider: string;
   model: string;
+  base_url?: string;
   credential_configured: boolean;
   key_hint: string;
   updated_at: string;
@@ -9,12 +10,14 @@ export interface AISettingsResponse {
 export interface AISettingsUpdateRequest {
   provider: string;
   model: string;
+  base_url?: string;
   api_key: string; // Used for saving only; backend handles empty string as "keep current"
 }
 
 export interface AISettingsTestRequest {
   provider: string;
   model: string;
+  base_url?: string;
   api_key: string;
 }
 

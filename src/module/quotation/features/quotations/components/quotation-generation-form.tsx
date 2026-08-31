@@ -1,7 +1,7 @@
 import type { ActiveSkill, GenerateQuotationPayload } from '../types';
 
 import { z } from 'zod';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 
@@ -19,8 +19,9 @@ import CardContent from '@mui/material/CardContent';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { Iconify } from 'src/shared/ui/iconify';
-import { Form, RHFSelect, RHFTextField, RHFNumericField } from 'src/shared/ui/hook-form';
+import { Form, RHFSelect, RHFTextField, RHFAutocomplete, RHFNumericField } from 'src/shared/ui/hook-form';
 
+import { useClients } from '../hooks/use-clients';
 import { useActiveSkills } from '../hooks/use-active-skills';
 import { useActiveRateCards } from '../hooks/use-active-rate-cards';
 
@@ -151,51 +152,47 @@ export function QuotationGenerationForm({
   onCancel,
 }: Props) {
   const { data: activeSkills = [] } = useActiveSkills();
+  const { data: clients = [], isLoading: isLoadingClients } = useClients();
   const { data: rateCards = [], isLoading: isLoadingRateCards } = useActiveRateCards();
 
-  const defaultValues: FormValues = useMemo(() => {
-    // Default fallback client ID if present
-    const fallbackClientId = crypto.randomUUID();
-
-    return {
-      client_id: fallbackClientId,
-      subject: '',
-      solution_type: 'Web Application',
-      commercial_scheme: 'dedicated_squad',
-      rate_card_id: rateCards[0]?.id || '',
-      rate_card_code: rateCards[0]?.code || '',
-      project_duration_months: 6,
-      budget_maximum: 150000000,
-      summary: '',
-      mandatory_scope: [
-        { value: 'System Architecture & Database Design' },
-        { value: 'Frontend UI/UX Implementation' },
-        { value: 'Backend API Development' },
+  const defaultValues: FormValues = useMemo(() => ({
+    client_id: clients[0]?.id || '',
+    subject: '',
+    solution_type: 'Web Application',
+    commercial_scheme: 'dedicated_squad',
+    rate_card_id: rateCards[0]?.id || '',
+    rate_card_code: rateCards[0]?.code || '',
+    project_duration_months: 6,
+    budget_maximum: 150000000,
+    summary: '',
+    mandatory_scope: [
+      { value: 'System Architecture & Database Design' },
+      { value: 'Frontend UI/UX Implementation' },
+      { value: 'Backend API Development' },
+    ],
+    optional_scope: [{ value: 'Mobile App Companion' }],
+    payment_terms: {
+      mode: 'milestone',
+      items: [
+        {
+          milestone_name: 'Down Payment (DP)',
+          percentage: 30,
+          description: 'Upon contract agreement',
+        },
+        {
+          milestone_name: 'Feature Complete & UAT',
+          percentage: 50,
+          description: 'After testing phase',
+        },
+        {
+          milestone_name: 'Final Handover',
+          percentage: 20,
+          description: 'Final release and go-live',
+        },
       ],
-      optional_scope: [{ value: 'Mobile App Companion' }],
-      payment_terms: {
-        mode: 'milestone',
-        items: [
-          {
-            milestone_name: 'Down Payment (DP)',
-            percentage: 30,
-            description: 'Upon contract agreement',
-          },
-          {
-            milestone_name: 'Feature Complete & UAT',
-            percentage: 50,
-            description: 'After testing phase',
-          },
-          {
-            milestone_name: 'Final Handover',
-            percentage: 20,
-            description: 'Final release and go-live',
-          },
-        ],
-      },
-      additional_notes: '',
-    };
-  }, [rateCards]);
+    },
+    additional_notes: '',
+  }), [clients, rateCards]);
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(quotationGenerationSchema),
@@ -210,6 +207,12 @@ export function QuotationGenerationForm({
     setValue,
     formState: { errors },
   } = methods;
+
+  useEffect(() => {
+    if (!watch('client_id') && clients.length > 0) {
+      setValue('client_id', clients[0].id, { shouldValidate: true });
+    }
+  }, [clients, setValue, watch]);
 
   const mandatoryScopeArray = useFieldArray({
     control,
@@ -344,11 +347,33 @@ export function QuotationGenerationForm({
               </Grid>
 
               <Grid size={{ xs: 12, md: 6 }}>
-                <RHFTextField
+                <RHFAutocomplete
                   name="client_id"
-                  label="Client Identifier (UUID)"
-                  disabled
-                  helperText="Auto-generated valid UUID"
+                  label="Client"
+                  placeholder="Select a client..."
+                  options={clients}
+                  getOptionLabel={(option) => {
+                    if (typeof option === 'string') {
+                      const found = clients.find((c) => c.id === option);
+                      return found ? found.name : option;
+                    }
+                    return option?.name || '';
+                  }}
+                  isOptionEqualToValue={(option, value) => {
+                    if (typeof value === 'string') {
+                      return option.id === value;
+                    }
+                    return option.id === value?.id;
+                  }}
+                  value={clients.find((c) => c.id === watch('client_id')) || null}
+                  onChange={(_event, newValue) => {
+                    const selectedId =
+                      typeof newValue === 'object' && newValue ? newValue.id : newValue || '';
+                    setValue('client_id', selectedId, { shouldValidate: true });
+                  }}
+                  loading={isLoadingClients}
+                  disabled={isSubmitting || isLoadingClients}
+                  helperText={errors.client_id?.message || 'Select client organization'}
                 />
               </Grid>
 

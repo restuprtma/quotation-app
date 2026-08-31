@@ -206,10 +206,14 @@ export function QuotationPromptView() {
       const errorMap: Record<string, string> = {
         invalid_rate_card:
           'Rate card tidak valid atau belum memiliki role (kosong). Silakan periksa Rate Card di AI Settings.',
+        rate_item_missing:
+          'Rate card yang dipilih tidak memiliki item tarif untuk role/senioritas yang dibutuhkan. Silakan periksa Rate Card di AI Settings.',
         settings_incomplete:
           'Pengaturan AI tidak lengkap (Model atau API Key salah/belum diatur).',
         budget_unfeasible:
           'Budget maksimum yang Anda tentukan tidak mencukupi untuk memenuhi ekspektasi durasi dan scope yang diminta.',
+        allocation_invalid:
+          'Alokasi sumber daya AI tidak memenuhi batasan mandatory scope.',
         settings_invalid: 'Pengaturan AI tidak valid, pastikan model dan provider sesuai.',
       };
 

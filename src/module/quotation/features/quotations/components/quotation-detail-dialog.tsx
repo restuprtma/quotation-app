@@ -75,7 +75,7 @@ export function QuotationDetailDialog({ open, id, onClose, onEdit, onCreateContr
                 <Info label={t('detail.client')} value={data.client_name ?? data.client_id} />
                 <Info
                   label={t('detail.projectType')}
-                  value={t(`projectTypes.${data.project_type}`)}
+                  value={data.solution_type ? t(`projectTypes.${data.solution_type}`, { defaultValue: data.solution_type }) : t('detail.empty')}
                 />
                 <Info
                   label={t('detail.budget')}
