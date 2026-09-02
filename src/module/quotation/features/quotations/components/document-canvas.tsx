@@ -20,6 +20,7 @@ export function DocumentCanvas({ children }: Props) {
     >
       <Box
         sx={{
+          position: 'relative',
           p: { xs: 2, sm: 3, md: 5 },
           minHeight: { xs: 420, md: 620 },
           overflowX: 'auto',
@@ -42,6 +43,10 @@ export function DocumentCanvas({ children }: Props) {
             '& li': { pl: 0.5, my: 0.5 },
             '& a': { color: 'primary.main', textDecoration: 'underline' },
             '& hr': { my: 3, border: 0, borderTop: 1, borderColor: 'divider' },
+            '& .tableWrapper': {
+              overflowX: 'auto',
+              my: 2.5,
+            },
             '& table': {
               width: '100%',
               minWidth: 480,
@@ -58,6 +63,16 @@ export function DocumentCanvas({ children }: Props) {
               overflowWrap: 'anywhere',
             },
             '& th': { bgcolor: 'action.hover', fontWeight: 700 },
+            '& .column-resize-handle': {
+              position: 'absolute',
+              right: -2,
+              top: 0,
+              bottom: 0,
+              width: 4,
+              backgroundColor: 'primary.main',
+              pointerEvents: 'none',
+              zIndex: 20,
+            },
             '& .selectedCell:after': {
               content: '""',
               position: 'absolute',

@@ -1,19 +1,23 @@
 import type { JSONContent } from '@tiptap/core';
 
-import { useRef, useEffect } from 'react';
 import Link from '@tiptap/extension-link';
 import StarterKit from '@tiptap/starter-kit';
 import { Table } from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
+import { useRef, useState, useEffect } from 'react';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import TableCell from '@tiptap/extension-table-cell';
 import { useEditor, EditorContent } from '@tiptap/react';
 import TableHeader from '@tiptap/extension-table-header';
 
+import Box from '@mui/material/Box';
+
 import { TableToolbar } from './table-toolbar';
 import { EditorToolbar } from './editor-toolbar';
 import { DocumentCanvas } from './document-canvas';
+import { TableGripOverlay } from './table-grip-overlay';
+import { EditorContextMenu } from './editor-context-menu';
 import { LegalBlockExtension } from './legal-block-extension';
 
 type Props = {
@@ -34,9 +38,12 @@ export function QuotationEditor({
   onChange,
 }: Props) {
   const lastContent = useRef(content);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [contextMenu, setContextMenu] = useState<{ top: number; left: number } | null>(null);
+
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({ link: false, underline: false }),
       Underline,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Link.configure({ openOnClick: false }),
@@ -46,6 +53,15 @@ export function QuotationEditor({
       TableCell,
       LegalBlockExtension.configure({ unlocked: isUnlocked }),
     ],
+    editorProps: {
+      handleDOMEvents: {
+        contextmenu: (_view, event) => {
+          event.preventDefault();
+          setContextMenu({ top: event.clientY, left: event.clientX });
+          return true;
+        },
+      },
+    },
     content,
     immediatelyRender: false,
     editable: !disabled,
@@ -81,7 +97,16 @@ export function QuotationEditor({
         disabled={disabled}
       />
       <TableToolbar editor={editor} />
-      <EditorContent editor={editor} />
+      <Box ref={containerRef} sx={{ position: 'relative' }}>
+        <TableGripOverlay editor={editor} containerRef={containerRef} isUnlocked={isUnlocked} />
+        <EditorContent editor={editor} />
+      </Box>
+      <EditorContextMenu
+        editor={editor}
+        anchorPosition={contextMenu}
+        onClose={() => setContextMenu(null)}
+        isUnlocked={isUnlocked}
+      />
     </DocumentCanvas>
   );
 }
