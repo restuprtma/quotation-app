@@ -9,7 +9,10 @@ import MenuItem from '@mui/material/MenuItem';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
+import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
+
+import { EDITOR_ICONS } from './editor-icons';
 
 type Props = {
   editor: Editor;
@@ -19,8 +22,8 @@ type Props = {
   disabled?: boolean;
 };
 
-function ToolbarIcon({ icon }: { icon: string }) {
-  return <Iconify icon={icon as IconifyName} width={18} />;
+function ToolbarIcon({ icon }: { icon: IconifyName }) {
+  return <Iconify icon={icon} width={18} />;
 }
 
 function ToolButton({
@@ -64,6 +67,8 @@ export function EditorToolbar({
   onRestoreOfficial,
   disabled = false,
 }: Props) {
+  const { t } = useTranslate('quotation');
+
   const run = (command: () => boolean) => command();
   const setHeading = (value: string) => {
     const level = Number(value);
@@ -79,16 +84,20 @@ export function EditorToolbar({
   };
   const setLink = () => {
     const previousUrl = editor.getAttributes('link').href as string | undefined;
-    const url = window.prompt('Link URL', previousUrl || 'https://');
+    const url = window.prompt(t('editor.toolbar.linkPrompt'), previousUrl || 'https://');
     if (url === null) return;
     if (!url.trim()) run(() => editor.chain().focus().unsetLink().run());
     else run(() => editor.chain().focus().setLink({ href: url.trim() }).run());
   };
-  const alignments = [
-    ['left', 'solar:text-align-left-bold'],
-    ['center', 'solar:text-align-center-bold'],
-    ['right', 'solar:text-align-right-bold'],
-    ['justify', 'solar:text-align-justify-bold'],
+  const alignments: {
+    value: 'left' | 'center' | 'right' | 'justify';
+    icon: IconifyName;
+    label: string;
+  }[] = [
+    { value: 'left', icon: EDITOR_ICONS.alignLeft, label: t('editor.toolbar.alignLeft') },
+    { value: 'center', icon: EDITOR_ICONS.alignCenter, label: t('editor.toolbar.alignCenter') },
+    { value: 'right', icon: EDITOR_ICONS.alignRight, label: t('editor.toolbar.alignRight') },
+    { value: 'justify', icon: EDITOR_ICONS.alignJustify, label: t('editor.toolbar.alignJustify') },
   ];
 
   return (
@@ -101,18 +110,18 @@ export function EditorToolbar({
     >
       <ToggleButtonGroup size="small" sx={{ mr: 0.5 }}>
         <ToolButton
-          label="Undo"
+          label={t('editor.toolbar.undo')}
           disabled={disabled || !editor.can().undo()}
           onClick={() => run(() => editor.chain().focus().undo().run())}
         >
-          <ToolbarIcon icon="solar:undo-left-round-bold" />
+          <ToolbarIcon icon={EDITOR_ICONS.undo} />
         </ToolButton>
         <ToolButton
-          label="Redo"
+          label={t('editor.toolbar.redo')}
           disabled={disabled || !editor.can().redo()}
           onClick={() => run(() => editor.chain().focus().redo().run())}
         >
-          <ToolbarIcon icon="solar:undo-right-round-bold" />
+          <ToolbarIcon icon={EDITOR_ICONS.redo} />
         </ToolButton>
       </ToggleButtonGroup>
       <Select
@@ -128,56 +137,56 @@ export function EditorToolbar({
                 : '0'
         }
         onChange={(event) => setHeading(event.target.value)}
-        aria-label="Text style"
+        aria-label={t('editor.toolbar.textStyle')}
         sx={{ minWidth: 116, height: 36, mr: 0.5 }}
       >
-        <MenuItem value="0">Paragraph</MenuItem>
-        <MenuItem value="1">Heading 1</MenuItem>
-        <MenuItem value="2">Heading 2</MenuItem>
-        <MenuItem value="3">Heading 3</MenuItem>
+        <MenuItem value="0">{t('editor.toolbar.paragraph')}</MenuItem>
+        <MenuItem value="1">{t('editor.toolbar.heading1')}</MenuItem>
+        <MenuItem value="2">{t('editor.toolbar.heading2')}</MenuItem>
+        <MenuItem value="3">{t('editor.toolbar.heading3')}</MenuItem>
       </Select>
       <ToggleButtonGroup size="small">
         <ToolButton
-          label="Bold"
+          label={t('editor.toolbar.bold')}
           disabled={disabled}
           active={editor.isActive('bold')}
           onClick={() => run(() => editor.chain().focus().toggleBold().run())}
         >
-          <ToolbarIcon icon="solar:text-bold" />
+          <ToolbarIcon icon={EDITOR_ICONS.bold} />
         </ToolButton>
         <ToolButton
-          label="Italic"
+          label={t('editor.toolbar.italic')}
           disabled={disabled}
           active={editor.isActive('italic')}
           onClick={() => run(() => editor.chain().focus().toggleItalic().run())}
         >
-          <ToolbarIcon icon="solar:text-italic" />
+          <ToolbarIcon icon={EDITOR_ICONS.italic} />
         </ToolButton>
         <ToolButton
-          label="Underline"
+          label={t('editor.toolbar.underline')}
           disabled={disabled}
           active={editor.isActive('underline')}
           onClick={() => run(() => editor.chain().focus().toggleUnderline().run())}
         >
-          <ToolbarIcon icon="solar:text-underline" />
+          <ToolbarIcon icon={EDITOR_ICONS.underline} />
         </ToolButton>
         <ToolButton
-          label="Strike"
+          label={t('editor.toolbar.strike')}
           disabled={disabled}
           active={editor.isActive('strike')}
           onClick={() => run(() => editor.chain().focus().toggleStrike().run())}
         >
-          <ToolbarIcon icon="solar:text-cross" />
+          <ToolbarIcon icon={EDITOR_ICONS.strike} />
         </ToolButton>
       </ToggleButtonGroup>
       <ToggleButtonGroup size="small">
-        {alignments.map(([alignment, icon]) => (
+        {alignments.map(({ value, icon, label }) => (
           <ToolButton
-            key={alignment}
+            key={value}
             disabled={disabled}
-            label={`Align ${alignment}`}
-            active={editor.isActive({ textAlign: alignment })}
-            onClick={() => run(() => editor.chain().focus().setTextAlign(alignment).run())}
+            label={label}
+            active={editor.isActive({ textAlign: value })}
+            onClick={() => run(() => editor.chain().focus().setTextAlign(value).run())}
           >
             <ToolbarIcon icon={icon} />
           </ToolButton>
@@ -185,23 +194,23 @@ export function EditorToolbar({
       </ToggleButtonGroup>
       <ToggleButtonGroup size="small">
         <ToolButton
-          label="Bulleted list"
+          label={t('editor.toolbar.bulletList')}
           disabled={disabled}
           active={editor.isActive('bulletList')}
           onClick={() => run(() => editor.chain().focus().toggleBulletList().run())}
         >
-          <ToolbarIcon icon="solar:list-bold" />
+          <ToolbarIcon icon={EDITOR_ICONS.bulletList} />
         </ToolButton>
         <ToolButton
-          label="Numbered list"
+          label={t('editor.toolbar.orderedList')}
           disabled={disabled}
           active={editor.isActive('orderedList')}
           onClick={() => run(() => editor.chain().focus().toggleOrderedList().run())}
         >
-          <ToolbarIcon icon="solar:list-check-bold" />
+          <ToolbarIcon icon={EDITOR_ICONS.orderedList} />
         </ToolButton>
         <ToolButton
-          label="Insert table"
+          label={t('editor.table.insert')}
           disabled={disabled}
           onClick={() =>
             run(() =>
@@ -209,24 +218,29 @@ export function EditorToolbar({
             )
           }
         >
-          <ToolbarIcon icon="solar:table-bold" />
-        </ToolButton>
-        <ToolButton label="Link" disabled={disabled} active={editor.isActive('link')} onClick={setLink}>
-          <ToolbarIcon icon="solar:link-bold" />
+          <ToolbarIcon icon={EDITOR_ICONS.insertTable} />
         </ToolButton>
         <ToolButton
-          label="Horizontal rule"
+          label={t('editor.toolbar.link')}
+          disabled={disabled}
+          active={editor.isActive('link')}
+          onClick={setLink}
+        >
+          <ToolbarIcon icon={EDITOR_ICONS.link} />
+        </ToolButton>
+        <ToolButton
+          label={t('editor.toolbar.horizontalRule')}
           disabled={disabled}
           onClick={() => run(() => editor.chain().focus().setHorizontalRule().run())}
         >
-          <ToolbarIcon icon="solar:minus-circle-bold" />
+          <ToolbarIcon icon={EDITOR_ICONS.horizontalRule} />
         </ToolButton>
         <ToolButton
-          label="Clear formatting"
+          label={t('editor.toolbar.clearFormatting')}
           disabled={disabled}
           onClick={() => run(() => editor.chain().focus().clearNodes().unsetAllMarks().run())}
         >
-          <ToolbarIcon icon="solar:eraser-bold" />
+          <ToolbarIcon icon={EDITOR_ICONS.clearFormatting} />
         </ToolButton>
       </ToggleButtonGroup>
 
@@ -234,23 +248,23 @@ export function EditorToolbar({
       <ToggleButtonGroup size="small" sx={{ ml: 'auto' }}>
         {onToggleUnlock && (
           <ToolButton
-            label={isUnlocked ? 'Lock Legal Block' : 'Unlock Legal Block'}
+            label={isUnlocked ? t('editor.lockLegal') : t('editor.unlockLegal')}
             active={isUnlocked}
             disabled={disabled}
             onClick={onToggleUnlock}
           >
             <ToolbarIcon
-              icon={isUnlocked ? 'solar:lock-unlocked-bold' : 'solar:lock-keyhole-bold'}
+              icon={isUnlocked ? EDITOR_ICONS.legalUnlocked : EDITOR_ICONS.legalLocked}
             />
           </ToolButton>
         )}
         {onRestoreOfficial && (
           <ToolButton
-            label="Restore Official Legal Template"
+            label={t('editor.restoreTemplate')}
             disabled={disabled}
             onClick={onRestoreOfficial}
           >
-            <ToolbarIcon icon="solar:restart-bold" />
+            <ToolbarIcon icon={EDITOR_ICONS.restoreTemplate} />
           </ToolButton>
         )}
       </ToggleButtonGroup>
