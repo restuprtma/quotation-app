@@ -28,7 +28,7 @@ describe('registerIcons', () => {
     expect(icon?.height).toBe(256);
   });
 
-  it.skip('registers mdi icons with a 24x24 viewBox (unskipped in Task 2)', () => {
+  it('registers mdi icons with a 24x24 viewBox', () => {
     const icon = getIcon('mdi:table-row-plus-after');
     expect(icon).toBeTruthy();
     expect(icon?.width).toBe(24);
