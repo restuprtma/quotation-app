@@ -30,6 +30,19 @@ export type IconifyName = keyof typeof allIcons;
 
 // ----------------------------------------------------------------------
 
+/**
+ * Native viewBox size per icon collection. Icon bodies are authored against the
+ * collection's own grid - Phosphor uses 256, Carbon uses 32, most others use 24.
+ * Rendering a 256-grid body inside a 24 viewBox only shows its top-left corner,
+ * which reads as a blank icon.
+ */
+const PREFIX_VIEW_BOX_SIZE: Record<string, number> = {
+  carbon: 32,
+  ph: 256,
+};
+
+const DEFAULT_VIEW_BOX_SIZE = 24;
+
 let areIconsRegistered = false;
 
 export function registerIcons() {
@@ -38,13 +51,9 @@ export function registerIcons() {
   }
 
   iconSets.forEach((iconSet) => {
-    const iconSetConfig = {
-      ...iconSet,
-      width: (iconSet.prefix === 'carbon' && 32) || 24,
-      height: (iconSet.prefix === 'carbon' && 32) || 24,
-    };
+    const size = PREFIX_VIEW_BOX_SIZE[iconSet.prefix] ?? DEFAULT_VIEW_BOX_SIZE;
 
-    addCollection(iconSetConfig);
+    addCollection({ ...iconSet, width: size, height: size });
   });
 
   areIconsRegistered = true;
