@@ -17,23 +17,22 @@ import IconButton from '@mui/material/IconButton';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import CircularProgress from '@mui/material/CircularProgress';
+import Checkbox from '@mui/material/Checkbox';
 
+import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
 import { Form, RHFSelect, RHFTextField, RHFAutocomplete, RHFNumericField } from 'src/shared/ui/hook-form';
 
 import { useClients } from '../hooks/use-clients';
 import { useActiveSkills } from '../hooks/use-active-skills';
 import { useActiveRateCards } from '../hooks/use-active-rate-cards';
+import {
+  SOLUTION_TYPES,
+  STANDARD_DEVELOPMENT_ACTIVITIES,
+  SCOPE_PRESETS_BY_SOLUTION_TYPE,
+} from '../constants/scope-presets';
 
 // ----------------------------------------------------------------------
-
-const SOLUTION_TYPES = [
-  { value: 'Web Application', label: 'Web Application' },
-  { value: 'Mobile Application', label: 'Mobile Application' },
-  { value: 'Enterprise SaaS', label: 'Enterprise SaaS' },
-  { value: 'Custom Software Solution', label: 'Custom Software Solution' },
-  { value: 'Cloud Infrastructure & API', label: 'Cloud Infrastructure & API' },
-];
 
 const MILESTONE_PRESETS = [
   {
@@ -93,7 +92,8 @@ const paymentTermItemSchema = z.object({
 
 const quotationGenerationSchema = z.object({
   client_id: z.string().optional(),
-  client_name: z.string().min(1, 'Client name is required'),
+  client_name: z.string().trim().min(1, 'Nama penerima / PIC (Yth.) wajib diisi'),
+  client_company_name: z.string().trim().optional(),
   subject: z.string().trim().min(1, 'Subject is required').max(200, 'Max 200 characters'),
   solution_type: z.string().min(1, 'Solution type is required'),
   commercial_scheme: z.literal('dedicated_squad'),
@@ -117,6 +117,7 @@ const quotationGenerationSchema = z.object({
     )
     .min(1, 'At least 1 mandatory scope item is required'),
   optional_scope: z.array(z.object({ value: z.string().trim() })).optional(),
+  allowed_standard_activities: z.array(z.string()).optional(),
   payment_terms: z
     .object({
       mode: z.literal('milestone'),
@@ -133,7 +134,26 @@ const quotationGenerationSchema = z.object({
       }
     ),
   additional_notes: z.string().optional(),
-});
+  discount_type: z.enum(['none', 'round_to_target', 'fixed_amount', 'percent']).optional(),
+  discount_input: z.number().min(0, 'Discount input cannot be negative').optional(),
+  discount_name: z.string().max(100, 'Max 100 characters').optional(),
+  discount_reason: z.string().max(500, 'Max 500 characters').optional(),
+})
+.refine(
+  (data) => {
+    if (!data.discount_type || data.discount_type === 'none') return true;
+    return Number(data.discount_input ?? 0) > 0;
+  },
+  { message: 'Discount input is required', path: ['discount_input'] }
+)
+.refine(
+  (data) => {
+    if (data.discount_type !== 'percent') return true;
+    const value = Number(data.discount_input ?? 0);
+    return value >= 1 && value <= 100;
+  },
+  { message: 'Percentage must be between 1 and 100', path: ['discount_input'] }
+);
 
 type FormValues = z.infer<typeof quotationGenerationSchema>;
 
@@ -152,13 +172,15 @@ export function QuotationGenerationForm({
   onSubmit,
   onCancel,
 }: Props) {
+  const { t } = useTranslate('quotation');
   const { data: activeSkills = [] } = useActiveSkills();
   const { data: clients = [], isLoading: isLoadingClients } = useClients();
   const { data: rateCards = [], isLoading: isLoadingRateCards } = useActiveRateCards();
 
   const defaultValues: FormValues = useMemo(() => ({
     client_id: clients[0]?.id || '',
-    client_name: clients[0]?.name || '',
+    client_company_name: clients[0]?.name || '',
+    client_name: 'Pimpinan Perusahaan',
     subject: '',
     solution_type: 'Web Application',
     commercial_scheme: 'dedicated_squad',
@@ -173,6 +195,7 @@ export function QuotationGenerationForm({
       { value: 'Backend API Development' },
     ],
     optional_scope: [{ value: 'Mobile App Companion' }],
+    allowed_standard_activities: STANDARD_DEVELOPMENT_ACTIVITIES.map((a) => a.id),
     payment_terms: {
       mode: 'milestone',
       items: [
@@ -194,6 +217,10 @@ export function QuotationGenerationForm({
       ],
     },
     additional_notes: '',
+    discount_type: 'none',
+    discount_input: 0,
+    discount_name: '',
+    discount_reason: '',
   }), [clients, rateCards]);
 
   const methods = useForm<FormValues>({
@@ -211,9 +238,12 @@ export function QuotationGenerationForm({
   } = methods;
 
   useEffect(() => {
-    if (!watch('client_id') && !watch('client_name') && clients.length > 0) {
+    if (!watch('client_id') && !watch('client_company_name') && clients.length > 0) {
       setValue('client_id', clients[0].id, { shouldValidate: true });
-      setValue('client_name', clients[0].name, { shouldValidate: true });
+      setValue('client_company_name', clients[0].name, { shouldValidate: true });
+      if (!watch('client_name')) {
+        setValue('client_name', 'Pimpinan Perusahaan', { shouldValidate: true });
+      }
     }
   }, [clients, setValue, watch]);
 
@@ -240,6 +270,68 @@ export function QuotationGenerationForm({
 
   const isPercentageValid = currentTotalPercentage === 100;
 
+  const watchedDiscountType = watch('discount_type');
+  const watchedDiscountInput = watch('discount_input');
+  const watchedBudgetMaximum = watch('budget_maximum');
+  const hasDiscount = !!watchedDiscountType && watchedDiscountType !== 'none';
+
+  const thousandFormatter = useMemo(() => new Intl.NumberFormat('id-ID'), []);
+
+  const discountHint = useMemo(() => {
+    const budget = Number(watchedBudgetMaximum ?? 0);
+    if (!budget) return '';
+    // Non-binding suggestion only: larger budgets commonly carry 5-10%.
+    const thresholds: Array<[number, [number, number]]> = [
+      [500_000_000, [5, 10]],
+      [200_000_000, [5, 8]],
+      [100_000_000, [3, 5]],
+    ];
+    const range = thresholds.find(([min]) => budget > min)?.[1];
+    if (!range) return '';
+    return t('dedicatedSquadForm.discount.hintForBudget', {
+      budget: thousandFormatter.format(budget),
+      min: range[0],
+      max: range[1],
+    });
+  }, [watchedBudgetMaximum, t, thousandFormatter]);
+
+  useEffect(() => {
+    // Discounts over 15% require a justification on the backend; pre-populate
+    // a placeholder so the rejection message is never a surprise.
+    const isPercentOverFifteen =
+      watchedDiscountType === 'percent' && Number(watchedDiscountInput ?? 0) > 15;
+    const isFixedOverFifteen =
+      watchedDiscountType === 'fixed_amount' &&
+      Number(watchedDiscountInput ?? 0) > Number(watchedBudgetMaximum ?? 0) * 0.15;
+    if (isPercentOverFifteen || isFixedOverFifteen) {
+      const currentReason = watch('discount_reason');
+      if (!currentReason?.trim()) {
+        setValue('discount_reason', 'High-value discount pending approval', {
+          shouldValidate: true,
+        });
+      }
+    }
+  }, [watchedDiscountType, watchedDiscountInput, watchedBudgetMaximum, watch, setValue]);
+
+  const selectedSolutionType = watch('solution_type');
+  const currentPreset = SCOPE_PRESETS_BY_SOLUTION_TYPE[selectedSolutionType];
+
+  const handleApplyPreset = () => {
+    if (!currentPreset) return;
+    setValue(
+      'mandatory_scope',
+      currentPreset.mandatory.map((val) => ({ value: val })),
+      { shouldValidate: true }
+    );
+    if (currentPreset.optional.length > 0) {
+      setValue(
+        'optional_scope',
+        currentPreset.optional.map((val) => ({ value: val })),
+        { shouldValidate: true }
+      );
+    }
+  };
+
   const handleFormSubmit = handleSubmit((data: FormValues) => {
     // Resolve valid skill UUID
     let skillId = selectedSkill?.id;
@@ -260,7 +352,8 @@ export function QuotationGenerationForm({
     const payload: GenerateQuotationPayload = {
       skill_id: skillId,
       client_id: data.client_id || undefined,
-      client_name: data.client_name,
+      client_name: data.client_name.trim(),
+      client_company_name: data.client_company_name?.trim() || undefined,
       subject: data.subject.trim(),
       solution_type: data.solution_type,
       commercial_scheme: 'dedicated_squad',
@@ -275,6 +368,7 @@ export function QuotationGenerationForm({
         .filter(Boolean),
       optional_scope:
         data.optional_scope?.map((s: { value: string }) => s.value.trim()).filter(Boolean) || [],
+      allowed_standard_activities: data.allowed_standard_activities || [],
       payment_terms: {
         mode: 'milestone',
         items: data.payment_terms.items.map(
@@ -286,6 +380,17 @@ export function QuotationGenerationForm({
         ),
       },
       additional_notes: data.additional_notes?.trim() || undefined,
+      ...(data.discount_type && data.discount_type !== 'none'
+        ? {
+            discount_type: data.discount_type,
+            discount_input:
+              data.discount_type === 'percent'
+                ? Math.round(Number(data.discount_input ?? 0) * 100)
+                : Math.round(Number(data.discount_input ?? 0)),
+            discount_name: data.discount_name?.trim() || undefined,
+            discount_reason: data.discount_reason?.trim() || undefined,
+          }
+        : { discount_type: 'none', discount_input: 0 }),
     };
 
     onSubmit(payload);
@@ -352,9 +457,9 @@ export function QuotationGenerationForm({
 
               <Grid size={{ xs: 12, md: 6 }}>
                 <RHFAutocomplete
-                  name="client_name"
-                  label="Client"
-                  placeholder="Select or type a client..."
+                  name="client_company_name"
+                  label="Perusahaan / Organisasi Klien"
+                  placeholder="Pilih atau ketik nama perusahaan klien..."
                   freeSolo
                   options={clients}
                   getOptionLabel={(option) => {
@@ -369,23 +474,23 @@ export function QuotationGenerationForm({
                   }}
                   value={
                     watch('client_id')
-                      ? clients.find((c) => c.id === watch('client_id')) || watch('client_name')
-                      : watch('client_name') || ''
+                      ? clients.find((c) => c.id === watch('client_id')) || watch('client_company_name')
+                      : watch('client_company_name') || ''
                   }
                   onChange={(_event, newValue) => {
                     if (typeof newValue === 'string') {
                       setValue('client_id', '', { shouldValidate: true });
-                      setValue('client_name', newValue, { shouldValidate: true });
+                      setValue('client_company_name', newValue, { shouldValidate: true });
                     } else if (newValue && typeof newValue === 'object') {
                       setValue('client_id', newValue.id, { shouldValidate: true });
-                      setValue('client_name', newValue.name, { shouldValidate: true });
+                      setValue('client_company_name', newValue.name, { shouldValidate: true });
                     } else {
                       setValue('client_id', '', { shouldValidate: true });
-                      setValue('client_name', '', { shouldValidate: true });
+                      setValue('client_company_name', '', { shouldValidate: true });
                     }
                   }}
                   onInputChange={(_event, newInputValue) => {
-                    setValue('client_name', newInputValue, { shouldValidate: true });
+                    setValue('client_company_name', newInputValue, { shouldValidate: true });
                     const foundClient = clients.find((c) => c.name === newInputValue);
                     if (foundClient) {
                       setValue('client_id', foundClient.id, { shouldValidate: true });
@@ -395,11 +500,21 @@ export function QuotationGenerationForm({
                   }}
                   loading={isLoadingClients}
                   disabled={isSubmitting || isLoadingClients}
-                  helperText={errors.client_name?.message || 'Select or type client organization'}
+                  helperText={errors.client_company_name?.message || 'Nama instansi, PT, atau organisasi'}
                 />
               </Grid>
 
               <Grid size={{ xs: 12, md: 6 }}>
+                <RHFTextField
+                  name="client_name"
+                  label="Ditujukan Kepada / PIC (Yth.)"
+                  placeholder="e.g. Bapak Hendra Kurniawan / Direksi PT"
+                  disabled={isSubmitting}
+                  helperText={errors.client_name?.message || 'Nama kontak / pejabat penerima quotation'}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12 }}>
                 <RHFTextField
                   name="commercial_scheme"
                   label="Commercial Scheme"
@@ -504,6 +619,20 @@ export function QuotationGenerationForm({
           <CardHeader
             title="3. Scope of Work (Mandatory & Optional)"
             subheader="Items will be mapped to resource allocation and narrative structure"
+            action={
+              currentPreset ? (
+                <Button
+                  size="small"
+                  variant="soft"
+                  color="primary"
+                  startIcon={<Iconify icon="solar:magic-stick-3-bold-duotone" />}
+                  onClick={handleApplyPreset}
+                  disabled={isSubmitting}
+                >
+                  Terapkan Template Scope ({selectedSolutionType})
+                </Button>
+              ) : null
+            }
             titleTypographyProps={{ variant: 'subtitle1', fontWeight: 600 }}
           />
           <CardContent>
@@ -616,10 +745,96 @@ export function QuotationGenerationForm({
           </CardContent>
         </Card>
 
-        {/* Section 4: Payment Terms (Milestones) */}
+        {/* Section 4: Standard Development Activities */}
         <Card>
           <CardHeader
-            title="4. Payment Terms (Milestones)"
+            title="4. Standar Aktivitas Pengembangan (Standard Activities)"
+            subheader="Pilih aktivitas standar yang diizinkan untuk disertakan oleh AI dalam alokasi squad"
+            action={
+              <Stack direction="row" spacing={1}>
+                <Button
+                  size="small"
+                  variant="text"
+                  onClick={() =>
+                    setValue(
+                      'allowed_standard_activities',
+                      STANDARD_DEVELOPMENT_ACTIVITIES.map((a) => a.id),
+                      { shouldValidate: true }
+                    )
+                  }
+                  disabled={isSubmitting}
+                >
+                  Pilih Semua
+                </Button>
+                <Button
+                  size="small"
+                  variant="text"
+                  color="inherit"
+                  onClick={() =>
+                    setValue('allowed_standard_activities', [], { shouldValidate: true })
+                  }
+                  disabled={isSubmitting}
+                >
+                  Hapus Semua
+                </Button>
+              </Stack>
+            }
+            titleTypographyProps={{ variant: 'subtitle1', fontWeight: 600 }}
+          />
+          <CardContent>
+            <Grid container spacing={1.5}>
+              {STANDARD_DEVELOPMENT_ACTIVITIES.map((activity) => {
+                const checked = (watch('allowed_standard_activities') || []).includes(activity.id);
+                return (
+                  <Grid key={activity.id} size={{ xs: 12, sm: 6 }}>
+                    <Box
+                      onClick={() => {
+                        if (isSubmitting) return;
+                        const current = watch('allowed_standard_activities') || [];
+                        const next = checked
+                          ? current.filter((id: string) => id !== activity.id)
+                          : [...current, activity.id];
+                        setValue('allowed_standard_activities', next, { shouldValidate: true });
+                      }}
+                      sx={{
+                        p: 1.5,
+                        border: 1,
+                        borderColor: checked ? 'primary.main' : 'divider',
+                        bgcolor: checked ? 'action.hover' : 'background.paper',
+                        borderRadius: 1,
+                        cursor: isSubmitting ? 'default' : 'pointer',
+                        transition: 'all 0.2s ease-in-out',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: 1.5,
+                      }}
+                    >
+                      <Checkbox
+                        checked={checked}
+                        size="small"
+                        disabled={isSubmitting}
+                        sx={{ p: 0, mt: 0.25 }}
+                      />
+                      <Box>
+                        <Typography variant="subtitle2" fontSize="0.875rem">
+                          {activity.label}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {activity.description}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          </CardContent>
+        </Card>
+
+        {/* Section 5: Payment Terms (Milestones) */}
+        <Card>
+          <CardHeader
+            title="5. Ketentuan Pembayaran (Milestones)"
             subheader="Define milestone payment breakdown (Total must equal exactly 100%)"
             action={
               <Stack direction="row" spacing={1} alignItems="center">
@@ -739,10 +954,96 @@ export function QuotationGenerationForm({
           </CardContent>
         </Card>
 
-        {/* Section 5: Additional Notes */}
+        {/* Section 6: Discount (Optional) */}
         <Card>
           <CardHeader
-            title="5. Additional Instructions / Notes (Optional)"
+            title={`6. ${t('dedicatedSquadForm.discount.sectionTitle')}`}
+            subheader={t('dedicatedSquadForm.discount.sectionSub')}
+            titleTypographyProps={{ variant: 'subtitle1', fontWeight: 600 }}
+          />
+          <CardContent>
+            <Stack spacing={2}>
+              <Grid container spacing={2.5}>
+                <Grid size={{ xs: 12, md: 4 }}>
+                  <RHFSelect
+                    name="discount_type"
+                    label={t('dedicatedSquadForm.discount.type')}
+                    disabled={isSubmitting}
+                  >
+                    <MenuItem value="none">{t('dedicatedSquadForm.discount.typeNone')}</MenuItem>
+                    <MenuItem value="round_to_target">
+                      {t('dedicatedSquadForm.discount.typeRoundToTarget')}
+                    </MenuItem>
+                    <MenuItem value="fixed_amount">
+                      {t('dedicatedSquadForm.discount.typeFixedAmount')}
+                    </MenuItem>
+                    <MenuItem value="percent">{t('dedicatedSquadForm.discount.typePercent')}</MenuItem>
+                  </RHFSelect>
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 4 }}>
+                  {watchedDiscountType === 'percent' ? (
+                    <RHFNumericField
+                      name="discount_input"
+                      label={t('dedicatedSquadForm.discount.inputPercent')}
+                      placeholder="5"
+                      size="small"
+                      disabled={isSubmitting}
+                      helperText={t('dedicatedSquadForm.discount.percentHelper')}
+                    />
+                  ) : (
+                    <RHFNumericField
+                      name="discount_input"
+                      label={
+                        watchedDiscountType === 'round_to_target'
+                          ? t('dedicatedSquadForm.discount.inputRoundToTarget')
+                          : t('dedicatedSquadForm.discount.inputFixedAmount')
+                      }
+                      placeholder="15.000.000"
+                      prefix="Rp "
+                      size="small"
+                      disabled={isSubmitting || !hasDiscount}
+                    />
+                  )}
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 4 }}>
+                  <RHFTextField
+                    name="discount_name"
+                    label={t('dedicatedSquadForm.discount.name')}
+                    placeholder={t('dedicatedSquadForm.discount.namePlaceholder')}
+                    size="small"
+                    disabled={isSubmitting || !hasDiscount}
+                  />
+                </Grid>
+
+                <Grid size={{ xs: 12 }}>
+                  <RHFTextField
+                    name="discount_reason"
+                    label={t('dedicatedSquadForm.discount.reason')}
+                    placeholder={t('dedicatedSquadForm.discount.reasonPlaceholder')}
+                    multiline
+                    rows={2}
+                    disabled={isSubmitting || !hasDiscount}
+                  />
+                </Grid>
+              </Grid>
+
+              {discountHint && (
+                <Alert severity="info" icon={<Iconify icon="solar:bulb-bold-duotone" width={18} />}>
+                  <Typography variant="caption" color="text.secondary">
+                    {discountHint}
+                  </Typography>
+                </Alert>
+              )}
+            </Stack>
+          </CardContent>
+        </Card>
+
+        {/* Section 7: Additional Notes */}
+        <Card>
+          <CardHeader
+            title="7. Additional Instructions / Notes (Optional)"
             subheader="Any custom SLA, governance, or delivery constraints"
             titleTypographyProps={{ variant: 'subtitle1', fontWeight: 600 }}
           />

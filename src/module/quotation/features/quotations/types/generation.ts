@@ -14,6 +14,7 @@ export type GenerateQuotationPayload = {
   skill_id: string;
   client_id?: string;
   client_name?: string;
+  client_company_name?: string;
   subject: string;
   solution_type: string;
   commercial_scheme: 'dedicated_squad';
@@ -27,6 +28,10 @@ export type GenerateQuotationPayload = {
   allowed_standard_activities?: string[];
   payment_terms: PaymentTermsInput;
   additional_notes?: string;
+  discount_type?: 'none' | 'round_to_target' | 'fixed_amount' | 'percent';
+  discount_input?: number;
+  discount_name?: string;
+  discount_reason?: string;
 };
 
 export type GenerateQuotationResponse = {
