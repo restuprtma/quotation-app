@@ -104,7 +104,10 @@ function defaultLine(model: SquadModel) {
     seniority: 'intermediate',
     headcount_quarters: 4,
     period_quarters: model === '1D' ? 0 : 24,
-    workday_count: model === '1D' ? 1 : 0,
+    // A newly added sprint line starts with the same five-weekday default as
+    // the form's initial sprint. The form still validates this against the
+    // selected date range before preview/generation.
+    workday_count: model === '1D' ? 5 : 0,
   };
 }
 
@@ -251,4 +254,3 @@ export function SquadPicker({ name, model, maintenance = false, disabled = false
 }
 
 export { defaultLine as getDefaultSquadLine };
-
