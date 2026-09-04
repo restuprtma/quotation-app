@@ -1,0 +1,253 @@
+/*
+ * Official quotation document surface.
+ *
+ * Generated HTML intentionally carries semantic data markers only. Layout is
+ * owned by this stylesheet so an edited draft cannot smuggle server-provided
+ * inline styles into the document or its PDF output.
+ */
+.quotation-document {
+  box-sizing: border-box;
+  color: #202124;
+  font-family: Roboto, 'Public Sans', Arial, sans-serif;
+}
+
+.quotation-document,
+.quotation-document * {
+  box-sizing: border-box;
+}
+
+.quotation-document__surface {
+  min-height: 297mm;
+}
+
+.quotation-document__editor {
+  min-width: 0;
+}
+
+.quotation-document .ProseMirror {
+  min-height: 240mm;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 10.5pt;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.quotation-document .ProseMirror > :first-child {
+  margin-top: 0;
+}
+
+.quotation-document .ProseMirror > :last-child {
+  margin-bottom: 0;
+}
+
+.quotation-document [data-block-type] {
+  margin-block: 1.25rem;
+}
+
+.quotation-document [data-block-type='metadata'] {
+  margin-top: 0;
+  border-bottom: 1px solid #d9dde3;
+  padding-bottom: 1rem;
+}
+
+.quotation-document [data-block-type='metadata'] h1 {
+  margin: 0 0 0.85rem;
+  color: #111827;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.quotation-document [data-block-type='metadata'] p {
+  margin: 0.2rem 0;
+}
+
+.quotation-document [data-block-type] h2 {
+  margin: 0 0 0.65rem;
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.quotation-document [data-block-type] p {
+  margin: 0.65rem 0;
+}
+
+.quotation-document [data-block-type] ul,
+.quotation-document [data-block-type] ol {
+  margin: 0.45rem 0;
+  padding-left: 1.35rem;
+}
+
+.quotation-document [data-block-type] li {
+  margin: 0.25rem 0;
+}
+
+.quotation-document table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.quotation-document th,
+.quotation-document td {
+  border: 1px solid #cfd5dc;
+  padding: 0.45rem 0.55rem;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.quotation-document th {
+  background: #f3f5f7;
+  color: #111827;
+  font-weight: 700;
+  text-align: left;
+}
+
+.quotation-document [data-column-width='75'] {
+  width: 75%;
+}
+
+.quotation-document [data-column-width='25'] {
+  width: 25%;
+}
+
+/* The official cost and payment tables are five-column grids. */
+.quotation-document [data-block-type='commercial'] table th:nth-child(1),
+.quotation-document [data-block-type='commercial'] table td:nth-child(1) {
+  width: 32%;
+}
+
+.quotation-document [data-block-type='commercial'] table th:nth-child(2),
+.quotation-document [data-block-type='commercial'] table td:nth-child(2) {
+  width: 18%;
+}
+
+.quotation-document [data-block-type='commercial'] table th:nth-child(3),
+.quotation-document [data-block-type='commercial'] table td:nth-child(3) {
+  width: 15%;
+}
+
+.quotation-document [data-block-type='commercial'] table th:nth-child(4),
+.quotation-document [data-block-type='commercial'] table td:nth-child(4) {
+  width: 15%;
+}
+
+.quotation-document [data-block-type='commercial'] table th:nth-child(5),
+.quotation-document [data-block-type='commercial'] table td:nth-child(5) {
+  width: 20%;
+  text-align: right;
+}
+
+.quotation-document [data-block-type='payment'] table th:nth-child(1),
+.quotation-document [data-block-type='payment'] table td:nth-child(1) {
+  width: 22%;
+}
+
+.quotation-document [data-block-type='payment'] table th:nth-child(2),
+.quotation-document [data-block-type='payment'] table td:nth-child(2) {
+  width: 16%;
+}
+
+.quotation-document [data-block-type='payment'] table th:nth-child(3),
+.quotation-document [data-block-type='payment'] table td:nth-child(3) {
+  width: 19%;
+}
+
+.quotation-document [data-block-type='payment'] table th:nth-child(4),
+.quotation-document [data-block-type='payment'] table td:nth-child(4) {
+  width: 19%;
+}
+
+.quotation-document [data-block-type='payment'] table th:nth-child(5),
+.quotation-document [data-block-type='payment'] table td:nth-child(5) {
+  width: 24%;
+  text-align: right;
+}
+
+.quotation-document .qtr-legal-block {
+  border: 1px dashed #aab2bd;
+  border-radius: 0.35rem;
+  padding: 0.85rem 1rem;
+}
+
+.quotation-document .qtr-legal-unlocked {
+  border-color: #b7791f;
+  background: #fffdf5;
+}
+
+.quotation-document .signature-table {
+  table-layout: fixed;
+}
+
+.quotation-document .signature-table td {
+  width: 50%;
+  border: 0;
+  padding: 0.75rem 1rem 0;
+}
+
+@page {
+  size: A4;
+  margin: 14mm;
+}
+
+@media print {
+  html,
+  body,
+  #root,
+  #root__layout {
+    background: #fff !important;
+  }
+
+  .quotation-document {
+    width: 210mm !important;
+    max-width: none !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .quotation-document__surface {
+    min-height: auto !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .quotation-document__editor-ui,
+  .quotation-document [data-editor-ui='true'] {
+    display: none !important;
+  }
+
+  .quotation-document__editor {
+    position: static !important;
+  }
+
+  .quotation-document .ProseMirror {
+    min-height: auto;
+    font-size: 10.5pt;
+  }
+
+  .quotation-document [data-block-type],
+  .quotation-document tr,
+  .quotation-document .signature-table,
+  .quotation-document .signature-table td {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+@media (max-width: 600px) {
+  .quotation-document .ProseMirror {
+    font-size: 0.95rem;
+  }
+
+  .quotation-document table {
+    min-width: 34rem;
+  }
+}

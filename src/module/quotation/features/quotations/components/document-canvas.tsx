@@ -1,3 +1,5 @@
+import '../styles/dedicated-document.css';
+
 import type { ReactNode } from 'react';
 
 import Box from '@mui/material/Box';
@@ -10,15 +12,20 @@ type Props = {
 export function DocumentCanvas({ children }: Props) {
   return (
     <Paper
+      className="quotation-document"
       elevation={0}
       sx={{
         overflow: 'hidden',
         border: 1,
         borderColor: 'divider',
         bgcolor: 'background.paper',
+        width: '100%',
+        maxWidth: '210mm',
+        mx: 'auto',
       }}
     >
       <Box
+        className="quotation-document__surface"
         sx={{
           position: 'relative',
           p: { xs: 2, sm: 3, md: 5 },

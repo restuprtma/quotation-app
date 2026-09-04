@@ -2,14 +2,10 @@ import type { JSONContent } from '@tiptap/core';
 
 import Link from '@tiptap/extension-link';
 import StarterKit from '@tiptap/starter-kit';
-import { Table } from '@tiptap/extension-table';
-import TableRow from '@tiptap/extension-table-row';
 import { useRef, useState, useEffect } from 'react';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
-import TableCell from '@tiptap/extension-table-cell';
 import { useEditor, EditorContent } from '@tiptap/react';
-import TableHeader from '@tiptap/extension-table-header';
 
 import Box from '@mui/material/Box';
 
@@ -18,7 +14,16 @@ import { EditorToolbar } from './editor-toolbar';
 import { DocumentCanvas } from './document-canvas';
 import { TableGripOverlay } from './table-grip-overlay';
 import { EditorContextMenu } from './editor-context-menu';
-import { LegalBlockExtension } from './legal-block-extension';
+import {
+  QuotationFieldMark,
+  LegalBlockExtension,
+  QuotationTableExtension,
+  QuotationSectionExtension,
+  QuotationTableRowExtension,
+  QuotationTableCellExtension,
+  QuotationTableHeaderExtension,
+  QuotationFieldAttributesExtension,
+} from './legal-block-extension';
 
 type Props = {
   content: string;
@@ -28,6 +33,20 @@ type Props = {
   onRestoreOfficial?: () => void;
   onChange?: (state: { html: string; json: JSONContent }) => void;
 };
+
+/**
+ * Tiptap serializes the document fragment (the ProseMirror `doc` node has no
+ * HTML wrapper). Keep the official article wrapper on every save so the
+ * persisted draft remains printable and distinguishable from legacy HTML.
+ */
+export function wrapOfficialDocument(html: string): string {
+  const trimmed = html.trim();
+  if (!trimmed) return '<article class="quotation-document"></article>';
+  if (/^<article\b[^>]*class=["'][^"']*\bquotation-document\b/i.test(trimmed)) {
+    return trimmed;
+  }
+  return `<article class="quotation-document">${trimmed}</article>`;
+}
 
 export function QuotationEditor({
   content,
@@ -44,13 +63,16 @@ export function QuotationEditor({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ link: false, underline: false }),
+      QuotationSectionExtension,
+      QuotationFieldAttributesExtension,
+      QuotationFieldMark,
       Underline,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Link.configure({ openOnClick: false }),
-      Table.configure({ resizable: true }),
-      TableRow,
-      TableHeader,
-      TableCell,
+      QuotationTableExtension.configure({ resizable: true }),
+      QuotationTableRowExtension,
+      QuotationTableHeaderExtension,
+      QuotationTableCellExtension,
       LegalBlockExtension.configure({ unlocked: isUnlocked }),
     ],
     editorProps: {
@@ -66,7 +88,10 @@ export function QuotationEditor({
     immediatelyRender: false,
     editable: !disabled,
     onUpdate: ({ editor: currentEditor }) =>
-      onChange?.({ html: currentEditor.getHTML(), json: currentEditor.getJSON() }),
+      onChange?.({
+        html: wrapOfficialDocument(currentEditor.getHTML()),
+        json: currentEditor.getJSON(),
+      }),
   });
 
   useEffect(() => {
@@ -89,15 +114,17 @@ export function QuotationEditor({
 
   return (
     <DocumentCanvas>
-      <EditorToolbar
-        editor={editor}
-        isUnlocked={isUnlocked}
-        onToggleUnlock={onToggleUnlock}
-        onRestoreOfficial={onRestoreOfficial}
-        disabled={disabled}
-      />
-      <TableToolbar editor={editor} />
-      <Box ref={containerRef} sx={{ position: 'relative' }}>
+      <Box className="quotation-document__editor-ui" data-editor-ui="true">
+        <EditorToolbar
+          editor={editor}
+          isUnlocked={isUnlocked}
+          onToggleUnlock={onToggleUnlock}
+          onRestoreOfficial={onRestoreOfficial}
+          disabled={disabled}
+        />
+        <TableToolbar editor={editor} />
+      </Box>
+      <Box ref={containerRef} className="quotation-document__editor" sx={{ position: 'relative' }}>
         <TableGripOverlay editor={editor} containerRef={containerRef} isUnlocked={isUnlocked} />
         <EditorContent editor={editor} />
       </Box>
