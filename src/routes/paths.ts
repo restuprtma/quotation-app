@@ -16,6 +16,8 @@ export const paths = {
       prompt: '/quotation',
       edit: (id: string) => `/quotation/${id}/edit`,
       aiSettings: '/quotation/ai-settings',
+      rateCards: '/quotation/rate-cards',
+      rateCardDetail: (id: string) => `/quotation/rate-cards/${id}`,
     },
     contract: {
       root: '/contract',

@@ -1,12 +1,12 @@
+import React from 'react';
 import { Icon } from '@iconify/react';
-import React, { useState, useEffect } from 'react';
 
 import {
   Box,
-  Chip,
   Table,
   Paper,
   Stack,
+  Button,
   TableRow,
   TableBody,
   TableCell,
@@ -16,51 +16,56 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-import axiosInstance from 'src/shared/lib/axios';
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 
-interface RateCard {
-  id: string;
-  name: string;
-  status: string;
-}
+import { Label } from 'src/shared/ui/label';
 
-interface ApiRateCard {
-  id: string;
-  name: string;
-  is_active?: boolean;
-}
+import { useActiveRateCards } from '../../quotations/hooks/use-active-rate-cards';
 
 export const RateCardSelector = () => {
-  const [rateCards, setRateCards] = useState<RateCard[]>([]);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const { data: rateCards = [], isLoading } = useActiveRateCards();
 
-  useEffect(() => {
-    axiosInstance
-      .get('/quotation/v1/rate-cards?status=active')
-      .then((res) => {
-        const data = res.data?.data || res.data;
-        const mapped = (Array.isArray(data) ? data : []).map((item: ApiRateCard) => ({
-          id: item.id,
-          name: item.name,
-          status: item.is_active ? 'active' : 'inactive',
-        }));
-        setRateCards(mapped);
-      })
-      .catch(() => {
-        setRateCards([
-          { id: 'rc-1', name: 'Standard IT Services 2026', status: 'active' },
-          { id: 'rc-2', name: 'Enterprise Consulting', status: 'active' },
-          { id: 'rc-3', name: 'Legacy Support (Archived)', status: 'inactive' },
-        ]);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+  const getTierColor = (tier?: string) => {
+    switch (tier) {
+      case 'commercial_national':
+        return 'info';
+      case 'government_bumn':
+        return 'warning';
+      case 'international':
+        return 'success';
+      default:
+        return 'default';
+    }
+  };
+
+  const formatTierLabel = (tier?: string) => {
+    switch (tier) {
+      case 'commercial_national':
+        return 'Commercial National';
+      case 'government_bumn':
+        return 'Government / BUMN';
+      case 'international':
+        return 'International';
+      default:
+        return tier || 'Commercial';
+    }
+  };
 
   return (
     <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
-      <Box sx={{ p: 2.5, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+      <Box
+        sx={{
+          p: 2.5,
+          borderBottom: 1,
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <Stack direction="row" alignItems="center" spacing={1.5}>
           <Box
             sx={{
@@ -78,19 +83,37 @@ export const RateCardSelector = () => {
               Rate Cards
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Available pricing models
+              Active pricing models and role rate cards
             </Typography>
           </Box>
         </Stack>
+
+        <Button
+          size="small"
+          variant="outlined"
+          color="primary"
+          onClick={() => router.push(paths.dashboard.quotation.rateCards)}
+          endIcon={<Icon icon="eva:arrow-ios-forward-fill" width={16} />}
+        >
+          Manage Rate Cards
+        </Button>
       </Box>
 
-      {loading ? (
+      {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
           <CircularProgress size={32} thickness={4} />
         </Box>
       ) : rateCards.length === 0 ? (
         <Box sx={{ p: 6, textAlign: 'center' }}>
           <Typography color="text.secondary">No active rate cards found.</Typography>
+          <Button
+            size="small"
+            variant="contained"
+            sx={{ mt: 1.5 }}
+            onClick={() => router.push(paths.dashboard.quotation.rateCards)}
+          >
+            Create Rate Card
+          </Button>
         </Box>
       ) : (
         <TableContainer sx={{ maxHeight: 400 }}>
@@ -100,12 +123,22 @@ export const RateCardSelector = () => {
                 <TableCell
                   sx={{ fontWeight: 600, color: 'text.secondary', bgcolor: 'background.neutral' }}
                 >
-                  ID
+                  Code
                 </TableCell>
                 <TableCell
                   sx={{ fontWeight: 600, color: 'text.secondary', bgcolor: 'background.neutral' }}
                 >
                   Name
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: 600, color: 'text.secondary', bgcolor: 'background.neutral' }}
+                >
+                  Client Tier
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: 600, color: 'text.secondary', bgcolor: 'background.neutral' }}
+                >
+                  Currency
                 </TableCell>
                 <TableCell
                   sx={{
@@ -124,22 +157,28 @@ export const RateCardSelector = () => {
                 <TableRow
                   key={rc.id}
                   hover
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                  sx={{
+                    '&:last-child td, &:last-child th': { border: 0 },
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => router.push(paths.dashboard.quotation.rateCardDetail(rc.id))}
                 >
                   <TableCell
-                    sx={{ fontFamily: 'monospace', color: 'text.secondary', fontSize: '0.875rem' }}
+                    sx={{ fontFamily: 'monospace', color: 'primary.main', fontWeight: 600 }}
                   >
-                    {rc.id}
+                    {rc.code || rc.id}
                   </TableCell>
                   <TableCell sx={{ fontWeight: 500 }}>{rc.name}</TableCell>
+                  <TableCell>
+                    <Label color={getTierColor(rc.client_tier)} variant="soft">
+                      {formatTierLabel(rc.client_tier)}
+                    </Label>
+                  </TableCell>
+                  <TableCell sx={{ color: 'text.secondary' }}>{rc.currency || 'IDR'}</TableCell>
                   <TableCell align="right">
-                    <Chip
-                      label={rc.status}
-                      size="small"
-                      color={rc.status === 'active' ? 'success' : 'default'}
-                      variant={rc.status === 'active' ? 'soft' : 'outlined'}
-                      sx={{ textTransform: 'capitalize', fontWeight: 600, borderRadius: 1 }}
-                    />
+                    <Label color={rc.is_active ? 'success' : 'default'} variant="soft">
+                      {rc.is_active ? 'Active' : 'Inactive'}
+                    </Label>
                   </TableCell>
                 </TableRow>
               ))}

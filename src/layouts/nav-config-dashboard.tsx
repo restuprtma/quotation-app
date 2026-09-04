@@ -34,6 +34,11 @@ export function useNavData(): NavSectionProps['data'] {
             icon: ICONS.quotation,
           },
           {
+            title: t('rate_cards', { defaultValue: 'Rate Cards' }),
+            path: paths.dashboard.quotation.rateCards,
+            icon: icon('ic-invoice'),
+          },
+          {
             title: t('ai_settings', { defaultValue: 'AI Settings' }),
             path: paths.dashboard.quotation.aiSettings,
             icon: icon('ic-setting'),

@@ -22,6 +22,12 @@ const QuotationListPage = lazy(() => import('src/module/quotation/features/quota
 const ContractListPage = lazy(() => import('src/module/contract/features/contracts/pages/list'));
 const ContractEditPage = lazy(() => import('src/module/contract/features/contracts/pages/edit'));
 const AISettingsPage = lazy(() => import('src/module/quotation/features/ai-settings/pages/index'));
+const RateCardListPage = lazy(
+  () => import('src/module/quotation/features/rate-cards/pages/rate-card-list-page')
+);
+const RateCardDetailPage = lazy(
+  () => import('src/module/quotation/features/rate-cards/pages/rate-card-detail-page')
+);
 
 // ----------------------------------------------------------------------
 
@@ -53,6 +59,8 @@ export const dashboardRoutes: RouteObject[] = [
           { path: ':id/edit', element: <QuotationEditorPage /> },
           { path: 'list', element: <QuotationListPage /> },
           { path: 'ai-settings', element: <AISettingsPage /> },
+          { path: 'rate-cards', element: <RateCardListPage /> },
+          { path: 'rate-cards/:id', element: <RateCardDetailPage /> },
         ],
       },
       {

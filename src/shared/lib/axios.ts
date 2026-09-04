@@ -167,6 +167,9 @@ export const endpoints = {
     rateCards: {
       list: '/quotation/v1/rate-cards',
       byId: (id: string) => `/quotation/v1/rate-cards/${id}`,
+      details: (id: string) => `/quotation/v1/rate-cards/${id}/details`,
+      create: '/quotation/v1/rate-cards',
+      delete: (id: string) => `/quotation/v1/rate-cards/${id}`,
     },
   },
 } as const;

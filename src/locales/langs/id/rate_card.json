@@ -1,0 +1,153 @@
+{
+  "title": "Model Harga (Rate Cards)",
+  "subtitle": "Kelola model penetapan harga, 14 role standar, rincian biaya, dan tarif lembur",
+  "buttons": {
+    "new": "Tambah Rate Card",
+    "back": "Kembali ke Daftar",
+    "backToList": "Kembali ke Daftar Rate Card"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Cari berdasarkan kode atau nama...",
+    "searchRolesPlaceholder": "Cari role, nama posisi, senioritas...",
+    "filterTier": "Kategori Klien",
+    "filterMarket": "Pasar",
+    "allTiers": "Semua Kategori Klien",
+    "allMarkets": "Semua Pasar"
+  },
+  "table": {
+    "code": "Kode",
+    "name": "Nama Model",
+    "clientTier": "Kategori Klien",
+    "market": "Pasar",
+    "currency": "Mata Uang",
+    "itemCount": "Jumlah Posisi",
+    "status": "Status",
+    "actions": "Aksi",
+    "role": "Posisi & Kualifikasi",
+    "discipline": "Disiplin",
+    "seniority": "Senioritas",
+    "termType": "Durasi Kerja",
+    "monthlyRate": "Tarif Bulanan",
+    "dailyRate": "Tarif Harian",
+    "hourlyRate": "Tarif Per Jam",
+    "rolesCount": "posisi",
+    "month": "bulan",
+    "noDataTitle": "Tidak Ada Rate Card",
+    "noDataDesc": "Belum ada rate card yang sesuai filter. Klik 'Tambah Rate Card' untuk membuat baru.",
+    "noMatchingRoles": "Tidak ada posisi yang sesuai dengan filter atau pencarian."
+  },
+  "tiers": {
+    "commercialNational": "Komersial Nasional",
+    "governmentBumn": "Pemerintah / BUMN",
+    "international": "Internasional"
+  },
+  "markets": {
+    "national": "Nasional",
+    "international": "Internasional"
+  },
+  "terms": {
+    "shortTerm": "Jangka Pendek (< 6 bln)",
+    "longTerm": "Jangka Panjang (>= 6 bln)"
+  },
+  "status": {
+    "active": "Aktif",
+    "inactive": "Nonaktif"
+  },
+  "disciplines": {
+    "all": "Semua Disiplin",
+    "engineering": "Engineering",
+    "qa": "QA",
+    "product": "Product",
+    "data": "Data",
+    "infrastructure": "Infrastruktur",
+    "support": "Support"
+  },
+  "dialog": {
+    "createTitle": "Buat Rate Card Baru",
+    "codeLabel": "Kode Rate Card",
+    "nameLabel": "Nama Rate Card",
+    "clientTierLabel": "Kategori Klien",
+    "marketLabel": "Pasar",
+    "currencyLabel": "Mata Uang",
+    "shortTermSurchargeLabel": "Biaya Tambahan Jangka Pendek (%)",
+    "enterpriseMarkupLabel": "Markup Korporat / Enterprise (%)",
+    "effectiveFromLabel": "Tanggal Berlaku",
+    "descriptionLabel": "Keterangan",
+    "descriptionPlaceholder": "Catatan atau rincian tambahan untuk rate card ini...",
+    "seedRolesTitle": "Isi Otomatis dengan 14 Role Standar Venturo",
+    "seedRolesDescription": "Secara otomatis membuat tarif dan rincian 5 komponen biaya untuk 14 role × 3 level × 2 jangka waktu",
+    "deleteTitle": "Hapus Rate Card",
+    "deleteDesc": "Apakah Anda yakin ingin menghapus rate card \"{{code}}\" ({{name}})? Tindakan ini tidak dapat dibatalkan."
+  },
+  "actions": {
+    "viewDetails": "Lihat Detail",
+    "delete": "Hapus"
+  },
+  "messages": {
+    "createSuccess": "Rate card berhasil dibuat",
+    "createFailed": "Gagal membuat rate card",
+    "deleteSuccess": "Rate card berhasil dihapus",
+    "deleteFailed": "Gagal menghapus rate card"
+  },
+  "detail": {
+    "title": "Detail Rate Card",
+    "notFound": "Rate card tidak ditemukan atau telah dihapus.",
+    "currency": "Mata Uang Dasar",
+    "shortTermSurcharge": "Surcharge Jangka Pendek",
+    "enterpriseMarkup": "Markup Enterprise",
+    "effectiveDate": "Tanggal Berlaku",
+    "catalogOverview": "Ringkasan Katalog",
+    "rateItems": "Tarif Posisi",
+    "overtimeConfigs": "Aturan Lembur",
+    "infraPackages": "Paket Server"
+  },
+  "tabs": {
+    "rolesAndRates": "Posisi & Tarif",
+    "overtime": "Aturan Lembur",
+    "infrastructure": "Katalog Server"
+  },
+  "breakdown": {
+    "title": "Rincian 5 Komponen Biaya",
+    "baseSalary": "Gaji Pokok Squad",
+    "baseSalarySub": "Alokasi gaji langsung tim pelaksana",
+    "techLeadFee": "Alokasi Tech Lead",
+    "techLeadFeeSub": "Pengawasan arsitektur dan supervisi teknis",
+    "aiRndFee": "Alokasi AI & R&D",
+    "aiRndFeeSub": "Langganan AI dan alat pengembangan teknologi",
+    "workspaceFee": "Ruang Kerja & Perangkat",
+    "workspaceFeeSub": "Lingkungan pengembangan, perkakas, dan lisensi",
+    "managementFee": "Manajemen Rekayasa",
+    "managementFeeSub": "Manajemen pengiriman proyek dan kontrol mutu"
+  },
+  "negotiation": {
+    "title": "Batas Negosiasi",
+    "publishedRate": "Harga Terbitan",
+    "maxDiscount": "Diskon Maksimal",
+    "floorRate": "Harga Dasar (Batas Bawah)"
+  },
+  "preparation": {
+    "title": "Biaya Persiapan & Rekrutmen",
+    "oneTime": "Satu kali per personel",
+    "kickoffFee": "Biaya Kickoff Proyek",
+    "recruitmentFee": "Perekrutan & Seleksi",
+    "onboardingFee": "Penyiapan Perangkat & Onboarding",
+    "totalHiringFee": "Total Biaya Persiapan"
+  },
+  "overtime": {
+    "noConfigs": "Tidak ada aturan lembur khusus untuk rate card ini.",
+    "baseMonthlyRate": "Dasar Tarif Bulanan",
+    "hourlyDivisor": "Pembagi Jam (Kemenaker)",
+    "hourlyRate": "Tarif Dasar Per Jam",
+    "workdayRate": "Pengali Hari Kerja",
+    "holidayRate": "Pengali Hari Libur"
+  },
+  "infra": {
+    "noPackages": "Tidak ada paket infrastruktur dalam rate card ini.",
+    "packageName": "Nama Paket",
+    "category": "Kategori",
+    "vcpu": "CPU",
+    "ram": "RAM",
+    "storage": "Penyimpanan",
+    "amountPerMonth": "Tarif / Bulan"
+  }
+}

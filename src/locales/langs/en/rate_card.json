@@ -1,0 +1,153 @@
+{
+  "title": "Rate Cards",
+  "subtitle": "Manage pricing models, standard roles, cost breakdowns, and overtime rates",
+  "buttons": {
+    "new": "New Rate Card",
+    "back": "Back to Rate Cards",
+    "backToList": "Back to Rate Card List"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Search by code or name...",
+    "searchRolesPlaceholder": "Search role, title, seniority...",
+    "filterTier": "Client Tier",
+    "filterMarket": "Market",
+    "allTiers": "All Client Tiers",
+    "allMarkets": "All Markets"
+  },
+  "table": {
+    "code": "Code",
+    "name": "Name",
+    "clientTier": "Client Tier",
+    "market": "Market",
+    "currency": "Currency",
+    "itemCount": "Items",
+    "status": "Status",
+    "actions": "Actions",
+    "role": "Role & Requirements",
+    "discipline": "Discipline",
+    "seniority": "Seniority",
+    "termType": "Term Type",
+    "monthlyRate": "Monthly Rate",
+    "dailyRate": "Daily Rate",
+    "hourlyRate": "Hourly Rate",
+    "rolesCount": "roles",
+    "month": "month",
+    "noDataTitle": "No Rate Cards Found",
+    "noDataDesc": "No rate cards found matching your filter criteria. Click 'New Rate Card' to create one.",
+    "noMatchingRoles": "No roles found matching your filter or search query."
+  },
+  "tiers": {
+    "commercialNational": "Commercial National",
+    "governmentBumn": "Government / BUMN",
+    "international": "International"
+  },
+  "markets": {
+    "national": "National",
+    "international": "International"
+  },
+  "terms": {
+    "shortTerm": "Short-Term (< 6 mos)",
+    "longTerm": "Long-Term (>= 6 mos)"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "disciplines": {
+    "all": "All Disciplines",
+    "engineering": "Engineering",
+    "qa": "QA",
+    "product": "Product",
+    "data": "Data",
+    "infrastructure": "Infrastructure",
+    "support": "Support"
+  },
+  "dialog": {
+    "createTitle": "Create New Rate Card",
+    "codeLabel": "Rate Card Code",
+    "nameLabel": "Rate Card Name",
+    "clientTierLabel": "Client Tier",
+    "marketLabel": "Market",
+    "currencyLabel": "Currency",
+    "shortTermSurchargeLabel": "Short-Term Surcharge (%)",
+    "enterpriseMarkupLabel": "Enterprise Markup (%)",
+    "effectiveFromLabel": "Effective Date",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Optional description or notes for this rate card...",
+    "seedRolesTitle": "Populate with 14 Standard Venturo Roles",
+    "seedRolesDescription": "Automatically generates rates and cost breakdowns across 14 roles × 3 seniorities × 2 term types",
+    "deleteTitle": "Delete Rate Card",
+    "deleteDesc": "Are you sure you want to delete rate card \"{{code}}\" ({{name}})? This action cannot be undone."
+  },
+  "actions": {
+    "viewDetails": "View Details",
+    "delete": "Delete"
+  },
+  "messages": {
+    "createSuccess": "Rate card created successfully",
+    "createFailed": "Failed to create rate card",
+    "deleteSuccess": "Rate card deleted successfully",
+    "deleteFailed": "Failed to delete rate card"
+  },
+  "detail": {
+    "title": "Rate Card Detail",
+    "notFound": "Rate card not found or has been deleted.",
+    "currency": "Base Currency",
+    "shortTermSurcharge": "Short-Term Surcharge",
+    "enterpriseMarkup": "Enterprise Markup",
+    "effectiveDate": "Effective Date",
+    "catalogOverview": "Catalog Overview",
+    "rateItems": "Role Rates",
+    "overtimeConfigs": "Overtime Rules",
+    "infraPackages": "Infra Packages"
+  },
+  "tabs": {
+    "rolesAndRates": "Roles & Rates",
+    "overtime": "Overtime Rules",
+    "infrastructure": "Infrastructure Catalog"
+  },
+  "breakdown": {
+    "title": "5-Component Cost Breakdown",
+    "baseSalary": "Squad Base",
+    "baseSalarySub": "Development squad direct base salary",
+    "techLeadFee": "Tech Lead Allocation",
+    "techLeadFeeSub": "Architectural governance and senior oversight",
+    "aiRndFee": "AI & R&D Fee",
+    "aiRndFeeSub": "AI subscription and tooling allocation",
+    "workspaceFee": "Engineering Workspace",
+    "workspaceFeeSub": "Development environments, tooling, and licenses",
+    "managementFee": "Engineering Management",
+    "managementFeeSub": "Project delivery management and quality supervision"
+  },
+  "negotiation": {
+    "title": "Negotiation Parameters",
+    "publishedRate": "Published Rate",
+    "maxDiscount": "Max Discount",
+    "floorRate": "Floor Rate (Bottom Line)"
+  },
+  "preparation": {
+    "title": "Preparation & Hiring Fees",
+    "oneTime": "One-time per resource",
+    "kickoffFee": "Project Kickoff Fee",
+    "recruitmentFee": "Recruitment & Screening",
+    "onboardingFee": "Workspace & Onboarding",
+    "totalHiringFee": "Total Hiring Cost"
+  },
+  "overtime": {
+    "noConfigs": "No overtime rate configurations found for this rate card.",
+    "baseMonthlyRate": "Base Monthly Rate",
+    "hourlyDivisor": "Divisor (Kemenaker)",
+    "hourlyRate": "Base Hourly Rate",
+    "workdayRate": "Workday Multipliers",
+    "holidayRate": "Holiday Multipliers"
+  },
+  "infra": {
+    "noPackages": "No infrastructure packages defined for this rate card.",
+    "packageName": "Package Name",
+    "category": "Category",
+    "vcpu": "CPU",
+    "ram": "RAM",
+    "storage": "Storage",
+    "amountPerMonth": "Rate / Month"
+  }
+}

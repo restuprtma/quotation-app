@@ -12,12 +12,12 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
+import Checkbox from '@mui/material/Checkbox';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import CircularProgress from '@mui/material/CircularProgress';
-import Checkbox from '@mui/material/Checkbox';
 
 import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
@@ -28,8 +28,8 @@ import { useActiveSkills } from '../hooks/use-active-skills';
 import { useActiveRateCards } from '../hooks/use-active-rate-cards';
 import {
   SOLUTION_TYPES,
-  STANDARD_DEVELOPMENT_ACTIVITIES,
   SCOPE_PRESETS_BY_SOLUTION_TYPE,
+  STANDARD_DEVELOPMENT_ACTIVITIES,
 } from '../constants/scope-presets';
 
 // ----------------------------------------------------------------------
@@ -556,7 +556,11 @@ export function QuotationGenerationForm({
                   >
                     {rateCards.map((rc) => (
                       <MenuItem key={rc.id} value={rc.id}>
-                        {rc.name} ({rc.code}) — {rc.currency}
+                        {rc.name} ({rc.code})
+                        {rc.client_tier
+                          ? ` [${rc.client_tier.replace(/_/g, ' ').toUpperCase()}]`
+                          : ''}{' '}
+                        — {rc.currency}
                       </MenuItem>
                     ))}
                     {rateCards.length === 0 && (

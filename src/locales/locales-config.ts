@@ -51,6 +51,7 @@ const productionNamespaces = new Set([
   'messages',
   'navigation',
   'quotation',
+  'rate_card',
   'settings',
 ]);
 

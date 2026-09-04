@@ -112,8 +112,10 @@ export type RateCardSummary = {
   code: string;
   name: string;
   market: string;
+  client_tier?: string;
   currency: string;
   is_active: boolean;
+  item_count?: number;
 };
 
 export type ClientSummary = {
