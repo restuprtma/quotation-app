@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { it, expect, describe } from 'vitest';
+
 import {
   SOLUTION_TYPES,
-  STANDARD_DEVELOPMENT_ACTIVITIES,
   SCOPE_PRESETS_BY_SOLUTION_TYPE,
+  STANDARD_DEVELOPMENT_ACTIVITIES,
 } from './scope-presets';
 
 describe('Quotation Form Constants and Presets', () => {
