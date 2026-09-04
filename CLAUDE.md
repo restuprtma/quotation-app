@@ -123,6 +123,7 @@ Proyek ini punya standarisasi terdokumentasi di [docs/](docs/). **Baca ini sebel
 ### Canonical reference
 
 - **Quotation feature:** [src/module/quotation/features/quotations/](src/module/quotation/features/quotations/)
+- **Rate Cards feature:** [src/module/quotation/features/rate-cards/](src/module/quotation/features/rate-cards/) (Full CRUD, TanStack Query, cost breakdown cards, overtime configs, infra catalog, integer IDR formatters)
 
 Saat ragu:
 1. Baca implementasi di referensi yang paling mendekati kebutuhan
