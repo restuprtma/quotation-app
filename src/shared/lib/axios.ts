@@ -156,6 +156,7 @@ export const endpoints = {
       create: '/quotation/v1/quotations',
       update: (id: string) => `/quotation/v1/quotations/${id}`,
       generate: '/quotation/v1/quotations/generate',
+      preview: '/quotation/v1/quotations/preview',
       regenerate: (id: string) => `/quotation/v1/quotations/${id}/regenerate`,
       generationStatus: (id: string) => `/quotation/v1/quotations/${id}/generation-status`,
       saveDraft: (id: string) => `/quotation/v1/quotations/${id}/draft`,

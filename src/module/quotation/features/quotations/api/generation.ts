@@ -8,6 +8,7 @@ import type {
   GenerateQuotationPayload,
   QuotationGenerationDetail,
   GenerateQuotationResponse,
+  DedicatedSquadPreviewResponse,
 } from '../types';
 
 import axios, { endpoints } from 'src/shared/lib/axios';
@@ -35,6 +36,17 @@ async function unwrap<T>(promise: Promise<{ data: ApiEnvelope<T> }>) {
 export function generateQuotation(payload: GenerateQuotationPayload) {
   return unwrap<GenerateQuotationResponse>(
     axios.post(endpoints.quotation.quotations.generate, payload)
+  );
+}
+
+/**
+ * Calculate the dedicated squad preview. The server owns all money math and
+ * visibility decisions; this request never persists a quotation or invokes
+ * the AI provider.
+ */
+export function previewDedicatedSquad(payload: GenerateQuotationPayload, signal?: AbortSignal) {
+  return unwrap<DedicatedSquadPreviewResponse>(
+    axios.post(endpoints.quotation.quotations.preview, payload, { signal })
   );
 }
 

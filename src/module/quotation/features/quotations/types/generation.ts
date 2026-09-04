@@ -9,6 +9,42 @@ export type PaymentTermsInput = {
   items: PaymentTermItem[];
 };
 
+export type SquadModel = '1A' | '1B' | '1C' | '1D';
+
+export type DedicatedTimelineMode = 'relative' | 'calendar' | 'sprint';
+
+/**
+ * Values in headcount_quarters and period_quarters are quarter-units. The
+ * backend deliberately uses integers (1 = 0.25 FTE/month) so preview and
+ * generation cannot drift because of floating point arithmetic.
+ */
+export type SquadLineInput = {
+  role: string;
+  seniority: string;
+  headcount_quarters: number;
+  period_quarters: number;
+  workday_count?: number;
+};
+
+export type DedicatedTimelineInput = {
+  mode: DedicatedTimelineMode | '';
+  start_date?: string;
+  sprint_end_date?: string;
+};
+
+export type DedicatedSquadInput = {
+  model: SquadModel;
+  requirement: string;
+  development_squad: SquadLineInput[];
+  maintenance_enabled: boolean;
+  maintenance_squad: SquadLineInput[];
+  kickoff_discount_bps: number;
+  payment_count: number;
+  /** ISO calendar date used by the backend for invoices and H+14 due dates. */
+  payment_anchor_date: string;
+  timeline: DedicatedTimelineInput;
+};
+
 export type GenerateQuotationPayload = {
   idempotency_key?: string;
   skill_id: string;
@@ -20,13 +56,15 @@ export type GenerateQuotationPayload = {
   commercial_scheme: 'dedicated_squad';
   rate_card_id: string;
   rate_card_code?: string;
-  project_duration_months: number;
-  budget_maximum: number;
-  summary: string;
-  mandatory_scope: string[];
+  dedicated_squad: DedicatedSquadInput;
+  /** Legacy fields remain optional for old revisions and compatibility. */
+  project_duration_months?: number;
+  budget_maximum?: number;
+  summary?: string;
+  mandatory_scope?: string[];
   optional_scope?: string[];
   allowed_standard_activities?: string[];
-  payment_terms: PaymentTermsInput;
+  payment_terms?: PaymentTermsInput;
   additional_notes?: string;
   discount_type?: 'none' | 'round_to_target' | 'fixed_amount' | 'percent';
   discount_input?: number;
@@ -36,6 +74,53 @@ export type GenerateQuotationPayload = {
 
 export type GenerateQuotationResponse = {
   quotation_id: string;
+};
+
+export type SquadLineCalculation = SquadLineInput & {
+  term_type: 'short_term' | 'long_term' | string;
+  amount_per_unit: number;
+  line_total: number;
+};
+
+export type PreparationCalculation = {
+  kind: 'hiring' | 'engineering_kickoff' | 'none' | string;
+  gross: number;
+  discount: number;
+  net: number;
+};
+
+export type PaymentRow = {
+  work_period: string;
+  terms: string;
+  invoice_date: string;
+  due_date: string;
+  nominal: number;
+};
+
+export type DedicatedSquadCalculation = {
+  model: SquadModel;
+  development: SquadLineCalculation[];
+  development_subtotal: number;
+  maintenance: SquadLineCalculation[];
+  maintenance_subtotal: number;
+  preparation: PreparationCalculation;
+  total: number;
+  discount: number;
+  total_investment: number;
+  payments: PaymentRow[];
+};
+
+export type DedicatedSquadDocumentSection = {
+  number: number;
+  code: string;
+  title: string;
+};
+
+export type DedicatedSquadPreviewResponse = {
+  calculation: DedicatedSquadCalculation;
+  visible_sections: DedicatedSquadDocumentSection[];
+  include_k6: boolean;
+  include_pentest: boolean;
 };
 
 export type GenerationProgressStage =
