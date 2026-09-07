@@ -32,6 +32,8 @@ import { useActiveSkills } from '../hooks/use-active-skills';
 import { useActiveRateCards } from '../hooks/use-active-rate-cards';
 import { useDedicatedSquadPreview } from '../hooks/use-quotation-generation';
 import { QuotationCalculationPreview } from './quotation-calculation-preview';
+import { QuotationProfilePanel } from './quotation-profile-panel';
+import { normalizeQuotationProfileForMode } from '../constants/dedicated-squad';
 import {
   DEDICATED_SQUAD_MODELS,
   getDefaultPaymentCount,
@@ -85,6 +87,28 @@ const commonDedicatedFields = {
   payment_anchor_date: z.string().regex(ISO_DATE_PATTERN),
 };
 
+const quotationProfileSchema = z.object({
+  preparation_mode: z.enum(['', 'none', 'hiring', 'engineering_kickoff']).optional(),
+  preparation_discount_bps: z.number().int().min(0).max(10_000).optional(),
+  maintenance_mode: z.enum(['', 'none', 'separate_section', 'within_development']).optional(),
+  scope_timeline_mode: z.enum(['', 'none', 'relative', 'calendar', 'sprint']).optional(),
+  included_phases: z.array(z.enum(['requirement', 'development', 'sit', 'uat', 'go_live', 'maintenance', 'k6', 'pentest'])).optional(),
+  payment_mode: z.enum(['', 'preset', 'explicit_rows']).optional(),
+  payment_rows: z.array(z.object({
+    work_period: z.string().trim().min(1).max(120),
+    terms: z.string().trim().min(1).max(120),
+    allocation_kind: z.enum(['investment_bps', 'net_preparation', 'remaining_bps']),
+    allocation_bps: z.number().int().min(0).max(10_000).optional(),
+    invoice_month_offset: z.number().int().min(0).max(59).optional(),
+    invoice_at_sprint_end: z.boolean().optional(),
+  })).max(60).optional(),
+  document_options: z.object({
+    letter_prefix: z.enum(['CTH', 'VEN', 'LANDA', 'VENTURO']).optional(),
+    tax_treatment: z.enum(['', 'exclusive_ppn', 'inclusive_ppn']).optional(),
+    clause_codes: z.array(z.enum(['out_of_pocket', 'overtime', 'onsite', 'third_party'])).optional(),
+  }).optional(),
+}).optional();
+
 /**
  * Keep the form contract discriminated by model. The API has the same matrix;
  * this prevents controls hidden for one model from leaking into its payload.
@@ -98,6 +122,7 @@ export const dedicatedSquadSchema = z.discriminatedUnion('model', [
     maintenance_squad: z.array(projectLineSchema),
     kickoff_discount_bps: z.literal(0),
     timeline: projectTimelineSchema,
+    quotation_profile: quotationProfileSchema,
   }),
   z.object({
     model: z.literal('1B'),
@@ -107,6 +132,7 @@ export const dedicatedSquadSchema = z.discriminatedUnion('model', [
     maintenance_squad: z.array(projectLineSchema).max(0),
     kickoff_discount_bps: z.literal(0),
     timeline: projectTimelineSchema,
+    quotation_profile: quotationProfileSchema,
   }),
   z.object({
     model: z.literal('1C'),
@@ -116,6 +142,7 @@ export const dedicatedSquadSchema = z.discriminatedUnion('model', [
     maintenance_squad: z.array(projectLineSchema).max(0),
     kickoff_discount_bps: z.union([z.literal(5_000), z.literal(10_000)]),
     timeline: noTimelineSchema,
+    quotation_profile: quotationProfileSchema,
   }),
   z.object({
     model: z.literal('1D'),
@@ -125,6 +152,7 @@ export const dedicatedSquadSchema = z.discriminatedUnion('model', [
     maintenance_squad: z.array(projectLineSchema).max(0),
     kickoff_discount_bps: z.literal(0),
     timeline: sprintTimelineSchema,
+    quotation_profile: quotationProfileSchema,
   }),
 ]);
 
@@ -233,6 +261,7 @@ export function toDedicatedSquadPayload(
       requirement,
       development_squad: data.dedicated_squad.development_squad.map((line) => ({ ...line })),
       maintenance_squad: data.dedicated_squad.maintenance_squad.map((line) => ({ ...line })),
+      quotation_profile: normalizeQuotationProfileForMode(data.dedicated_squad.quotation_profile),
     },
   };
 }
@@ -493,6 +522,8 @@ export function QuotationGenerationForm({
               />
 
               <SquadPicker name="dedicated_squad.development_squad" model={model} disabled={isSubmitting} />
+
+              <QuotationProfilePanel disabled={isSubmitting} />
 
               {visibility.includeMaintenance && (
                 <>

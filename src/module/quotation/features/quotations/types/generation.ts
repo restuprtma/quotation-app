@@ -12,6 +12,39 @@ export type PaymentTermsInput = {
 export type SquadModel = '1A' | '1B' | '1C' | '1D';
 
 export type DedicatedTimelineMode = 'relative' | 'calendar' | 'sprint';
+export type PreparationMode = '' | 'none' | 'hiring' | 'engineering_kickoff';
+export type MaintenanceMode = '' | 'none' | 'separate_section' | 'within_development';
+export type ScopeTimelineMode = '' | 'none' | 'relative' | 'calendar' | 'sprint';
+export type QuotationPaymentMode = '' | 'preset' | 'explicit_rows';
+export type PaymentAllocationKind = 'investment_bps' | 'net_preparation' | 'remaining_bps';
+export type TaxTreatment = '' | 'exclusive_ppn' | 'inclusive_ppn';
+export type QuotationPhase = 'requirement' | 'development' | 'sit' | 'uat' | 'go_live' | 'maintenance' | 'k6' | 'pentest';
+
+export type PaymentRowInput = {
+  work_period: string;
+  terms: string;
+  allocation_kind: PaymentAllocationKind;
+  allocation_bps?: number;
+  invoice_month_offset?: number;
+  invoice_at_sprint_end?: boolean;
+};
+
+export type DocumentOptionsInput = {
+  letter_prefix?: 'CTH' | 'VEN' | 'LANDA' | 'VENTURO';
+  tax_treatment?: TaxTreatment;
+  clause_codes?: string[];
+};
+
+export type QuotationProfileInput = {
+  preparation_mode?: PreparationMode;
+  preparation_discount_bps?: number;
+  maintenance_mode?: MaintenanceMode;
+  scope_timeline_mode?: ScopeTimelineMode;
+  included_phases?: QuotationPhase[];
+  payment_mode?: QuotationPaymentMode;
+  payment_rows?: PaymentRowInput[];
+  document_options?: DocumentOptionsInput;
+};
 
 /**
  * Values in headcount_quarters and period_quarters are quarter-units. The
@@ -43,6 +76,7 @@ export type DedicatedSquadInput = {
   /** ISO calendar date used by the backend for invoices and H+14 due dates. */
   payment_anchor_date: string;
   timeline: DedicatedTimelineInput;
+  quotation_profile?: QuotationProfileInput;
 };
 
 export type GenerateQuotationPayload = {
@@ -118,6 +152,12 @@ export type DedicatedSquadDocumentSection = {
 
 export type DedicatedSquadPreviewResponse = {
   calculation: DedicatedSquadCalculation;
+  resolved_profile: QuotationProfileInput & {
+    preparation_kind?: string;
+    preparation_discount_bps?: number;
+    maintenance_mode?: MaintenanceMode;
+    scope_timeline_mode?: ScopeTimelineMode;
+  };
   visible_sections: DedicatedSquadDocumentSection[];
   include_k6: boolean;
   include_pentest: boolean;

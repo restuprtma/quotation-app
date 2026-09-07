@@ -5,6 +5,8 @@ import {
   isGeneratorRateCardCode,
   GENERATOR_RATE_CARD_CODES,
   getDedicatedSquadVisibility,
+  getQuotationProfileVisibility,
+  normalizeQuotationProfileForMode,
 } from './dedicated-squad';
 
 describe('dedicated squad visibility', () => {
@@ -50,6 +52,27 @@ describe('dedicated squad visibility', () => {
   });
 });
 
+describe('quotation profile helpers', () => {
+  it('reveals only controls required by the selected modes', () => {
+    expect(getQuotationProfileVisibility({ preparation_mode: 'hiring', payment_mode: 'explicit_rows' })).toMatchObject({
+      showDiscount: true,
+      showPaymentRows: true,
+      showMaintenanceSquad: false,
+    });
+  });
+
+  it('removes dependent fields before payload serialization', () => {
+    expect(normalizeQuotationProfileForMode({
+      preparation_mode: 'none',
+      preparation_discount_bps: 2500,
+      scope_timeline_mode: 'none',
+      included_phases: ['development'],
+      payment_mode: 'preset',
+      payment_rows: [{ work_period: 'Kick off', terms: 'DP', allocation_kind: 'investment_bps', allocation_bps: 10_000 }],
+    })).toEqual({ preparation_mode: 'none', scope_timeline_mode: 'none', payment_mode: 'preset' });
+  });
+});
+
 describe('dedicated squad constants', () => {
   it('restricts generator cards to the four seeded cards', () => {
     expect(GENERATOR_RATE_CARD_CODES).toEqual([
@@ -67,4 +90,3 @@ describe('dedicated squad constants', () => {
     expect(getDefaultPaymentCount('1A')).toBe(3);
   });
 });
-

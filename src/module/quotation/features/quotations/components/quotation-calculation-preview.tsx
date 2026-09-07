@@ -77,6 +77,21 @@ export function QuotationCalculationPreview({
 
         {preview && !error && (
           <>
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 0.5 }}>Konfigurasi efektif</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Persiapan: {preview.resolved_profile.preparation_kind || preview.resolved_profile.preparation_mode || 'preset'}
+                {' · '}Maintenance: {preview.resolved_profile.maintenance_mode || 'preset'}
+                {' · '}Timeline: {preview.resolved_profile.scope_timeline_mode || 'preset'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Prefix: {preview.resolved_profile.document_options?.letter_prefix || 'CTH'}
+                {' · '}Pajak: {preview.resolved_profile.document_options?.tax_treatment || 'exclusive_ppn'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Seksi: {preview.visible_sections.map((section) => `${section.number}. ${section.title}`).join(' · ')}
+              </Typography>
+            </Box>
             <Stack spacing={1}>
               <PreviewAmountRow
                 label={t('dedicatedSquadForm.preview.grossPreparation')}
@@ -177,4 +192,3 @@ function formatDate(value: string) {
     year: 'numeric',
   }).format(date);
 }
-

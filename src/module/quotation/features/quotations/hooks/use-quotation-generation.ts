@@ -53,6 +53,12 @@ export function normalizeDedicatedSquadPreviewPayload(
       ...squad,
       development_squad: squad.development_squad.map((line) => ({ ...line })),
       maintenance_squad: squad.maintenance_squad.map((line) => ({ ...line })),
+      quotation_profile: squad.quotation_profile ? {
+        ...squad.quotation_profile,
+        included_phases: squad.quotation_profile.included_phases ? [...squad.quotation_profile.included_phases] : undefined,
+        payment_rows: squad.quotation_profile.payment_rows?.map((row) => ({ ...row })),
+        document_options: squad.quotation_profile.document_options ? { ...squad.quotation_profile.document_options, clause_codes: squad.quotation_profile.document_options.clause_codes ? [...squad.quotation_profile.document_options.clause_codes] : undefined } : undefined,
+      } : undefined,
     },
   };
 }

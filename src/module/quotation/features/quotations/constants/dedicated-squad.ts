@@ -1,4 +1,45 @@
-import type { SquadModel } from '../types';
+import type { QuotationProfileInput, SquadModel } from '../types';
+
+export const QUOTATION_PROFILE_OPTIONS = {
+  preparation: ['none', 'hiring', 'engineering_kickoff'],
+  maintenance: ['none', 'separate_section', 'within_development'],
+  timeline: ['none', 'relative', 'calendar', 'sprint'],
+  phases: ['requirement', 'development', 'sit', 'uat', 'go_live', 'maintenance', 'k6', 'pentest'],
+  paymentAllocation: ['investment_bps', 'net_preparation', 'remaining_bps'],
+  prefixes: ['CTH', 'VEN', 'LANDA', 'VENTURO'],
+  tax: ['exclusive_ppn', 'inclusive_ppn'],
+  clauses: ['out_of_pocket', 'overtime', 'onsite', 'third_party'],
+} as const;
+
+export function getQuotationProfileVisibility(profile?: QuotationProfileInput) {
+  return {
+    showDiscount: profile?.preparation_mode === 'hiring' || profile?.preparation_mode === 'engineering_kickoff',
+    showMaintenanceSquad: profile?.maintenance_mode === 'separate_section' || profile?.maintenance_mode === 'within_development',
+    showPhases: Boolean(profile?.scope_timeline_mode && profile.scope_timeline_mode !== 'none'),
+    showPaymentRows: profile?.payment_mode === 'explicit_rows',
+  };
+}
+
+/** Removes dependent values before a profile is serialized to the API. */
+export function normalizeQuotationProfileForMode(profile?: QuotationProfileInput): QuotationProfileInput | undefined {
+  if (!profile) return undefined;
+  const next: QuotationProfileInput = {
+    ...profile,
+    included_phases: profile.included_phases ? [...profile.included_phases] : undefined,
+    payment_rows: profile.payment_rows?.map((row) => ({ ...row })),
+    document_options: profile.document_options
+      ? { ...profile.document_options, clause_codes: profile.document_options.clause_codes ? [...profile.document_options.clause_codes] : undefined }
+      : undefined,
+  };
+  if (next.preparation_mode === 'none') delete next.preparation_discount_bps;
+  if (next.scope_timeline_mode === 'none') delete next.included_phases;
+  if (next.payment_mode !== 'explicit_rows') delete next.payment_rows;
+  next.payment_rows?.forEach((row) => {
+    if (row.allocation_kind === 'net_preparation') delete row.allocation_bps;
+  });
+  const hasValue = Object.entries(next).some(([key, value]) => key !== 'document_options' ? value !== undefined && value !== '' : value && Object.values(value).some(Boolean));
+  return hasValue ? next : undefined;
+}
 
 export const GENERATOR_RATE_CARD_CODES = [
   'DEFAULT',
@@ -109,4 +150,3 @@ export function getDefaultTimelineMode(model: SquadModel): 'relative' | 'calenda
       return '';
   }
 }
-
