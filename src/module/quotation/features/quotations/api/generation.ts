@@ -9,6 +9,7 @@ import type {
   QuotationGenerationDetail,
   GenerateQuotationResponse,
   DedicatedSquadPreviewResponse,
+  SubscriptionSaaSPreviewResponse,
 } from '../types';
 
 import axios, { endpoints } from 'src/shared/lib/axios';
@@ -47,6 +48,16 @@ export function generateQuotation(payload: GenerateQuotationPayload) {
 export function previewDedicatedSquad(payload: GenerateQuotationPayload, signal?: AbortSignal) {
   return unwrap<DedicatedSquadPreviewResponse>(
     axios.post(endpoints.quotation.quotations.preview, payload, { signal })
+  );
+}
+
+/**
+ * Calculate the subscription SaaS preview. The server owns all money math,
+ * section planning, and profile resolutions without calling AI or persisting data.
+ */
+export function previewSubscriptionSaaS(payload: GenerateQuotationPayload, signal?: AbortSignal) {
+  return unwrap<SubscriptionSaaSPreviewResponse>(
+    axios.post(endpoints.quotation.quotations.subscriptionPreview, payload, { signal })
   );
 }
 

@@ -2,12 +2,14 @@ import type {
   GenerateQuotationPayload,
   GenerateQuotationResponse,
   DedicatedSquadPreviewResponse,
+  SubscriptionSaaSPreviewResponse,
 } from '../types';
 
 import { useMemo, useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { generateQuotation, previewDedicatedSquad } from '../api';
+import { normalizeSubscriptionSaaS } from '../constants/subscription-saas';
+import { generateQuotation, previewDedicatedSquad, previewSubscriptionSaaS } from '../api';
 
 function generateUUID(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -44,7 +46,7 @@ export const DEDICATED_SQUAD_PREVIEW_QUERY_KEY = ['quotation', 'dedicated-squad-
 export function normalizeDedicatedSquadPreviewPayload(
   payload: GenerateQuotationPayload | null | undefined
 ) {
-  if (!payload) return null;
+  if (!payload || payload.commercial_scheme !== 'dedicated_squad') return null;
 
   const squad = payload.dedicated_squad;
   return {
@@ -98,12 +100,13 @@ export function useDedicatedSquadPreview(
       debounced ? JSON.stringify(debounced) : 'disabled',
     ],
     queryFn: ({ signal }) => {
-      if (!payload || !debounced) {
+      if (!payload || !debounced || payload.commercial_scheme !== 'dedicated_squad') {
         throw new Error('Dedicated squad preview is disabled');
       }
       return previewDedicatedSquad(
         {
           ...payload,
+          commercial_scheme: 'dedicated_squad',
           rate_card_id: debounced.rate_card_id,
           dedicated_squad: debounced.dedicated_squad,
         },
@@ -118,3 +121,75 @@ export function useDedicatedSquadPreview(
 
   return { ...query, isDebouncing };
 }
+
+export const SUBSCRIPTION_SAAS_PREVIEW_QUERY_KEY = [
+  'quotation',
+  'subscription-saas-preview',
+] as const;
+
+export function normalizeSubscriptionSaaSPreviewPayload(
+  payload: GenerateQuotationPayload | null | undefined
+) {
+  if (!payload || payload.commercial_scheme !== 'subscription_saas') return null;
+  return {
+    commercial_scheme: payload.commercial_scheme,
+    subscription_saas: normalizeSubscriptionSaaS(payload.subscription_saas),
+  };
+}
+
+/**
+ * Debounced server-authoritative preview for Subscription SaaS. TanStack Query
+ * supplies an AbortSignal to Axios, so rapid typing cancels stale in-flight
+ * preview requests.
+ */
+export function useSubscriptionSaaSPreview(
+  payload: GenerateQuotationPayload | null | undefined,
+  enabled = true
+) {
+  const normalized = useMemo(() => normalizeSubscriptionSaaSPreviewPayload(payload), [payload]);
+  const [debounced, setDebounced] = useState(normalized);
+  const [isDebouncing, setIsDebouncing] = useState(false);
+
+  useEffect(() => {
+    if (!enabled || !normalized) {
+      setDebounced(null);
+      setIsDebouncing(false);
+      return undefined;
+    }
+
+    setIsDebouncing(true);
+    const timer = setTimeout(() => {
+      setDebounced(normalized);
+      setIsDebouncing(false);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [enabled, normalized]);
+
+  const query = useQuery<SubscriptionSaaSPreviewResponse, Error>({
+    queryKey: [
+      ...SUBSCRIPTION_SAAS_PREVIEW_QUERY_KEY,
+      debounced ? JSON.stringify(debounced) : 'disabled',
+    ],
+    queryFn: ({ signal }) => {
+      if (!payload || !debounced || payload.commercial_scheme !== 'subscription_saas') {
+        throw new Error('Subscription SaaS preview is disabled');
+      }
+      return previewSubscriptionSaaS(
+        {
+          ...payload,
+          commercial_scheme: 'subscription_saas',
+          subscription_saas: debounced.subscription_saas,
+        },
+        signal
+      );
+    },
+    enabled: Boolean(enabled && payload && debounced),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+
+  return { ...query, isDebouncing };
+}
+

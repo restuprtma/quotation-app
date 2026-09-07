@@ -1,19 +1,19 @@
 import { useEffect } from 'react';
-import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { useWatch, useFieldArray, useFormContext } from 'react-hook-form';
 
-import Accordion from '@mui/material/Accordion';
+import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
+import Accordion from '@mui/material/Accordion';
+import Typography from '@mui/material/Typography';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import Grid from '@mui/material/Grid';
-import MenuItem from '@mui/material/MenuItem';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
 
 import { Iconify } from 'src/shared/ui/iconify';
 import { RHFSelect, RHFTextField } from 'src/shared/ui/hook-form';
 
-import { getQuotationProfileVisibility, QUOTATION_PROFILE_OPTIONS } from '../constants/dedicated-squad';
+import { QUOTATION_PROFILE_OPTIONS, getQuotationProfileVisibility } from '../constants/dedicated-squad';
 
 type Props = { disabled?: boolean };
 

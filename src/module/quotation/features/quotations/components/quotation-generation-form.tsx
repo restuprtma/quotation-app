@@ -29,18 +29,18 @@ import { SquadPicker } from './squad-picker';
 import { useClients } from '../hooks/use-clients';
 import { SOLUTION_TYPES } from '../constants/scope-presets';
 import { useActiveSkills } from '../hooks/use-active-skills';
+import { resolveQuotationSkillId } from '../utils/generation';
+import { QuotationProfilePanel } from './quotation-profile-panel';
 import { useActiveRateCards } from '../hooks/use-active-rate-cards';
 import { useDedicatedSquadPreview } from '../hooks/use-quotation-generation';
 import { QuotationCalculationPreview } from './quotation-calculation-preview';
-import { QuotationProfilePanel } from './quotation-profile-panel';
-import { normalizeQuotationProfileForMode } from '../constants/dedicated-squad';
-import {
-  DEDICATED_SQUAD_MODELS,
+import { DEDICATED_SQUAD_MODELS ,
   getDefaultPaymentCount,
   getDefaultTimelineMode,
   isGeneratorRateCardCode,
   DEDICATED_TIMELINE_MODES,
   getDedicatedSquadVisibility,
+  normalizeQuotationProfileForMode,
 } from '../constants/dedicated-squad';
 
 // ----------------------------------------------------------------------
@@ -219,23 +219,6 @@ function getDefaultLine(model: SquadModel): SquadLineInput & { workday_count: nu
   };
 }
 
-function resolveSkillId(selectedSkill: ActiveSkill | null | undefined, activeSkills: ActiveSkill[]) {
-  if (
-    selectedSkill?.id &&
-    !selectedSkill.id.startsWith('cmd-') &&
-    selectedSkill.id !== '00000000-0000-0000-0000-000000000000'
-  ) {
-    return selectedSkill.id;
-  }
-  const match = activeSkills.find(
-    (skill) =>
-      skill.command === '/quotation' ||
-      skill.command === 'quotation' ||
-      skill.command === selectedSkill?.command
-  );
-  return match?.id || activeSkills[0]?.id || '00000000-0000-0000-0000-000000000000';
-}
-
 export function toDedicatedSquadPayload(
   data: QuotationGenerationFormValues,
   selectedSkill: ActiveSkill | null | undefined,
@@ -244,7 +227,7 @@ export function toDedicatedSquadPayload(
 ): GenerateQuotationPayload {
   const requirement = data.dedicated_squad.requirement.trim();
   return {
-    skill_id: resolveSkillId(selectedSkill, activeSkills),
+    skill_id: resolveQuotationSkillId(selectedSkill, activeSkills),
     client_id: data.client_id || undefined,
     client_name: data.client_name.trim(),
     client_company_name: data.client_company_name?.trim() || undefined,

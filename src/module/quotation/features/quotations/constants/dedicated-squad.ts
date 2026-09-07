@@ -1,4 +1,4 @@
-import type { QuotationProfileInput, SquadModel } from '../types';
+import type { SquadModel, QuotationProfileInput } from '../types';
 
 export const QUOTATION_PROFILE_OPTIONS = {
   preparation: ['none', 'hiring', 'engineering_kickoff'],

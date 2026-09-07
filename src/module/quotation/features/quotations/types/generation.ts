@@ -79,7 +79,69 @@ export type DedicatedSquadInput = {
   quotation_profile?: QuotationProfileInput;
 };
 
-export type GenerateQuotationPayload = {
+export type SubscriptionSectionLayout =
+  | 'subscription_development'
+  | 'development_maintenance';
+
+export type SubscriptionBillingCycle = 'monthly' | 'quarterly' | 'yearly';
+
+export type SubscriptionTaxTreatment =
+  | 'not_stated'
+  | 'exclusive_ppn'
+  | 'inclusive_ppn';
+
+export type SubscriptionPricePeriodInput = {
+  label: string;
+  start_month_offset: number;
+  duration_months: number;
+  monthly_rate: number;
+};
+
+export type SubscriptionOneTimeItemInput = {
+  name: string;
+  amount: number;
+};
+
+export type SubscriptionPaymentRowInput = {
+  work_period: string;
+  start_month_offset: number;
+  covered_months: number;
+  invoice_date_label: string;
+  due_date_label: string;
+  nominal: number;
+};
+
+export type SubscriptionFeatureGroupInput = {
+  name: string;
+  features: string[];
+};
+
+export type IncomeSharingInput = {
+  venturo_share_bps: number;
+  partner_share_bps: number;
+  eligible_revenue_description: string;
+  settlement_business_days: number;
+  prohibit_unilateral_discount: boolean;
+};
+
+export type SubscriptionSaaSInput = {
+  product_name: string;
+  quotation_date: string;
+  section_layout: SubscriptionSectionLayout;
+  billing_cycle: SubscriptionBillingCycle;
+  tax_treatment: SubscriptionTaxTreatment;
+  initial_term_months: number;
+  auto_renewal: boolean;
+  price_periods: SubscriptionPricePeriodInput[];
+  one_time_items?: SubscriptionOneTimeItemInput[];
+  payment_schedule: SubscriptionPaymentRowInput[];
+  feature_groups?: SubscriptionFeatureGroupInput[];
+  rights_clause_code?: string;
+  is_partnership: boolean;
+  income_sharing?: IncomeSharingInput;
+};
+
+type GenerateQuotationBase = {
   idempotency_key?: string;
   skill_id: string;
   client_id?: string;
@@ -87,24 +149,32 @@ export type GenerateQuotationPayload = {
   client_company_name?: string;
   subject: string;
   solution_type: string;
-  commercial_scheme: 'dedicated_squad';
-  rate_card_id: string;
-  rate_card_code?: string;
-  dedicated_squad: DedicatedSquadInput;
-  /** Legacy fields remain optional for old revisions and compatibility. */
-  project_duration_months?: number;
-  budget_maximum?: number;
-  summary?: string;
-  mandatory_scope?: string[];
-  optional_scope?: string[];
-  allowed_standard_activities?: string[];
-  payment_terms?: PaymentTermsInput;
-  additional_notes?: string;
-  discount_type?: 'none' | 'round_to_target' | 'fixed_amount' | 'percent';
-  discount_input?: number;
-  discount_name?: string;
-  discount_reason?: string;
 };
+
+export type GenerateQuotationPayload =
+  | (GenerateQuotationBase & {
+      commercial_scheme: 'dedicated_squad';
+      rate_card_id: string;
+      rate_card_code?: string;
+      dedicated_squad: DedicatedSquadInput;
+      /** Legacy fields remain optional for old revisions and compatibility. */
+      project_duration_months?: number;
+      budget_maximum?: number;
+      summary?: string;
+      mandatory_scope?: string[];
+      optional_scope?: string[];
+      allowed_standard_activities?: string[];
+      payment_terms?: PaymentTermsInput;
+      additional_notes?: string;
+      discount_type?: 'none' | 'round_to_target' | 'fixed_amount' | 'percent';
+      discount_input?: number;
+      discount_name?: string;
+      discount_reason?: string;
+    })
+  | (GenerateQuotationBase & {
+      commercial_scheme: 'subscription_saas';
+      subscription_saas: SubscriptionSaaSInput;
+    });
 
 export type GenerateQuotationResponse = {
   quotation_id: string;
@@ -161,6 +231,44 @@ export type DedicatedSquadPreviewResponse = {
   visible_sections: DedicatedSquadDocumentSection[];
   include_k6: boolean;
   include_pentest: boolean;
+};
+
+export type SubscriptionPricePeriodCalculation = SubscriptionPricePeriodInput & {
+  subtotal: number;
+};
+
+export type SubscriptionSaaSCalculation = {
+  price_periods: SubscriptionPricePeriodCalculation[];
+  one_time_items?: SubscriptionOneTimeItemInput[];
+  recurring_total: number;
+  one_time_total: number;
+  total_contract: number;
+  payments: SubscriptionPaymentRowInput[];
+};
+
+export type ResolvedSubscriptionSaaSProfile = {
+  section_layout: SubscriptionSectionLayout;
+  billing_cycle: SubscriptionBillingCycle;
+  tax_treatment: SubscriptionTaxTreatment;
+  tax_clause_text?: string;
+  rights_clause_code?: string;
+  rights_clause_text?: string;
+  income_sharing_text?: string;
+  auto_renewal_text?: string;
+  legal_catalog_version: string;
+  has_features?: boolean;
+};
+
+export type SubscriptionDocumentSection = {
+  number: number;
+  code: string;
+  title: string;
+};
+
+export type SubscriptionSaaSPreviewResponse = {
+  calculation: SubscriptionSaaSCalculation;
+  resolved_profile: ResolvedSubscriptionSaaSProfile;
+  visible_sections: SubscriptionDocumentSection[];
 };
 
 export type GenerationProgressStage =
