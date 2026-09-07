@@ -275,14 +275,23 @@ export const LegalBlockExtension = Node.create<LegalBlockOptions>({
         tag: 'div[data-block-type="legal"]',
         priority: 60,
       },
+      {
+        tag: 'section[data-block-type="rights"]',
+        priority: 60,
+      },
+      {
+        tag: 'div[data-block-type="rights"]',
+        priority: 60,
+      },
     ];
   },
 
   renderHTML({ HTMLAttributes }) {
+    const blockType = (HTMLAttributes['data-block-type'] as string) || 'legal';
     return [
       'section',
       mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
-        'data-block-type': 'legal',
+        'data-block-type': blockType,
         class: `qtr-legal-block ${this.options.unlocked ? 'qtr-legal-unlocked' : 'qtr-legal-locked'}`,
       }),
       0,

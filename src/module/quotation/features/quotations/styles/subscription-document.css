@@ -1,0 +1,136 @@
+/*
+ * Official Software Subscription / SaaS document stylesheet.
+ *
+ * Scoped under .quotation-document to preserve semantic HTML markers and ensure
+ * visual parity with Dedicated Squad document surfaces without polluting global styles.
+ */
+
+/* Tables layout and sizing */
+.quotation-document [data-block-type='commercial'] table,
+.quotation-document [data-block-type='payment'] table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* SaaS Commercial Table: 4-column column widths */
+.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) th:nth-child(1),
+.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) td:nth-child(1),
+.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) th:nth-child(1),
+.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) td:nth-child(1) {
+  width: 38%;
+}
+
+.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) th:nth-child(2),
+.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) td:nth-child(2),
+.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) th:nth-child(2),
+.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) td:nth-child(2) {
+  width: 22%;
+  text-align: right;
+}
+
+.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) th:nth-child(3),
+.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) td:nth-child(3),
+.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) th:nth-child(3),
+.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) td:nth-child(3) {
+  width: 18%;
+  text-align: center;
+}
+
+.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) th:nth-child(4),
+.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) td:nth-child(4),
+.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) th:nth-child(4),
+.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) td:nth-child(4) {
+  width: 22%;
+  text-align: right;
+}
+
+/* SaaS Payment Table: 4-column column widths */
+.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) th:nth-child(1),
+.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) td:nth-child(1) {
+  width: 34%;
+}
+
+.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) th:nth-child(2),
+.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) td:nth-child(2) {
+  width: 24%;
+}
+
+.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) th:nth-child(3),
+.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) td:nth-child(3) {
+  width: 18%;
+}
+
+.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) th:nth-child(4),
+.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) td:nth-child(4) {
+  width: 24%;
+  text-align: right;
+}
+
+/* Numeric columns right alignment */
+.quotation-document [data-field='subscription_line_total'],
+.quotation-document [data-field='total_contract'],
+.quotation-document [data-field='payment_nominal'] {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Feature list wrapping and presentation */
+.quotation-document [data-block-type='features'] {
+  margin-block: 1.25rem;
+}
+
+.quotation-document [data-block-type='features'] h3 {
+  margin: 1rem 0 0.5rem;
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.quotation-document [data-block-type='features'] ul {
+  margin: 0.35rem 0 0.85rem;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.quotation-document [data-block-type='features'] li {
+  margin: 0.25rem 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Rights section and clauses */
+.quotation-document [data-block-type='rights'] {
+  margin-block: 1.25rem;
+}
+
+.quotation-document [data-block-type='rights'] p {
+  margin: 0.65rem 0;
+  line-height: 1.6;
+}
+
+.quotation-document [data-field='rights_clause'],
+.quotation-document [data-field='income_sharing'] {
+  margin: 0.5rem 0;
+}
+
+/* Auto-renewal and tax notes */
+.quotation-document [data-field='auto_renewal'],
+.quotation-document [data-field='tax_clause'] {
+  margin-top: 0.75rem;
+  font-style: italic;
+  color: #4b5563;
+}
+
+/* Print page-break avoidance and formatting */
+@media print {
+  .quotation-document [data-block-type='commercial'] tr,
+  .quotation-document [data-block-type='payment'] tr,
+  .quotation-document [data-block-type='features'] h3,
+  .quotation-document [data-block-type='features'] li,
+  .quotation-document [data-block-type='rights'],
+  .quotation-document [data-block-type] h2 {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

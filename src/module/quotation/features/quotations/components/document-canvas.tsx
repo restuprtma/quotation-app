@@ -1,4 +1,5 @@
 import '../styles/dedicated-document.css';
+import '../styles/subscription-document.css';
 
 import type { ReactNode } from 'react';
 
