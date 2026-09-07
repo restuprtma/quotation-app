@@ -41,15 +41,9 @@ export const TAX_TREATMENT_OPTIONS = [
   { value: 'inclusive_ppn', label: 'Sudah Termasuk PPN' },
 ] as const;
 
-export type SubscriptionSaaSFormValues = {
-  client_id?: string;
-  client_company_name?: string;
-  client_name: string;
-  subject: string;
-  solution_type: string;
-  commercial_scheme: 'subscription_saas';
-  subscription_saas: SubscriptionSaaSInput;
-};
+import type { SubscriptionSaaSFormValues } from '../components/subscription-saas-form-model';
+
+export type { SubscriptionSaaSFormValues };
 
 export function createDefaultSubscriptionSaaSValues(
   today: string,

@@ -5,11 +5,13 @@ import { useRef, useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import CardActionArea from '@mui/material/CardActionArea';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { paths } from 'src/routes/paths';
@@ -23,6 +25,7 @@ import { useActiveSkills } from '../hooks/use-active-skills';
 import { SlashCommandMenu } from '../components/slash-command-menu';
 import { useGenerateQuotation } from '../hooks/use-quotation-generation';
 import { QuotationGenerationForm } from '../components/quotation-generation-form';
+import { SubscriptionSaaSGenerationForm } from '../components/subscription-saas-generation-form';
 import { GENERATION_STAGES, GenerationProgressCard } from '../components/generation-progress-card';
 
 // ----------------------------------------------------------------------
@@ -43,6 +46,9 @@ export function QuotationPromptView() {
   // Form view state
   const [activeSkill, setActiveSkill] = useState<ActiveSkill | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [commercialScheme, setCommercialScheme] = useState<
+    'dedicated_squad' | 'subscription_saas' | null
+  >(null);
 
   // Generation state machine
   const [isProgressOpen, setIsProgressOpen] = useState(false);
@@ -138,6 +144,7 @@ export function QuotationPromptView() {
 
       const resolved = resolveQuotationSkill(skill.command);
       setActiveSkill(resolved.id ? resolved : skill);
+      setCommercialScheme(null);
       setIsFormOpen(true);
     },
     [resolveQuotationSkill]
@@ -363,7 +370,7 @@ export function QuotationPromptView() {
               </Typography>
               <Chip
                 icon={<Iconify icon="solar:atom-bold-duotone" width={16} />}
-                label="/quotation — Dedicated Squad"
+                label="/quotation — Quotation Generator"
                 clickable
                 color="primary"
                 variant="outlined"
@@ -402,36 +409,187 @@ export function QuotationPromptView() {
             </Stack>
           </Box>
         ) : (
-          /* When Form is Open -> Render Dedicated Squad Form */
-          <Box>
-            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
-              <Button
-                size="small"
-                variant="outlined"
-                color="inherit"
-                startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-                onClick={() => {
-                  setIsFormOpen(false);
-                  setPromptText('');
-                }}
-              >
-                {t('prompt.backToPrompt')}
-              </Button>
-              <Typography variant="h5" fontWeight={700}>
-                {t('dedicatedSquadForm.title')}
-              </Typography>
-            </Stack>
+          /* When Form is Open -> Render Scheme Selector or Selected Scheme Form */
+          commercialScheme === null ? (
+            <Box sx={{ maxWidth: 960, mx: 'auto', width: '100%' }}>
+              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 4 }}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="inherit"
+                  startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+                  onClick={() => {
+                    setIsFormOpen(false);
+                    setPromptText('');
+                  }}
+                >
+                  {t('prompt.backToPrompt')}
+                </Button>
+              </Stack>
 
-            <QuotationGenerationForm
-              selectedSkill={activeSkill}
-              isSubmitting={generateMutation.isPending}
-              onSubmit={handleFormSubmit}
-              onCancel={() => {
-                setIsFormOpen(false);
-                setPromptText('');
-              }}
-            />
-          </Box>
+              <Box sx={{ textAlign: 'center', mb: 5 }}>
+                <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
+                  {t('prompt.schemeSelectorTitle')}
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  {t('prompt.schemeSelectorSubtitle')}
+                </Typography>
+              </Box>
+
+              <Grid container spacing={3}>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      height: '100%',
+                      transition: (theme) =>
+                        theme.transitions.create(['border-color', 'box-shadow']),
+                      '&:hover': {
+                        borderColor: 'primary.main',
+                        boxShadow: (theme) =>
+                          `0 0 0 2px ${theme.palette.primary.main}22`,
+                      },
+                    }}
+                  >
+                    <CardActionArea
+                      onClick={() => setCommercialScheme('dedicated_squad')}
+                      sx={{
+                        p: 4,
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        justifyContent: 'flex-start',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          mb: 2.5,
+                          p: 1.5,
+                          borderRadius: '12px',
+                          bgcolor: (theme) =>
+                            theme.palette.mode === 'light'
+                              ? 'primary.lighter'
+                              : 'primary.dark',
+                          color: 'primary.main',
+                          display: 'inline-flex',
+                        }}
+                      >
+                        <Iconify
+                          icon="solar:users-group-two-rounded-bold-duotone"
+                          width={36}
+                        />
+                      </Box>
+                      <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+                        {t('prompt.dedicatedSquadTitle')}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {t('prompt.dedicatedSquadDesc')}
+                      </Typography>
+                    </CardActionArea>
+                  </Card>
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      height: '100%',
+                      transition: (theme) =>
+                        theme.transitions.create(['border-color', 'box-shadow']),
+                      '&:hover': {
+                        borderColor: 'primary.main',
+                        boxShadow: (theme) =>
+                          `0 0 0 2px ${theme.palette.primary.main}22`,
+                      },
+                    }}
+                  >
+                    <CardActionArea
+                      onClick={() => setCommercialScheme('subscription_saas')}
+                      sx={{
+                        p: 4,
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        justifyContent: 'flex-start',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          mb: 2.5,
+                          p: 1.5,
+                          borderRadius: '12px',
+                          bgcolor: (theme) =>
+                            theme.palette.mode === 'light'
+                              ? 'info.lighter'
+                              : 'info.dark',
+                          color: 'info.main',
+                          display: 'inline-flex',
+                        }}
+                      >
+                        <Iconify icon="solar:cloud-square-bold-duotone" width={36} />
+                      </Box>
+                      <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+                        {t('prompt.subscriptionSaaSTitle')}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {t('prompt.subscriptionSaaSDesc')}
+                      </Typography>
+                    </CardActionArea>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Box>
+          ) : commercialScheme === 'dedicated_squad' ? (
+            <Box>
+              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="inherit"
+                  startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+                  onClick={() => setCommercialScheme(null)}
+                >
+                  {t('prompt.backToSchemes')}
+                </Button>
+                <Typography variant="h5" fontWeight={700}>
+                  {t('dedicatedSquadForm.title')}
+                </Typography>
+              </Stack>
+
+              <QuotationGenerationForm
+                selectedSkill={activeSkill}
+                isSubmitting={generateMutation.isPending}
+                onSubmit={handleFormSubmit}
+                onCancel={() => setCommercialScheme(null)}
+              />
+            </Box>
+          ) : (
+            <Box>
+              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="inherit"
+                  startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+                  onClick={() => setCommercialScheme(null)}
+                >
+                  {t('prompt.backToSchemes')}
+                </Button>
+                <Typography variant="h5" fontWeight={700}>
+                  {t('subscriptionSaaSForm.title')}
+                </Typography>
+              </Stack>
+
+              <SubscriptionSaaSGenerationForm
+                selectedSkill={activeSkill}
+                isSubmitting={generateMutation.isPending}
+                onSubmit={handleFormSubmit}
+                onCancel={() => setCommercialScheme(null)}
+              />
+            </Box>
+          )
         )}
       </Stack>
 
