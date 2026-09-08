@@ -175,12 +175,6 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
                 ),
               },
               {
-                value: 'horizontal',
-                icon: (
-                  <SvgIcon sx={{ width: 1, height: 'auto' }}>{settingIcons.navHorizontal}</SvgIcon>
-                ),
-              },
-              {
                 value: 'mini',
                 icon: <SvgIcon sx={{ width: 1, height: 'auto' }}>{settingIcons.navMini}</SvgIcon>,
               },

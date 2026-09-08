@@ -44,6 +44,8 @@ export function SettingsProvider({
       try {
         if (!storedValue.version || storedValue.version !== defaultSettings.version) {
           onReset();
+        } else if (storedValue.navLayout === 'horizontal') {
+          setField('navLayout', 'vertical');
         }
       } catch {
         onReset();

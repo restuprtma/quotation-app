@@ -2,12 +2,12 @@ import type { Breakpoint } from '@mui/material/styles';
 import type { NavSectionProps } from 'src/shared/ui/nav-section';
 import type { MainSectionProps, HeaderSectionProps, LayoutSectionProps } from '../core';
 
+import { useEffect } from 'react';
 import { merge } from 'es-toolkit';
 import { useBoolean } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
-import { iconButtonClasses } from '@mui/material/IconButton';
 
 // import { allLangs } from 'src/locales';
 import { BrandLogo } from 'src/shared/ui/logo';
@@ -15,9 +15,7 @@ import { useAuthContext } from 'src/module/core/features/auth/hooks';
 import { useSettingsContext } from 'src/module/core/features/settings';
 
 import { NavMobile } from './nav-mobile';
-import { VerticalDivider } from './content';
 import { NavVertical } from './nav-vertical';
-import { NavHorizontal } from './nav-horizontal';
 import { useNavData } from '../nav-config-dashboard';
 import { MenuButton } from '../components/menu-button';
 import { AccountDrawer } from '../components/account-drawer';
@@ -60,34 +58,30 @@ export function DashboardLayout({
   const dashboardNavData = useNavData();
   const navData = slotProps?.nav?.data ?? dashboardNavData;
 
+  useEffect(() => {
+    if (settings.state.navLayout === 'horizontal') {
+      settings.setField('navLayout', 'vertical');
+    }
+  }, [settings]);
+
   const isNavMini = settings.state.navLayout === 'mini';
-  const isNavHorizontal = settings.state.navLayout === 'horizontal';
-  const isNavVertical = isNavMini || settings.state.navLayout === 'vertical';
+  const isNavVertical = true;
 
   const renderHeader = () => {
     const headerSlotProps: HeaderSectionProps['slotProps'] = {
       container: {
         maxWidth: false,
         sx: {
-          ...(isNavVertical && {
-            px: { [layoutQuery]: 5 },
-            borderBottomStyle: 'dashed',
-            borderBottomWidth: 1,
-            borderBottomColor: 'divider',
-          }),
-          ...(isNavHorizontal && {
-            bgcolor: 'var(--layout-nav-bg)',
-            height: { [layoutQuery]: 'var(--layout-nav-horizontal-height)' },
-            [`& .${iconButtonClasses.root}`]: { color: 'var(--layout-nav-text-secondary-color)' },
-          }),
+          px: { [layoutQuery]: 5 },
+          borderBottomStyle: 'dashed',
+          borderBottomWidth: 1,
+          borderBottomColor: 'divider',
         },
       },
     };
 
     const headerSlots: HeaderSectionProps['slots'] = {
-      bottomArea: isNavHorizontal ? (
-        <NavHorizontal data={navData} layoutQuery={layoutQuery} cssVars={navVars.section} />
-      ) : null,
+      bottomArea: null,
       leftArea: (
         <>
           {/** @slot Nav mobile */}
@@ -103,29 +97,12 @@ export function DashboardLayout({
             slots={{ bottomArea: renderNavAccountFooter(false) }}
           />
 
-          {/** @slot Logo */}
-          {isNavHorizontal && (
-            <BrandLogo
-              sx={{
-                display: 'none',
-                [theme.breakpoints.up(layoutQuery)]: { display: 'inline-flex' },
-              }}
-            />
-          )}
-
           {/** @slot Logo (mobile only — desktop uses sidebar logo) */}
-          {!isNavHorizontal && (
-            <BrandLogo
-              sx={{
-                [theme.breakpoints.up(layoutQuery)]: { display: 'none' },
-              }}
-            />
-          )}
-
-          {/** @slot Divider */}
-          {isNavHorizontal && (
-            <VerticalDivider sx={{ [theme.breakpoints.up(layoutQuery)]: { display: 'flex' } }} />
-          )}
+          <BrandLogo
+            sx={{
+              [theme.breakpoints.up(layoutQuery)]: { display: 'none' },
+            }}
+          />
         </>
       ),
       rightArea: <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0, sm: 0.75 } }} />,
@@ -201,7 +178,7 @@ export function DashboardLayout({
       /** **************************************
        * @Sidebar
        *************************************** */
-      sidebarSection={isNavHorizontal ? null : renderSidebar()}
+      sidebarSection={renderSidebar()}
       /** **************************************
        * @Footer
        *************************************** */

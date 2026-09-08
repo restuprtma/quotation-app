@@ -1,9 +1,6 @@
 import { it, expect, describe } from 'vitest';
 
-import {
-  subscriptionSaaSSchema,
-  subscriptionSaaSFormSchema,
-} from './subscription-saas-form-model';
+import { subscriptionSaaSSchema, subscriptionSaaSFormSchema } from './subscription-saas-form-model';
 
 describe('subscriptionSaaSSchema & subscriptionSaaSFormSchema', () => {
   const validHubungInput = {
@@ -165,7 +162,8 @@ describe('subscriptionSaaSSchema & subscriptionSaaSFormSchema', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         const offsetIssue = result.error.issues.find(
-          (i) => i.path[0] === 'price_periods' && i.path[1] === 1 && i.path[2] === 'start_month_offset'
+          (i) =>
+            i.path[0] === 'price_periods' && i.path[1] === 1 && i.path[2] === 'start_month_offset'
         );
         expect(offsetIssue).toBeDefined();
       }
@@ -326,6 +324,49 @@ describe('subscriptionSaaSSchema & subscriptionSaaSFormSchema', () => {
       if (!result.success) {
         const issue = result.error.issues.find((i) => i.path[0] === 'income_sharing');
         expect(issue).toBeDefined();
+      }
+    });
+
+    it('accepts settlement_business_days = 365 and rejects settlement_business_days > 365', () => {
+      const valid365 = {
+        ...validPercetakanInput,
+        income_sharing: {
+          ...validPercetakanInput.income_sharing,
+          settlement_business_days: 365,
+        },
+      };
+      expect(subscriptionSaaSSchema.safeParse(valid365).success).toBe(true);
+
+      const invalid366 = {
+        ...validPercetakanInput,
+        income_sharing: {
+          ...validPercetakanInput.income_sharing,
+          settlement_business_days: 366,
+        },
+      };
+      const result = subscriptionSaaSSchema.safeParse(invalid366);
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('duration bounds validations', () => {
+    it('fails when price period duration exceeds initial_term_months', () => {
+      const invalid = {
+        ...validHubungInput,
+        initial_term_months: 12,
+        price_periods: [
+          {
+            label: 'Excessive Period',
+            start_month_offset: 0,
+            duration_months: 13,
+            monthly_rate: 1_000_000,
+          },
+        ],
+      };
+      const result = subscriptionSaaSSchema.safeParse(invalid);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.some((i) => i.path.includes('duration_months'))).toBe(true);
       }
     });
   });

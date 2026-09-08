@@ -31,7 +31,7 @@ export function NavLayoutOptions({
         {
           gap: 1.5,
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateColumns: `repeat(${options.length}, 1fr)`,
         },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}

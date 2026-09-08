@@ -14,55 +14,127 @@
 }
 
 /* SaaS Commercial Table: 4-column column widths */
-.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) th:nth-child(1),
-.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) td:nth-child(1),
-.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) th:nth-child(1),
-.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) td:nth-child(1) {
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='subscription_line_total'])
+  th:nth-child(1),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='subscription_line_total'])
+  td:nth-child(1),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_contract'])
+  th:nth-child(1),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_contract'])
+  td:nth-child(1) {
   width: 38%;
 }
 
-.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) th:nth-child(2),
-.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) td:nth-child(2),
-.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) th:nth-child(2),
-.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) td:nth-child(2) {
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='subscription_line_total'])
+  th:nth-child(2),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='subscription_line_total'])
+  td:nth-child(2),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_contract'])
+  th:nth-child(2),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_contract'])
+  td:nth-child(2) {
   width: 22%;
   text-align: right;
 }
 
-.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) th:nth-child(3),
-.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) td:nth-child(3),
-.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) th:nth-child(3),
-.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) td:nth-child(3) {
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='subscription_line_total'])
+  th:nth-child(3),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='subscription_line_total'])
+  td:nth-child(3),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_contract'])
+  th:nth-child(3),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_contract'])
+  td:nth-child(3) {
   width: 18%;
   text-align: center;
 }
 
-.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) th:nth-child(4),
-.quotation-document [data-block-type='commercial'] table:has([data-field='subscription_line_total']) td:nth-child(4),
-.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) th:nth-child(4),
-.quotation-document [data-block-type='commercial'] table:has([data-field='total_contract']) td:nth-child(4) {
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='subscription_line_total'])
+  th:nth-child(4),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='subscription_line_total'])
+  td:nth-child(4),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_contract'])
+  th:nth-child(4),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_contract'])
+  td:nth-child(4) {
   width: 22%;
   text-align: right;
 }
 
 /* SaaS Payment Table: 4-column column widths */
-.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) th:nth-child(1),
-.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) td:nth-child(1) {
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_nominal'])
+  th:nth-child(1),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_nominal'])
+  td:nth-child(1) {
   width: 34%;
 }
 
-.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) th:nth-child(2),
-.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) td:nth-child(2) {
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_nominal'])
+  th:nth-child(2),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_nominal'])
+  td:nth-child(2) {
   width: 24%;
 }
 
-.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) th:nth-child(3),
-.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) td:nth-child(3) {
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_nominal'])
+  th:nth-child(3),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_nominal'])
+  td:nth-child(3) {
   width: 18%;
 }
 
-.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) th:nth-child(4),
-.quotation-document [data-block-type='payment'] table:has([data-field='payment_nominal']) td:nth-child(4) {
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_nominal'])
+  th:nth-child(4),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_nominal'])
+  td:nth-child(4) {
   width: 24%;
   text-align: right;
 }
@@ -82,7 +154,7 @@
 
 .quotation-document [data-block-type='features'] h3 {
   margin: 1rem 0 0.5rem;
-  color: #111827;
+  color: inherit;
   font-size: 1rem;
   font-weight: 600;
 }
@@ -119,7 +191,8 @@
 .quotation-document [data-field='tax_clause'] {
   margin-top: 0.75rem;
   font-style: italic;
-  color: #4b5563;
+  color: inherit;
+  opacity: 0.85;
 }
 
 /* Print page-break avoidance and formatting */

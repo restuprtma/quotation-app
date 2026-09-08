@@ -26,11 +26,9 @@ type Props = {
 
 export function SubscriptionRightsPanel({ disabled = false }: Props) {
   const { t } = useTranslate('quotation');
-  const { control, setValue } = useFormContext<SubscriptionSaaSFormValues>();
+  const { control, setValue, getValues } = useFormContext<SubscriptionSaaSFormValues>();
 
-  const isPartnership = Boolean(
-    useWatch({ control, name: 'subscription_saas.is_partnership' })
-  );
+  const isPartnership = Boolean(useWatch({ control, name: 'subscription_saas.is_partnership' }));
 
   const venturoShareBps =
     useWatch({ control, name: 'subscription_saas.income_sharing.venturo_share_bps' }) ?? 5000;
@@ -45,7 +43,7 @@ export function SubscriptionRightsPanel({ disabled = false }: Props) {
     if (!isPartnership) {
       setValue('subscription_saas.income_sharing', undefined, { shouldValidate: true });
     } else {
-      const current = control._formValues?.subscription_saas?.income_sharing;
+      const current = getValues('subscription_saas.income_sharing');
       if (!current) {
         setValue(
           'subscription_saas.income_sharing',
@@ -60,7 +58,7 @@ export function SubscriptionRightsPanel({ disabled = false }: Props) {
         );
       }
     }
-  }, [control, isPartnership, setValue]);
+  }, [getValues, isPartnership, setValue]);
 
   return (
     <Accordion
@@ -74,7 +72,11 @@ export function SubscriptionRightsPanel({ disabled = false }: Props) {
     >
       <AccordionSummary expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}>
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <Iconify icon="solar:shield-check-bold-duotone" width={24} sx={{ color: 'primary.main' }} />
+          <Iconify
+            icon="solar:shield-check-bold-duotone"
+            width={24}
+            sx={{ color: 'primary.main' }}
+          />
           <Box>
             <Typography variant="subtitle1" fontWeight={700}>
               {t('subscriptionSaaSForm.rightsTitle')}
@@ -124,7 +126,7 @@ export function SubscriptionRightsPanel({ disabled = false }: Props) {
               }}
             >
               <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700 }}>
-                Ketentuan Pembagian Hasil (Income Sharing)
+                {t('subscriptionSaaSForm.rights.incomeSharingTitle')}
               </Typography>
 
               <Grid container spacing={2}>
@@ -161,7 +163,11 @@ export function SubscriptionRightsPanel({ disabled = false }: Props) {
                     fontWeight={600}
                     display="block"
                   >
-                    {t('subscriptionSaaSForm.rights.bpsHelper')} Total saat ini: {totalBps} bps ({totalBps / 100}%).
+                    {t('subscriptionSaaSForm.rights.bpsHelper')}{' '}
+                    {t('subscriptionSaaSForm.rights.bpsCurrent', {
+                      total: totalBps,
+                      percent: totalBps / 100,
+                    })}
                   </Typography>
                 </Grid>
 
@@ -194,7 +200,11 @@ export function SubscriptionRightsPanel({ disabled = false }: Props) {
                     label={t('subscriptionSaaSForm.rights.prohibitDiscount')}
                     disabled={disabled}
                   />
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', pl: 6 }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: 'block', pl: 6 }}
+                  >
                     {t('subscriptionSaaSForm.rights.prohibitDiscountHelper')}
                   </Typography>
                 </Grid>

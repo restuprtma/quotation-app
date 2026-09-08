@@ -64,6 +64,13 @@ export function validateSubscriptionCrossFields(
   let priceOffset = 0;
   for (let i = 0; i < data.price_periods.length; i += 1) {
     const period = data.price_periods[i];
+    if (period.duration_months > data.initial_term_months) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Duration (${period.duration_months} months) cannot exceed initial term (${data.initial_term_months} months)`,
+        path: ['price_periods', i, 'duration_months'],
+      });
+    }
     if (period.start_month_offset !== priceOffset) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -174,7 +181,8 @@ export function validateSubscriptionCrossFields(
         path: ['income_sharing'],
       });
     } else if (
-      data.income_sharing.venturo_share_bps + data.income_sharing.partner_share_bps !== 10_000
+      data.income_sharing.venturo_share_bps + data.income_sharing.partner_share_bps !==
+      10_000
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
