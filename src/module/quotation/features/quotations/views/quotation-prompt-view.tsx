@@ -25,6 +25,7 @@ import { useActiveSkills } from '../hooks/use-active-skills';
 import { SlashCommandMenu } from '../components/slash-command-menu';
 import { useGenerateQuotation } from '../hooks/use-quotation-generation';
 import { QuotationGenerationForm } from '../components/quotation-generation-form';
+import { WhiteLabelGenerationForm } from '../components/white-label-generation-form';
 import { SubscriptionSaaSGenerationForm } from '../components/subscription-saas-generation-form';
 import { GENERATION_STAGES, GenerationProgressCard } from '../components/generation-progress-card';
 
@@ -47,7 +48,7 @@ export function QuotationPromptView() {
   const [activeSkill, setActiveSkill] = useState<ActiveSkill | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [commercialScheme, setCommercialScheme] = useState<
-    'dedicated_squad' | 'subscription_saas' | null
+    'dedicated_squad' | 'subscription_saas' | 'white_label' | null
   >(null);
 
   // Generation state machine
@@ -204,9 +205,7 @@ export function QuotationPromptView() {
       } else if (responseData?.message) {
         errMessage = responseData.message;
       } else {
-        const extractedCode = err?.message?.includes(':')
-          ? err.message.split(':')[0].trim()
-          : null;
+        const extractedCode = err?.message?.includes(':') ? err.message.split(':')[0].trim() : null;
         if (extractedCode) errCode = extractedCode;
       }
 
@@ -215,12 +214,10 @@ export function QuotationPromptView() {
           'Rate card tidak valid atau belum memiliki role (kosong). Silakan periksa Rate Card di AI Settings.',
         rate_item_missing:
           'Rate card yang dipilih tidak memiliki item tarif untuk role/senioritas yang dibutuhkan. Silakan periksa Rate Card di AI Settings.',
-        settings_incomplete:
-          'Pengaturan AI tidak lengkap (Model atau API Key salah/belum diatur).',
+        settings_incomplete: 'Pengaturan AI tidak lengkap (Model atau API Key salah/belum diatur).',
         budget_unfeasible:
           'Budget maksimum yang Anda tentukan tidak mencukupi untuk memenuhi ekspektasi durasi dan scope yang diminta.',
-        allocation_invalid:
-          'Alokasi sumber daya AI tidak memenuhi batasan mandatory scope.',
+        allocation_invalid: 'Alokasi sumber daya AI tidak memenuhi batasan mandatory scope.',
         settings_invalid: 'Pengaturan AI tidak valid, pastikan model dan provider sesuai.',
       };
 
@@ -408,188 +405,245 @@ export function QuotationPromptView() {
               </Button>
             </Stack>
           </Box>
-        ) : (
-          /* When Form is Open -> Render Scheme Selector or Selected Scheme Form */
-          commercialScheme === null ? (
-            <Box sx={{ maxWidth: 960, mx: 'auto', width: '100%' }}>
-              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 4 }}>
-                <Button
-                  size="small"
+        ) : /* When Form is Open -> Render Scheme Selector or Selected Scheme Form */
+        commercialScheme === null ? (
+          <Box sx={{ maxWidth: 960, mx: 'auto', width: '100%' }}>
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 4 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+                onClick={() => {
+                  setIsFormOpen(false);
+                  setPromptText('');
+                }}
+              >
+                {t('prompt.backToPrompt')}
+              </Button>
+            </Stack>
+
+            <Box sx={{ textAlign: 'center', mb: 5 }}>
+              <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
+                {t('prompt.schemeSelectorTitle')}
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                {t('prompt.schemeSelectorSubtitle')}
+              </Typography>
+            </Box>
+
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Card
                   variant="outlined"
-                  color="inherit"
-                  startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-                  onClick={() => {
-                    setIsFormOpen(false);
-                    setPromptText('');
+                  sx={{
+                    height: '100%',
+                    transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                      boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}22`,
+                    },
                   }}
                 >
-                  {t('prompt.backToPrompt')}
-                </Button>
-              </Stack>
-
-              <Box sx={{ textAlign: 'center', mb: 5 }}>
-                <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
-                  {t('prompt.schemeSelectorTitle')}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  {t('prompt.schemeSelectorSubtitle')}
-                </Typography>
-              </Box>
-
-              <Grid container spacing={3}>
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <Card
-                    variant="outlined"
+                  <CardActionArea
+                    onClick={() => setCommercialScheme('dedicated_squad')}
                     sx={{
+                      p: 4,
                       height: '100%',
-                      transition: (theme) =>
-                        theme.transitions.create(['border-color', 'box-shadow']),
-                      '&:hover': {
-                        borderColor: 'primary.main',
-                        boxShadow: (theme) =>
-                          `0 0 0 2px ${theme.palette.primary.main}22`,
-                      },
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      justifyContent: 'flex-start',
                     }}
                   >
-                    <CardActionArea
-                      onClick={() => setCommercialScheme('dedicated_squad')}
+                    <Box
                       sx={{
-                        p: 4,
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        justifyContent: 'flex-start',
+                        mb: 2.5,
+                        p: 1.5,
+                        borderRadius: '12px',
+                        bgcolor: (theme) =>
+                          theme.palette.mode === 'light' ? 'primary.lighter' : 'primary.dark',
+                        color: 'primary.main',
+                        display: 'inline-flex',
                       }}
                     >
-                      <Box
-                        sx={{
-                          mb: 2.5,
-                          p: 1.5,
-                          borderRadius: '12px',
-                          bgcolor: (theme) =>
-                            theme.palette.mode === 'light'
-                              ? 'primary.lighter'
-                              : 'primary.dark',
-                          color: 'primary.main',
-                          display: 'inline-flex',
-                        }}
-                      >
-                        <Iconify
-                          icon="solar:users-group-two-rounded-bold-duotone"
-                          width={36}
-                        />
-                      </Box>
-                      <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
-                        {t('prompt.dedicatedSquadTitle')}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {t('prompt.dedicatedSquadDesc')}
-                      </Typography>
-                    </CardActionArea>
-                  </Card>
-                </Grid>
-
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <Card
-                    variant="outlined"
-                    sx={{
-                      height: '100%',
-                      transition: (theme) =>
-                        theme.transitions.create(['border-color', 'box-shadow']),
-                      '&:hover': {
-                        borderColor: 'primary.main',
-                        boxShadow: (theme) =>
-                          `0 0 0 2px ${theme.palette.primary.main}22`,
-                      },
-                    }}
-                  >
-                    <CardActionArea
-                      onClick={() => setCommercialScheme('subscription_saas')}
-                      sx={{
-                        p: 4,
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        justifyContent: 'flex-start',
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          mb: 2.5,
-                          p: 1.5,
-                          borderRadius: '12px',
-                          bgcolor: (theme) =>
-                            theme.palette.mode === 'light'
-                              ? 'info.lighter'
-                              : 'info.dark',
-                          color: 'info.main',
-                          display: 'inline-flex',
-                        }}
-                      >
-                        <Iconify icon="solar:cloud-square-bold-duotone" width={36} />
-                      </Box>
-                      <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
-                        {t('prompt.subscriptionSaaSTitle')}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {t('prompt.subscriptionSaaSDesc')}
-                      </Typography>
-                    </CardActionArea>
-                  </Card>
-                </Grid>
+                      <Iconify icon="solar:users-group-two-rounded-bold-duotone" width={36} />
+                    </Box>
+                    <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+                      {t('prompt.dedicatedSquadTitle')}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {t('prompt.dedicatedSquadDesc')}
+                    </Typography>
+                  </CardActionArea>
+                </Card>
               </Grid>
-            </Box>
-          ) : commercialScheme === 'dedicated_squad' ? (
-            <Box>
-              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  color="inherit"
-                  startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-                  onClick={() => setCommercialScheme(null)}
-                >
-                  {t('prompt.backToSchemes')}
-                </Button>
-                <Typography variant="h5" fontWeight={700}>
-                  {t('dedicatedSquadForm.title')}
-                </Typography>
-              </Stack>
 
-              <QuotationGenerationForm
-                selectedSkill={activeSkill}
-                isSubmitting={generateMutation.isPending}
-                onSubmit={handleFormSubmit}
-                onCancel={() => setCommercialScheme(null)}
-              />
-            </Box>
-          ) : (
-            <Box>
-              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
-                <Button
-                  size="small"
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Card
                   variant="outlined"
-                  color="inherit"
-                  startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-                  onClick={() => setCommercialScheme(null)}
+                  sx={{
+                    height: '100%',
+                    transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                      boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}22`,
+                    },
+                  }}
                 >
-                  {t('prompt.backToSchemes')}
-                </Button>
-                <Typography variant="h5" fontWeight={700}>
-                  {t('subscriptionSaaSForm.title')}
-                </Typography>
-              </Stack>
+                  <CardActionArea
+                    onClick={() => setCommercialScheme('subscription_saas')}
+                    sx={{
+                      p: 4,
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      justifyContent: 'flex-start',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        mb: 2.5,
+                        p: 1.5,
+                        borderRadius: '12px',
+                        bgcolor: (theme) =>
+                          theme.palette.mode === 'light' ? 'info.lighter' : 'info.dark',
+                        color: 'info.main',
+                        display: 'inline-flex',
+                      }}
+                    >
+                      <Iconify icon="solar:cloud-square-bold-duotone" width={36} />
+                    </Box>
+                    <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+                      {t('prompt.subscriptionSaaSTitle')}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {t('prompt.subscriptionSaaSDesc')}
+                    </Typography>
+                  </CardActionArea>
+                </Card>
+              </Grid>
 
-              <SubscriptionSaaSGenerationForm
-                selectedSkill={activeSkill}
-                isSubmitting={generateMutation.isPending}
-                onSubmit={handleFormSubmit}
-                onCancel={() => setCommercialScheme(null)}
-              />
-            </Box>
-          )
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Card
+                  variant="outlined"
+                  sx={{
+                    height: '100%',
+                    transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                      boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}22`,
+                    },
+                  }}
+                >
+                  <CardActionArea
+                    onClick={() => setCommercialScheme('white_label')}
+                    sx={{
+                      p: 4,
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      justifyContent: 'flex-start',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        mb: 2.5,
+                        p: 1.5,
+                        borderRadius: '12px',
+                        bgcolor: (theme) =>
+                          theme.palette.mode === 'light' ? 'secondary.lighter' : 'secondary.dark',
+                        color: 'secondary.main',
+                        display: 'inline-flex',
+                      }}
+                    >
+                      <Iconify icon="solar:tag-price-bold-duotone" width={36} />
+                    </Box>
+                    <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+                      {t('prompt.whiteLabelTitle')}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {t('prompt.whiteLabelDesc')}
+                    </Typography>
+                  </CardActionArea>
+                </Card>
+              </Grid>
+            </Grid>
+          </Box>
+        ) : commercialScheme === 'dedicated_squad' ? (
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+                onClick={() => setCommercialScheme(null)}
+              >
+                {t('prompt.backToSchemes')}
+              </Button>
+              <Typography variant="h5" fontWeight={700}>
+                {t('dedicatedSquadForm.title')}
+              </Typography>
+            </Stack>
+
+            <QuotationGenerationForm
+              selectedSkill={activeSkill}
+              isSubmitting={generateMutation.isPending}
+              onSubmit={handleFormSubmit}
+              onCancel={() => setCommercialScheme(null)}
+            />
+          </Box>
+        ) : commercialScheme === 'subscription_saas' ? (
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+                onClick={() => setCommercialScheme(null)}
+              >
+                {t('prompt.backToSchemes')}
+              </Button>
+              <Typography variant="h5" fontWeight={700}>
+                {t('subscriptionSaaSForm.title')}
+              </Typography>
+            </Stack>
+
+            <SubscriptionSaaSGenerationForm
+              selectedSkill={activeSkill}
+              isSubmitting={generateMutation.isPending}
+              onSubmit={handleFormSubmit}
+              onCancel={() => setCommercialScheme(null)}
+            />
+          </Box>
+        ) : (
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+                onClick={() => setCommercialScheme(null)}
+              >
+                {t('prompt.backToSchemes')}
+              </Button>
+              <Typography variant="h5" fontWeight={700}>
+                {t('whiteLabelForm.title')}
+              </Typography>
+            </Stack>
+
+            <WhiteLabelGenerationForm
+              selectedSkill={activeSkill}
+              isSubmitting={generateMutation.isPending}
+              onSubmit={handleFormSubmit}
+              onCancel={() => setCommercialScheme(null)}
+            />
+          </Box>
         )}
       </Stack>
 
