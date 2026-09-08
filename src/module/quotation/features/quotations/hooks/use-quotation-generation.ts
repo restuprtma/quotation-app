@@ -4,6 +4,7 @@ import type {
   WhiteLabelPreviewResponse,
   DedicatedSquadPreviewResponse,
   SubscriptionSaaSPreviewResponse,
+  StandaloneMaintenancePreviewResponse,
 } from '../types';
 
 import { useMemo, useState, useEffect } from 'react';
@@ -11,11 +12,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { normalizeWhiteLabel } from '../constants/white-label';
 import { normalizeSubscriptionSaaS } from '../constants/subscription-saas';
+import { normalizeStandaloneMaintenance } from '../constants/standalone-maintenance';
 import {
   generateQuotation,
   previewWhiteLabel,
   previewDedicatedSquad,
   previewSubscriptionSaaS,
+  previewStandaloneMaintenance,
 } from '../api';
 
 function generateUUID(): string {
@@ -278,3 +281,78 @@ export function useWhiteLabelPreview(
 
   return { ...query, isDebouncing };
 }
+
+export const STANDALONE_MAINTENANCE_PREVIEW_QUERY_KEY = [
+  'quotation',
+  'standalone-maintenance-preview',
+] as const;
+
+export function normalizeStandaloneMaintenancePreviewPayload(
+  payload: GenerateQuotationPayload | null | undefined
+) {
+  if (!payload || payload.commercial_scheme !== 'standalone_maintenance') return null;
+  return {
+    commercial_scheme: payload.commercial_scheme,
+    standalone_maintenance: normalizeStandaloneMaintenance(payload.standalone_maintenance),
+  };
+}
+
+/**
+ * Debounced server-authoritative preview for Standalone Maintenance. TanStack Query
+ * supplies an AbortSignal to Axios, so rapid typing cancels stale in-flight
+ * preview requests.
+ */
+export function useStandaloneMaintenancePreview(
+  payload: GenerateQuotationPayload | null | undefined,
+  enabled = true
+) {
+  const normalized = useMemo(
+    () => normalizeStandaloneMaintenancePreviewPayload(payload),
+    [payload]
+  );
+  const [debounced, setDebounced] = useState(normalized);
+  const [isDebouncing, setIsDebouncing] = useState(false);
+
+  useEffect(() => {
+    if (!enabled || !normalized) {
+      setDebounced(null);
+      setIsDebouncing(false);
+      return undefined;
+    }
+
+    setIsDebouncing(true);
+    const timer = setTimeout(() => {
+      setDebounced(normalized);
+      setIsDebouncing(false);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [enabled, normalized]);
+
+  const query = useQuery<StandaloneMaintenancePreviewResponse, Error>({
+    queryKey: [
+      ...STANDALONE_MAINTENANCE_PREVIEW_QUERY_KEY,
+      debounced ? JSON.stringify(debounced) : 'disabled',
+    ],
+    queryFn: ({ signal }) => {
+      if (!payload || !debounced || payload.commercial_scheme !== 'standalone_maintenance') {
+        throw new Error('Standalone maintenance preview is disabled');
+      }
+      return previewStandaloneMaintenance(
+        {
+          ...payload,
+          commercial_scheme: 'standalone_maintenance',
+          standalone_maintenance: debounced.standalone_maintenance,
+        },
+        signal
+      );
+    },
+    enabled: Boolean(enabled && payload && debounced),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+
+  return { ...query, isDebouncing };
+}
+

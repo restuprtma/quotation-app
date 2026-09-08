@@ -3,14 +3,15 @@ import type {
   ClientSummary,
   RateCardSummary,
   SaveDraftPayload,
-  SaveDraftResultResponse,
   GenerationStateResponse,
+  SaveDraftResultResponse,
   GenerateQuotationPayload,
-  QuotationGenerationDetail,
   GenerateQuotationResponse,
+  QuotationGenerationDetail,
   WhiteLabelPreviewResponse,
   DedicatedSquadPreviewResponse,
   SubscriptionSaaSPreviewResponse,
+  StandaloneMaintenancePreviewResponse,
 } from '../types';
 
 import axios, { endpoints } from 'src/shared/lib/axios';
@@ -69,6 +70,16 @@ export function previewSubscriptionSaaS(payload: GenerateQuotationPayload, signa
 export function previewWhiteLabel(payload: GenerateQuotationPayload, signal?: AbortSignal) {
   return unwrap<WhiteLabelPreviewResponse>(
     axios.post(endpoints.quotation.quotations.whiteLabelPreview, payload, { signal })
+  );
+}
+
+/**
+ * Calculate the standalone maintenance quotation preview. The server owns all money math,
+ * section planning, and profile resolutions without calling AI or persisting data.
+ */
+export function previewStandaloneMaintenance(payload: GenerateQuotationPayload, signal?: AbortSignal) {
+  return unwrap<StandaloneMaintenancePreviewResponse>(
+    axios.post(endpoints.quotation.quotations.standaloneMaintenancePreview, payload, { signal })
   );
 }
 

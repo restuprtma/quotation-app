@@ -207,6 +207,71 @@ export type WhiteLabelInput = {
   limitation_codes: WhiteLabelLimitationCode[];
 };
 
+export type StandaloneMaintenanceMode = 'retainer' | 'hourly_task';
+
+export type StandaloneMaintenancePriority = 'P0' | 'P1' | 'P2';
+
+export type StandaloneMaintenanceTaxTreatment = 'not_stated' | 'exclusive_ppn' | 'inclusive_ppn';
+
+export type RetainerCostItem = {
+  name: string;
+  monthly_rate: number;
+  fte_quarters: number;
+  period_months: number;
+};
+
+export type HourlyCostItem = {
+  name: string;
+  display_monthly_rate: number;
+  headcount: number;
+  hours_half_units: number;
+  quoted_line_total: number;
+};
+
+export type MaintenanceDefectItem = {
+  item_number: string;
+  priority: StandaloneMaintenancePriority;
+  function: string;
+  screen_flow: string;
+  existing: string;
+  improvement: string;
+  reference?: string;
+};
+
+export type MaintenanceDefectGroup = {
+  title: string;
+  items: MaintenanceDefectItem[];
+};
+
+export type HourlyMaintenanceTask = {
+  description: string;
+  platform: string;
+  hours_half_units: number;
+};
+
+export type PaymentScheduleItem = {
+  work_period: string;
+  terms: string;
+  invoice_date_label: string;
+  due_date_label: string;
+  nominal: number;
+};
+
+export type StandaloneMaintenanceInput = {
+  system_name: string;
+  quotation_date: string;
+  mode: StandaloneMaintenanceMode;
+  tax_treatment: StandaloneMaintenanceTaxTreatment;
+  retainer_items?: RetainerCostItem[];
+  hourly_cost_items?: HourlyCostItem[];
+  defect_groups?: MaintenanceDefectGroup[];
+  hourly_tasks?: HourlyMaintenanceTask[];
+  discount_amount: number;
+  show_discount_row: boolean;
+  payment_schedule: PaymentScheduleItem[];
+  rights_statements?: string[];
+};
+
 type GenerateQuotationBase = {
   idempotency_key?: string;
   skill_id: string;
@@ -237,6 +302,7 @@ export type DedicatedSquadGeneratePayload = GenerateQuotationBase & {
   discount_reason?: string;
   subscription_saas?: never;
   white_label?: never;
+  standalone_maintenance?: never;
 };
 
 export type SubscriptionSaaSGeneratePayload = GenerateQuotationBase & {
@@ -244,6 +310,7 @@ export type SubscriptionSaaSGeneratePayload = GenerateQuotationBase & {
   subscription_saas: SubscriptionSaaSInput;
   dedicated_squad?: never;
   white_label?: never;
+  standalone_maintenance?: never;
 };
 
 export type WhiteLabelGeneratePayload = GenerateQuotationBase & {
@@ -251,12 +318,23 @@ export type WhiteLabelGeneratePayload = GenerateQuotationBase & {
   white_label: WhiteLabelInput;
   dedicated_squad?: never;
   subscription_saas?: never;
+  standalone_maintenance?: never;
+};
+
+export type StandaloneMaintenanceGeneratePayload = GenerateQuotationBase & {
+  commercial_scheme: 'standalone_maintenance';
+  standalone_maintenance: StandaloneMaintenanceInput;
+  dedicated_squad?: never;
+  subscription_saas?: never;
+  white_label?: never;
+  rate_card_id?: never;
 };
 
 export type GenerateQuotationPayload =
   | DedicatedSquadGeneratePayload
   | SubscriptionSaaSGeneratePayload
-  | WhiteLabelGeneratePayload;
+  | WhiteLabelGeneratePayload
+  | StandaloneMaintenanceGeneratePayload;
 
 export type GenerateQuotationResponse = {
   quotation_id: string;
@@ -397,6 +475,44 @@ export type ResolvedWhiteLabelProfile = {
 export type WhiteLabelPreviewResponse = {
   calculation: WhiteLabelCalculation;
   resolved_profile: ResolvedWhiteLabelProfile;
+};
+
+export type RetainerLineCalculation = RetainerCostItem & {
+  line_total: number;
+};
+
+export type HourlyLineCalculation = HourlyCostItem & {
+  line_total: number;
+};
+
+export type StandaloneMaintenanceCalculation = {
+  mode: StandaloneMaintenanceMode;
+  retainer?: RetainerLineCalculation[];
+  hourly?: HourlyLineCalculation[];
+  subtotal: number;
+  discount_amount: number;
+  total_investment: number;
+  payment_total: number;
+};
+
+export type StandaloneMaintenanceDocumentSection = {
+  number: number;
+  code: string;
+  title: string;
+};
+
+export type ResolvedStandaloneMaintenanceProfile = {
+  mode: StandaloneMaintenanceMode;
+  tax_treatment: StandaloneMaintenanceTaxTreatment;
+  tax_clause_text?: string;
+  show_discount_row: boolean;
+  show_rights: boolean;
+  sections: StandaloneMaintenanceDocumentSection[];
+};
+
+export type StandaloneMaintenancePreviewResponse = {
+  calculation: StandaloneMaintenanceCalculation;
+  resolved_profile: ResolvedStandaloneMaintenanceProfile;
 };
 
 export type GenerationProgressStage =
