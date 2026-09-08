@@ -1,6 +1,7 @@
 import type {
   GenerateQuotationPayload,
   GenerateQuotationResponse,
+  WhiteLabelPreviewResponse,
   DedicatedSquadPreviewResponse,
   SubscriptionSaaSPreviewResponse,
 } from '../types';
@@ -8,8 +9,14 @@ import type {
 import { useMemo, useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { normalizeWhiteLabel } from '../constants/white-label';
 import { normalizeSubscriptionSaaS } from '../constants/subscription-saas';
-import { generateQuotation, previewDedicatedSquad, previewSubscriptionSaaS } from '../api';
+import {
+  generateQuotation,
+  previewWhiteLabel,
+  previewDedicatedSquad,
+  previewSubscriptionSaaS,
+} from '../api';
 
 function generateUUID(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -55,12 +62,23 @@ export function normalizeDedicatedSquadPreviewPayload(
       ...squad,
       development_squad: squad.development_squad.map((line) => ({ ...line })),
       maintenance_squad: squad.maintenance_squad.map((line) => ({ ...line })),
-      quotation_profile: squad.quotation_profile ? {
-        ...squad.quotation_profile,
-        included_phases: squad.quotation_profile.included_phases ? [...squad.quotation_profile.included_phases] : undefined,
-        payment_rows: squad.quotation_profile.payment_rows?.map((row) => ({ ...row })),
-        document_options: squad.quotation_profile.document_options ? { ...squad.quotation_profile.document_options, clause_codes: squad.quotation_profile.document_options.clause_codes ? [...squad.quotation_profile.document_options.clause_codes] : undefined } : undefined,
-      } : undefined,
+      quotation_profile: squad.quotation_profile
+        ? {
+            ...squad.quotation_profile,
+            included_phases: squad.quotation_profile.included_phases
+              ? [...squad.quotation_profile.included_phases]
+              : undefined,
+            payment_rows: squad.quotation_profile.payment_rows?.map((row) => ({ ...row })),
+            document_options: squad.quotation_profile.document_options
+              ? {
+                  ...squad.quotation_profile.document_options,
+                  clause_codes: squad.quotation_profile.document_options.clause_codes
+                    ? [...squad.quotation_profile.document_options.clause_codes]
+                    : undefined,
+                }
+              : undefined,
+          }
+        : undefined,
     },
   };
 }
@@ -193,3 +211,70 @@ export function useSubscriptionSaaSPreview(
   return { ...query, isDebouncing };
 }
 
+export const WHITE_LABEL_PREVIEW_QUERY_KEY = ['quotation', 'white-label-preview'] as const;
+
+export function normalizeWhiteLabelPreviewPayload(
+  payload: GenerateQuotationPayload | null | undefined
+) {
+  if (!payload || payload.commercial_scheme !== 'white_label') return null;
+  return {
+    commercial_scheme: payload.commercial_scheme,
+    white_label: normalizeWhiteLabel(payload.white_label),
+  };
+}
+
+/**
+ * Debounced server-authoritative preview for White Label. TanStack Query
+ * supplies an AbortSignal to Axios, so rapid typing cancels stale in-flight
+ * preview requests.
+ */
+export function useWhiteLabelPreview(
+  payload: GenerateQuotationPayload | null | undefined,
+  enabled = true
+) {
+  const normalized = useMemo(() => normalizeWhiteLabelPreviewPayload(payload), [payload]);
+  const [debounced, setDebounced] = useState(normalized);
+  const [isDebouncing, setIsDebouncing] = useState(false);
+
+  useEffect(() => {
+    if (!enabled || !normalized) {
+      setDebounced(null);
+      setIsDebouncing(false);
+      return undefined;
+    }
+
+    setIsDebouncing(true);
+    const timer = setTimeout(() => {
+      setDebounced(normalized);
+      setIsDebouncing(false);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [enabled, normalized]);
+
+  const query = useQuery<WhiteLabelPreviewResponse, Error>({
+    queryKey: [
+      ...WHITE_LABEL_PREVIEW_QUERY_KEY,
+      debounced ? JSON.stringify(debounced) : 'disabled',
+    ],
+    queryFn: ({ signal }) => {
+      if (!payload || !debounced || payload.commercial_scheme !== 'white_label') {
+        throw new Error('White Label preview is disabled');
+      }
+      return previewWhiteLabel(
+        {
+          ...payload,
+          commercial_scheme: 'white_label',
+          white_label: debounced.white_label,
+        },
+        signal
+      );
+    },
+    enabled: Boolean(enabled && payload && debounced),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+
+  return { ...query, isDebouncing };
+}

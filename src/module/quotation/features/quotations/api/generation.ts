@@ -8,6 +8,7 @@ import type {
   GenerateQuotationPayload,
   QuotationGenerationDetail,
   GenerateQuotationResponse,
+  WhiteLabelPreviewResponse,
   DedicatedSquadPreviewResponse,
   SubscriptionSaaSPreviewResponse,
 } from '../types';
@@ -61,6 +62,16 @@ export function previewSubscriptionSaaS(payload: GenerateQuotationPayload, signa
   );
 }
 
+/**
+ * Calculate the white label quotation preview. The server owns all money math,
+ * section planning, and profile resolutions without calling AI or persisting data.
+ */
+export function previewWhiteLabel(payload: GenerateQuotationPayload, signal?: AbortSignal) {
+  return unwrap<WhiteLabelPreviewResponse>(
+    axios.post(endpoints.quotation.quotations.whiteLabelPreview, payload, { signal })
+  );
+}
+
 export function getGenerationStatus(id: string) {
   return unwrap<GenerationStateResponse>(
     axios.get(endpoints.quotation.quotations.generationStatus(id))
@@ -68,9 +79,7 @@ export function getGenerationStatus(id: string) {
 }
 
 export function regenerateQuotation(id: string) {
-  return unwrap<GenerationStateResponse>(
-    axios.post(endpoints.quotation.quotations.regenerate(id))
-  );
+  return unwrap<GenerationStateResponse>(axios.post(endpoints.quotation.quotations.regenerate(id)));
 }
 
 export function getQuotationDetail(id: string) {
@@ -105,4 +114,3 @@ export async function getClients(): Promise<ClientSummary[]> {
   }
   return [];
 }
-

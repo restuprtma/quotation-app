@@ -18,7 +18,15 @@ export type ScopeTimelineMode = '' | 'none' | 'relative' | 'calendar' | 'sprint'
 export type QuotationPaymentMode = '' | 'preset' | 'explicit_rows';
 export type PaymentAllocationKind = 'investment_bps' | 'net_preparation' | 'remaining_bps';
 export type TaxTreatment = '' | 'exclusive_ppn' | 'inclusive_ppn';
-export type QuotationPhase = 'requirement' | 'development' | 'sit' | 'uat' | 'go_live' | 'maintenance' | 'k6' | 'pentest';
+export type QuotationPhase =
+  | 'requirement'
+  | 'development'
+  | 'sit'
+  | 'uat'
+  | 'go_live'
+  | 'maintenance'
+  | 'k6'
+  | 'pentest';
 
 export type PaymentRowInput = {
   work_period: string;
@@ -79,16 +87,11 @@ export type DedicatedSquadInput = {
   quotation_profile?: QuotationProfileInput;
 };
 
-export type SubscriptionSectionLayout =
-  | 'subscription_development'
-  | 'development_maintenance';
+export type SubscriptionSectionLayout = 'subscription_development' | 'development_maintenance';
 
 export type SubscriptionBillingCycle = 'monthly' | 'quarterly' | 'yearly';
 
-export type SubscriptionTaxTreatment =
-  | 'not_stated'
-  | 'exclusive_ppn'
-  | 'inclusive_ppn';
+export type SubscriptionTaxTreatment = 'not_stated' | 'exclusive_ppn' | 'inclusive_ppn';
 
 export type SubscriptionPricePeriodInput = {
   label: string;
@@ -141,6 +144,69 @@ export type SubscriptionSaaSInput = {
   income_sharing?: IncomeSharingInput;
 };
 
+export type WhiteLabelTaxTreatment = 'not_stated' | 'exclusive_ppn' | 'inclusive_ppn';
+
+export type WhiteLabelPaymentComponent = 'license' | 'maintenance_hosting';
+
+export type WhiteLabelLicenseItemInput = {
+  name: string;
+  unit_rate: number;
+  quantity: number;
+};
+
+export type WhiteLabelMaintenanceItemInput = {
+  name: string;
+  monthly_rate: number;
+  fte_quarters: number;
+  period_months: number;
+};
+
+export type WhiteLabelHostingItemInput = {
+  name: string;
+  monthly_rate: number;
+  quantity: number;
+  period_months: number;
+};
+
+export type WhiteLabelModuleGroupInput = {
+  name: string;
+  features: string[];
+};
+
+export type WhiteLabelTimelineRowInput = {
+  description: string;
+  timeline: string;
+};
+
+export type WhiteLabelPaymentRowInput = {
+  work_period: string;
+  terms: string;
+  invoice_date_label: string;
+  due_date_label: string;
+  component: WhiteLabelPaymentComponent;
+  nominal: number;
+};
+
+export type WhiteLabelLimitationCode =
+  | 'out_of_pocket'
+  | 'overtime'
+  | 'third_party'
+  | 'scope_change';
+
+export type WhiteLabelInput = {
+  product_name: string;
+  quotation_date: string;
+  tax_treatment: WhiteLabelTaxTreatment;
+  license_items: WhiteLabelLicenseItemInput[];
+  maintenance_items?: WhiteLabelMaintenanceItemInput[];
+  hosting_items?: WhiteLabelHostingItemInput[];
+  module_groups?: WhiteLabelModuleGroupInput[];
+  timeline_rows?: WhiteLabelTimelineRowInput[];
+  payment_schedule: WhiteLabelPaymentRowInput[];
+  rights_statements?: string[];
+  limitation_codes: WhiteLabelLimitationCode[];
+};
+
 type GenerateQuotationBase = {
   idempotency_key?: string;
   skill_id: string;
@@ -151,30 +217,46 @@ type GenerateQuotationBase = {
   solution_type: string;
 };
 
+export type DedicatedSquadGeneratePayload = GenerateQuotationBase & {
+  commercial_scheme: 'dedicated_squad';
+  rate_card_id: string;
+  rate_card_code?: string;
+  dedicated_squad: DedicatedSquadInput;
+  /** Legacy fields remain optional for old revisions and compatibility. */
+  project_duration_months?: number;
+  budget_maximum?: number;
+  summary?: string;
+  mandatory_scope?: string[];
+  optional_scope?: string[];
+  allowed_standard_activities?: string[];
+  payment_terms?: PaymentTermsInput;
+  additional_notes?: string;
+  discount_type?: 'none' | 'round_to_target' | 'fixed_amount' | 'percent';
+  discount_input?: number;
+  discount_name?: string;
+  discount_reason?: string;
+  subscription_saas?: never;
+  white_label?: never;
+};
+
+export type SubscriptionSaaSGeneratePayload = GenerateQuotationBase & {
+  commercial_scheme: 'subscription_saas';
+  subscription_saas: SubscriptionSaaSInput;
+  dedicated_squad?: never;
+  white_label?: never;
+};
+
+export type WhiteLabelGeneratePayload = GenerateQuotationBase & {
+  commercial_scheme: 'white_label';
+  white_label: WhiteLabelInput;
+  dedicated_squad?: never;
+  subscription_saas?: never;
+};
+
 export type GenerateQuotationPayload =
-  | (GenerateQuotationBase & {
-      commercial_scheme: 'dedicated_squad';
-      rate_card_id: string;
-      rate_card_code?: string;
-      dedicated_squad: DedicatedSquadInput;
-      /** Legacy fields remain optional for old revisions and compatibility. */
-      project_duration_months?: number;
-      budget_maximum?: number;
-      summary?: string;
-      mandatory_scope?: string[];
-      optional_scope?: string[];
-      allowed_standard_activities?: string[];
-      payment_terms?: PaymentTermsInput;
-      additional_notes?: string;
-      discount_type?: 'none' | 'round_to_target' | 'fixed_amount' | 'percent';
-      discount_input?: number;
-      discount_name?: string;
-      discount_reason?: string;
-    })
-  | (GenerateQuotationBase & {
-      commercial_scheme: 'subscription_saas';
-      subscription_saas: SubscriptionSaaSInput;
-    });
+  | DedicatedSquadGeneratePayload
+  | SubscriptionSaaSGeneratePayload
+  | WhiteLabelGeneratePayload;
 
 export type GenerateQuotationResponse = {
   quotation_id: string;
@@ -271,6 +353,52 @@ export type SubscriptionSaaSPreviewResponse = {
   visible_sections: SubscriptionDocumentSection[];
 };
 
+export type WhiteLabelLicenseLineCalculation = WhiteLabelLicenseItemInput & {
+  line_total: number;
+};
+
+export type WhiteLabelMaintenanceLineCalculation = WhiteLabelMaintenanceItemInput & {
+  line_total: number;
+};
+
+export type WhiteLabelHostingLineCalculation = WhiteLabelHostingItemInput & {
+  line_total: number;
+};
+
+export type WhiteLabelCalculation = {
+  license: WhiteLabelLicenseLineCalculation[];
+  maintenance?: WhiteLabelMaintenanceLineCalculation[];
+  hosting?: WhiteLabelHostingLineCalculation[];
+  license_subtotal: number;
+  maintenance_subtotal: number;
+  hosting_subtotal: number;
+  maintenance_hosting_subtotal: number;
+  total_investment: number;
+  license_payment_total: number;
+  maintenance_hosting_payment_total: number;
+  payment_total: number;
+};
+
+export type WhiteLabelDocumentSection = {
+  number: number;
+  code: string;
+  title: string;
+};
+
+export type ResolvedWhiteLabelProfile = {
+  tax_treatment: WhiteLabelTaxTreatment;
+  tax_clause_text?: string;
+  show_maintenance_hosting: boolean;
+  show_scope_timeline: boolean;
+  show_rights: boolean;
+  sections: WhiteLabelDocumentSection[];
+};
+
+export type WhiteLabelPreviewResponse = {
+  calculation: WhiteLabelCalculation;
+  resolved_profile: ResolvedWhiteLabelProfile;
+};
+
 export type GenerationProgressStage =
   | 'validating_input'
   | 'creating_draft'
@@ -357,4 +485,3 @@ export type ClientSummary = {
   slug?: string;
   is_active?: boolean;
 };
-
