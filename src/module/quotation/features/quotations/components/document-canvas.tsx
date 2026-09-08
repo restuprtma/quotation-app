@@ -1,5 +1,6 @@
 import '../styles/dedicated-document.css';
 import '../styles/subscription-document.css';
+import '../styles/white-label-document.css';
 
 import type { ReactNode } from 'react';
 

@@ -1,0 +1,265 @@
+/*
+ * Official White Label Product document stylesheet.
+ *
+ * Scoped under .quotation-document to preserve semantic HTML markers and ensure
+ * visual parity with official quotation document surfaces without polluting global styles.
+ */
+
+/* Tables layout and sizing */
+.quotation-document [data-block-type='commercial'] table,
+.quotation-document [data-block-type='commercial-maintenance-hosting'] table,
+.quotation-document [data-block-type='timeline'] table,
+.quotation-document [data-block-type='payment'] table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* White Label License Commercial Table: 4-column column widths */
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='license_line_total'])
+  th:nth-child(1),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='license_line_total'])
+  td:nth-child(1),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_license'])
+  th:nth-child(1),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_license'])
+  td:nth-child(1) {
+  width: 40%;
+}
+
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='license_line_total'])
+  th:nth-child(2),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='license_line_total'])
+  td:nth-child(2),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_license'])
+  th:nth-child(2),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_license'])
+  td:nth-child(2) {
+  width: 20%;
+  text-align: right;
+}
+
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='license_line_total'])
+  th:nth-child(3),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='license_line_total'])
+  td:nth-child(3),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_license'])
+  th:nth-child(3),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_license'])
+  td:nth-child(3) {
+  width: 15%;
+  text-align: center;
+}
+
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='license_line_total'])
+  th:nth-child(4),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='license_line_total'])
+  td:nth-child(4),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_license'])
+  th:nth-child(4),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-field='total_license'])
+  td:nth-child(4) {
+  width: 25%;
+  text-align: right;
+}
+
+/* White Label Maintenance & Hosting Commercial Table: 5-column column widths */
+.quotation-document [data-block-type='commercial-maintenance-hosting'] table th:nth-child(1),
+.quotation-document [data-block-type='commercial-maintenance-hosting'] table td:nth-child(1) {
+  width: 32%;
+}
+
+.quotation-document [data-block-type='commercial-maintenance-hosting'] table th:nth-child(2),
+.quotation-document [data-block-type='commercial-maintenance-hosting'] table td:nth-child(2) {
+  width: 18%;
+  text-align: right;
+}
+
+.quotation-document [data-block-type='commercial-maintenance-hosting'] table th:nth-child(3),
+.quotation-document [data-block-type='commercial-maintenance-hosting'] table td:nth-child(3) {
+  width: 15%;
+  text-align: center;
+}
+
+.quotation-document [data-block-type='commercial-maintenance-hosting'] table th:nth-child(4),
+.quotation-document [data-block-type='commercial-maintenance-hosting'] table td:nth-child(4) {
+  width: 15%;
+  text-align: center;
+}
+
+.quotation-document [data-block-type='commercial-maintenance-hosting'] table th:nth-child(5),
+.quotation-document [data-block-type='commercial-maintenance-hosting'] table td:nth-child(5) {
+  width: 20%;
+  text-align: right;
+}
+
+/* White Label Payment Table: 5-column column widths */
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  th:nth-child(1),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  td:nth-child(1) {
+  width: 25%;
+}
+
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  th:nth-child(2),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  td:nth-child(2) {
+  width: 20%;
+}
+
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  th:nth-child(3),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  td:nth-child(3) {
+  width: 18%;
+}
+
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  th:nth-child(4),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  td:nth-child(4) {
+  width: 17%;
+}
+
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  th:nth-child(5),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  td:nth-child(5) {
+  width: 20%;
+  text-align: right;
+}
+
+/* Numeric columns right alignment */
+.quotation-document [data-field='license_line_total'],
+.quotation-document [data-field='total_license'],
+.quotation-document [data-field='maintenance_line_total'],
+.quotation-document [data-field='hosting_line_total'],
+.quotation-document [data-field='maintenance_hosting_total'],
+.quotation-document [data-field='payment_nominal'],
+.quotation-document [data-field='payment_total'] {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Scope & Module List wrapping and presentation */
+.quotation-document [data-block-type='scope'] {
+  margin-block: 1.25rem;
+}
+
+.quotation-document [data-block-type='scope'] h3 {
+  margin: 1rem 0 0.5rem;
+  color: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.quotation-document [data-block-type='scope'] ul {
+  margin: 0.35rem 0 0.85rem;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.quotation-document [data-block-type='scope'] li {
+  margin: 0.25rem 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Timeline block inside scope */
+.quotation-document [data-block-type='timeline'] {
+  margin-block: 1rem;
+}
+
+.quotation-document [data-block-type='timeline'] table [data-column-width='75'] {
+  width: 75%;
+}
+
+.quotation-document [data-block-type='timeline'] table [data-column-width='25'] {
+  width: 25%;
+}
+
+/* Rights section and clauses */
+.quotation-document [data-block-type='rights'] {
+  margin-block: 1.25rem;
+}
+
+.quotation-document [data-block-type='rights'] p {
+  margin: 0.65rem 0;
+  line-height: 1.6;
+}
+
+/* Tax clause */
+.quotation-document [data-field='tax_clause'] {
+  margin-top: 0.75rem;
+  font-style: italic;
+  color: inherit;
+  opacity: 0.85;
+}
+
+/* Print page-break avoidance and formatting */
+@media print {
+  .quotation-document [data-block-type='commercial'] tr,
+  .quotation-document [data-block-type='commercial-maintenance-hosting'] tr,
+  .quotation-document [data-block-type='timeline'] tr,
+  .quotation-document [data-block-type='payment'] tr,
+  .quotation-document [data-block-type='scope'] h3,
+  .quotation-document [data-block-type='scope'] li,
+  .quotation-document [data-block-type='rights'],
+  .quotation-document [data-block-type] h2 {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
