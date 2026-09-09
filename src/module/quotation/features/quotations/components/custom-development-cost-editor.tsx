@@ -38,7 +38,7 @@ type Props = {
 
 export function CustomDevelopmentCostEditor({ disabled = false }: Props) {
   const { t } = useTranslate('quotation');
-  const { control, setValue, getValues, watch } = useFormContext<CustomDevelopmentFormValues>();
+  const { control, setValue, watch } = useFormContext<CustomDevelopmentFormValues>();
 
   const customDev = useWatch({ control, name: 'custom_development' });
   const tableMode = customDev?.development_table_mode || 'monthly_period';
@@ -54,18 +54,6 @@ export function CustomDevelopmentCostEditor({ disabled = false }: Props) {
 
   const handleTableModeChange = (newMode: 'monthly_period' | 'daily_period' | 'fixed_days') => {
     setValue('custom_development.development_table_mode', newMode, { shouldValidate: true });
-    if (newMode === 'fixed_days') {
-      const groups = getValues('custom_development.development_groups') || [];
-      groups.forEach((g, gIdx) => {
-        g.items.forEach((_, iIdx) => {
-          setValue(
-            `custom_development.development_groups.${gIdx}.items.${iIdx}.display_rate`,
-            null,
-            { shouldValidate: true }
-          );
-        });
-      });
-    }
   };
 
   const handleAddGroup = () => {

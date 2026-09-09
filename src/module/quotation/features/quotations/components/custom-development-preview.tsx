@@ -228,7 +228,7 @@ export function CustomDevelopmentPreview({
                   label={
                     vm.showMonthly
                       ? t('customDevelopmentForm.monthly.enableSwitch')
-                      : 'Biaya Bulanan: Tidak Ada'
+                      : t('customDevelopmentForm.preview.noMonthly')
                   }
                   color={vm.showMonthly ? 'info' : 'default'}
                   variant="outlined"
@@ -244,10 +244,22 @@ export function CustomDevelopmentPreview({
                   variant="outlined"
                 />
                 {typeof moduleCount === 'number' && (
-                  <Chip size="small" label={`${moduleCount} Kelompok Modul`} variant="outlined" />
+                  <Chip
+                    size="small"
+                    label={t('customDevelopmentForm.preview.moduleGroupCount', {
+                      count: moduleCount,
+                    })}
+                    variant="outlined"
+                  />
                 )}
                 {typeof timelineCount === 'number' && (
-                  <Chip size="small" label={`${timelineCount} Baris Timeline`} variant="outlined" />
+                  <Chip
+                    size="small"
+                    label={t('customDevelopmentForm.preview.timelineRowCount', {
+                      count: timelineCount,
+                    })}
+                    variant="outlined"
+                  />
                 )}
               </Stack>
 
