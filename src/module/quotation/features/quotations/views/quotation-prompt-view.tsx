@@ -28,6 +28,7 @@ import { QuotationGenerationForm } from '../components/quotation-generation-form
 import { WhiteLabelGenerationForm } from '../components/white-label-generation-form';
 import { SubscriptionSaaSGenerationForm } from '../components/subscription-saas-generation-form';
 import { GENERATION_STAGES, GenerationProgressCard } from '../components/generation-progress-card';
+import { StandaloneMaintenanceGenerationForm } from '../components/standalone-maintenance-generation-form';
 
 // ----------------------------------------------------------------------
 
@@ -48,7 +49,7 @@ export function QuotationPromptView() {
   const [activeSkill, setActiveSkill] = useState<ActiveSkill | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [commercialScheme, setCommercialScheme] = useState<
-    'dedicated_squad' | 'subscription_saas' | 'white_label' | null
+    'dedicated_squad' | 'subscription_saas' | 'white_label' | 'standalone_maintenance' | null
   >(null);
 
   // Generation state machine
@@ -433,7 +434,7 @@ export function QuotationPromptView() {
             </Box>
 
             <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 4 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <Card
                   variant="outlined"
                   sx={{
@@ -479,7 +480,7 @@ export function QuotationPromptView() {
                 </Card>
               </Grid>
 
-              <Grid size={{ xs: 12, md: 4 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <Card
                   variant="outlined"
                   sx={{
@@ -525,7 +526,7 @@ export function QuotationPromptView() {
                 </Card>
               </Grid>
 
-              <Grid size={{ xs: 12, md: 4 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <Card
                   variant="outlined"
                   sx={{
@@ -566,6 +567,52 @@ export function QuotationPromptView() {
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {t('prompt.whiteLabelDesc')}
+                    </Typography>
+                  </CardActionArea>
+                </Card>
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Card
+                  variant="outlined"
+                  sx={{
+                    height: '100%',
+                    transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                      boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}22`,
+                    },
+                  }}
+                >
+                  <CardActionArea
+                    onClick={() => setCommercialScheme('standalone_maintenance')}
+                    sx={{
+                      p: 4,
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      justifyContent: 'flex-start',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        mb: 2.5,
+                        p: 1.5,
+                        borderRadius: '12px',
+                        bgcolor: (theme) =>
+                          theme.palette.mode === 'light' ? 'warning.lighter' : 'warning.dark',
+                        color: 'warning.main',
+                        display: 'inline-flex',
+                      }}
+                    >
+                      <Iconify icon="solar:tuning-square-2-bold-duotone" width={36} />
+                    </Box>
+                    <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+                      {t('prompt.standaloneMaintenanceTitle')}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {t('prompt.standaloneMaintenanceDesc')}
                     </Typography>
                   </CardActionArea>
                 </Card>
@@ -620,7 +667,7 @@ export function QuotationPromptView() {
               onCancel={() => setCommercialScheme(null)}
             />
           </Box>
-        ) : (
+        ) : commercialScheme === 'white_label' ? (
           <Box>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
               <Button
@@ -644,7 +691,31 @@ export function QuotationPromptView() {
               onCancel={() => setCommercialScheme(null)}
             />
           </Box>
-        )}
+        ) : commercialScheme === 'standalone_maintenance' ? (
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+                onClick={() => setCommercialScheme(null)}
+              >
+                {t('prompt.backToSchemes')}
+              </Button>
+              <Typography variant="h5" fontWeight={700}>
+                {t('standaloneMaintenanceForm.title')}
+              </Typography>
+            </Stack>
+
+            <StandaloneMaintenanceGenerationForm
+              selectedSkill={activeSkill}
+              isSubmitting={generateMutation.isPending}
+              onSubmit={handleFormSubmit}
+              onCancel={() => setCommercialScheme(null)}
+            />
+          </Box>
+        ) : null}
       </Stack>
 
       {/* Generation Progress State UI Modal */}
