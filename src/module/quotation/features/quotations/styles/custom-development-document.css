@@ -1,0 +1,228 @@
+/*
+ * Official Custom Software Development document stylesheet.
+ *
+ * Scoped under .quotation-document to preserve semantic HTML markers and ensure
+ * visual parity with official quotation document surfaces without polluting global styles.
+ */
+
+/* Tables layout and sizing */
+.quotation-document [data-quotation-section='commercial-development'] table,
+.quotation-document [data-quotation-section='commercial-monthly'] table,
+.quotation-document [data-quotation-section='timeline'] table,
+.quotation-document [data-quotation-section='payment'] table,
+.quotation-document [data-quotation-section='signature'] table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* Custom Development Commercial Table (Deskripsi, Rate, SDM, Period, Total) */
+.quotation-document [data-quotation-section='commercial-development'] table th:nth-child(1),
+.quotation-document [data-quotation-section='commercial-development'] table td:nth-child(1) {
+  width: 35%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.quotation-document [data-quotation-section='commercial-development'] table th:nth-child(2),
+.quotation-document [data-quotation-section='commercial-development'] table td:nth-child(2) {
+  text-align: right;
+}
+
+.quotation-document [data-quotation-section='commercial-development'] table th:nth-child(3),
+.quotation-document [data-quotation-section='commercial-development'] table td:nth-child(3) {
+  text-align: center;
+}
+
+.quotation-document [data-quotation-section='commercial-development'] table th:nth-child(4),
+.quotation-document [data-quotation-section='commercial-development'] table td:nth-child(4) {
+  text-align: center;
+}
+
+.quotation-document [data-quotation-section='commercial-development'] table th:nth-child(5),
+.quotation-document [data-quotation-section='commercial-development'] table td:nth-child(5) {
+  text-align: right;
+}
+
+/* Custom Development Monthly Commercial Table (5 columns) */
+.quotation-document [data-quotation-section='commercial-monthly'] table th:nth-child(1),
+.quotation-document [data-quotation-section='commercial-monthly'] table td:nth-child(1) {
+  width: 25%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.quotation-document [data-quotation-section='commercial-monthly'] table th:nth-child(2),
+.quotation-document [data-quotation-section='commercial-monthly'] table td:nth-child(2) {
+  width: 30%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.quotation-document [data-quotation-section='commercial-monthly'] table th:nth-child(3),
+.quotation-document [data-quotation-section='commercial-monthly'] table td:nth-child(3) {
+  width: 18%;
+  text-align: right;
+}
+
+.quotation-document [data-quotation-section='commercial-monthly'] table th:nth-child(4),
+.quotation-document [data-quotation-section='commercial-monthly'] table td:nth-child(4) {
+  width: 10%;
+  text-align: center;
+}
+
+.quotation-document [data-quotation-section='commercial-monthly'] table th:nth-child(5),
+.quotation-document [data-quotation-section='commercial-monthly'] table td:nth-child(5) {
+  width: 17%;
+  text-align: right;
+}
+
+/* Payment Table */
+.quotation-document [data-quotation-section='payment'] table th:nth-child(1),
+.quotation-document [data-quotation-section='payment'] table td:nth-child(1) {
+  width: 25%;
+  word-break: break-word;
+}
+
+.quotation-document [data-quotation-section='payment'] table th:nth-child(2),
+.quotation-document [data-quotation-section='payment'] table td:nth-child(2) {
+  width: 25%;
+  word-break: break-word;
+}
+
+.quotation-document [data-quotation-section='payment'] table th:nth-child(3),
+.quotation-document [data-quotation-section='payment'] table td:nth-child(3) {
+  width: 18%;
+}
+
+.quotation-document [data-quotation-section='payment'] table th:nth-child(4),
+.quotation-document [data-quotation-section='payment'] table td:nth-child(4) {
+  width: 12%;
+}
+
+.quotation-document [data-quotation-section='payment'] table th:nth-child(5),
+.quotation-document [data-quotation-section='payment'] table td:nth-child(5) {
+  width: 20%;
+  text-align: right;
+}
+
+/* Numeric columns right alignment */
+.quotation-document [data-quotation-field='development_subtotal'],
+.quotation-document [data-quotation-field='discount_amount'],
+.quotation-document [data-quotation-field='total_investment'],
+.quotation-document [data-quotation-field='monthly_total'],
+.quotation-document [data-quotation-field^='development_line_'],
+.quotation-document [data-quotation-field^='monthly_line_'],
+.quotation-document [data-quotation-field^='payment_nominal_'] {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Scope & Modules presentation */
+.quotation-document [data-quotation-section='scope'] {
+  margin-block: 1.25rem;
+}
+
+.quotation-document [data-quotation-section='scope'] h3 {
+  margin: 1rem 0 0.5rem;
+  color: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.quotation-document [data-quotation-section='scope'] ul {
+  margin: 0.35rem 0 0.85rem;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.quotation-document [data-quotation-section='scope'] li {
+  margin: 0.25rem 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Monthly notes component */
+.quotation-document [data-quotation-component='monthly-notes'] {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+/* Timeline section inside scope */
+.quotation-document [data-quotation-section='timeline'] {
+  margin-block: 1rem;
+}
+
+.quotation-document [data-quotation-section='timeline'] table [data-column-width='75'] {
+  width: 75%;
+}
+
+.quotation-document [data-quotation-section='timeline'] table [data-column-width='25'] {
+  width: 25%;
+}
+
+/* Tax clause */
+.quotation-document [data-quotation-field='tax_clause'] {
+  margin-top: 0.75rem;
+  font-style: italic;
+  color: inherit;
+  opacity: 0.85;
+}
+
+/* Rights section */
+.quotation-document [data-quotation-section='rights'] {
+  margin-block: 1.25rem;
+}
+
+.quotation-document [data-quotation-section='rights'] p {
+  margin: 0.65rem 0;
+  line-height: 1.6;
+}
+
+/* Limitations section */
+.quotation-document [data-quotation-section='limitations'] {
+  margin-block: 1.25rem;
+}
+
+.quotation-document [data-quotation-section='limitations'] ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.quotation-document [data-quotation-section='limitations'] li {
+  margin: 0.35rem 0;
+  line-height: 1.6;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Signature 2-column layout */
+.quotation-document [data-quotation-section='signature'] table.signature-table {
+  width: 100%;
+  border: none;
+  margin-top: 2rem;
+}
+
+.quotation-document [data-quotation-section='signature'] table.signature-table td {
+  width: 50%;
+  vertical-align: top;
+  border: none;
+  padding: 0.5rem 1rem;
+}
+
+/* Print page-break avoidance and formatting */
+@media print {
+  .quotation-document [data-quotation-section] tr,
+  .quotation-document [data-quotation-section] h2,
+  .quotation-document [data-quotation-section] h3,
+  .quotation-document [data-quotation-section='scope'] li,
+  .quotation-document [data-quotation-section='rights'],
+  .quotation-document [data-quotation-section='limitations'] li,
+  .quotation-document [data-quotation-section='signature'],
+  .quotation-document [data-quotation-section='signature'] tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

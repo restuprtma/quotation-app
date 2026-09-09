@@ -54,6 +54,25 @@ export const QuotationSectionExtension = Node.create({
         renderHTML: (attributes: Record<string, unknown>) =>
           renderMarker(attributes, 'data-section-number', SECTION_NUMBER_PATTERN),
       },
+      'data-quotation-section': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-quotation-section'),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-quotation-section'),
+      },
+      'data-quotation-section-number': {
+        default: null,
+        parseHTML: (element: HTMLElement) =>
+          readMarker(element, 'data-quotation-section-number', SECTION_NUMBER_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-quotation-section-number', SECTION_NUMBER_PATTERN),
+      },
+      'data-quotation-component': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-quotation-component'),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-quotation-component'),
+      },
       'data-template-code': {
         default: null,
         parseHTML: (element: HTMLElement) => readMarker(element, 'data-template-code'),
@@ -73,6 +92,8 @@ export const QuotationSectionExtension = Node.create({
     return [
       { tag: 'section[data-block-type]', priority: 50 },
       { tag: 'header[data-block-type]', priority: 50 },
+      { tag: 'section[data-quotation-section]', priority: 50 },
+      { tag: 'header[data-quotation-section]', priority: 50 },
     ];
   },
 
@@ -88,13 +109,25 @@ export const QuotationFieldAttributesExtension = Extension.create({
   addGlobalAttributes() {
     return [
       {
-        types: ['paragraph', 'heading', 'orderedList', 'bulletList', 'listItem'],
+        types: ['paragraph', 'heading', 'orderedList', 'bulletList', 'listItem', 'tableCell', 'tableHeader'],
         attributes: {
           'data-field': {
             default: null,
             parseHTML: (element: HTMLElement) => readMarker(element, 'data-field'),
             renderHTML: (attributes: Record<string, unknown>) =>
               renderMarker(attributes, 'data-field'),
+          },
+          'data-quotation-field': {
+            default: null,
+            parseHTML: (element: HTMLElement) => readMarker(element, 'data-quotation-field'),
+            renderHTML: (attributes: Record<string, unknown>) =>
+              renderMarker(attributes, 'data-quotation-field'),
+          },
+          'data-quotation-component': {
+            default: null,
+            parseHTML: (element: HTMLElement) => readMarker(element, 'data-quotation-component'),
+            renderHTML: (attributes: Record<string, unknown>) =>
+              renderMarker(attributes, 'data-quotation-component'),
           },
         },
       },
@@ -115,11 +148,17 @@ export const QuotationFieldMark = Mark.create({
         parseHTML: (element: HTMLElement) => readMarker(element, 'data-field'),
         renderHTML: (attributes: Record<string, unknown>) => renderMarker(attributes, 'data-field'),
       },
+      'data-quotation-field': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-quotation-field'),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-quotation-field'),
+      },
     };
   },
 
   parseHTML() {
-    return [{ tag: 'span[data-field]' }];
+    return [{ tag: 'span[data-field]' }, { tag: 'span[data-quotation-field]' }];
   },
 
   renderHTML({ HTMLAttributes }) {
@@ -164,6 +203,12 @@ export const QuotationTableRowExtension = TableRow.extend({
         renderHTML: (attributes: Record<string, unknown>) =>
           renderMarker(attributes, 'data-component'),
       },
+      'data-quotation-component': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-quotation-component'),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-quotation-component'),
+      },
       'data-payment-index': {
         default: null,
         parseHTML: (element: HTMLElement) => readMarker(element, 'data-payment-index', /^[0-9]+$/),
@@ -205,6 +250,12 @@ function addQuotationCellAttributes<T extends typeof TableCell | typeof TableHea
           parseHTML: (element: HTMLElement) => readMarker(element, 'data-field'),
           renderHTML: (attributes: Record<string, unknown>) =>
             renderMarker(attributes, 'data-field'),
+        },
+        'data-quotation-field': {
+          default: null,
+          parseHTML: (element: HTMLElement) => readMarker(element, 'data-quotation-field'),
+          renderHTML: (attributes: Record<string, unknown>) =>
+            renderMarker(attributes, 'data-quotation-field'),
         },
       };
     },
@@ -250,10 +301,30 @@ export const LegalBlockExtension = Node.create<LegalBlockOptions>({
   addAttributes() {
     return {
       'data-block-type': {
-        default: 'legal',
-        parseHTML: (element: HTMLElement) => readMarker(element, 'data-block-type') || 'legal',
+        default: null,
+        parseHTML: (element: HTMLElement) => {
+          const bt = readMarker(element, 'data-block-type');
+          if (bt) return bt;
+          if (element.hasAttribute('data-quotation-section')) {
+            return null;
+          }
+          return 'legal';
+        },
         renderHTML: (attributes: Record<string, unknown>) =>
           renderMarker(attributes, 'data-block-type'),
+      },
+      'data-quotation-section': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-quotation-section'),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-quotation-section'),
+      },
+      'data-quotation-section-number': {
+        default: null,
+        parseHTML: (element: HTMLElement) =>
+          readMarker(element, 'data-quotation-section-number', SECTION_NUMBER_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-quotation-section-number', SECTION_NUMBER_PATTERN),
       },
       'data-template-code': {
         default: null,
@@ -295,17 +366,53 @@ export const LegalBlockExtension = Node.create<LegalBlockOptions>({
         tag: 'div[data-block-type="rights"]',
         priority: 60,
       },
+      {
+        tag: 'section[data-block-type="limitations"]',
+        priority: 60,
+      },
+      {
+        tag: 'div[data-block-type="limitations"]',
+        priority: 60,
+      },
+      {
+        tag: 'section[data-quotation-section="legal"]',
+        priority: 60,
+      },
+      {
+        tag: 'div[data-quotation-section="legal"]',
+        priority: 60,
+      },
+      {
+        tag: 'section[data-quotation-section="rights"]',
+        priority: 60,
+      },
+      {
+        tag: 'div[data-quotation-section="rights"]',
+        priority: 60,
+      },
+      {
+        tag: 'section[data-quotation-section="limitations"]',
+        priority: 60,
+      },
+      {
+        tag: 'div[data-quotation-section="limitations"]',
+        priority: 60,
+      },
     ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    const blockType = (HTMLAttributes['data-block-type'] as string) || 'legal';
+    const extraAttrs: Record<string, string> = {
+      class: `qtr-legal-block ${this.options.unlocked ? 'qtr-legal-unlocked' : 'qtr-legal-locked'}`,
+    };
+    if (HTMLAttributes['data-block-type']) {
+      extraAttrs['data-block-type'] = HTMLAttributes['data-block-type'] as string;
+    } else if (!HTMLAttributes['data-quotation-section']) {
+      extraAttrs['data-block-type'] = 'legal';
+    }
     return [
       'section',
-      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
-        'data-block-type': blockType,
-        class: `qtr-legal-block ${this.options.unlocked ? 'qtr-legal-unlocked' : 'qtr-legal-locked'}`,
-      }),
+      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, extraAttrs),
       0,
     ];
   },

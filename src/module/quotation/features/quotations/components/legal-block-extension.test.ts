@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import StarterKit from '@tiptap/starter-kit';
 import { Selection } from '@tiptap/pm/state';
 
-import { LegalBlockExtension } from './legal-block-extension';
+import { LegalBlockExtension, QuotationSectionExtension } from './legal-block-extension';
 
 describe('LegalBlockExtension', () => {
   const initialContent = {
@@ -125,5 +125,108 @@ describe('LegalBlockExtension', () => {
     assert.equal(editor.state.selection.from, legalPos, 'Cursor selection inside legal block must be allowed');
 
     editor.destroy();
+  });
+
+  it('rejects edits inside rights and limitations blocks when locked, and permits when unlocked', () => {
+    const customContent = {
+      type: 'doc',
+      content: [
+        {
+          type: 'quotationSection',
+          attrs: { 'data-quotation-section': 'scope', 'data-quotation-section-number': '1' },
+          content: [
+            {
+              type: 'paragraph',
+              content: [{ type: 'text', text: 'Standard scope text' }],
+            },
+          ],
+        },
+        {
+          type: 'legalBlock',
+          attrs: { 'data-quotation-section': 'rights', 'data-quotation-section-number': '2' },
+          content: [
+            {
+              type: 'paragraph',
+              content: [{ type: 'text', text: 'Original rights text' }],
+            },
+          ],
+        },
+        {
+          type: 'legalBlock',
+          attrs: { 'data-quotation-section': 'limitations', 'data-quotation-section-number': '3' },
+          content: [
+            {
+              type: 'paragraph',
+              content: [{ type: 'text', text: 'Original limitations text' }],
+            },
+          ],
+        },
+      ],
+    };
+
+    function createCustomEditor(unlocked: boolean) {
+      const editor = new Editor({
+        extensions: [
+          StarterKit,
+          QuotationSectionExtension,
+          LegalBlockExtension.configure({ unlocked }),
+        ],
+        content: customContent,
+      });
+      const stateWithPlugins = editor.state.reconfigure({
+        plugins: editor.extensionManager.plugins,
+      });
+      editor.view.updateState(stateWithPlugins);
+      return editor;
+    }
+
+    // 1. Locked: text insertion into rights and limitations is blocked
+    const lockedEditor = createCustomEditor(false);
+    let rightsPos = -1;
+    let limPos = -1;
+    lockedEditor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'legalBlock') {
+        if (node.attrs?.['data-quotation-section'] === 'rights') {
+          rightsPos = pos + 2;
+        } else if (node.attrs?.['data-quotation-section'] === 'limitations') {
+          limPos = pos + 2;
+        }
+      }
+    });
+    assert.ok(rightsPos > 0, 'rights block found');
+    assert.ok(limPos > 0, 'limitations block found');
+
+    const beforeLocked = JSON.stringify(lockedEditor.getJSON());
+    const tr1 = lockedEditor.state.tr.insertText('HACKED_RIGHTS ', rightsPos);
+    (lockedEditor as any).dispatchTransaction(tr1);
+    assert.equal(JSON.stringify(lockedEditor.getJSON()), beforeLocked, 'rights block must not change when locked');
+
+    const tr2 = lockedEditor.state.tr.insertText('HACKED_LIMITATIONS ', limPos);
+    (lockedEditor as any).dispatchTransaction(tr2);
+    assert.equal(JSON.stringify(lockedEditor.getJSON()), beforeLocked, 'limitations block must not change when locked');
+    lockedEditor.destroy();
+
+    // 2. Unlocked: editing is permitted
+    const unlockedEditor = createCustomEditor(true);
+    let uRightsPos = -1;
+    let uLimPos = -1;
+    unlockedEditor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'legalBlock') {
+        if (node.attrs?.['data-quotation-section'] === 'rights') {
+          uRightsPos = pos + 2;
+        } else if (node.attrs?.['data-quotation-section'] === 'limitations') {
+          uLimPos = pos + 2;
+        }
+      }
+    });
+
+    const tr3 = unlockedEditor.state.tr.insertText('EDITED_RIGHTS ', uRightsPos);
+    (unlockedEditor as any).dispatchTransaction(tr3);
+    assert.ok(JSON.stringify(unlockedEditor.getJSON()).includes('EDITED_RIGHTS'), 'rights edited when unlocked');
+
+    const tr4 = unlockedEditor.state.tr.insertText('EDITED_LIMITATIONS ', uLimPos);
+    (unlockedEditor as any).dispatchTransaction(tr4);
+    assert.ok(JSON.stringify(unlockedEditor.getJSON()).includes('EDITED_LIMITATIONS'), 'limitations edited when unlocked');
+    unlockedEditor.destroy();
   });
 });
