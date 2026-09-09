@@ -28,6 +28,7 @@ import { QuotationGenerationForm } from '../components/quotation-generation-form
 import { WhiteLabelGenerationForm } from '../components/white-label-generation-form';
 import { SubscriptionSaaSGenerationForm } from '../components/subscription-saas-generation-form';
 import { GENERATION_STAGES, GenerationProgressCard } from '../components/generation-progress-card';
+import { CustomDevelopmentGenerationForm } from '../components/custom-development-generation-form';
 import { StandaloneMaintenanceGenerationForm } from '../components/standalone-maintenance-generation-form';
 
 // ----------------------------------------------------------------------
@@ -49,7 +50,12 @@ export function QuotationPromptView() {
   const [activeSkill, setActiveSkill] = useState<ActiveSkill | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [commercialScheme, setCommercialScheme] = useState<
-    'dedicated_squad' | 'subscription_saas' | 'white_label' | 'standalone_maintenance' | null
+    | 'dedicated_squad'
+    | 'subscription_saas'
+    | 'white_label'
+    | 'standalone_maintenance'
+    | 'custom_development'
+    | null
   >(null);
 
   // Generation state machine
@@ -433,8 +439,8 @@ export function QuotationPromptView() {
               </Typography>
             </Box>
 
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid container spacing={3} columns={{ xs: 12, sm: 12, md: 12, lg: 10 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
                 <Card
                   variant="outlined"
                   sx={{
@@ -480,7 +486,7 @@ export function QuotationPromptView() {
                 </Card>
               </Grid>
 
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
                 <Card
                   variant="outlined"
                   sx={{
@@ -526,7 +532,7 @@ export function QuotationPromptView() {
                 </Card>
               </Grid>
 
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
                 <Card
                   variant="outlined"
                   sx={{
@@ -572,7 +578,7 @@ export function QuotationPromptView() {
                 </Card>
               </Grid>
 
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
                 <Card
                   variant="outlined"
                   sx={{
@@ -613,6 +619,52 @@ export function QuotationPromptView() {
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {t('prompt.standaloneMaintenanceDesc')}
+                    </Typography>
+                  </CardActionArea>
+                </Card>
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
+                <Card
+                  variant="outlined"
+                  sx={{
+                    height: '100%',
+                    transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                      boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}22`,
+                    },
+                  }}
+                >
+                  <CardActionArea
+                    onClick={() => setCommercialScheme('custom_development')}
+                    sx={{
+                      p: 4,
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      justifyContent: 'flex-start',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        mb: 2.5,
+                        p: 1.5,
+                        borderRadius: '12px',
+                        bgcolor: (theme) =>
+                          theme.palette.mode === 'light' ? 'success.lighter' : 'success.dark',
+                        color: 'success.main',
+                        display: 'inline-flex',
+                      }}
+                    >
+                      <Iconify icon="solar:code-square-bold-duotone" width={36} />
+                    </Box>
+                    <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+                      {t('prompt.customDevelopmentTitle')}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {t('prompt.customDevelopmentDesc')}
                     </Typography>
                   </CardActionArea>
                 </Card>
@@ -709,6 +761,30 @@ export function QuotationPromptView() {
             </Stack>
 
             <StandaloneMaintenanceGenerationForm
+              selectedSkill={activeSkill}
+              isSubmitting={generateMutation.isPending}
+              onSubmit={handleFormSubmit}
+              onCancel={() => setCommercialScheme(null)}
+            />
+          </Box>
+        ) : commercialScheme === 'custom_development' ? (
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+                onClick={() => setCommercialScheme(null)}
+              >
+                {t('prompt.backToSchemes')}
+              </Button>
+              <Typography variant="h5" fontWeight={700}>
+                {t('customDevelopmentForm.title')}
+              </Typography>
+            </Stack>
+
+            <CustomDevelopmentGenerationForm
               selectedSkill={activeSkill}
               isSubmitting={generateMutation.isPending}
               onSubmit={handleFormSubmit}
