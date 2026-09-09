@@ -158,6 +158,18 @@ export const QuotationTableRowExtension = TableRow.extend({
         parseHTML: (element: HTMLElement) => readMarker(element, 'data-field'),
         renderHTML: (attributes: Record<string, unknown>) => renderMarker(attributes, 'data-field'),
       },
+      'data-component': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-component'),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-component'),
+      },
+      'data-payment-index': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-payment-index', /^[0-9]+$/),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-payment-index', /^[0-9]+$/),
+      },
     };
   },
 });

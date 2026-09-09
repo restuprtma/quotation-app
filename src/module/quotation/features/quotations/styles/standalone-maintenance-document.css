@@ -1,0 +1,342 @@
+/*
+ * Official Standalone Maintenance & Support document stylesheet.
+ *
+ * Scoped under .quotation-document to preserve semantic HTML markers and ensure
+ * visual parity with official quotation document surfaces without polluting global styles.
+ */
+
+/* Table layout and sizing */
+.quotation-document [data-block-type='commercial'] table,
+.quotation-document [data-block-type='scope'] table,
+.quotation-document [data-block-type='payment'] table,
+.quotation-document [data-block-type='signature'] table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Standalone Maintenance Retainer Cost Table: 5-column widths */
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='retainer_cost_'])
+  th:nth-child(1),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='retainer_cost_'])
+  td:nth-child(1) {
+  width: 32%;
+}
+
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='retainer_cost_'])
+  th:nth-child(2),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='retainer_cost_'])
+  td:nth-child(2) {
+  width: 18%;
+  text-align: right;
+}
+
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='retainer_cost_'])
+  th:nth-child(3),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='retainer_cost_'])
+  td:nth-child(3) {
+  width: 15%;
+  text-align: center;
+}
+
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='retainer_cost_'])
+  th:nth-child(4),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='retainer_cost_'])
+  td:nth-child(4) {
+  width: 15%;
+  text-align: center;
+}
+
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='retainer_cost_'])
+  th:nth-child(5),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='retainer_cost_'])
+  td:nth-child(5) {
+  width: 20%;
+  text-align: right;
+}
+
+/* Standalone Maintenance Hourly Cost Table: 5-column widths */
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='hourly_cost_'])
+  th:nth-child(1),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='hourly_cost_'])
+  td:nth-child(1) {
+  width: 32%;
+}
+
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='hourly_cost_'])
+  th:nth-child(2),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='hourly_cost_'])
+  td:nth-child(2) {
+  width: 18%;
+  text-align: right;
+}
+
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='hourly_cost_'])
+  th:nth-child(3),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='hourly_cost_'])
+  td:nth-child(3) {
+  width: 15%;
+  text-align: center;
+}
+
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='hourly_cost_'])
+  th:nth-child(4),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='hourly_cost_'])
+  td:nth-child(4) {
+  width: 15%;
+  text-align: center;
+}
+
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='hourly_cost_'])
+  th:nth-child(5),
+.quotation-document
+  [data-block-type='commercial']
+  table:has([data-role^='hourly_cost_'])
+  td:nth-child(5) {
+  width: 20%;
+  text-align: right;
+}
+
+/* Standalone Maintenance Defect Matrix Table: 6-column widths & wrapping */
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) th:nth-child(1),
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) td:nth-child(1) {
+  width: 11%;
+  text-align: center;
+}
+
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) th:nth-child(2),
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) td:nth-child(2) {
+  width: 20%;
+}
+
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) th:nth-child(3),
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) td:nth-child(3) {
+  width: 19%;
+}
+
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) th:nth-child(4),
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) td:nth-child(4) {
+  width: 21%;
+}
+
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) th:nth-child(5),
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) td:nth-child(5) {
+  width: 20%;
+}
+
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) th:nth-child(6),
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) td:nth-child(6) {
+  width: 9%;
+  text-align: center;
+}
+
+/* Defect cells multiline and wrapping rules */
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) td,
+.quotation-document [data-block-type='scope'] table:has([data-role^='defect_']) th {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+/* Defect group header rows */
+.quotation-document [data-block-type='scope'] tr[data-role^='defect_group_'] td {
+  background: #f8fafc;
+  font-weight: 700;
+  text-align: left;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+/* Standalone Maintenance Hourly Task Table: 3-column widths */
+.quotation-document
+  [data-block-type='scope']
+  table:has([data-role^='hourly_task_'])
+  th:nth-child(1),
+.quotation-document
+  [data-block-type='scope']
+  table:has([data-role^='hourly_task_'])
+  td:nth-child(1) {
+  width: 60%;
+}
+
+.quotation-document
+  [data-block-type='scope']
+  table:has([data-role^='hourly_task_'])
+  th:nth-child(2),
+.quotation-document
+  [data-block-type='scope']
+  table:has([data-role^='hourly_task_'])
+  td:nth-child(2) {
+  width: 25%;
+}
+
+.quotation-document
+  [data-block-type='scope']
+  table:has([data-role^='hourly_task_'])
+  th:nth-child(3),
+.quotation-document
+  [data-block-type='scope']
+  table:has([data-role^='hourly_task_'])
+  td:nth-child(3) {
+  width: 15%;
+  text-align: center;
+}
+
+.quotation-document [data-block-type='scope'] table:has([data-role^='hourly_task_']) td {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+/* Standalone Maintenance Payment Table: 5-column widths */
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  th:nth-child(1),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  td:nth-child(1) {
+  width: 25%;
+}
+
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  th:nth-child(2),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  td:nth-child(2) {
+  width: 20%;
+}
+
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  th:nth-child(3),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  td:nth-child(3) {
+  width: 18%;
+}
+
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  th:nth-child(4),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  td:nth-child(4) {
+  width: 17%;
+}
+
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  th:nth-child(5),
+.quotation-document
+  [data-block-type='payment']
+  table:has([data-field='payment_total'])
+  td:nth-child(5) {
+  width: 20%;
+  text-align: right;
+}
+
+/* Numeric columns right alignment */
+.quotation-document [data-field='cost_line_total'],
+.quotation-document [data-field='cost_subtotal'],
+.quotation-document [data-field='discount_amount'],
+.quotation-document [data-field='total_investment'],
+.quotation-document [data-field='payment_nominal'],
+.quotation-document [data-field='payment_total'] {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Rights section */
+.quotation-document [data-block-type='rights'] {
+  margin-block: 1.25rem;
+}
+
+.quotation-document [data-block-type='rights'] p {
+  margin: 0.65rem 0;
+  line-height: 1.6;
+}
+
+/* Tax clause */
+.quotation-document [data-field='tax_clause'] {
+  margin-top: 0.75rem;
+  font-style: italic;
+  color: inherit;
+  opacity: 0.85;
+}
+
+/* Signature table two columns */
+.quotation-document .signature-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.quotation-document .signature-table td {
+  width: 50%;
+  border: 0;
+  padding: 0.75rem 1rem 0;
+  vertical-align: top;
+}
+
+/* Print repeated headers, page-break avoidance, A4 margins */
+@media print {
+  .quotation-document thead {
+    display: table-header-group;
+  }
+
+  .quotation-document tr,
+  .quotation-document [data-block-type] h2,
+  .quotation-document [data-block-type] h3,
+  .quotation-document [data-block-type='signature'],
+  .quotation-document .signature-table,
+  .quotation-document .signature-table td {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
