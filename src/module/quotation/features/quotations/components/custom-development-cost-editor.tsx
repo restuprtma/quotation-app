@@ -1,3 +1,4 @@
+import type { Control, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import type { CustomDevelopmentFormValues } from './custom-development-form-model';
 
 import { useWatch, Controller, useFieldArray, useFormContext } from 'react-hook-form';
@@ -268,15 +269,15 @@ export function CustomDevelopmentCostEditor({ disabled = false }: Props) {
 
 type GroupSectionProps = {
   groupIndex: number;
-  control: any;
+  control: Control<CustomDevelopmentFormValues>;
   disabled: boolean;
   tableMode: 'monthly_period' | 'daily_period' | 'fixed_days';
   rateHeader: string | null;
   periodHeader: string;
   canRemoveGroup: boolean;
   onRemoveGroup: () => void;
-  setValue: any;
-  watch: any;
+  setValue: UseFormSetValue<CustomDevelopmentFormValues>;
+  watch: UseFormWatch<CustomDevelopmentFormValues>;
 };
 
 function CostGroupSection({
