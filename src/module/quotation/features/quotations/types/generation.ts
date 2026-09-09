@@ -272,6 +272,68 @@ export type StandaloneMaintenanceInput = {
   rights_statements?: string[];
 };
 
+export type CustomDevelopmentTableMode = 'monthly_period' | 'daily_period' | 'fixed_days';
+export type CustomDevelopmentTaxTreatment = 'exclusive_ppn' | 'inclusive_ppn' | 'not_stated';
+export type CustomDevelopmentPaymentComponent = 'development' | 'monthly_recurring';
+
+export type CustomDevelopmentCostItemInput = {
+  name: string;
+  display_rate?: number | null;
+  headcount: number;
+  period_label: string;
+  quoted_line_total?: number | null;
+};
+
+export type CustomDevelopmentCostGroupInput = {
+  title: string;
+  items: CustomDevelopmentCostItemInput[];
+};
+
+export type CustomDevelopmentMonthlyItemInput = {
+  name: string;
+  specification: string;
+  unit_rate: number;
+  quantity: number;
+};
+
+export type CustomDevelopmentModuleGroupInput = {
+  name: string;
+  features: string[];
+};
+
+export type CustomDevelopmentTimelineRowInput = {
+  description: string;
+  timeline: string;
+};
+
+export type CustomDevelopmentPaymentRowInput = {
+  work_period: string;
+  terms: string;
+  invoice_date_label: string;
+  due_date_label: string;
+  component: CustomDevelopmentPaymentComponent;
+  nominal: number;
+};
+
+export type CustomDevelopmentInput = {
+  system_name: string;
+  quotation_date: string;
+  development_table_mode: CustomDevelopmentTableMode;
+  tax_treatment: CustomDevelopmentTaxTreatment;
+  development_groups: CustomDevelopmentCostGroupInput[];
+  discount_label?: string;
+  discount_amount: number;
+  show_discount_row: boolean;
+  monthly_items?: CustomDevelopmentMonthlyItemInput[];
+  monthly_notes?: string[];
+  module_groups: CustomDevelopmentModuleGroupInput[];
+  timeline_rows: CustomDevelopmentTimelineRowInput[];
+  payment_schedule: CustomDevelopmentPaymentRowInput[];
+  rights_statements?: string[];
+  limitation_codes?: string[];
+  additional_limitations?: string[];
+};
+
 type GenerateQuotationBase = {
   idempotency_key?: string;
   skill_id: string;
@@ -303,6 +365,7 @@ export type DedicatedSquadGeneratePayload = GenerateQuotationBase & {
   subscription_saas?: never;
   white_label?: never;
   standalone_maintenance?: never;
+  custom_development?: never;
 };
 
 export type SubscriptionSaaSGeneratePayload = GenerateQuotationBase & {
@@ -311,6 +374,7 @@ export type SubscriptionSaaSGeneratePayload = GenerateQuotationBase & {
   dedicated_squad?: never;
   white_label?: never;
   standalone_maintenance?: never;
+  custom_development?: never;
 };
 
 export type WhiteLabelGeneratePayload = GenerateQuotationBase & {
@@ -319,6 +383,7 @@ export type WhiteLabelGeneratePayload = GenerateQuotationBase & {
   dedicated_squad?: never;
   subscription_saas?: never;
   standalone_maintenance?: never;
+  custom_development?: never;
 };
 
 export type StandaloneMaintenanceGeneratePayload = GenerateQuotationBase & {
@@ -327,14 +392,28 @@ export type StandaloneMaintenanceGeneratePayload = GenerateQuotationBase & {
   dedicated_squad?: never;
   subscription_saas?: never;
   white_label?: never;
+  custom_development?: never;
   rate_card_id?: never;
 };
+
+export type CustomDevelopmentGeneratePayload = GenerateQuotationBase & {
+  commercial_scheme: 'custom_development';
+  custom_development: CustomDevelopmentInput;
+  dedicated_squad?: never;
+  subscription_saas?: never;
+  white_label?: never;
+  standalone_maintenance?: never;
+  rate_card_id?: never;
+};
+
+export type CustomDevelopmentPayload = CustomDevelopmentGeneratePayload;
 
 export type GenerateQuotationPayload =
   | DedicatedSquadGeneratePayload
   | SubscriptionSaaSGeneratePayload
   | WhiteLabelGeneratePayload
-  | StandaloneMaintenanceGeneratePayload;
+  | StandaloneMaintenanceGeneratePayload
+  | CustomDevelopmentGeneratePayload;
 
 export type GenerateQuotationResponse = {
   quotation_id: string;
@@ -513,6 +592,52 @@ export type ResolvedStandaloneMaintenanceProfile = {
 export type StandaloneMaintenancePreviewResponse = {
   calculation: StandaloneMaintenanceCalculation;
   resolved_profile: ResolvedStandaloneMaintenanceProfile;
+};
+
+export type CustomDevelopmentCalculation = {
+  development_subtotal: number;
+  discount_amount: number;
+  total_investment: number;
+  monthly_total: number;
+  development_payment_total: number;
+  monthly_payment_rows: number;
+  development_lines: Array<{
+    group_index: number;
+    item_index: number;
+    name: string;
+    display_rate: number | null;
+    headcount: number;
+    period_label: string;
+    quoted_line_total: number | null;
+  }>;
+  monthly_lines: Array<{
+    name: string;
+    specification: string;
+    unit_rate: number;
+    quantity: number;
+    line_total: number;
+  }>;
+};
+
+export type CustomDevelopmentSectionConfig = {
+  number: number;
+  title: string;
+  component: string;
+};
+
+export type ResolvedCustomDevelopmentProfile = {
+  show_monthly: boolean;
+  show_rights: boolean;
+  sections: CustomDevelopmentSectionConfig[];
+  rate_header: string;
+  period_header: string;
+  show_rate_column: boolean;
+  tax_disclaimer: string;
+};
+
+export type CustomDevelopmentPreviewResponse = {
+  calculation: CustomDevelopmentCalculation;
+  resolved_profile: ResolvedCustomDevelopmentProfile;
 };
 
 export type GenerationProgressStage =

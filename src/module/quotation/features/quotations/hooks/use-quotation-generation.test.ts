@@ -1,6 +1,7 @@
 import type {
   GenerateQuotationPayload,
   SubscriptionSaaSPreviewResponse,
+  CustomDevelopmentPreviewResponse,
   StandaloneMaintenancePreviewResponse,
 } from '../types';
 
@@ -8,13 +9,20 @@ import { it, vi, expect, describe } from 'vitest';
 
 import axios, { endpoints } from 'src/shared/lib/axios';
 
-import { previewSubscriptionSaaS, previewStandaloneMaintenance } from '../api/generation';
+import {
+  previewSubscriptionSaaS,
+  previewCustomDevelopment,
+  previewStandaloneMaintenance,
+} from '../api/generation';
 import {
   useSubscriptionSaaSPreview,
+  useCustomDevelopmentPreview,
   useStandaloneMaintenancePreview,
   SUBSCRIPTION_SAAS_PREVIEW_QUERY_KEY,
+  CUSTOM_DEVELOPMENT_PREVIEW_QUERY_KEY,
   normalizeSubscriptionSaaSPreviewPayload,
   STANDALONE_MAINTENANCE_PREVIEW_QUERY_KEY,
+  normalizeCustomDevelopmentPreviewPayload,
   normalizeStandaloneMaintenancePreviewPayload,
 } from './use-quotation-generation';
 
@@ -314,4 +322,196 @@ describe('Standalone Maintenance preview API & hook', () => {
     });
   });
 });
+
+describe('Custom Development preview API & hook', () => {
+  const sampleCustomDevPayload: GenerateQuotationPayload = {
+    skill_id: 'skill-uuid-1',
+    client_id: 'client-uuid-1',
+    client_name: 'Client',
+    subject: 'Subject',
+    solution_type: 'Web Application',
+    commercial_scheme: 'custom_development',
+    custom_development: {
+      system_name: 'Sistem Kopi Studio24',
+      quotation_date: '2026-07-15',
+      development_table_mode: 'monthly_period',
+      tax_treatment: 'exclusive_ppn',
+      development_groups: [
+        {
+          title: 'Fase 1',
+          items: [
+            {
+              name: 'Senior Dev',
+              display_rate: 15_000_000,
+              headcount: 1,
+              period_label: '1',
+              quoted_line_total: 15_000_000,
+            },
+          ],
+        },
+      ],
+      discount_label: 'DISCOUNT',
+      discount_amount: 1_000_000,
+      show_discount_row: true,
+      monthly_items: [
+        {
+          name: 'Cloud Hosting',
+          specification: 'Standard',
+          unit_rate: 1_000_000,
+          quantity: 1,
+        },
+      ],
+      module_groups: [
+        {
+          name: 'Modul 1',
+          features: ['Fitur 1'],
+        },
+      ],
+      timeline_rows: [
+        {
+          description: 'Pengerjaan',
+          timeline: '1 Bulan',
+        },
+      ],
+      payment_schedule: [
+        {
+          work_period: 'Termin 1',
+          terms: 'DP',
+          invoice_date_label: 'Saat SPK',
+          due_date_label: 'H+7',
+          component: 'development',
+          nominal: 14_000_000,
+        },
+        {
+          work_period: 'Bulan 1',
+          terms: 'Hosting',
+          invoice_date_label: 'Awal Bulan',
+          due_date_label: 'H+7',
+          component: 'monthly_recurring',
+          nominal: 1_000_000,
+        },
+      ],
+      limitation_codes: ['out_of_pocket', 'overtime'],
+    },
+  };
+
+  it('configures the customDevelopmentPreview endpoint correctly', () => {
+    expect((endpoints as any).quotation?.quotations?.customDevelopmentPreview).toBe(
+      '/quotation/v1/quotations/preview/custom-development'
+    );
+  });
+
+  it('defines the query key matching the specification', () => {
+    expect(CUSTOM_DEVELOPMENT_PREVIEW_QUERY_KEY).toEqual([
+      'quotation',
+      'custom-development-preview',
+    ]);
+  });
+
+  describe('normalizeCustomDevelopmentPreviewPayload', () => {
+    it('returns null when payload is null or not custom_development', () => {
+      expect(normalizeCustomDevelopmentPreviewPayload(null)).toBeNull();
+      expect(normalizeCustomDevelopmentPreviewPayload(undefined)).toBeNull();
+
+      const dedicatedPayload = {
+        commercial_scheme: 'dedicated_squad',
+      } as unknown as GenerateQuotationPayload;
+      expect(normalizeCustomDevelopmentPreviewPayload(dedicatedPayload)).toBeNull();
+    });
+
+    it('normalizes valid custom_development payload and clones arrays', () => {
+      const normalized = normalizeCustomDevelopmentPreviewPayload(sampleCustomDevPayload);
+      expect(normalized).not.toBeNull();
+      expect(normalized?.commercial_scheme).toBe('custom_development');
+      expect(normalized?.custom_development.system_name).toBe('Sistem Kopi Studio24');
+      expect(normalized?.custom_development.development_groups).not.toBe(
+        sampleCustomDevPayload.custom_development.development_groups
+      );
+    });
+  });
+
+  describe('previewCustomDevelopment API function', () => {
+    it('calls axios.post with endpoint and returns unwrapped data', async () => {
+      const mockResponse: CustomDevelopmentPreviewResponse = {
+        calculation: {
+          development_subtotal: 15_000_000,
+          discount_amount: 1_000_000,
+          total_investment: 14_000_000,
+          monthly_total: 1_000_000,
+          development_payment_total: 14_000_000,
+          monthly_payment_rows: 1,
+          development_lines: [
+            {
+              group_index: 0,
+              item_index: 0,
+              name: 'Senior Dev',
+              display_rate: 15_000_000,
+              headcount: 1,
+              period_label: '1',
+              quoted_line_total: 15_000_000,
+            },
+          ],
+          monthly_lines: [
+            {
+              name: 'Cloud Hosting',
+              specification: 'Standard',
+              unit_rate: 1_000_000,
+              quantity: 1,
+              line_total: 1_000_000,
+            },
+          ],
+        },
+        resolved_profile: {
+          show_monthly: true,
+          show_rights: false,
+          sections: [
+            { number: 1, title: 'Biaya Pengembangan', component: 'development_table' },
+            { number: 2, title: 'Biaya Bulanan', component: 'monthly_table' },
+          ],
+          rate_header: 'Rate Bulanan',
+          period_header: 'Bulan',
+          show_rate_column: true,
+          tax_disclaimer: 'Belum termasuk PPN',
+        },
+      };
+
+      const postSpy = vi.spyOn(axios, 'post').mockResolvedValueOnce({
+        data: {
+          data: mockResponse,
+          message: 'Custom development preview calculated successfully',
+        },
+      });
+
+      const abortController = new AbortController();
+      const result = await previewCustomDevelopment(sampleCustomDevPayload, abortController.signal);
+
+      expect(postSpy).toHaveBeenCalledWith(
+        '/quotation/v1/quotations/preview/custom-development',
+        sampleCustomDevPayload,
+        { signal: abortController.signal }
+      );
+      expect(result.calculation.total_investment).toBe(14_000_000);
+      expect(result.resolved_profile.show_monthly).toBe(true);
+    });
+
+    it('throws when API returns an error envelope', async () => {
+      vi.spyOn(axios, 'post').mockResolvedValueOnce({
+        data: {
+          errors: 'Custom development input is invalid',
+        },
+      });
+
+      await expect(previewCustomDevelopment(sampleCustomDevPayload)).rejects.toThrow(
+        'Custom development input is invalid'
+      );
+    });
+  });
+
+  describe('useCustomDevelopmentPreview hook definition', () => {
+    it('is exported as a function', () => {
+      expect(typeof useCustomDevelopmentPreview).toBe('function');
+    });
+  });
+});
+
 

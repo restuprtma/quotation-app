@@ -11,6 +11,7 @@ import type {
   WhiteLabelPreviewResponse,
   DedicatedSquadPreviewResponse,
   SubscriptionSaaSPreviewResponse,
+  CustomDevelopmentPreviewResponse,
   StandaloneMaintenancePreviewResponse,
 } from '../types';
 
@@ -80,6 +81,16 @@ export function previewWhiteLabel(payload: GenerateQuotationPayload, signal?: Ab
 export function previewStandaloneMaintenance(payload: GenerateQuotationPayload, signal?: AbortSignal) {
   return unwrap<StandaloneMaintenancePreviewResponse>(
     axios.post(endpoints.quotation.quotations.standaloneMaintenancePreview, payload, { signal })
+  );
+}
+
+/**
+ * Calculate the custom development quotation preview. The server owns all money math,
+ * section planning, and profile resolutions without calling AI or persisting data.
+ */
+export function previewCustomDevelopment(payload: GenerateQuotationPayload, signal?: AbortSignal) {
+  return unwrap<CustomDevelopmentPreviewResponse>(
+    axios.post(endpoints.quotation.quotations.customDevelopmentPreview, payload, { signal })
   );
 }
 

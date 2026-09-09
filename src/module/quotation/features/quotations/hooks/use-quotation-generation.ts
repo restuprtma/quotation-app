@@ -4,6 +4,7 @@ import type {
   WhiteLabelPreviewResponse,
   DedicatedSquadPreviewResponse,
   SubscriptionSaaSPreviewResponse,
+  CustomDevelopmentPreviewResponse,
   StandaloneMaintenancePreviewResponse,
 } from '../types';
 
@@ -12,12 +13,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { normalizeWhiteLabel } from '../constants/white-label';
 import { normalizeSubscriptionSaaS } from '../constants/subscription-saas';
+import { normalizeCustomDevelopment } from '../constants/custom-development';
 import { normalizeStandaloneMaintenance } from '../constants/standalone-maintenance';
 import {
   generateQuotation,
   previewWhiteLabel,
   previewDedicatedSquad,
   previewSubscriptionSaaS,
+  previewCustomDevelopment,
   previewStandaloneMaintenance,
 } from '../api';
 
@@ -343,6 +346,80 @@ export function useStandaloneMaintenancePreview(
           ...payload,
           commercial_scheme: 'standalone_maintenance',
           standalone_maintenance: debounced.standalone_maintenance,
+        },
+        signal
+      );
+    },
+    enabled: Boolean(enabled && payload && debounced),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+
+  return { ...query, isDebouncing };
+}
+
+export const CUSTOM_DEVELOPMENT_PREVIEW_QUERY_KEY = [
+  'quotation',
+  'custom-development-preview',
+] as const;
+
+export function normalizeCustomDevelopmentPreviewPayload(
+  payload: GenerateQuotationPayload | null | undefined
+) {
+  if (!payload || payload.commercial_scheme !== 'custom_development') return null;
+  return {
+    commercial_scheme: payload.commercial_scheme,
+    custom_development: normalizeCustomDevelopment(payload.custom_development),
+  };
+}
+
+/**
+ * Debounced server-authoritative preview for Custom Development. TanStack Query
+ * supplies an AbortSignal to Axios, so rapid typing cancels stale in-flight
+ * preview requests.
+ */
+export function useCustomDevelopmentPreview(
+  payload: GenerateQuotationPayload | null | undefined,
+  enabled = true
+) {
+  const normalized = useMemo(
+    () => normalizeCustomDevelopmentPreviewPayload(payload),
+    [payload]
+  );
+  const [debounced, setDebounced] = useState(normalized);
+  const [isDebouncing, setIsDebouncing] = useState(false);
+
+  useEffect(() => {
+    if (!enabled || !normalized) {
+      setDebounced(null);
+      setIsDebouncing(false);
+      return undefined;
+    }
+
+    setIsDebouncing(true);
+    const timer = setTimeout(() => {
+      setDebounced(normalized);
+      setIsDebouncing(false);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [enabled, normalized]);
+
+  const query = useQuery<CustomDevelopmentPreviewResponse, Error>({
+    queryKey: [
+      ...CUSTOM_DEVELOPMENT_PREVIEW_QUERY_KEY,
+      debounced ? JSON.stringify(debounced) : 'disabled',
+    ],
+    queryFn: ({ signal }) => {
+      if (!payload || !debounced || payload.commercial_scheme !== 'custom_development') {
+        throw new Error('Custom development preview is disabled');
+      }
+      return previewCustomDevelopment(
+        {
+          ...payload,
+          commercial_scheme: 'custom_development',
+          custom_development: debounced.custom_development,
         },
         signal
       );

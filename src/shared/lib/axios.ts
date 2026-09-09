@@ -160,6 +160,7 @@ export const endpoints = {
       subscriptionPreview: '/quotation/v1/quotations/preview/subscription-saas',
       whiteLabelPreview: '/quotation/v1/quotations/preview/white-label',
       standaloneMaintenancePreview: '/quotation/v1/quotations/preview/standalone-maintenance',
+      customDevelopmentPreview: '/quotation/v1/quotations/preview/custom-development',
       regenerate: (id: string) => `/quotation/v1/quotations/${id}/regenerate`,
       generationStatus: (id: string) => `/quotation/v1/quotations/${id}/generation-status`,
       saveDraft: (id: string) => `/quotation/v1/quotations/${id}/draft`,
