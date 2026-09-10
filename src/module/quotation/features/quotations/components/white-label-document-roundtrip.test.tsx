@@ -77,7 +77,7 @@ const representativeWhiteLabelDocument: JSONContent = {
           content: [
             {
               type: 'text',
-              text: 'Melalui penawaran ini, Venturo menyampaikan skema penyediaan lisensi software White Label Product beserta rincian biaya, pemeliharaan, hosting, lingkup modul, dan ketentuan komersial yang disepakati.',
+              text: 'Melalui penawaran ini, kami menegaskan kesiapan tim IT Profesional kami yang berjumlah lebih dari 100 orang untuk mendukung layanan dan keberhasilan proyek. Dokumen ini memuat ruang lingkup pekerjaan, output, timeline, dan rincian biaya sebagai acuan kesepakatan bersama kedua belah pihak.',
             },
           ],
         },
@@ -383,10 +383,7 @@ const representativeWhiteLabelDocument: JSONContent = {
               attrs: { 'data-role': null, 'data-field': null },
               content: [
                 makeCell('tableCell', 'Hormat Kami, Yulianto Frandi - Direksi Venturo Pro'),
-                makeCell(
-                  'tableCell',
-                  'Disetujui Oleh, Pimpinan Pondok Pesantren - Ponpes Modern'
-                ),
+                makeCell('tableCell', 'Disetujui Oleh, Pimpinan Pondok Pesantren - Ponpes Modern'),
               ],
             },
           ],

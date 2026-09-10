@@ -238,19 +238,6 @@ export function validateCustomDevelopmentCrossFields(
     for (let iIdx = 0; iIdx < (group.items || []).length; iIdx += 1) {
       const item = group.items[iIdx];
 
-      // In fixed_days mode, display_rate must not be present
-      if (
-        data.development_table_mode === 'fixed_days' &&
-        item.display_rate !== null &&
-        item.display_rate !== undefined
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Display rate harus kosong pada mode fixed_days',
-          path: ['development_groups', gIdx, 'items', iIdx, 'display_rate'],
-        });
-      }
-
       if (item.quoted_line_total !== null && item.quoted_line_total !== undefined) {
         if (item.quoted_line_total > 0) {
           pricedCount += 1;

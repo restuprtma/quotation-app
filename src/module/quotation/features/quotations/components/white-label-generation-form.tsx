@@ -151,10 +151,10 @@ export function WhiteLabelGenerationForm({
 
   const previewReady = Boolean(
     preview.data &&
-      !preview.isFetching &&
-      !preview.isDebouncing &&
-      !preview.error &&
-      draftTotals?.is_balanced
+    !preview.isFetching &&
+    !preview.isDebouncing &&
+    !preview.error &&
+    draftTotals?.is_balanced
   );
 
   const submit = handleSubmit((data) => {

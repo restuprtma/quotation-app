@@ -414,6 +414,8 @@ export function createDefaultKioskQueueValues(
       limitation_codes: isGov
         ? ['civil_electrical']
         : ['client_hardware'],
+      additional_limitations: [],
+      rights_statements: [],
       government_scope_phases: isGov
         ? [{ title: 'Fase 1: Persiapan & Desain', deliverables: ['Dokumen Analisis Kebutuhan'] }]
         : [],

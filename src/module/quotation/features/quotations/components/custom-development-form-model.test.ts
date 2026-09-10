@@ -305,32 +305,27 @@ describe('customDevelopmentFormSchema & customDevelopmentSchema', () => {
       }
     });
 
-    it('in fixed_days mode, rejects item with display_rate', () => {
+    it('in fixed_days mode, allows item with display_rate to preserve table-mode invariance', () => {
       const data = {
         ...validEcoflowValues.custom_development,
         development_groups: [
           {
-            title: 'Website 1',
+            ...validEcoflowValues.custom_development.development_groups[0],
             items: [
               {
-                name: 'Dev',
-                display_rate: 5_000_000, // Not allowed in fixed_days
-                headcount: 1,
-                period_label: '15 Hari',
-                quoted_line_total: 15_000_000,
+                ...validEcoflowValues.custom_development.development_groups[0].items[0],
+                display_rate: 5_000_000,
               },
+              validEcoflowValues.custom_development.development_groups[0].items[1],
             ],
           },
+          validEcoflowValues.custom_development.development_groups[1],
         ],
       };
       const result = customDevelopmentSchema.safeParse(data);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(
-          result.error.issues.some(
-            (i) => i.path.includes('display_rate') || i.message.includes('fixed_days')
-          )
-        ).toBe(true);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.development_groups[0].items[0].display_rate).toBe(5_000_000);
       }
     });
   });
@@ -514,6 +509,22 @@ describe('customDevelopmentFormSchema & customDevelopmentSchema', () => {
       };
       const result = customDevelopmentSchema.safeParse(data);
       expect(result.success).toBe(false);
+    });
+
+    it('guarantees table-mode invariance when switching from monthly_period to fixed_days', () => {
+      const data = {
+        ...validKopiStudio24Values.custom_development,
+        development_table_mode: 'fixed_days' as const,
+      };
+      expect(data.development_groups[0].items[0].display_rate).toBe(15_000_000);
+      expect(data.development_groups[0].items[0].quoted_line_total).toBe(15_000_000);
+      const result = customDevelopmentSchema.safeParse(data);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.development_table_mode).toBe('fixed_days');
+        expect(result.data.development_groups[0].items[0].display_rate).toBe(15_000_000);
+        expect(result.data.development_groups[0].items[0].quoted_line_total).toBe(15_000_000);
+      }
     });
   });
 });

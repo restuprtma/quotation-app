@@ -1,6 +1,6 @@
-import { it, expect, describe } from 'vitest';
-
 import type { KioskQueueSystemInput } from '../types';
+
+import { it, expect, describe } from 'vitest';
 
 import {
   calculateKioskQueueLocal,
