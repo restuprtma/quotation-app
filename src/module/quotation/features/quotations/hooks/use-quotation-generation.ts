@@ -2,6 +2,7 @@ import type {
   GenerateQuotationPayload,
   GenerateQuotationResponse,
   WhiteLabelPreviewResponse,
+  KioskQueuePreviewResponse,
   DedicatedSquadPreviewResponse,
   SubscriptionSaaSPreviewResponse,
   CustomDevelopmentPreviewResponse,
@@ -13,12 +14,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { normalizeWhiteLabel } from '../constants/white-label';
 import { normalizeSubscriptionSaaS } from '../constants/subscription-saas';
+import { normalizeKioskQueueSystem } from '../constants/kiosk-queue-system';
 import { normalizeCustomDevelopment } from '../constants/custom-development';
 import { normalizeStandaloneMaintenance } from '../constants/standalone-maintenance';
 import {
   generateQuotation,
   previewWhiteLabel,
   previewDedicatedSquad,
+  previewKioskQueueSystem,
   previewSubscriptionSaaS,
   previewCustomDevelopment,
   previewStandaloneMaintenance,
@@ -420,6 +423,80 @@ export function useCustomDevelopmentPreview(
           ...payload,
           commercial_scheme: 'custom_development',
           custom_development: debounced.custom_development,
+        },
+        signal
+      );
+    },
+    enabled: Boolean(enabled && payload && debounced),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+
+  return { ...query, isDebouncing };
+}
+
+export const KIOSK_QUEUE_PREVIEW_QUERY_KEY = [
+  'quotation',
+  'kiosk-queue-preview',
+] as const;
+
+export function normalizeKioskQueuePreviewPayload(
+  payload: GenerateQuotationPayload | null | undefined
+) {
+  if (!payload || payload.commercial_scheme !== 'kiosk_queue_system') return null;
+  return {
+    commercial_scheme: payload.commercial_scheme,
+    kiosk_queue_system: normalizeKioskQueueSystem(payload.kiosk_queue_system),
+  };
+}
+
+/**
+ * Debounced server-authoritative preview for Kiosk Queue System. TanStack Query
+ * supplies an AbortSignal to Axios, so rapid typing cancels stale in-flight
+ * preview requests.
+ */
+export function useKioskQueuePreview(
+  payload: GenerateQuotationPayload | null | undefined,
+  enabled = true
+) {
+  const normalized = useMemo(
+    () => normalizeKioskQueuePreviewPayload(payload),
+    [payload]
+  );
+  const [debounced, setDebounced] = useState(normalized);
+  const [isDebouncing, setIsDebouncing] = useState(false);
+
+  useEffect(() => {
+    if (!enabled || !normalized) {
+      setDebounced(null);
+      setIsDebouncing(false);
+      return undefined;
+    }
+
+    setIsDebouncing(true);
+    const timer = setTimeout(() => {
+      setDebounced(normalized);
+      setIsDebouncing(false);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [enabled, normalized]);
+
+  const query = useQuery<KioskQueuePreviewResponse, Error>({
+    queryKey: [
+      ...KIOSK_QUEUE_PREVIEW_QUERY_KEY,
+      debounced ? JSON.stringify(debounced) : 'disabled',
+    ],
+    queryFn: ({ signal }) => {
+      if (!payload || !debounced || payload.commercial_scheme !== 'kiosk_queue_system') {
+        throw new Error('Kiosk queue preview is disabled');
+      }
+      return previewKioskQueueSystem(
+        {
+          ...payload,
+          commercial_scheme: 'kiosk_queue_system',
+          kiosk_queue_system: debounced.kiosk_queue_system,
         },
         signal
       );

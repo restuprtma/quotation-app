@@ -9,6 +9,8 @@ import type {
   GenerateQuotationResponse,
   QuotationGenerationDetail,
   WhiteLabelPreviewResponse,
+  KioskQueueGeneratePayload,
+  KioskQueuePreviewResponse,
   DedicatedSquadPreviewResponse,
   SubscriptionSaaSPreviewResponse,
   CustomDevelopmentPreviewResponse,
@@ -91,6 +93,16 @@ export function previewStandaloneMaintenance(payload: GenerateQuotationPayload, 
 export function previewCustomDevelopment(payload: GenerateQuotationPayload, signal?: AbortSignal) {
   return unwrap<CustomDevelopmentPreviewResponse>(
     axios.post(endpoints.quotation.quotations.customDevelopmentPreview, payload, { signal })
+  );
+}
+
+/**
+ * Calculate the kiosk queue system quotation preview. The server owns all money math,
+ * section planning, and profile resolutions without calling AI or persisting data.
+ */
+export function previewKioskQueueSystem(payload: KioskQueueGeneratePayload, signal?: AbortSignal) {
+  return unwrap<KioskQueuePreviewResponse>(
+    axios.post(endpoints.quotation.quotations.kioskQueuePreview, payload, { signal })
   );
 }
 

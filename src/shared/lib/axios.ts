@@ -161,6 +161,7 @@ export const endpoints = {
       whiteLabelPreview: '/quotation/v1/quotations/preview/white-label',
       standaloneMaintenancePreview: '/quotation/v1/quotations/preview/standalone-maintenance',
       customDevelopmentPreview: '/quotation/v1/quotations/preview/custom-development',
+      kioskQueuePreview: '/quotation/v1/quotations/preview/kiosk-queue-system',
       regenerate: (id: string) => `/quotation/v1/quotations/${id}/regenerate`,
       generationStatus: (id: string) => `/quotation/v1/quotations/${id}/generation-status`,
       saveDraft: (id: string) => `/quotation/v1/quotations/${id}/draft`,

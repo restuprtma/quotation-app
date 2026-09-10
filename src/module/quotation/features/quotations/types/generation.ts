@@ -334,6 +334,91 @@ export type CustomDevelopmentInput = {
   additional_limitations?: string[];
 };
 
+export type KioskQueueVariant = 'government_mpp' | 'private_food_court';
+export type HardwareProvision = 'venturo_supplied' | 'client_supplied';
+export type KioskQueueTaxTreatment = 'inclusive_ppn_11' | 'exclusive_ppn';
+export type KioskQueueLimitationCode =
+  | 'civil_electrical'
+  | 'client_hardware'
+  | 'extra_hardware'
+  | 'hardware_warranty'
+  | 'out_of_pocket'
+  | 'overtime'
+  | 'third_party'
+  | 'scope_change';
+
+export type KioskQueueScopePhaseInput = {
+  title: string;
+  deliverables: string[];
+};
+
+export type KioskQueueExpertInput = {
+  role: string;
+  headcount: number;
+  duration_label: string;
+  minimum_qualification: string;
+};
+
+export type KioskQueueServiceItemInput = {
+  name: string;
+  monthly_rate: number;
+  headcount: number;
+  period_quarters: number;
+};
+
+export type KioskQueueServiceGroupInput = {
+  title: string;
+  items: KioskQueueServiceItemInput[];
+};
+
+export type KioskQueueHardwareItemInput = {
+  name: string;
+  unit_price: number;
+  quantity: number;
+};
+
+export type KioskQueueTimelineRowInput = {
+  description: string;
+  timeline: string;
+};
+
+export type KioskQueueGovernmentPaymentInput = {
+  stage: string;
+  billing_basis: string;
+  nominal: number;
+};
+
+export type KioskQueuePrivatePaymentInput = {
+  work_period: string;
+  terms: string;
+  invoice_date_label: string;
+  due_date_label: string;
+  nominal: number;
+};
+
+export type KioskQueueSystemInput = {
+  variant: KioskQueueVariant;
+  document_number: string;
+  system_name: string;
+  quotation_date: string;
+  hardware_provision: HardwareProvision;
+  tax_treatment: KioskQueueTaxTreatment;
+  government_scope_phases?: KioskQueueScopePhaseInput[];
+  expert_requirements?: KioskQueueExpertInput[];
+  service_groups: KioskQueueServiceGroupInput[];
+  service_discount_amount: number;
+  show_service_discount_row: boolean;
+  hardware_items?: KioskQueueHardwareItemInput[];
+  maintenance_items?: KioskQueueServiceItemInput[];
+  private_timeline_rows?: KioskQueueTimelineRowInput[];
+  government_payment_schedule?: KioskQueueGovernmentPaymentInput[];
+  private_payment_schedule?: KioskQueuePrivatePaymentInput[];
+  payment_due_days: number;
+  limitation_codes: KioskQueueLimitationCode[];
+  additional_limitations?: string[];
+  rights_statements?: string[];
+};
+
 type GenerateQuotationBase = {
   idempotency_key?: string;
   skill_id: string;
@@ -366,6 +451,7 @@ export type DedicatedSquadGeneratePayload = GenerateQuotationBase & {
   white_label?: never;
   standalone_maintenance?: never;
   custom_development?: never;
+  kiosk_queue_system?: never;
 };
 
 export type SubscriptionSaaSGeneratePayload = GenerateQuotationBase & {
@@ -375,6 +461,7 @@ export type SubscriptionSaaSGeneratePayload = GenerateQuotationBase & {
   white_label?: never;
   standalone_maintenance?: never;
   custom_development?: never;
+  kiosk_queue_system?: never;
 };
 
 export type WhiteLabelGeneratePayload = GenerateQuotationBase & {
@@ -384,6 +471,7 @@ export type WhiteLabelGeneratePayload = GenerateQuotationBase & {
   subscription_saas?: never;
   standalone_maintenance?: never;
   custom_development?: never;
+  kiosk_queue_system?: never;
 };
 
 export type StandaloneMaintenanceGeneratePayload = GenerateQuotationBase & {
@@ -393,6 +481,7 @@ export type StandaloneMaintenanceGeneratePayload = GenerateQuotationBase & {
   subscription_saas?: never;
   white_label?: never;
   custom_development?: never;
+  kiosk_queue_system?: never;
   rate_card_id?: never;
 };
 
@@ -403,17 +492,32 @@ export type CustomDevelopmentGeneratePayload = GenerateQuotationBase & {
   subscription_saas?: never;
   white_label?: never;
   standalone_maintenance?: never;
+  kiosk_queue_system?: never;
   rate_card_id?: never;
 };
 
 export type CustomDevelopmentPayload = CustomDevelopmentGeneratePayload;
+
+export type KioskQueueGeneratePayload = GenerateQuotationBase & {
+  commercial_scheme: 'kiosk_queue_system';
+  kiosk_queue_system: KioskQueueSystemInput;
+  dedicated_squad?: never;
+  subscription_saas?: never;
+  white_label?: never;
+  standalone_maintenance?: never;
+  custom_development?: never;
+  rate_card_id?: never;
+};
+
+export type KioskQueuePayload = KioskQueueGeneratePayload;
 
 export type GenerateQuotationPayload =
   | DedicatedSquadGeneratePayload
   | SubscriptionSaaSGeneratePayload
   | WhiteLabelGeneratePayload
   | StandaloneMaintenanceGeneratePayload
-  | CustomDevelopmentGeneratePayload;
+  | CustomDevelopmentGeneratePayload
+  | KioskQueueGeneratePayload;
 
 export type GenerateQuotationResponse = {
   quotation_id: string;
@@ -638,6 +742,60 @@ export type ResolvedCustomDevelopmentProfile = {
 export type CustomDevelopmentPreviewResponse = {
   calculation: CustomDevelopmentCalculation;
   resolved_profile: ResolvedCustomDevelopmentProfile;
+};
+
+export type KioskQueueServiceLineCalculation = KioskQueueServiceItemInput & {
+  line_total: number;
+};
+
+export type KioskQueueHardwareLineCalculation = KioskQueueHardwareItemInput & {
+  line_total: number;
+};
+
+export type KioskQueueServiceGroupCalculation = {
+  title: string;
+  items: KioskQueueServiceLineCalculation[];
+};
+
+export type KioskQueueCalculation = {
+  variant: KioskQueueVariant;
+  service_groups: KioskQueueServiceGroupCalculation[];
+  service_subtotal: number;
+  service_discount_amount: number;
+  service_tax_amount: number;
+  service_total: number;
+  hardware?: KioskQueueHardwareLineCalculation[];
+  hardware_subtotal: number;
+  hardware_tax_amount: number;
+  hardware_total: number;
+  maintenance?: KioskQueueServiceLineCalculation[];
+  maintenance_total: number;
+  payment_target_total: number;
+  payment_total: number;
+};
+
+export type KioskQueueDocumentSection = {
+  number: number;
+  code: string;
+  title: string;
+};
+
+export type ResolvedKioskQueueProfile = {
+  variant: KioskQueueVariant;
+  hardware_provision: HardwareProvision;
+  tax_treatment: KioskQueueTaxTreatment;
+  tax_clause_text: string;
+  show_hardware: boolean;
+  show_maintenance: boolean;
+  show_rights: boolean;
+  payment_due_days: number;
+  limitation_texts: string[];
+  sections: KioskQueueDocumentSection[];
+};
+
+export type KioskQueuePreviewResponse = {
+  calculation: KioskQueueCalculation;
+  resolved_profile: ResolvedKioskQueueProfile;
 };
 
 export type GenerationProgressStage =
