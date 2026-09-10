@@ -452,6 +452,7 @@ export type DedicatedSquadGeneratePayload = GenerateQuotationBase & {
   standalone_maintenance?: never;
   custom_development?: never;
   kiosk_queue_system?: never;
+  talent_outsourcing?: never;
 };
 
 export type SubscriptionSaaSGeneratePayload = GenerateQuotationBase & {
@@ -462,6 +463,7 @@ export type SubscriptionSaaSGeneratePayload = GenerateQuotationBase & {
   standalone_maintenance?: never;
   custom_development?: never;
   kiosk_queue_system?: never;
+  talent_outsourcing?: never;
 };
 
 export type WhiteLabelGeneratePayload = GenerateQuotationBase & {
@@ -472,6 +474,7 @@ export type WhiteLabelGeneratePayload = GenerateQuotationBase & {
   standalone_maintenance?: never;
   custom_development?: never;
   kiosk_queue_system?: never;
+  talent_outsourcing?: never;
 };
 
 export type StandaloneMaintenanceGeneratePayload = GenerateQuotationBase & {
@@ -483,6 +486,7 @@ export type StandaloneMaintenanceGeneratePayload = GenerateQuotationBase & {
   custom_development?: never;
   kiosk_queue_system?: never;
   rate_card_id?: never;
+  talent_outsourcing?: never;
 };
 
 export type CustomDevelopmentGeneratePayload = GenerateQuotationBase & {
@@ -494,6 +498,7 @@ export type CustomDevelopmentGeneratePayload = GenerateQuotationBase & {
   standalone_maintenance?: never;
   kiosk_queue_system?: never;
   rate_card_id?: never;
+  talent_outsourcing?: never;
 };
 
 export type CustomDevelopmentPayload = CustomDevelopmentGeneratePayload;
@@ -507,9 +512,45 @@ export type KioskQueueGeneratePayload = GenerateQuotationBase & {
   standalone_maintenance?: never;
   custom_development?: never;
   rate_card_id?: never;
+  talent_outsourcing?: never;
 };
 
 export type KioskQueuePayload = KioskQueueGeneratePayload;
+
+export type TalentEngagementMode = 'manpower_supply' | 'managed_squad';
+export type TalentCostCategory = 'personnel' | 'non_personnel';
+export type TalentPeriodUnit = 'month' | 'workday';
+export type TalentTaxTreatment = 'bpjs_dpp_ppn_12' | 'exclusive_ppn' | 'not_stated';
+export type TalentLimitationCode = 'out_of_pocket' | 'overtime' | 'third_party' | 'scope_change';
+export type TalentCostItemInput = { name: string; quantity: number; quantity_unit: string; period_count: number; period_unit: TalentPeriodUnit; unit_rate: number };
+export type TalentCostGroupInput = { category: TalentCostCategory; title: string; items: TalentCostItemInput[] };
+export type TalentPreparationItemInput = { name: string; headcount: number; quoted_line_total: number };
+export type TalentSquadItemInput = { role: string; monthly_rate: number; headcount: number; period_months: number };
+export type TalentScopeBlockInput = { title: string; description?: string; responsibilities?: string[]; qualifications?: string[]; deliverables?: string[]; timeline?: string };
+export type TalentPaymentRowInput = { work_period: string; terms: string; invoice_date_label: string; due_date_label: string; nominal: number };
+export type TalentOutsourcingInput = {
+  engagement_mode: TalentEngagementMode; document_number: string; service_name: string; quotation_date: string; tax_treatment: TalentTaxTreatment;
+  cost_groups?: TalentCostGroupInput[]; preparation_items?: TalentPreparationItemInput[]; preparation_discount_amount: number; show_preparation_discount_row: boolean; squad_items?: TalentSquadItemInput[];
+  scope_blocks: TalentScopeBlockInput[]; payment_schedule: TalentPaymentRowInput[]; payment_due_days: number; limitation_codes: TalentLimitationCode[];
+  additional_limitations?: string[]; warranty_statements?: string[]; rights_statements?: string[];
+};
+export type TalentCostLineCalculation = TalentCostItemInput & { line_total: number };
+export type TalentCostGroupCalculation = Omit<TalentCostGroupInput, 'items'> & { items: TalentCostLineCalculation[] };
+export type TalentPreparationLineCalculation = TalentPreparationItemInput & { line_total: number };
+export type TalentSquadLineCalculation = TalentSquadItemInput & { line_total: number };
+export type TalentOutsourcingCalculation = {
+  engagement_mode: TalentEngagementMode; cost_groups?: TalentCostGroupCalculation[]; preparation?: TalentPreparationLineCalculation[]; squad?: TalentSquadLineCalculation[];
+  personnel_subtotal: number; non_personnel_subtotal: number; preparation_subtotal: number; preparation_discount_amount: number; squad_subtotal: number;
+  total_before_tax: number; dpp_amount: number; tax_amount: number; grand_total: number; payment_total: number;
+};
+export type ResolvedTalentOutsourcingProfile = {
+  engagement_mode: TalentEngagementMode; tax_treatment: TalentTaxTreatment; tax_clause_text?: string; show_non_personnel: boolean; show_preparation: boolean; show_preparation_discount: boolean; show_warranty: boolean; show_rights: boolean; sections: Array<{ number: number; code: string; title: string }>;
+};
+export type TalentOutsourcingPreviewResponse = { calculation: TalentOutsourcingCalculation; resolved_profile: ResolvedTalentOutsourcingProfile };
+export type TalentOutsourcingGeneratePayload = GenerateQuotationBase & {
+  commercial_scheme: 'talent_outsourcing'; talent_outsourcing: TalentOutsourcingInput;
+  dedicated_squad?: never; subscription_saas?: never; white_label?: never; standalone_maintenance?: never; custom_development?: never; kiosk_queue_system?: never; rate_card_id?: never;
+};
 
 export type GenerateQuotationPayload =
   | DedicatedSquadGeneratePayload
@@ -517,7 +558,8 @@ export type GenerateQuotationPayload =
   | WhiteLabelGeneratePayload
   | StandaloneMaintenanceGeneratePayload
   | CustomDevelopmentGeneratePayload
-  | KioskQueueGeneratePayload;
+  | KioskQueueGeneratePayload
+  | TalentOutsourcingGeneratePayload;
 
 export type GenerateQuotationResponse = {
   quotation_id: string;

@@ -14,6 +14,7 @@ import type {
   DedicatedSquadPreviewResponse,
   SubscriptionSaaSPreviewResponse,
   CustomDevelopmentPreviewResponse,
+  TalentOutsourcingPreviewResponse,
   StandaloneMaintenancePreviewResponse,
 } from '../types';
 
@@ -103,6 +104,12 @@ export function previewCustomDevelopment(payload: GenerateQuotationPayload, sign
 export function previewKioskQueueSystem(payload: KioskQueueGeneratePayload, signal?: AbortSignal) {
   return unwrap<KioskQueuePreviewResponse>(
     axios.post(endpoints.quotation.quotations.kioskQueuePreview, payload, { signal })
+  );
+}
+
+export function previewTalentOutsourcing(payload: GenerateQuotationPayload, signal?: AbortSignal) {
+  return unwrap<TalentOutsourcingPreviewResponse>(
+    axios.post(endpoints.quotation.quotations.talentOutsourcingPreview, payload, { signal })
   );
 }
 

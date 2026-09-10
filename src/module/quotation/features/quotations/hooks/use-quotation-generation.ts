@@ -6,6 +6,7 @@ import type {
   DedicatedSquadPreviewResponse,
   SubscriptionSaaSPreviewResponse,
   CustomDevelopmentPreviewResponse,
+  TalentOutsourcingPreviewResponse,
   StandaloneMaintenancePreviewResponse,
 } from '../types';
 
@@ -16,6 +17,7 @@ import { normalizeWhiteLabel } from '../constants/white-label';
 import { normalizeSubscriptionSaaS } from '../constants/subscription-saas';
 import { normalizeKioskQueueSystem } from '../constants/kiosk-queue-system';
 import { normalizeCustomDevelopment } from '../constants/custom-development';
+import { normalizeTalentOutsourcing } from '../constants/talent-outsourcing';
 import { normalizeStandaloneMaintenance } from '../constants/standalone-maintenance';
 import {
   generateQuotation,
@@ -24,6 +26,7 @@ import {
   previewKioskQueueSystem,
   previewSubscriptionSaaS,
   previewCustomDevelopment,
+  previewTalentOutsourcing,
   previewStandaloneMaintenance,
 } from '../api';
 
@@ -510,3 +513,20 @@ export function useKioskQueuePreview(
   return { ...query, isDebouncing };
 }
 
+export const TALENT_OUTSOURCING_PREVIEW_QUERY_KEY = ['quotation', 'talent-outsourcing-preview'] as const;
+export function normalizeTalentOutsourcingPreviewPayload(payload: GenerateQuotationPayload | null | undefined) {
+  if (!payload || payload.commercial_scheme !== 'talent_outsourcing') return null;
+  return { commercial_scheme: 'talent_outsourcing' as const, talent_outsourcing: normalizeTalentOutsourcing(payload.talent_outsourcing) };
+}
+export function useTalentOutsourcingPreview(payload: GenerateQuotationPayload | null | undefined, enabled = true) {
+  const normalized = useMemo(() => normalizeTalentOutsourcingPreviewPayload(payload), [payload]);
+  const [debounced, setDebounced] = useState(normalized);
+  const [isDebouncing, setIsDebouncing] = useState(false);
+  useEffect(() => { if (!enabled || !normalized) { setDebounced(null); setIsDebouncing(false); return undefined; } setIsDebouncing(true); const timer = setTimeout(() => { setDebounced(normalized); setIsDebouncing(false); }, 400); return () => clearTimeout(timer); }, [enabled, normalized]);
+  const query = useQuery<TalentOutsourcingPreviewResponse, Error>({
+    queryKey: [...TALENT_OUTSOURCING_PREVIEW_QUERY_KEY, debounced ? JSON.stringify(debounced) : 'disabled'],
+    queryFn: ({ signal }) => { if (!payload || !debounced || payload.commercial_scheme !== 'talent_outsourcing') throw new Error('Talent outsourcing preview is disabled'); return previewTalentOutsourcing({ ...payload, talent_outsourcing: debounced.talent_outsourcing }, signal); },
+    enabled: Boolean(enabled && payload && debounced), staleTime: 30_000, gcTime: 5 * 60_000, retry: false,
+  });
+  return { ...query, isDebouncing };
+}
