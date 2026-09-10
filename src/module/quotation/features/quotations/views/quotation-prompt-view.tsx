@@ -26,6 +26,7 @@ import { SlashCommandMenu } from '../components/slash-command-menu';
 import { useGenerateQuotation } from '../hooks/use-quotation-generation';
 import { QuotationGenerationForm } from '../components/quotation-generation-form';
 import { WhiteLabelGenerationForm } from '../components/white-label-generation-form';
+import { KioskQueueGenerationForm } from '../components/kiosk-queue-generation-form';
 import { SubscriptionSaaSGenerationForm } from '../components/subscription-saas-generation-form';
 import { GENERATION_STAGES, GenerationProgressCard } from '../components/generation-progress-card';
 import { CustomDevelopmentGenerationForm } from '../components/custom-development-generation-form';
@@ -55,6 +56,7 @@ export function QuotationPromptView() {
     | 'white_label'
     | 'standalone_maintenance'
     | 'custom_development'
+    | 'kiosk_queue_system'
     | null
   >(null);
 
@@ -439,7 +441,7 @@ export function QuotationPromptView() {
               </Typography>
             </Box>
 
-            <Grid container spacing={3} columns={{ xs: 12, sm: 12, md: 12, lg: 10 }}>
+            <Grid container spacing={3} columns={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
               <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
                 <Card
                   variant="outlined"
@@ -669,6 +671,56 @@ export function QuotationPromptView() {
                   </CardActionArea>
                 </Card>
               </Grid>
+
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
+                <Card
+                  variant="outlined"
+                  sx={{
+                    height: '100%',
+                    transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                      boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}22`,
+                    },
+                  }}
+                >
+                  <CardActionArea
+                    onClick={() => setCommercialScheme('kiosk_queue_system')}
+                    aria-label={t('prompt.kioskQueueTitle', 'Sistem & Integrasi Perangkat Keras')}
+                    sx={{
+                      p: 4,
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      justifyContent: 'flex-start',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        mb: 2.5,
+                        p: 1.5,
+                        borderRadius: '12px',
+                        bgcolor: (theme) =>
+                          theme.palette.mode === 'light' ? 'error.lighter' : 'error.dark',
+                        color: 'error.main',
+                        display: 'inline-flex',
+                      }}
+                    >
+                      <Iconify icon="solar:devices-bold-duotone" width={36} />
+                    </Box>
+                    <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+                      {t('prompt.kioskQueueTitle', 'Sistem & Integrasi Perangkat Keras')}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {t(
+                        'prompt.kioskQueueDesc',
+                        'Kiosk, sistem antrian, integrasi printer/display, dan perangkat kondisional.'
+                      )}
+                    </Typography>
+                  </CardActionArea>
+                </Card>
+              </Grid>
             </Grid>
           </Box>
         ) : commercialScheme === 'dedicated_squad' ? (
@@ -785,6 +837,30 @@ export function QuotationPromptView() {
             </Stack>
 
             <CustomDevelopmentGenerationForm
+              selectedSkill={activeSkill}
+              isSubmitting={generateMutation.isPending}
+              onSubmit={handleFormSubmit}
+              onCancel={() => setCommercialScheme(null)}
+            />
+          </Box>
+        ) : commercialScheme === 'kiosk_queue_system' ? (
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+                onClick={() => setCommercialScheme(null)}
+              >
+                {t('prompt.backToSchemes')}
+              </Button>
+              <Typography variant="h5" fontWeight={700}>
+                {t('kioskQueueForm.title', 'Buat Quotation Kiosk & Sistem Perangkat Keras')}
+              </Typography>
+            </Stack>
+
+            <KioskQueueGenerationForm
               selectedSkill={activeSkill}
               isSubmitting={generateMutation.isPending}
               onSubmit={handleFormSubmit}
