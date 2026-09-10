@@ -63,9 +63,9 @@ export function TalentOutsourcingGenerationForm({
   const payload = useMemo(
     () =>
       formState.isValid
-        ? toTalentOutsourcingPayload(getValues(), selectedSkill, activeSkills)
+        ? toTalentOutsourcingPayload(values, selectedSkill, activeSkills)
         : null,
-    [activeSkills, formState.isValid, getValues, selectedSkill, values]
+    [activeSkills, formState.isValid, selectedSkill, values]
   );
   const preview = useTalentOutsourcingPreview(payload, Boolean(payload) && !isSubmitting);
   const currentHash = hash(payload);
