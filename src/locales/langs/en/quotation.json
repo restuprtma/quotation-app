@@ -202,6 +202,8 @@
     "backToSchemes": "Change Commercial Scheme",
     "dedicatedSquadTitle": "Dedicated Programmer Squad",
     "dedicatedSquadDesc": "Dedicated programmer capacity (FTE) with official Venturo rate card pricing, sprint/calendar timelines, and maintenance options.",
+    "talentOutsourcingTitle": "Talent Outsourcing",
+    "talentOutsourcingDesc": "Personnel procurement or managed squads with explicit costs, payment terms, and taxes.",
     "subscriptionSaaSTitle": "Software Subscription / SaaS",
     "subscriptionSaaSDesc": "Recurring software subscription (monthly/quarterly/yearly), one-time fees, income sharing partnerships, and intellectual property rights.",
     "whiteLabelTitle": "White Label Product",
@@ -1093,6 +1095,9 @@
   "kioskQueue": {
     "title": "Hardware & System Integration",
     "description": "Kiosks, queue systems, printer/display integration, and conditional hardware"
+  },
+  "talentOutsourcingForm": {
+    "title": "Create Talent Outsourcing Quotation"
   },
   "kioskQueueForm": {
     "title": "Create Kiosk & Hardware System Quotation",

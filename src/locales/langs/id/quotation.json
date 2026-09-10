@@ -202,6 +202,8 @@
     "backToSchemes": "Ganti Skema Layanan",
     "dedicatedSquadTitle": "Dedicated Programmer Squad",
     "dedicatedSquadDesc": "Kapasitas programmer dedicated (FTE) dengan kalkulasi rate card resmi Venturo, timeline sprint/kalender, dan opsi maintenance.",
+    "talentOutsourcingTitle": "Talent Outsourcing",
+    "talentOutsourcingDesc": "Pengadaan personel atau managed squad dengan biaya, termin, dan pajak eksplisit.",
     "subscriptionSaaSTitle": "Software Subscription / SaaS",
     "subscriptionSaaSDesc": "Langganan aplikasi berulang (bulanan/kuartalan/tahunan), item biaya sekali bayar, pembagian hasil (income sharing), dan klausul hak cipta.",
     "whiteLabelTitle": "White Label Product",
@@ -1093,6 +1095,9 @@
   "kioskQueue": {
     "title": "Sistem & Integrasi Perangkat Keras",
     "description": "Kiosk, sistem antrian, integrasi printer/display, dan perangkat kondisional"
+  },
+  "talentOutsourcingForm": {
+    "title": "Buat Quotation Talent Outsourcing"
   },
   "kioskQueueForm": {
     "title": "Buat Quotation Kiosk & Sistem Perangkat Keras",
