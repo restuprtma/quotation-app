@@ -4,6 +4,7 @@ import '../styles/white-label-document.css';
 import '../styles/standalone-maintenance-document.css';
 import '../styles/custom-development-document.css';
 import '../styles/kiosk-queue-document.css';
+import '../styles/talent-outsourcing-document.css';
 
 import type { ReactNode } from 'react';
 

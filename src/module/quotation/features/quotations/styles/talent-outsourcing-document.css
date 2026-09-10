@@ -1,0 +1,49 @@
+.talent-outsourcing-document {
+  color: #172033;
+  font-family: Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.45;
+}
+
+.talent-outsourcing-document table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.talent-outsourcing-document th,
+.talent-outsourcing-document td {
+  padding: 6px 8px;
+  border: 1px solid #cfd5df;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+.talent-outsourcing-document [data-field$='line_total'],
+.talent-outsourcing-document [data-field$='subtotal'],
+.talent-outsourcing-document [data-field$='amount'],
+.talent-outsourcing-document [data-field$='total'],
+.talent-outsourcing-document [data-field$='nominal'] {
+  text-align: right;
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .talent-outsourcing-document {
+    font-size: 9pt;
+  }
+  .talent-outsourcing-document th,
+  .talent-outsourcing-document td {
+    padding: 4px;
+  }
+}
+@media print {
+  .talent-outsourcing-document {
+    width: 210mm;
+  }
+  .talent-outsourcing-document table,
+  .talent-outsourcing-document tr,
+  .talent-outsourcing-document [data-block-type='signature'] {
+    break-inside: avoid;
+  }
+  .talent-outsourcing-document thead {
+    display: table-header-group;
+  }
+}
