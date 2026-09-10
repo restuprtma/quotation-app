@@ -1,13 +1,17 @@
 import { Table } from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
+import ListItem from '@tiptap/extension-list-item';
 import TableCell from '@tiptap/extension-table-cell';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import TableHeader from '@tiptap/extension-table-header';
 import { Mark, Node, Extension, mergeAttributes } from '@tiptap/core';
 
 const MARKER_PATTERN = /^[a-z0-9][a-z0-9_-]{0,63}$/i;
+const FIELD_PATTERN = /^[a-z0-9][a-z0-9_.-]{0,127}$/i;
 const SECTION_NUMBER_PATTERN = /^[1-9][0-9]{0,2}$/;
 const COLUMN_WIDTH_PATTERN = /^(25|75)$/;
+const INDEX_PATTERN = /^(0|[1-9][0-9]{0,5})$/;
+const MONEY_VALUE_PATTERN = /^(0|[1-9][0-9]{0,14})$/;
 
 function readMarker(element: HTMLElement, name: string, pattern = MARKER_PATTERN): string | null {
   const value = element.getAttribute(name);
@@ -79,6 +83,15 @@ export const QuotationSectionExtension = Node.create({
         renderHTML: (attributes: Record<string, unknown>) =>
           renderMarker(attributes, 'data-template-code'),
       },
+      // Talent Outsourcing documents use this to bind a rendered section to
+      // the approved profile. It is deliberately a marker, not a catch-all
+      // data-* escape hatch.
+      'data-section-code': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-section-code'),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-section-code'),
+      },
       'data-modified': {
         default: null,
         parseHTML: (element: HTMLElement) => readMarker(element, 'data-modified', /^(true|false)$/),
@@ -121,9 +134,9 @@ export const QuotationFieldAttributesExtension = Extension.create({
         attributes: {
           'data-field': {
             default: null,
-            parseHTML: (element: HTMLElement) => readMarker(element, 'data-field'),
+            parseHTML: (element: HTMLElement) => readMarker(element, 'data-field', FIELD_PATTERN),
             renderHTML: (attributes: Record<string, unknown>) =>
-              renderMarker(attributes, 'data-field'),
+              renderMarker(attributes, 'data-field', FIELD_PATTERN),
           },
           'data-quotation-field': {
             default: null,
@@ -153,8 +166,9 @@ export const QuotationFieldMark = Mark.create({
     return {
       'data-field': {
         default: null,
-        parseHTML: (element: HTMLElement) => readMarker(element, 'data-field'),
-        renderHTML: (attributes: Record<string, unknown>) => renderMarker(attributes, 'data-field'),
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-field', FIELD_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-field', FIELD_PATTERN),
       },
       'data-quotation-field': {
         default: null,
@@ -228,6 +242,34 @@ export const QuotationTableRowExtension = TableRow.extend({
         renderHTML: (attributes: Record<string, unknown>) =>
           renderMarker(attributes, 'data-payment-index', /^[0-9]+$/),
       },
+      'data-group-index': {
+        default: null,
+        parseHTML: (element: HTMLElement) =>
+          readMarker(element, 'data-group-index', INDEX_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-group-index', INDEX_PATTERN),
+      },
+      'data-row-index': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-row-index', INDEX_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-row-index', INDEX_PATTERN),
+      },
+    };
+  },
+});
+
+/** Retains approved limitation identifiers on list items. */
+export const QuotationListItemExtension = ListItem.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      'data-limitation-code': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-limitation-code'),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-limitation-code'),
+      },
     };
   },
 });
@@ -260,15 +302,24 @@ function addQuotationCellAttributes<T extends typeof TableCell | typeof TableHea
         },
         'data-field': {
           default: null,
-          parseHTML: (element: HTMLElement) => readMarker(element, 'data-field'),
+          parseHTML: (element: HTMLElement) => readMarker(element, 'data-field', FIELD_PATTERN),
           renderHTML: (attributes: Record<string, unknown>) =>
-            renderMarker(attributes, 'data-field'),
+            renderMarker(attributes, 'data-field', FIELD_PATTERN),
         },
         'data-quotation-field': {
           default: null,
           parseHTML: (element: HTMLElement) => readMarker(element, 'data-quotation-field'),
           renderHTML: (attributes: Record<string, unknown>) =>
             renderMarker(attributes, 'data-quotation-field'),
+        },
+        // Renderer-generated Talent monetary cells pair their whitelisted
+        // data-field with an integer source-of-truth value.
+        'data-value': {
+          default: null,
+          parseHTML: (element: HTMLElement) =>
+            readMarker(element, 'data-value', MONEY_VALUE_PATTERN),
+          renderHTML: (attributes: Record<string, unknown>) =>
+            renderMarker(attributes, 'data-value', MONEY_VALUE_PATTERN),
         },
       };
     },

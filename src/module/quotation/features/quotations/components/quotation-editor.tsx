@@ -19,6 +19,7 @@ import {
   LegalBlockExtension,
   QuotationTableExtension,
   QuotationSectionExtension,
+  QuotationListItemExtension,
   QuotationTableRowExtension,
   QuotationTableCellExtension,
   QuotationTableHeaderExtension,
@@ -45,7 +46,18 @@ export function wrapOfficialDocument(html: string): string {
   if (/^<article\b[^>]*class=["'][^"']*\bquotation-document\b/i.test(trimmed)) {
     return trimmed;
   }
-  return `<article class="quotation-document">${trimmed}</article>`;
+  // The article is outside ProseMirror's document fragment. Talent documents
+  // identify themselves with approved child section codes, so restore their
+  // fixed service marker when saving rather than accepting arbitrary wrapper
+  // attributes from editable HTML.
+  const talentDocument = /\bdata-section-code=["'](?:development_cost|scope_timeline|payment|limitations)["']/i.test(
+    trimmed
+  );
+  const className = talentDocument
+    ? 'quotation-document talent-outsourcing-document'
+    : 'quotation-document';
+  const service = talentDocument ? ' data-service="talent_outsourcing"' : '';
+  return `<article class="${className}"${service}>${trimmed}</article>`;
 }
 
 export function QuotationEditor({
@@ -62,7 +74,8 @@ export function QuotationEditor({
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({ link: false, underline: false }),
+      StarterKit.configure({ link: false, underline: false, listItem: false }),
+      QuotationListItemExtension,
       QuotationSectionExtension,
       QuotationFieldAttributesExtension,
       QuotationFieldMark,
