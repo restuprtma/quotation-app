@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 import {
@@ -190,9 +189,7 @@ export const kioskQueueBaseSchema = z.object({
     .trim()
     .min(1, 'Nama sistem wajib diisi')
     .max(MAX_KIOSK_QUEUE_SHORT_TEXT_RUNES, 'Nama sistem maksimal 200 karakter'),
-  quotation_date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Format tanggal harus YYYY-MM-DD'),
+  quotation_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format tanggal harus YYYY-MM-DD'),
   hardware_provision: z.enum(['venturo_supplied', 'client_supplied']),
   tax_treatment: z.enum(['inclusive_ppn_11', 'exclusive_ppn']),
   government_scope_phases: z
@@ -472,7 +469,8 @@ export function validateKioskQueueCrossFields(
     if (!seenLimits.has('civil_electrical')) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Batasan pekerjaan sipil dan kelistrikan (civil_electrical) wajib dipilih untuk pemerintah',
+        message:
+          'Batasan pekerjaan sipil dan kelistrikan (civil_electrical) wajib dipilih untuk pemerintah',
         path: ['limitation_codes'],
       });
     }
@@ -513,7 +511,8 @@ export function validateKioskQueueCrossFields(
       if (!seenLimits.has('client_hardware')) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Batasan perangkat disediakan klien (client_hardware) wajib dipilih jika hardware_provision adalah client_supplied',
+          message:
+            'Batasan perangkat disediakan klien (client_hardware) wajib dipilih jika hardware_provision adalah client_supplied',
           path: ['limitation_codes'],
         });
       }
@@ -546,7 +545,8 @@ export function validateKioskQueueCrossFields(
     if (data.hardware_provision !== 'client_supplied') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Varian korporasi swasta Food Court hanya menerima hardware_provision client_supplied',
+        message:
+          'Varian korporasi swasta Food Court hanya menerima hardware_provision client_supplied',
         path: ['hardware_provision'],
       });
     }
@@ -555,7 +555,8 @@ export function validateKioskQueueCrossFields(
     if (data.tax_treatment !== 'exclusive_ppn') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Varian korporasi swasta Food Court harus menggunakan perlakuan pajak exclusive_ppn',
+        message:
+          'Varian korporasi swasta Food Court harus menggunakan perlakuan pajak exclusive_ppn',
         path: ['tax_treatment'],
       });
     }
@@ -606,7 +607,8 @@ export function validateKioskQueueCrossFields(
     if (!seenLimits.has('client_hardware')) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Batasan perangkat disediakan klien (client_hardware) wajib dipilih untuk varian swasta',
+        message:
+          'Batasan perangkat disediakan klien (client_hardware) wajib dipilih untuk varian swasta',
         path: ['limitation_codes'],
       });
     }
@@ -696,11 +698,7 @@ export function makeKioskQueueFormSchema(t?: (key: string) => string) {
       .trim()
       .min(1, 'Nama penanggung jawab wajib diisi')
       .max(MAX_KIOSK_QUEUE_SHORT_TEXT_RUNES),
-    client_company_name: z
-      .string()
-      .trim()
-      .max(MAX_KIOSK_QUEUE_SHORT_TEXT_RUNES)
-      .optional(),
+    client_company_name: z.string().trim().max(MAX_KIOSK_QUEUE_SHORT_TEXT_RUNES).optional(),
     subject: z
       .string()
       .trim()
@@ -716,3 +714,7 @@ export const kioskQueueFormSchema = makeKioskQueueFormSchema();
 
 export type KioskQueueFormValues = z.infer<typeof kioskQueueFormSchema>;
 export type KioskQueueValidationValues = z.infer<typeof kioskQueueSchema>;
+
+export function fieldId(path: string): string {
+  return `field-${path.replace(/\./g, '-')}`;
+}

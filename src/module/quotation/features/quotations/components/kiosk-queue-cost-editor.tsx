@@ -21,6 +21,7 @@ import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
 import { RHFSelect, RHFCheckbox, RHFTextField, RHFNumericField } from 'src/shared/ui/hook-form';
 
+import { fieldId } from './kiosk-queue-form-model';
 import {
   kioskQuarterLineTotal,
   kioskHardwareLineTotal,
@@ -136,6 +137,7 @@ function ServiceGroupItems({ groupIndex, control, disabled }: ServiceGroupItemsP
             <Grid container spacing={2} alignItems="center">
               <Grid size={{ xs: 12, sm: 4 }}>
                 <RHFTextField
+                  id={fieldId(`${path}.${iIdx}.name`)}
                   name={`${path}.${iIdx}.name`}
                   label={t('kioskQueueForm.cost.itemName', 'Nama Item / Posisi Jasa')}
                   placeholder="contoh: Senior Software Engineer"
@@ -145,25 +147,30 @@ function ServiceGroupItems({ groupIndex, control, disabled }: ServiceGroupItemsP
               </Grid>
 
               <Grid size={{ xs: 12, sm: 3 }}>
-                <RHFNumericField
-                  name={`${path}.${iIdx}.monthly_rate`}
-                  label={t('kioskQueueForm.cost.monthlyRate', 'Tarif Bulanan (IDR)')}
-                  size="small"
-                  disabled={disabled}
-                />
+                <Box id={fieldId(`${path}.${iIdx}.monthly_rate`)}>
+                  <RHFNumericField
+                    name={`${path}.${iIdx}.monthly_rate`}
+                    label={t('kioskQueueForm.cost.monthlyRate', 'Tarif Bulanan (IDR)')}
+                    size="small"
+                    disabled={disabled}
+                  />
+                </Box>
               </Grid>
 
               <Grid size={{ xs: 6, sm: 1.5 }}>
-                <RHFNumericField
-                  name={`${path}.${iIdx}.headcount`}
-                  label={t('kioskQueueForm.cost.headcount', 'Personel')}
-                  size="small"
-                  disabled={disabled}
-                />
+                <Box id={fieldId(`${path}.${iIdx}.headcount`)}>
+                  <RHFNumericField
+                    name={`${path}.${iIdx}.headcount`}
+                    label={t('kioskQueueForm.cost.headcount', 'Personel')}
+                    size="small"
+                    disabled={disabled}
+                  />
+                </Box>
               </Grid>
 
               <Grid size={{ xs: 6, sm: 2 }}>
                 <RHFSelect
+                  id={fieldId(`${path}.${iIdx}.period_quarters`)}
                   name={`${path}.${iIdx}.period_quarters`}
                   label={t('kioskQueueForm.cost.period', 'Periode')}
                   size="small"
@@ -333,6 +340,7 @@ export function KioskQueueCostEditor({ disabled = false }: Props) {
                 <Stack spacing={2}>
                   <Stack direction="row" spacing={1.5} alignItems="center">
                     <RHFTextField
+                      id={fieldId(`kiosk_queue_system.service_groups.${gIdx}.title`)}
                       name={`kiosk_queue_system.service_groups.${gIdx}.title`}
                       label={t('kioskQueueForm.cost.groupTitleLabel', `Judul Kelompok ${gIdx + 1}`)}
                       placeholder="contoh: Pengembangan Modul Dispenser Antrian"
@@ -369,7 +377,10 @@ export function KioskQueueCostEditor({ disabled = false }: Props) {
             />
 
             {showDiscount && (
-              <Box sx={{ maxWidth: 360, pt: 1 }}>
+              <Box
+                id={fieldId('kiosk_queue_system.service_discount_amount')}
+                sx={{ maxWidth: 360, pt: 1 }}
+              >
                 <RHFNumericField
                   name="kiosk_queue_system.service_discount_amount"
                   label={t('kioskQueueForm.cost.discountAmount', 'Nominal Diskon Jasa (IDR)')}
@@ -429,6 +440,7 @@ export function KioskQueueCostEditor({ disabled = false }: Props) {
                     <Grid container spacing={2} alignItems="center">
                       <Grid size={{ xs: 12, sm: 5 }}>
                         <RHFTextField
+                          id={fieldId(`kiosk_queue_system.hardware_items.${hIdx}.name`)}
                           name={`kiosk_queue_system.hardware_items.${hIdx}.name`}
                           label={t('kioskQueueForm.cost.hardwareName', 'Nama Perangkat')}
                           placeholder="contoh: Thermal Ticket Printer 80mm Autocutter"
@@ -438,21 +450,25 @@ export function KioskQueueCostEditor({ disabled = false }: Props) {
                       </Grid>
 
                       <Grid size={{ xs: 12, sm: 3 }}>
-                        <RHFNumericField
-                          name={`kiosk_queue_system.hardware_items.${hIdx}.unit_price`}
-                          label={t('kioskQueueForm.cost.unitPrice', 'Harga Satuan (IDR)')}
-                          size="small"
-                          disabled={disabled}
-                        />
+                        <Box id={fieldId(`kiosk_queue_system.hardware_items.${hIdx}.unit_price`)}>
+                          <RHFNumericField
+                            name={`kiosk_queue_system.hardware_items.${hIdx}.unit_price`}
+                            label={t('kioskQueueForm.cost.unitPrice', 'Harga Satuan (IDR)')}
+                            size="small"
+                            disabled={disabled}
+                          />
+                        </Box>
                       </Grid>
 
                       <Grid size={{ xs: 6, sm: 1.5 }}>
-                        <RHFNumericField
-                          name={`kiosk_queue_system.hardware_items.${hIdx}.quantity`}
-                          label={t('kioskQueueForm.cost.quantity', 'Jumlah (Unit)')}
-                          size="small"
-                          disabled={disabled}
-                        />
+                        <Box id={fieldId(`kiosk_queue_system.hardware_items.${hIdx}.quantity`)}>
+                          <RHFNumericField
+                            name={`kiosk_queue_system.hardware_items.${hIdx}.quantity`}
+                            label={t('kioskQueueForm.cost.quantity', 'Jumlah (Unit)')}
+                            size="small"
+                            disabled={disabled}
+                          />
+                        </Box>
                       </Grid>
 
                       <Grid size={{ xs: 6, sm: 2 }}>
@@ -539,6 +555,7 @@ export function KioskQueueCostEditor({ disabled = false }: Props) {
                     <Grid container spacing={2} alignItems="center">
                       <Grid size={{ xs: 12, sm: 4 }}>
                         <RHFTextField
+                          id={fieldId(`kiosk_queue_system.maintenance_items.${mIdx}.name`)}
                           name={`kiosk_queue_system.maintenance_items.${mIdx}.name`}
                           label={t('kioskQueueForm.cost.maintenanceName', 'Item Maintenance')}
                           placeholder="contoh: Maintenance Support & Monitoring"
@@ -548,25 +565,34 @@ export function KioskQueueCostEditor({ disabled = false }: Props) {
                       </Grid>
 
                       <Grid size={{ xs: 12, sm: 3 }}>
-                        <RHFNumericField
-                          name={`kiosk_queue_system.maintenance_items.${mIdx}.monthly_rate`}
-                          label={t('kioskQueueForm.cost.monthlyRate', 'Tarif Bulanan (IDR)')}
-                          size="small"
-                          disabled={disabled}
-                        />
+                        <Box
+                          id={fieldId(`kiosk_queue_system.maintenance_items.${mIdx}.monthly_rate`)}
+                        >
+                          <RHFNumericField
+                            name={`kiosk_queue_system.maintenance_items.${mIdx}.monthly_rate`}
+                            label={t('kioskQueueForm.cost.monthlyRate', 'Tarif Bulanan (IDR)')}
+                            size="small"
+                            disabled={disabled}
+                          />
+                        </Box>
                       </Grid>
 
                       <Grid size={{ xs: 6, sm: 1.5 }}>
-                        <RHFNumericField
-                          name={`kiosk_queue_system.maintenance_items.${mIdx}.headcount`}
-                          label={t('kioskQueueForm.cost.headcount', 'Personel')}
-                          size="small"
-                          disabled={disabled}
-                        />
+                        <Box id={fieldId(`kiosk_queue_system.maintenance_items.${mIdx}.headcount`)}>
+                          <RHFNumericField
+                            name={`kiosk_queue_system.maintenance_items.${mIdx}.headcount`}
+                            label={t('kioskQueueForm.cost.headcount', 'Personel')}
+                            size="small"
+                            disabled={disabled}
+                          />
+                        </Box>
                       </Grid>
 
                       <Grid size={{ xs: 6, sm: 2 }}>
                         <RHFSelect
+                          id={fieldId(
+                            `kiosk_queue_system.maintenance_items.${mIdx}.period_quarters`
+                          )}
                           name={`kiosk_queue_system.maintenance_items.${mIdx}.period_quarters`}
                           label={t('kioskQueueForm.cost.period', 'Periode')}
                           size="small"

@@ -1,10 +1,5 @@
 import type { KioskQueueFormValues } from './kiosk-queue-form-model';
-import type {
-  ActiveSkill,
-  KioskQueueVariant,
-  GenerateQuotationPayload,
-  KioskQueuePreviewResponse,
-} from '../types';
+import type { ActiveSkill, KioskQueueVariant, GenerateQuotationPayload } from '../types';
 
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,13 +30,13 @@ import { Iconify } from 'src/shared/ui/iconify';
 import { Form, RHFSelect, RHFTextField } from 'src/shared/ui/hook-form';
 
 import { useClients } from '../hooks/use-clients';
-import { KioskQueuePreview } from './kiosk-queue-preview';
 import { SOLUTION_TYPES } from '../constants/scope-presets';
 import { useActiveSkills } from '../hooks/use-active-skills';
-import { kioskQueueFormSchema } from './kiosk-queue-form-model';
 import { KioskQueueCostEditor } from './kiosk-queue-cost-editor';
 import { KioskQueueScopeEditor } from './kiosk-queue-scope-editor';
+import { fieldId, kioskQueueFormSchema } from './kiosk-queue-form-model';
 import { KioskQueuePaymentLegalEditor } from './kiosk-queue-payment-legal-editor';
+import { KioskQueuePreview, isKioskQueueSubmitReady } from './kiosk-queue-preview';
 import {
   toKioskQueuePayload,
   createDefaultKioskQueueValues,
@@ -241,9 +236,7 @@ export function shouldPromptVariantSwitch(
   return hasTimeline || hasMaintenance || hasPayments;
 }
 
-export function fieldId(path: string): string {
-  return `field-${path.replace(/\./g, '-')}`;
-}
+export { fieldId, isKioskQueueSubmitReady };
 
 export type ExtractedFieldError = {
   path: string;
@@ -279,31 +272,6 @@ export function getKioskQueuePayloadHash(
   return normalized ? JSON.stringify(normalized) : '';
 }
 
-export function isKioskQueueSubmitReady(params: {
-  isValid: boolean;
-  isDebouncing: boolean;
-  isFetching: boolean;
-  isSuccess: boolean;
-  isSubmitting?: boolean;
-  error: any;
-  preview: KioskQueuePreviewResponse | undefined;
-  previewPayloadHash: string;
-  currentNormalizedPayloadHash: string;
-}): boolean {
-  if (!params.isValid) return false;
-  if (params.isSubmitting) return false;
-  if (params.isDebouncing || params.isFetching || Boolean(params.error) || !params.isSuccess) {
-    return false;
-  }
-  if (!params.preview) return false;
-  if (params.previewPayloadHash !== params.currentNormalizedPayloadHash) return false;
-
-  const { calculation } = params.preview;
-  if (calculation.payment_total !== calculation.payment_target_total) return false;
-
-  return true;
-}
-
 // ----------------------------------------------------------------------
 // Main Form Component
 // ----------------------------------------------------------------------
@@ -313,6 +281,7 @@ type Props = {
   isSubmitting?: boolean;
   onSubmit: (payload: GenerateQuotationPayload) => void;
   onCancel: () => void;
+  initialValues?: KioskQueueFormValues;
 };
 
 export function KioskQueueGenerationForm({
@@ -320,6 +289,7 @@ export function KioskQueueGenerationForm({
   isSubmitting = false,
   onSubmit,
   onCancel,
+  initialValues,
 }: Props) {
   const { t } = useTranslate('quotation');
   const { data: activeSkills = [] } = useActiveSkills();
@@ -332,12 +302,13 @@ export function KioskQueueGenerationForm({
 
   const defaultValues = useMemo(
     () =>
+      initialValues ||
       createDefaultKioskQueueValues(
         new Date().toISOString().slice(0, 10),
         clients[0],
         'government_mpp'
       ),
-    [clients]
+    [clients, initialValues]
   );
 
   const methods = useForm<KioskQueueFormValues>({

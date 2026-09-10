@@ -1,4 +1,4 @@
-import type { Control, UseFormSetValue, UseFormGetValues } from 'react-hook-form';
+import type { Control, UseFormSetValue } from 'react-hook-form';
 import type { KioskQueueFormValues } from './kiosk-queue-form-model';
 import type {
   KioskQueueExpertInput,
@@ -23,6 +23,8 @@ import CardContent from '@mui/material/CardContent';
 import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
 import { RHFTextField, RHFNumericField } from 'src/shared/ui/hook-form';
+
+import { fieldId } from './kiosk-queue-form-model';
 
 // ----------------------------------------------------------------------
 // Pure data manipulation helpers for tests and stable array operations
@@ -128,20 +130,20 @@ type DeliverablesEditorProps = {
   phaseIndex: number;
   control: Control<KioskQueueFormValues>;
   setValue: UseFormSetValue<KioskQueueFormValues>;
-  getValues: UseFormGetValues<KioskQueueFormValues>;
   disabled?: boolean;
 };
 
 function DeliverablesEditor({
   phaseIndex,
+  control,
   setValue,
-  getValues,
   disabled = false,
 }: DeliverablesEditorProps) {
   const { t } = useTranslate('quotation');
   const path = `kiosk_queue_system.government_scope_phases.${phaseIndex}.deliverables` as const;
 
-  const currentDeliverables = (getValues(path) || ['']) as string[];
+  const watched = useWatch({ control, name: path });
+  const currentDeliverables = (watched && watched.length > 0 ? watched : ['']) as string[];
 
   const handleAdd = () => {
     const next = addDeliverable(currentDeliverables);
@@ -162,6 +164,7 @@ function DeliverablesEditor({
       {currentDeliverables.map((_, dIdx) => (
         <Stack key={dIdx} direction="row" spacing={1} alignItems="flex-start">
           <RHFTextField
+            id={fieldId(`${path}.${dIdx}`)}
             name={`${path}.${dIdx}`}
             placeholder={t(
               'kioskQueueForm.scope.deliverablePlaceholder',
@@ -223,7 +226,7 @@ type Props = {
 
 export function KioskQueueScopeEditor({ disabled = false }: Props) {
   const { t } = useTranslate('quotation');
-  const { control, setValue, getValues } = useFormContext<KioskQueueFormValues>();
+  const { control, setValue } = useFormContext<KioskQueueFormValues>();
   const variant =
     useWatch({
       control,
@@ -306,6 +309,7 @@ export function KioskQueueScopeEditor({ disabled = false }: Props) {
                   <Stack spacing={2}>
                     <Stack direction="row" spacing={1} alignItems="center">
                       <RHFTextField
+                        id={fieldId(`kiosk_queue_system.government_scope_phases.${pIdx}.title`)}
                         name={`kiosk_queue_system.government_scope_phases.${pIdx}.title`}
                         label={t('kioskQueueForm.scope.phaseTitleLabel', `Judul Fase ${pIdx + 1}`)}
                         placeholder={t(
@@ -364,7 +368,6 @@ export function KioskQueueScopeEditor({ disabled = false }: Props) {
                       phaseIndex={pIdx}
                       control={control}
                       setValue={setValue}
-                      getValues={getValues}
                       disabled={disabled}
                     />
                   </Stack>
@@ -407,6 +410,7 @@ export function KioskQueueScopeEditor({ disabled = false }: Props) {
                   <Grid container spacing={2} alignItems="flex-start">
                     <Grid size={{ xs: 12, sm: 4 }}>
                       <RHFTextField
+                        id={fieldId(`kiosk_queue_system.expert_requirements.${eIdx}.role`)}
                         name={`kiosk_queue_system.expert_requirements.${eIdx}.role`}
                         label={t('kioskQueueForm.scope.expertRole', 'Peran / Posisi')}
                         placeholder="contoh: Project Manager"
@@ -416,16 +420,21 @@ export function KioskQueueScopeEditor({ disabled = false }: Props) {
                     </Grid>
 
                     <Grid size={{ xs: 6, sm: 2 }}>
-                      <RHFNumericField
-                        name={`kiosk_queue_system.expert_requirements.${eIdx}.headcount`}
-                        label={t('kioskQueueForm.scope.expertHeadcount', 'Jumlah (Org)')}
-                        disabled={disabled}
-                        size="small"
-                      />
+                      <Box id={fieldId(`kiosk_queue_system.expert_requirements.${eIdx}.headcount`)}>
+                        <RHFNumericField
+                          name={`kiosk_queue_system.expert_requirements.${eIdx}.headcount`}
+                          label={t('kioskQueueForm.scope.expertHeadcount', 'Jumlah (Org)')}
+                          disabled={disabled}
+                          size="small"
+                        />
+                      </Box>
                     </Grid>
 
                     <Grid size={{ xs: 6, sm: 3 }}>
                       <RHFTextField
+                        id={fieldId(
+                          `kiosk_queue_system.expert_requirements.${eIdx}.duration_label`
+                        )}
                         name={`kiosk_queue_system.expert_requirements.${eIdx}.duration_label`}
                         label={t('kioskQueueForm.scope.expertDuration', 'Durasi Penugasan')}
                         placeholder="contoh: 3 Bulan"
@@ -482,6 +491,9 @@ export function KioskQueueScopeEditor({ disabled = false }: Props) {
 
                     <Grid size={{ xs: 12 }}>
                       <RHFTextField
+                        id={fieldId(
+                          `kiosk_queue_system.expert_requirements.${eIdx}.minimum_qualification`
+                        )}
                         name={`kiosk_queue_system.expert_requirements.${eIdx}.minimum_qualification`}
                         label={t('kioskQueueForm.scope.expertQualification', 'Kualifikasi Minimal')}
                         placeholder="contoh: Minimal S1 Sistem Informasi / Teknik Informatika, pengalaman 3 tahun"
@@ -541,6 +553,7 @@ export function KioskQueueScopeEditor({ disabled = false }: Props) {
               <Grid container spacing={2} alignItems="flex-start">
                 <Grid size={{ xs: 12, sm: 7 }}>
                   <RHFTextField
+                    id={fieldId(`kiosk_queue_system.private_timeline_rows.${tIdx}.description`)}
                     name={`kiosk_queue_system.private_timeline_rows.${tIdx}.description`}
                     label={t('kioskQueueForm.scope.timelineDescription', 'Deskripsi Lingkup')}
                     placeholder="contoh: Desain UI Kiosk & Integrasi Payment Gateway"
@@ -553,6 +566,7 @@ export function KioskQueueScopeEditor({ disabled = false }: Props) {
 
                 <Grid size={{ xs: 12, sm: 3 }}>
                   <RHFTextField
+                    id={fieldId(`kiosk_queue_system.private_timeline_rows.${tIdx}.timeline`)}
                     name={`kiosk_queue_system.private_timeline_rows.${tIdx}.timeline`}
                     label={t('kioskQueueForm.scope.timelineTarget', 'Target Waktu')}
                     placeholder="contoh: Bulan 1 (Minggu 1-2)"

@@ -25,6 +25,7 @@ import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
 import { RHFTextField, RHFNumericField } from 'src/shared/ui/hook-form';
 
+import { fieldId } from './kiosk-queue-form-model';
 import { KIOSK_QUEUE_LIMITATION_OPTIONS } from '../constants/kiosk-queue-system';
 
 // ----------------------------------------------------------------------
@@ -193,6 +194,9 @@ export function KioskQueuePaymentLegalEditor({ disabled = false }: Props) {
                     <Grid container spacing={2} alignItems="center">
                       <Grid size={{ xs: 12, sm: 4 }}>
                         <RHFTextField
+                          id={fieldId(
+                            `kiosk_queue_system.government_payment_schedule.${pIdx}.stage`
+                          )}
                           name={`kiosk_queue_system.government_payment_schedule.${pIdx}.stage`}
                           label={t('kioskQueueForm.payment.stage', 'Tahap Pembayaran')}
                           placeholder="contoh: Pembayaran Uang Muka 50%"
@@ -203,6 +207,9 @@ export function KioskQueuePaymentLegalEditor({ disabled = false }: Props) {
 
                       <Grid size={{ xs: 12, sm: 4 }}>
                         <RHFTextField
+                          id={fieldId(
+                            `kiosk_queue_system.government_payment_schedule.${pIdx}.billing_basis`
+                          )}
                           name={`kiosk_queue_system.government_payment_schedule.${pIdx}.billing_basis`}
                           label={t('kioskQueueForm.payment.billingBasis', 'Dasar Penagihan')}
                           placeholder="contoh: Penandatanganan Kontrak & SPMK"
@@ -212,12 +219,18 @@ export function KioskQueuePaymentLegalEditor({ disabled = false }: Props) {
                       </Grid>
 
                       <Grid size={{ xs: 10, sm: 3.5 }}>
-                        <RHFNumericField
-                          name={`kiosk_queue_system.government_payment_schedule.${pIdx}.nominal`}
-                          label={t('kioskQueueForm.payment.nominal', 'Nominal Pembayaran (IDR)')}
-                          size="small"
-                          disabled={disabled}
-                        />
+                        <Box
+                          id={fieldId(
+                            `kiosk_queue_system.government_payment_schedule.${pIdx}.nominal`
+                          )}
+                        >
+                          <RHFNumericField
+                            name={`kiosk_queue_system.government_payment_schedule.${pIdx}.nominal`}
+                            label={t('kioskQueueForm.payment.nominal', 'Nominal Pembayaran (IDR)')}
+                            size="small"
+                            disabled={disabled}
+                          />
+                        </Box>
                       </Grid>
 
                       <Grid size={{ xs: 2, sm: 0.5 }}>
@@ -240,7 +253,10 @@ export function KioskQueuePaymentLegalEditor({ disabled = false }: Props) {
                   </Paper>
                 ))}
 
-                <Box sx={{ maxWidth: 300, pt: 1 }}>
+                <Box
+                  id={fieldId('kiosk_queue_system.payment_due_days')}
+                  sx={{ maxWidth: 300, pt: 1 }}
+                >
                   <RHFNumericField
                     name="kiosk_queue_system.payment_due_days"
                     label={t('kioskQueueForm.payment.dueDays', 'Jatuh Tempo Pembayaran (Hari)')}
@@ -267,6 +283,9 @@ export function KioskQueuePaymentLegalEditor({ disabled = false }: Props) {
                     <Grid container spacing={2} alignItems="center">
                       <Grid size={{ xs: 12, sm: 3 }}>
                         <RHFTextField
+                          id={fieldId(
+                            `kiosk_queue_system.private_payment_schedule.${pIdx}.work_period`
+                          )}
                           name={`kiosk_queue_system.private_payment_schedule.${pIdx}.work_period`}
                           label={t('kioskQueueForm.payment.workPeriod', 'Work Period / Tahap')}
                           placeholder="contoh: Termin 1"
@@ -277,6 +296,7 @@ export function KioskQueuePaymentLegalEditor({ disabled = false }: Props) {
 
                       <Grid size={{ xs: 12, sm: 3 }}>
                         <RHFTextField
+                          id={fieldId(`kiosk_queue_system.private_payment_schedule.${pIdx}.terms`)}
                           name={`kiosk_queue_system.private_payment_schedule.${pIdx}.terms`}
                           label={t('kioskQueueForm.payment.terms', 'Terms / Ketentuan')}
                           placeholder="contoh: DP Kick-off 50%"
@@ -287,6 +307,9 @@ export function KioskQueuePaymentLegalEditor({ disabled = false }: Props) {
 
                       <Grid size={{ xs: 6, sm: 2 }}>
                         <RHFTextField
+                          id={fieldId(
+                            `kiosk_queue_system.private_payment_schedule.${pIdx}.invoice_date_label`
+                          )}
                           name={`kiosk_queue_system.private_payment_schedule.${pIdx}.invoice_date_label`}
                           label={t('kioskQueueForm.payment.invoiceDate', 'Invoice Date')}
                           placeholder="contoh: Saat SPMK"
@@ -297,6 +320,9 @@ export function KioskQueuePaymentLegalEditor({ disabled = false }: Props) {
 
                       <Grid size={{ xs: 6, sm: 1.5 }}>
                         <RHFTextField
+                          id={fieldId(
+                            `kiosk_queue_system.private_payment_schedule.${pIdx}.due_date_label`
+                          )}
                           name={`kiosk_queue_system.private_payment_schedule.${pIdx}.due_date_label`}
                           label={t('kioskQueueForm.payment.dueDate', 'Due Date')}
                           placeholder="contoh: H+14"
@@ -306,12 +332,18 @@ export function KioskQueuePaymentLegalEditor({ disabled = false }: Props) {
                       </Grid>
 
                       <Grid size={{ xs: 10, sm: 2 }}>
-                        <RHFNumericField
-                          name={`kiosk_queue_system.private_payment_schedule.${pIdx}.nominal`}
-                          label={t('kioskQueueForm.payment.nominal', 'Nominal (IDR)')}
-                          size="small"
-                          disabled={disabled}
-                        />
+                        <Box
+                          id={fieldId(
+                            `kiosk_queue_system.private_payment_schedule.${pIdx}.nominal`
+                          )}
+                        >
+                          <RHFNumericField
+                            name={`kiosk_queue_system.private_payment_schedule.${pIdx}.nominal`}
+                            label={t('kioskQueueForm.payment.nominal', 'Nominal (IDR)')}
+                            size="small"
+                            disabled={disabled}
+                          />
+                        </Box>
                       </Grid>
 
                       <Grid size={{ xs: 2, sm: 0.5 }}>
@@ -417,6 +449,7 @@ export function KioskQueuePaymentLegalEditor({ disabled = false }: Props) {
               {additionalLimitations.map((_, aIdx) => (
                 <Stack key={aIdx} direction="row" spacing={1} alignItems="center">
                   <RHFTextField
+                    id={fieldId(`kiosk_queue_system.additional_limitations.${aIdx}`)}
                     name={`kiosk_queue_system.additional_limitations.${aIdx}`}
                     placeholder="contoh: Akses ke ruang server harus didampingi teknisi klien"
                     size="small"
@@ -474,6 +507,7 @@ export function KioskQueuePaymentLegalEditor({ disabled = false }: Props) {
                   {rightsStatements.map((_, rIdx) => (
                     <Stack key={rIdx} direction="row" spacing={1} alignItems="center">
                       <RHFTextField
+                        id={fieldId(`kiosk_queue_system.rights_statements.${rIdx}`)}
                         name={`kiosk_queue_system.rights_statements.${rIdx}`}
                         placeholder="contoh: Source code modul integrasi diserahkan secara non-eksklusif..."
                         size="small"
