@@ -4,7 +4,11 @@ import assert from 'node:assert/strict';
 import StarterKit from '@tiptap/starter-kit';
 import { Selection } from '@tiptap/pm/state';
 
-import { LegalBlockExtension, QuotationSectionExtension } from './legal-block-extension';
+import {
+  LegalBlockExtension,
+  QuotationTableExtension,
+  QuotationSectionExtension,
+} from './legal-block-extension';
 
 describe('LegalBlockExtension', () => {
   const initialContent = {
@@ -33,10 +37,7 @@ describe('LegalBlockExtension', () => {
 
   function createTestEditor(options: { unlocked: boolean }) {
     const editor = new Editor({
-      extensions: [
-        StarterKit,
-        LegalBlockExtension.configure({ unlocked: options.unlocked }),
-      ],
+      extensions: [StarterKit, LegalBlockExtension.configure({ unlocked: options.unlocked })],
       content: initialContent,
     });
     // In headless test mode without DOM mount, activate plugins on editor state
@@ -59,7 +60,7 @@ describe('LegalBlockExtension', () => {
     assert.ok(legalPos > 0, 'legalBlock node must be found in doc');
 
     const jsonBefore = JSON.stringify(editor.getJSON());
-    
+
     // Attempt to insert text inside legal block
     const tr = editor.state.tr.insertText('TAMPERED ', legalPos);
     (editor as any).dispatchTransaction(tr);
@@ -67,7 +68,7 @@ describe('LegalBlockExtension', () => {
     const jsonAfter = JSON.stringify(editor.getJSON());
     assert.equal(jsonAfter, jsonBefore, 'Content inside legal block must NOT change when locked');
     assert.ok(!jsonAfter.includes('TAMPERED'), 'Document must not contain tampered text');
-    
+
     editor.destroy();
   });
 
@@ -82,7 +83,10 @@ describe('LegalBlockExtension', () => {
 
     const jsonAfter = JSON.stringify(editor.getJSON());
     assert.notEqual(jsonAfter, jsonBefore, 'Content outside legal block must change when edited');
-    assert.ok(jsonAfter.includes('EDITED Opening paragraph'), 'Document must contain edited opening text');
+    assert.ok(
+      jsonAfter.includes('EDITED Opening paragraph'),
+      'Document must contain edited opening text'
+    );
 
     editor.destroy();
   });
@@ -102,7 +106,10 @@ describe('LegalBlockExtension', () => {
     (editor as any).dispatchTransaction(tr);
 
     const jsonAfter = JSON.stringify(editor.getJSON());
-    assert.ok(jsonAfter.includes('UNLOCKED_EDIT Official legal'), 'Document must contain modified legal text when unlocked');
+    assert.ok(
+      jsonAfter.includes('UNLOCKED_EDIT Official legal'),
+      'Document must contain modified legal text when unlocked'
+    );
 
     editor.destroy();
   });
@@ -118,11 +125,13 @@ describe('LegalBlockExtension', () => {
     });
 
     // Move selection into legal block
-    const tr = editor.state.tr.setSelection(
-      Selection.near(editor.state.doc.resolve(legalPos))
-    );
+    const tr = editor.state.tr.setSelection(Selection.near(editor.state.doc.resolve(legalPos)));
     (editor as any).dispatchTransaction(tr);
-    assert.equal(editor.state.selection.from, legalPos, 'Cursor selection inside legal block must be allowed');
+    assert.equal(
+      editor.state.selection.from,
+      legalPos,
+      'Cursor selection inside legal block must be allowed'
+    );
 
     editor.destroy();
   });
@@ -199,11 +208,19 @@ describe('LegalBlockExtension', () => {
     const beforeLocked = JSON.stringify(lockedEditor.getJSON());
     const tr1 = lockedEditor.state.tr.insertText('HACKED_RIGHTS ', rightsPos);
     (lockedEditor as any).dispatchTransaction(tr1);
-    assert.equal(JSON.stringify(lockedEditor.getJSON()), beforeLocked, 'rights block must not change when locked');
+    assert.equal(
+      JSON.stringify(lockedEditor.getJSON()),
+      beforeLocked,
+      'rights block must not change when locked'
+    );
 
     const tr2 = lockedEditor.state.tr.insertText('HACKED_LIMITATIONS ', limPos);
     (lockedEditor as any).dispatchTransaction(tr2);
-    assert.equal(JSON.stringify(lockedEditor.getJSON()), beforeLocked, 'limitations block must not change when locked');
+    assert.equal(
+      JSON.stringify(lockedEditor.getJSON()),
+      beforeLocked,
+      'limitations block must not change when locked'
+    );
     lockedEditor.destroy();
 
     // 2. Unlocked: editing is permitted
@@ -222,11 +239,34 @@ describe('LegalBlockExtension', () => {
 
     const tr3 = unlockedEditor.state.tr.insertText('EDITED_RIGHTS ', uRightsPos);
     (unlockedEditor as any).dispatchTransaction(tr3);
-    assert.ok(JSON.stringify(unlockedEditor.getJSON()).includes('EDITED_RIGHTS'), 'rights edited when unlocked');
+    assert.ok(
+      JSON.stringify(unlockedEditor.getJSON()).includes('EDITED_RIGHTS'),
+      'rights edited when unlocked'
+    );
 
     const tr4 = unlockedEditor.state.tr.insertText('EDITED_LIMITATIONS ', uLimPos);
     (unlockedEditor as any).dispatchTransaction(tr4);
-    assert.ok(JSON.stringify(unlockedEditor.getJSON()).includes('EDITED_LIMITATIONS'), 'limitations edited when unlocked');
+    assert.ok(
+      JSON.stringify(unlockedEditor.getJSON()).includes('EDITED_LIMITATIONS'),
+      'limitations edited when unlocked'
+    );
     unlockedEditor.destroy();
+  });
+
+  it('preserves data-role on QuotationTableExtension', () => {
+    const attrs = QuotationTableExtension.config.addAttributes?.call({}) as any;
+    assert.ok(
+      attrs['data-role'],
+      'data-role attribute must be configured on QuotationTableExtension'
+    );
+    assert.equal(
+      attrs['data-role'].parseHTML({
+        getAttribute: (name: string) => (name === 'data-role' ? 'hardware_cost_table' : null),
+      }),
+      'hardware_cost_table'
+    );
+    assert.deepEqual(attrs['data-role'].renderHTML({ 'data-role': 'hardware_cost_table' }), {
+      'data-role': 'hardware_cost_table',
+    });
   });
 });

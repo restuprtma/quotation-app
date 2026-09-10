@@ -1,0 +1,245 @@
+/*
+ * Official Kiosk & Queue System quotation document stylesheet.
+ *
+ * Scoped under .kiosk-queue-document to preserve semantic HTML markers and ensure
+ * visual parity with official quotation document surfaces without polluting global styles.
+ */
+
+.kiosk-queue-document table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.kiosk-queue-document th,
+.kiosk-queue-document td {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  vertical-align: top;
+}
+
+/* Service commercial table (5 columns: Deskripsi, Rate, SDM, Durasi, Total) */
+.kiosk-queue-document [data-role='service_cost_table'] th:nth-child(1),
+.kiosk-queue-document [data-role='service_cost_table'] td:nth-child(1),
+.kiosk-queue-document
+  [data-block-type='commercial']
+  table:not([data-role='hardware_cost_table'])
+  th:nth-child(1),
+.kiosk-queue-document
+  [data-block-type='commercial']
+  table:not([data-role='hardware_cost_table'])
+  td:nth-child(1) {
+  width: 35%;
+}
+
+.kiosk-queue-document [data-role='service_cost_table'] th:nth-child(2),
+.kiosk-queue-document [data-role='service_cost_table'] td:nth-child(2),
+.kiosk-queue-document
+  [data-block-type='commercial']
+  table:not([data-role='hardware_cost_table'])
+  th:nth-child(2),
+.kiosk-queue-document
+  [data-block-type='commercial']
+  table:not([data-role='hardware_cost_table'])
+  td:nth-child(2) {
+  width: 20%;
+  text-align: right;
+}
+
+.kiosk-queue-document [data-role='service_cost_table'] th:nth-child(3),
+.kiosk-queue-document [data-role='service_cost_table'] td:nth-child(3),
+.kiosk-queue-document
+  [data-block-type='commercial']
+  table:not([data-role='hardware_cost_table'])
+  th:nth-child(3),
+.kiosk-queue-document
+  [data-block-type='commercial']
+  table:not([data-role='hardware_cost_table'])
+  td:nth-child(3) {
+  width: 12%;
+  text-align: center;
+}
+
+.kiosk-queue-document [data-role='service_cost_table'] th:nth-child(4),
+.kiosk-queue-document [data-role='service_cost_table'] td:nth-child(4),
+.kiosk-queue-document
+  [data-block-type='commercial']
+  table:not([data-role='hardware_cost_table'])
+  th:nth-child(4),
+.kiosk-queue-document
+  [data-block-type='commercial']
+  table:not([data-role='hardware_cost_table'])
+  td:nth-child(4) {
+  width: 13%;
+  text-align: center;
+}
+
+.kiosk-queue-document [data-role='service_cost_table'] th:nth-child(5),
+.kiosk-queue-document [data-role='service_cost_table'] td:nth-child(5),
+.kiosk-queue-document
+  [data-block-type='commercial']
+  table:not([data-role='hardware_cost_table'])
+  th:nth-child(5),
+.kiosk-queue-document
+  [data-block-type='commercial']
+  table:not([data-role='hardware_cost_table'])
+  td:nth-child(5) {
+  width: 20%;
+  text-align: right;
+}
+
+/* Hardware cost table (4 columns: Perangkat Keras, Harga Satuan, Jumlah, Total) */
+.kiosk-queue-document [data-role='hardware_cost_table'] th:first-child,
+.kiosk-queue-document [data-role='hardware_cost_table'] td:first-child {
+  width: 52%;
+}
+
+.kiosk-queue-document [data-role='hardware_cost_table'] th:nth-child(2),
+.kiosk-queue-document [data-role='hardware_cost_table'] td:nth-child(2) {
+  width: 18%;
+  text-align: right;
+}
+
+.kiosk-queue-document [data-role='hardware_cost_table'] th:nth-child(3),
+.kiosk-queue-document [data-role='hardware_cost_table'] td:nth-child(3) {
+  width: 10%;
+  text-align: center;
+}
+
+.kiosk-queue-document [data-role='hardware_cost_table'] th:nth-child(4),
+.kiosk-queue-document [data-role='hardware_cost_table'] td:nth-child(4) {
+  width: 20%;
+  text-align: right;
+}
+
+/* Expert requirements table (4 columns: Posisi / Peran, Jumlah SDM, Durasi, Kualifikasi) */
+.kiosk-queue-document [data-block-type='experts'] table th:nth-child(1),
+.kiosk-queue-document [data-block-type='experts'] table td:nth-child(1) {
+  width: 28%;
+}
+
+.kiosk-queue-document [data-block-type='experts'] table th:nth-child(2),
+.kiosk-queue-document [data-block-type='experts'] table td:nth-child(2) {
+  width: 14%;
+  text-align: center;
+}
+
+.kiosk-queue-document [data-block-type='experts'] table th:nth-child(3),
+.kiosk-queue-document [data-block-type='experts'] table td:nth-child(3) {
+  width: 16%;
+  text-align: center;
+}
+
+.kiosk-queue-document [data-block-type='experts'] table th:nth-child(4),
+.kiosk-queue-document [data-block-type='experts'] table td:nth-child(4) {
+  width: 42%;
+}
+
+/* Maintenance table (5 columns: Squad, Rate, SDM, Durasi, Total) */
+.kiosk-queue-document [data-block-type='commercial-maintenance'] table th:nth-child(1),
+.kiosk-queue-document [data-block-type='commercial-maintenance'] table td:nth-child(1) {
+  width: 35%;
+}
+
+.kiosk-queue-document [data-block-type='commercial-maintenance'] table th:nth-child(2),
+.kiosk-queue-document [data-block-type='commercial-maintenance'] table td:nth-child(2) {
+  width: 20%;
+  text-align: right;
+}
+
+.kiosk-queue-document [data-block-type='commercial-maintenance'] table th:nth-child(3),
+.kiosk-queue-document [data-block-type='commercial-maintenance'] table td:nth-child(3) {
+  width: 12%;
+  text-align: center;
+}
+
+.kiosk-queue-document [data-block-type='commercial-maintenance'] table th:nth-child(4),
+.kiosk-queue-document [data-block-type='commercial-maintenance'] table td:nth-child(4) {
+  width: 13%;
+  text-align: center;
+}
+
+.kiosk-queue-document [data-block-type='commercial-maintenance'] table th:nth-child(5),
+.kiosk-queue-document [data-block-type='commercial-maintenance'] table td:nth-child(5) {
+  width: 20%;
+  text-align: right;
+}
+
+/* Payment tables */
+.kiosk-queue-document [data-block-type='payment'] table th:last-child,
+.kiosk-queue-document [data-block-type='payment'] table td:last-child {
+  text-align: right;
+}
+
+/* Numeric fields alignment */
+.kiosk-queue-document [data-field='service_line_total'],
+.kiosk-queue-document [data-field='service_subtotal'],
+.kiosk-queue-document [data-field='service_discount_amount'],
+.kiosk-queue-document [data-field='service_tax_amount'],
+.kiosk-queue-document [data-field='service_total'],
+.kiosk-queue-document [data-field='hardware_line_total'],
+.kiosk-queue-document [data-field='hardware_subtotal'],
+.kiosk-queue-document [data-field='hardware_tax_amount'],
+.kiosk-queue-document [data-field='hardware_total'],
+.kiosk-queue-document [data-field='maintenance_line_total'],
+.kiosk-queue-document [data-field='maintenance_total'],
+.kiosk-queue-document [data-field='payment_nominal'],
+.kiosk-queue-document [data-field='payment_total'] {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Timeline column widths */
+.kiosk-queue-document [data-column-width='75'] {
+  width: 75%;
+}
+
+.kiosk-queue-document [data-column-width='25'] {
+  width: 25%;
+}
+
+/* Signature 2-column layout */
+.kiosk-queue-document .signature-table {
+  width: 100%;
+  border: none;
+  margin-top: 2rem;
+  table-layout: fixed;
+}
+
+.kiosk-queue-document .signature-table td {
+  width: 50%;
+  vertical-align: top;
+  border: none;
+  padding: 0.5rem 1rem;
+}
+
+/* Print page-break avoidance and formatting */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  .kiosk-queue-document section {
+    break-inside: auto;
+  }
+
+  .kiosk-queue-document h2 {
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
+
+  .kiosk-queue-document thead {
+    display: table-header-group;
+  }
+
+  .kiosk-queue-document tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .kiosk-queue-document .signature-table {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

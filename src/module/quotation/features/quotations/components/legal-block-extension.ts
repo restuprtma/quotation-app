@@ -109,7 +109,15 @@ export const QuotationFieldAttributesExtension = Extension.create({
   addGlobalAttributes() {
     return [
       {
-        types: ['paragraph', 'heading', 'orderedList', 'bulletList', 'listItem', 'tableCell', 'tableHeader'],
+        types: [
+          'paragraph',
+          'heading',
+          'orderedList',
+          'bulletList',
+          'listItem',
+          'tableCell',
+          'tableHeader',
+        ],
         attributes: {
           'data-field': {
             default: null,
@@ -177,6 +185,11 @@ export const QuotationTableExtension = Table.extend({
           element.getAttribute('class') === 'signature-table' ? 'signature-table' : null,
         renderHTML: (attributes: Record<string, unknown>) =>
           attributes.class === 'signature-table' ? { class: 'signature-table' } : {},
+      },
+      'data-role': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-role'),
+        renderHTML: (attributes: Record<string, unknown>) => renderMarker(attributes, 'data-role'),
       },
     };
   },
@@ -280,7 +293,11 @@ declare module '@tiptap/core' {
 
 export const LegalBlockPluginKey = new PluginKey('legalBlockLock');
 
-export const LegalBlockExtension = Node.create<LegalBlockOptions>({
+export interface LegalBlockStorage {
+  unlocked: boolean;
+}
+
+export const LegalBlockExtension = Node.create<LegalBlockOptions, LegalBlockStorage>({
   name: 'legalBlock',
 
   group: 'block',
@@ -296,6 +313,18 @@ export const LegalBlockExtension = Node.create<LegalBlockOptions>({
       unlocked: false,
       HTMLAttributes: {},
     };
+  },
+
+  addStorage() {
+    return {
+      unlocked: this.options.unlocked ?? false,
+    };
+  },
+
+  onCreate() {
+    if (this.storage && this.options.unlocked !== undefined) {
+      this.storage.unlocked = this.options.unlocked;
+    }
   },
 
   addAttributes() {
@@ -410,11 +439,7 @@ export const LegalBlockExtension = Node.create<LegalBlockOptions>({
     } else if (!HTMLAttributes['data-quotation-section']) {
       extraAttrs['data-block-type'] = 'legal';
     }
-    return [
-      'section',
-      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, extraAttrs),
-      0,
-    ];
+    return ['section', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, extraAttrs), 0];
   },
 
   addCommands() {
@@ -423,6 +448,9 @@ export const LegalBlockExtension = Node.create<LegalBlockOptions>({
         (unlocked: boolean) =>
         ({ tr, dispatch }) => {
           this.options.unlocked = unlocked;
+          if (this.storage) {
+            this.storage.unlocked = unlocked;
+          }
           if (dispatch) {
             tr.setMeta(LegalBlockPluginKey, { unlocked });
           }
@@ -432,12 +460,24 @@ export const LegalBlockExtension = Node.create<LegalBlockOptions>({
   },
 
   addProseMirrorPlugins() {
+    const { storage } = this;
     return [
       new Plugin({
         key: LegalBlockPluginKey,
+        state: {
+          init: () => ({ unlocked: this.options.unlocked }),
+          apply: (tr, current) => {
+            const meta = tr.getMeta(LegalBlockPluginKey);
+            if (meta && typeof meta.unlocked === 'boolean') {
+              return { unlocked: meta.unlocked };
+            }
+            return current;
+          },
+        },
         filterTransaction: (tr, state) => {
-          // If extension option is unlocked, permit all transactions
-          if (this.options.unlocked) {
+          // If extension option or storage or plugin state is unlocked, permit all transactions
+          const pluginState = LegalBlockPluginKey.getState(state);
+          if (this.options.unlocked || storage?.unlocked || pluginState?.unlocked) {
             return true;
           }
 
