@@ -15,6 +15,8 @@ import type {
   SubscriptionSaaSPreviewResponse,
   CustomDevelopmentPreviewResponse,
   TalentOutsourcingPreviewResponse,
+  CloudInfrastructureGeneratePayload,
+  CloudInfrastructurePreviewResponse,
   StandaloneMaintenancePreviewResponse,
 } from '../types';
 
@@ -110,6 +112,12 @@ export function previewKioskQueueSystem(payload: KioskQueueGeneratePayload, sign
 export function previewTalentOutsourcing(payload: GenerateQuotationPayload, signal?: AbortSignal) {
   return unwrap<TalentOutsourcingPreviewResponse>(
     axios.post(endpoints.quotation.quotations.talentOutsourcingPreview, payload, { signal })
+  );
+}
+
+export function previewCloudInfrastructure(payload: CloudInfrastructureGeneratePayload, signal?: AbortSignal) {
+  return unwrap<CloudInfrastructurePreviewResponse>(
+    axios.post(endpoints.quotation.quotations.cloudInfrastructurePreview, payload, { signal })
   );
 }
 

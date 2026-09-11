@@ -3,6 +3,7 @@ import type {
   SubscriptionSaaSPreviewResponse,
   CustomDevelopmentPreviewResponse,
   StandaloneMaintenancePreviewResponse,
+  CloudInfrastructurePreviewResponse,
 } from '../types';
 
 import { it, vi, expect, describe } from 'vitest';
@@ -13,6 +14,7 @@ import {
   previewSubscriptionSaaS,
   previewCustomDevelopment,
   previewStandaloneMaintenance,
+  previewCloudInfrastructure,
 } from '../api/generation';
 import {
   useSubscriptionSaaSPreview,
@@ -24,6 +26,9 @@ import {
   STANDALONE_MAINTENANCE_PREVIEW_QUERY_KEY,
   normalizeCustomDevelopmentPreviewPayload,
   normalizeStandaloneMaintenancePreviewPayload,
+  CLOUD_INFRASTRUCTURE_PREVIEW_QUERY_KEY,
+  normalizeCloudInfrastructurePreviewPayload,
+  useCloudInfrastructurePreview,
 } from './use-quotation-generation';
 
 describe('Subscription SaaS preview API & hook', () => {

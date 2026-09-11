@@ -552,6 +552,36 @@ export type TalentOutsourcingGeneratePayload = GenerateQuotationBase & {
   dedicated_squad?: never; subscription_saas?: never; white_label?: never; standalone_maintenance?: never; custom_development?: never; kiosk_queue_system?: never; rate_card_id?: never;
 };
 
+export type CloudPackageCategory = 'shared_hosting' | 'vps_cloud';
+export type CloudTaxTreatment = 'exclusive_ppn' | 'inclusive_ppn' | 'not_stated';
+export type CloudPaymentComponent = 'setup' | 'monthly_service';
+export type CloudLimitationCode = 'out_of_pocket' | 'overtime' | 'third_party' | 'scope_change';
+export type CloudPackageItemInput = { category: CloudPackageCategory; name: string; vcpu: number; ram_gb: number; storage_gb: number; unit_rate: number };
+export type CloudSetupItemInput = { name: string; amount: number };
+export type CloudScopeSectionInput = { title: string; activities: string[] };
+export type CloudScopeRowInput = { sections: CloudScopeSectionInput[]; timeline: string };
+export type CloudPaymentRowInput = { work_period: string; terms: string; invoice_date_label: string; due_date_label: string; component: CloudPaymentComponent; nominal: number };
+export type CloudInfrastructureInput = {
+  document_number: string; service_name: string; quotation_date: string; tax_treatment: CloudTaxTreatment;
+  package_items: CloudPackageItemInput[]; setup_items?: CloudSetupItemInput[]; scope_rows?: CloudScopeRowInput[];
+  payment_schedule: CloudPaymentRowInput[]; payment_due_days: number; limitation_codes: CloudLimitationCode[]; additional_limitations?: string[];
+};
+export type CloudPackageLineCalculation = CloudPackageItemInput & { line_total: number };
+export type CloudSetupLineCalculation = CloudSetupItemInput & { line_total: number };
+export type CloudInfrastructureCalculation = {
+  packages: CloudPackageLineCalculation[]; setup?: CloudSetupLineCalculation[]; monthly_subtotal: number; setup_subtotal: number;
+  setup_payment_total: number; monthly_payment_rows: number; scheduled_recurring_total: number; payment_total: number;
+};
+export type ResolvedCloudInfrastructureProfile = {
+  tax_treatment: CloudTaxTreatment; tax_clause_text?: string; show_setup: boolean; show_scope: boolean;
+  sections: Array<{ number: number; code: string; title: string }>;
+};
+export type CloudInfrastructurePreviewResponse = { calculation: CloudInfrastructureCalculation; resolved_profile: ResolvedCloudInfrastructureProfile };
+export type CloudInfrastructureGeneratePayload = GenerateQuotationBase & {
+  commercial_scheme: 'cloud_infrastructure'; cloud_infrastructure: CloudInfrastructureInput;
+  dedicated_squad?: never; subscription_saas?: never; white_label?: never; standalone_maintenance?: never; custom_development?: never; kiosk_queue_system?: never; talent_outsourcing?: never; rate_card_id?: never;
+};
+
 export type GenerateQuotationPayload =
   | DedicatedSquadGeneratePayload
   | SubscriptionSaaSGeneratePayload
@@ -559,7 +589,8 @@ export type GenerateQuotationPayload =
   | StandaloneMaintenanceGeneratePayload
   | CustomDevelopmentGeneratePayload
   | KioskQueueGeneratePayload
-  | TalentOutsourcingGeneratePayload;
+  | TalentOutsourcingGeneratePayload
+  | CloudInfrastructureGeneratePayload;
 
 export type GenerateQuotationResponse = {
   quotation_id: string;

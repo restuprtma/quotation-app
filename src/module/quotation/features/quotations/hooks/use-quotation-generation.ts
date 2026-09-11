@@ -7,6 +7,7 @@ import type {
   SubscriptionSaaSPreviewResponse,
   CustomDevelopmentPreviewResponse,
   TalentOutsourcingPreviewResponse,
+  CloudInfrastructurePreviewResponse,
   StandaloneMaintenancePreviewResponse,
 } from '../types';
 
@@ -19,6 +20,8 @@ import { normalizeKioskQueueSystem } from '../constants/kiosk-queue-system';
 import { normalizeCustomDevelopment } from '../constants/custom-development';
 import { normalizeTalentOutsourcing } from '../constants/talent-outsourcing';
 import { normalizeStandaloneMaintenance } from '../constants/standalone-maintenance';
+import { normalizeCloudInfrastructure } from '../constants/cloud-infrastructure';
+import { cloudInfrastructureFormSchema } from '../components/cloud-infrastructure-form-model';
 import {
   generateQuotation,
   previewWhiteLabel,
@@ -28,6 +31,7 @@ import {
   previewCustomDevelopment,
   previewTalentOutsourcing,
   previewStandaloneMaintenance,
+  previewCloudInfrastructure,
 } from '../api';
 
 function generateUUID(): string {
@@ -529,4 +533,34 @@ export function useTalentOutsourcingPreview(payload: GenerateQuotationPayload | 
     enabled: Boolean(enabled && payload && debounced), staleTime: 30_000, gcTime: 5 * 60_000, retry: false,
   });
   return { ...query, isDebouncing };
+}
+
+export const CLOUD_INFRASTRUCTURE_PREVIEW_QUERY_KEY = ['quotation', 'cloud-infrastructure-preview'] as const;
+export function normalizeCloudInfrastructurePreviewPayload(payload: GenerateQuotationPayload | null | undefined) {
+  if (!payload || payload.commercial_scheme !== 'cloud_infrastructure') return null;
+  return { ...payload, cloud_infrastructure: normalizeCloudInfrastructure(payload.cloud_infrastructure) };
+}
+export function useCloudInfrastructurePreview(payload: GenerateQuotationPayload | null | undefined, enabled = true) {
+  const normalized = useMemo(() => normalizeCloudInfrastructurePreviewPayload(payload), [payload]);
+  const isValid = Boolean(normalized && cloudInfrastructureFormSchema.safeParse(normalized).success);
+  const currentFingerprint = normalized ? JSON.stringify(normalized) : null;
+  const [debounced, setDebounced] = useState<typeof normalized>(null);
+  const [isDebouncing, setIsDebouncing] = useState(false);
+  useEffect(() => {
+    if (!enabled || !isValid || !normalized) { setDebounced(null); setIsDebouncing(false); return undefined; }
+    setIsDebouncing(true);
+    const timer = setTimeout(() => { setDebounced(normalized); setIsDebouncing(false); }, 350);
+    return () => clearTimeout(timer);
+  }, [enabled, isValid, normalized]);
+  const debouncedFingerprint = debounced ? JSON.stringify(debounced) : null;
+  const query = useQuery<CloudInfrastructurePreviewResponse, Error>({
+    queryKey: [...CLOUD_INFRASTRUCTURE_PREVIEW_QUERY_KEY, debouncedFingerprint ?? 'disabled'],
+    queryFn: ({ signal }) => {
+      if (!debounced) throw new Error('Cloud infrastructure preview is disabled');
+      return previewCloudInfrastructure(debounced, signal);
+    },
+    enabled: Boolean(enabled && isValid && debounced), staleTime: 30_000, gcTime: 5 * 60_000, retry: false,
+  });
+  const successfulFingerprint = query.isSuccess && !isDebouncing && currentFingerprint === debouncedFingerprint ? debouncedFingerprint : null;
+  return { ...query, isDebouncing, currentFingerprint, successfulFingerprint };
 }

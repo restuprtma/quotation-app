@@ -163,6 +163,7 @@ export const endpoints = {
       customDevelopmentPreview: '/quotation/v1/quotations/preview/custom-development',
       kioskQueuePreview: '/quotation/v1/quotations/preview/kiosk-queue-system',
       talentOutsourcingPreview: '/quotation/v1/quotations/preview/talent-outsourcing',
+      cloudInfrastructurePreview: '/quotation/v1/quotations/preview/cloud-infrastructure',
       regenerate: (id: string) => `/quotation/v1/quotations/${id}/regenerate`,
       generationStatus: (id: string) => `/quotation/v1/quotations/${id}/generation-status`,
       saveDraft: (id: string) => `/quotation/v1/quotations/${id}/draft`,
