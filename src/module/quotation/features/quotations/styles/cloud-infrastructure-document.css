@@ -1,0 +1,65 @@
+.quotation-document--cloud-infrastructure {
+  color: #1b2533;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.45;
+}
+
+.quotation-document--cloud-infrastructure table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.quotation-document--cloud-infrastructure th,
+.quotation-document--cloud-infrastructure td {
+  border: 1px solid #cfd7e3;
+  padding: 6px 8px;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.quotation-document--cloud-infrastructure [data-cloud-package-field='unit_rate'],
+.quotation-document--cloud-infrastructure [data-cloud-package-field='line_total'],
+.quotation-document--cloud-infrastructure [data-cloud-field='monthly_subtotal'],
+.quotation-document--cloud-infrastructure [data-cloud-field^='payment_nominal_'],
+.quotation-document--cloud-infrastructure [data-cloud-field='setup_line_total'],
+.quotation-document--cloud-infrastructure [data-cloud-field='setup_subtotal'] {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.quotation-document--cloud-infrastructure [data-cloud-scope-field='timeline'] {
+  width: 25%;
+  text-align: center;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .quotation-document--cloud-infrastructure {
+    font-size: 9pt;
+  }
+
+  .quotation-document--cloud-infrastructure th,
+  .quotation-document--cloud-infrastructure td {
+    padding: 4px;
+  }
+}
+
+@media print {
+  .quotation-document--cloud-infrastructure {
+    width: 210mm;
+    max-width: 210mm;
+  }
+
+  .quotation-document--cloud-infrastructure table,
+  .quotation-document--cloud-infrastructure tr,
+  .quotation-document--cloud-infrastructure [data-signature-block] {
+    break-inside: avoid;
+  }
+
+  .quotation-document--cloud-infrastructure thead {
+    display: table-header-group;
+  }
+}

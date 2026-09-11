@@ -1,8 +1,10 @@
 // @vitest-environment happy-dom
 import type { CloudInfrastructurePreviewResponse } from '../types';
+
 import { createElement } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { it, vi, expect, describe, afterEach } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
+
 import { CloudInfrastructurePreview } from './cloud-infrastructure-preview';
 
 vi.mock('src/locales', () => ({ useTranslate: () => ({ t: (key: string) => key }) }));

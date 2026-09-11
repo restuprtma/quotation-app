@@ -12,6 +12,9 @@ const SECTION_NUMBER_PATTERN = /^[1-9][0-9]{0,2}$/;
 const COLUMN_WIDTH_PATTERN = /^(25|75)$/;
 const INDEX_PATTERN = /^(0|[1-9][0-9]{0,5})$/;
 const MONEY_VALUE_PATTERN = /^(0|[1-9][0-9]{0,14})$/;
+const CLOUD_INDEX_PATTERN = /^(0|[1-9][0-9]{0,5})$/;
+const CLOUD_FIELD_PATTERN = /^[a-z0-9][a-z0-9_.-]{0,127}$/i;
+const CLOUD_COMPONENT_PATTERN = /^(setup|monthly_service)$/;
 
 function readMarker(element: HTMLElement, name: string, pattern = MARKER_PATTERN): string | null {
   const value = element.getAttribute(name);
@@ -150,6 +153,13 @@ export const QuotationFieldAttributesExtension = Extension.create({
             renderHTML: (attributes: Record<string, unknown>) =>
               renderMarker(attributes, 'data-quotation-component'),
           },
+          'data-cloud-field': {
+            default: null,
+            parseHTML: (element: HTMLElement) =>
+              readMarker(element, 'data-cloud-field', CLOUD_FIELD_PATTERN),
+            renderHTML: (attributes: Record<string, unknown>) =>
+              renderMarker(attributes, 'data-cloud-field', CLOUD_FIELD_PATTERN),
+          },
         },
       },
     ];
@@ -255,6 +265,47 @@ export const QuotationTableRowExtension = TableRow.extend({
         renderHTML: (attributes: Record<string, unknown>) =>
           renderMarker(attributes, 'data-row-index', INDEX_PATTERN),
       },
+      'data-cloud-total-row': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-cloud-total-row'),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-cloud-total-row'),
+      },
+      'data-cloud-setup-row': {
+        default: null,
+        parseHTML: (element: HTMLElement) =>
+          readMarker(element, 'data-cloud-setup-row', CLOUD_INDEX_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-cloud-setup-row', CLOUD_INDEX_PATTERN),
+      },
+      'data-cloud-package-row': {
+        default: null,
+        parseHTML: (element: HTMLElement) =>
+          readMarker(element, 'data-cloud-package-row', CLOUD_INDEX_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-cloud-package-row', CLOUD_INDEX_PATTERN),
+      },
+      'data-cloud-scope-row': {
+        default: null,
+        parseHTML: (element: HTMLElement) =>
+          readMarker(element, 'data-cloud-scope-row', CLOUD_INDEX_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-cloud-scope-row', CLOUD_INDEX_PATTERN),
+      },
+      'data-cloud-payment-row': {
+        default: null,
+        parseHTML: (element: HTMLElement) =>
+          readMarker(element, 'data-cloud-payment-row', CLOUD_INDEX_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-cloud-payment-row', CLOUD_INDEX_PATTERN),
+      },
+      'data-cloud-payment-component': {
+        default: null,
+        parseHTML: (element: HTMLElement) =>
+          readMarker(element, 'data-cloud-payment-component', CLOUD_COMPONENT_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-cloud-payment-component', CLOUD_COMPONENT_PATTERN),
+      },
     };
   },
 });
@@ -320,6 +371,27 @@ function addQuotationCellAttributes<T extends typeof TableCell | typeof TableHea
             readMarker(element, 'data-value', MONEY_VALUE_PATTERN),
           renderHTML: (attributes: Record<string, unknown>) =>
             renderMarker(attributes, 'data-value', MONEY_VALUE_PATTERN),
+        },
+        'data-cloud-package-field': {
+          default: null,
+          parseHTML: (element: HTMLElement) =>
+            readMarker(element, 'data-cloud-package-field', CLOUD_FIELD_PATTERN),
+          renderHTML: (attributes: Record<string, unknown>) =>
+            renderMarker(attributes, 'data-cloud-package-field', CLOUD_FIELD_PATTERN),
+        },
+        'data-cloud-field': {
+          default: null,
+          parseHTML: (element: HTMLElement) =>
+            readMarker(element, 'data-cloud-field', CLOUD_FIELD_PATTERN),
+          renderHTML: (attributes: Record<string, unknown>) =>
+            renderMarker(attributes, 'data-cloud-field', CLOUD_FIELD_PATTERN),
+        },
+        'data-cloud-scope-field': {
+          default: null,
+          parseHTML: (element: HTMLElement) =>
+            readMarker(element, 'data-cloud-scope-field', CLOUD_FIELD_PATTERN),
+          renderHTML: (attributes: Record<string, unknown>) =>
+            renderMarker(attributes, 'data-cloud-scope-field', CLOUD_FIELD_PATTERN),
         },
       };
     },
