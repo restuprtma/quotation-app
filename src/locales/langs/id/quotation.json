@@ -212,6 +212,8 @@
     "standaloneMaintenanceDesc": "Pemeliharaan teknis sistem eksisting dengan opsi Retainer Squad atau Hourly Task, matriks backlog defect berprioritas, dan rincian pekerjaan terstruktur.",
     "customDevelopmentTitle": "Custom Software Development",
     "customDevelopmentDesc": "Pengembangan aplikasi kustom dengan kelompok biaya terstruktur, rincian biaya bulanan opsional, modul fitur, timeline, dan termin bertahap.",
+    "cloudInfrastructureTitle": "Infrastruktur Cloud",
+    "cloudInfrastructureDesc": "Shared hosting, VPS, dan layanan cloud terkelola.",
     "kioskQueueTitle": "Sistem & Integrasi Perangkat Keras",
     "kioskQueueDesc": "Kiosk, sistem antrian, integrasi printer/display, dan perangkat kondisional."
   },
@@ -807,6 +809,18 @@
       "unitPerson": "org",
       "unitHour": "jam"
     }
+  },
+  "cloudInfrastructure": {
+    "description": "Paket server, setup opsional, lingkup, dan invoice eksplisit.", "timeline": "Timeline", "ram": "RAM (GB)", "storage": "Storage (GB)", "unitRate": "Harga per bulan", "activities": "Aktivitas",
+    "setupFee": {"title":"Setup fee server (satu kali)","name":"Item setup","amount":"Nominal"},
+    "limitation": {"title":"Pajak & batasan","codes":"Batasan yang dipilih","out_of_pocket":"Biaya di luar pengeluaran standar","overtime":"Lembur","third_party":"Layanan pihak ketiga","scope_change":"Perubahan lingkup","additional":"Batasan tambahan"},
+    "title": "Buat Quotation Infrastruktur Cloud", "subject": "Subjek", "clientName": "Nama PIC", "clientCompany": "Perusahaan", "documentNumber": "Nomor dokumen", "serviceName": "Nama layanan", "quotationDate": "Tanggal quotation", "taxTreatment": "Perlakuan pajak", "categories": {"shared_hosting": "Shared Hosting", "vps_cloud": "VPS / Cloud"}, "packageName": "Nama paket", "category": "Kategori", "vcpu": "vCPU", "ram_gb": "RAM (GB)", "storage_gb": "Storage (GB)", "unit_rate": "Harga per bulan", "paymentDueDays": "Jatuh tempo (hari)", "scheduledRecurringExplanation": "Jumlah baris invoice berulang yang dijadwalkan, bukan total kontrak.",
+    "tax": {"exclusive_ppn": "Belum termasuk PPN", "inclusive_ppn": "Termasuk PPN", "not_stated": "Tidak dinyatakan"}, "administration": {"title": "Administrasi"},
+    "packageCatalog": {"title": "Paket server", "helper": "Pilih katalog lalu salin nilainya ke quotation.", "rateCard": "Rate card", "choose": "Pilih rate card", "load": "Muat paket", "copyOnly": "Nilai paket disalin; perubahan katalog tidak mengubah quotation ini."},
+    "scope": {"title": "Lingkup & timeline", "helper": "Tambahkan hanya pekerjaan yang disepakati.", "sectionTitle": "Subbagian", "activity": "Aktivitas"},
+    "payment": {"expectedMonthly":"Nominal setiap invoice bulanan: Rp{{amount}} (isi secara eksplisit).", "title": "Jadwal pembayaran", "work_period": "Periode", "terms": "Ketentuan", "invoice_date_label": "Tanggal invoice", "due_date_label": "Tanggal jatuh tempo", "component": "Komponen", "nominal": "Nominal", "components": {"monthly_service": "Layanan bulanan", "setup": "Setup"}},
+    "preview": {"title": "Preview authoritative", "loading": "Memuat preview…", "stale": "Preview perlu diperbarui.", "monthlySubtotal": "Subtotal bulanan", "setupSubtotal": "Subtotal setup", "scheduledRecurringTotal": "Total recurring terjadwal"},
+    "validation": {"title": "Periksa isian", "focus": "Fokus ke error pertama", "invalidField":"Periksa isian: gunakan teks valid, nominal bulat, dan pembayaran yang sesuai."}, "actions": {"chooseClient":"Pilih klien", "addSetup":"Tambah item setup", "addLimitation":"Tambah batasan", "validate":"Periksa isian", "addPackage": "Tambah paket", "remove": "Hapus", "addScope": "Tambah scope", "removeScope": "Hapus scope", "addSection": "Tambah subbagian", "removeSection": "Hapus subbagian", "addActivity": "Tambah aktivitas", "removeActivity": "Hapus aktivitas", "addPayment": "Tambah pembayaran", "cancel": "Batal", "submit": "Buat quotation"}, "accessibility": {"removePackage": "Hapus paket", "removeActivity": "Hapus aktivitas"}
   },
   "customDevelopmentForm": {
     "title": "Inisiasi Proposal Custom Software Development",

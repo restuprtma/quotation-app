@@ -212,6 +212,8 @@
     "standaloneMaintenanceDesc": "Technical maintenance of existing systems with Retainer Squad or Hourly Task options, prioritized defect backlog matrix, and structured task details.",
     "customDevelopmentTitle": "Custom Software Development",
     "customDevelopmentDesc": "Tailored application development with structured cost groups, optional recurring operational fees, feature modules, timeline, and staged payment terms.",
+    "cloudInfrastructureTitle": "Cloud Infrastructure",
+    "cloudInfrastructureDesc": "Shared hosting, VPS, and managed cloud services.",
     "kioskQueueTitle": "Hardware & System Integration",
     "kioskQueueDesc": "Kiosks, queue systems, printer/display integration, and conditional hardware."
   },
@@ -807,6 +809,18 @@
       "unitPerson": "pax",
       "unitHour": "hrs"
     }
+  },
+  "cloudInfrastructure": {
+    "description": "Server packages, optional setup, scope, and explicit invoices.", "timeline": "Timeline", "ram": "RAM (GB)", "storage": "Storage (GB)", "unitRate": "Monthly rate", "activities": "Activities",
+    "setupFee": {"title":"Server setup fee (one time only)","name":"Setup item","amount":"Amount"},
+    "limitation": {"title":"Tax & limitations","codes":"Selected limitations","out_of_pocket":"Out-of-pocket expenses","overtime":"Overtime","third_party":"Third-party services","scope_change":"Scope changes","additional":"Additional limitation"},
+    "title": "Create Cloud Infrastructure Quotation", "subject": "Subject", "clientName": "Contact name", "clientCompany": "Company", "documentNumber": "Document number", "serviceName": "Service name", "quotationDate": "Quotation date", "taxTreatment": "Tax treatment", "categories": {"shared_hosting": "Shared Hosting", "vps_cloud": "VPS / Cloud"}, "packageName": "Package name", "category": "Category", "vcpu": "vCPU", "ram_gb": "RAM (GB)", "storage_gb": "Storage (GB)", "unit_rate": "Monthly rate", "paymentDueDays": "Due days", "scheduledRecurringExplanation": "The number of scheduled recurring invoice rows, not the contract total.",
+    "tax": {"exclusive_ppn": "Exclusive VAT", "inclusive_ppn": "Inclusive VAT", "not_stated": "Not stated"}, "administration": {"title": "Administration"},
+    "packageCatalog": {"title": "Server packages", "helper": "Choose a catalog and copy values into the quotation.", "rateCard": "Rate card", "choose": "Choose a rate card", "load": "Load packages", "copyOnly": "Package values are copied; later catalog changes do not alter this quotation."},
+    "scope": {"title": "Scope & timeline", "helper": "Add only explicitly agreed work.", "sectionTitle": "Subsection", "activity": "Activity"},
+    "payment": {"expectedMonthly":"Expected amount for each monthly invoice: Rp{{amount}} (enter explicitly).", "title": "Payment schedule", "work_period": "Period", "terms": "Terms", "invoice_date_label": "Invoice date", "due_date_label": "Due date", "component": "Component", "nominal": "Amount", "components": {"monthly_service": "Monthly service", "setup": "Setup"}},
+    "preview": {"title": "Authoritative preview", "loading": "Loading preview…", "stale": "Preview needs to be refreshed.", "monthlySubtotal": "Monthly subtotal", "setupSubtotal": "Setup subtotal", "scheduledRecurringTotal": "Scheduled recurring total"},
+    "validation": {"title": "Check your entries", "focus": "Focus first error", "invalidField":"Check this field: use valid text, integer amounts, and matching payments."}, "actions": {"chooseClient":"Choose a client", "addSetup":"Add setup item", "addLimitation":"Add limitation", "validate":"Check entries", "addPackage": "Add package", "remove": "Remove", "addScope": "Add scope", "removeScope": "Remove scope", "addSection": "Add subsection", "removeSection": "Remove subsection", "addActivity": "Add activity", "removeActivity": "Remove activity", "addPayment": "Add payment", "cancel": "Cancel", "submit": "Create quotation"}, "accessibility": {"removePackage": "Remove package", "removeActivity": "Remove activity"}
   },
   "customDevelopmentForm": {
     "title": "Custom Software Development Proposal Inception",

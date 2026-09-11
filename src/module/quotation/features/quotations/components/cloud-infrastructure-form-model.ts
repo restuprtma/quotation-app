@@ -28,7 +28,9 @@ const inputSchema = z.object({
   payment_due_days: z.number().int().min(1).max(365), limitation_codes: z.array(z.enum(['out_of_pocket', 'overtime', 'third_party', 'scope_change'])).min(1).max(4), additional_limitations: z.array(plain(4_000)).max(30).default([]),
 }).superRefine((value, ctx) => {
   const seen = new Set<string>(); value.limitation_codes.forEach((code, index) => { if (seen.has(code)) ctx.addIssue({ code: 'custom', path: ['limitation_codes', index], message: 'Limitation codes must be unique' }); seen.add(code); });
-  const calculation = projectCloudCalculation(value);
+  let calculation;
+  try { calculation = projectCloudCalculation(value); }
+  catch { ctx.addIssue({ code: 'custom', path: ['package_items'], message: 'Amounts exceed the supported integer range' }); return; }
   let hasMonthly = false;
   value.payment_schedule.forEach((row, index) => {
     if (row.component === 'monthly_service') { hasMonthly = true; if (row.nominal !== calculation.monthly_subtotal) ctx.addIssue({ code: 'custom', path: ['payment_schedule', index, 'nominal'], message: 'Monthly service payment must equal monthly subtotal' }); }

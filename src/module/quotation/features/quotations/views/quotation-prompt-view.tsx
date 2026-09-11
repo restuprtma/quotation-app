@@ -31,6 +31,7 @@ import { SubscriptionSaaSGenerationForm } from '../components/subscription-saas-
 import { GENERATION_STAGES, GenerationProgressCard } from '../components/generation-progress-card';
 import { CustomDevelopmentGenerationForm } from '../components/custom-development-generation-form';
 import { TalentOutsourcingGenerationForm } from '../components/talent-outsourcing-generation-form';
+import { CloudInfrastructureGenerationForm } from '../components/cloud-infrastructure-generation-form';
 import { StandaloneMaintenanceGenerationForm } from '../components/standalone-maintenance-generation-form';
 
 // ----------------------------------------------------------------------
@@ -59,6 +60,7 @@ export function QuotationPromptView() {
     | 'custom_development'
     | 'kiosk_queue_system'
     | 'talent_outsourcing'
+    | 'cloud_infrastructure'
     | null
   >(null);
 
@@ -491,6 +493,12 @@ export function QuotationPromptView() {
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
+                <Card variant="outlined"><CardActionArea onClick={() => setCommercialScheme('cloud_infrastructure')} aria-label={t('prompt.cloudInfrastructureTitle')} sx={{ p: 4, minHeight: 220 }}>
+                  <Iconify icon="solar:server-square-cloud-bold-duotone" width={36} /><Typography variant="h6" fontWeight={700} sx={{ mt: 2 }}>{t('prompt.cloudInfrastructureTitle')}</Typography><Typography variant="body2" color="text.secondary">{t('prompt.cloudInfrastructureDesc')}</Typography>
+                </CardActionArea></Card>
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
                 <Card variant="outlined">
                   <CardActionArea onClick={() => setCommercialScheme('talent_outsourcing')} aria-label={t('prompt.talentOutsourcingTitle')} sx={{ p: 4, minHeight: 220 }}>
                     <Iconify icon="solar:users-group-rounded-bold-duotone" width={36} />
@@ -887,6 +895,8 @@ export function QuotationPromptView() {
             </Stack>
             <TalentOutsourcingGenerationForm selectedSkill={activeSkill} isSubmitting={generateMutation.isPending} onSubmit={handleFormSubmit} onCancel={() => setCommercialScheme(null)} />
           </Box>
+        ) : commercialScheme === 'cloud_infrastructure' ? (
+          <Box><Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}><Button size="small" variant="outlined" color="inherit" startIcon={<Iconify icon="eva:arrow-ios-back-fill" />} onClick={() => setCommercialScheme(null)}>{t('prompt.backToSchemes')}</Button><Typography variant="h5" fontWeight={700}>{t('cloudInfrastructure.title')}</Typography></Stack><CloudInfrastructureGenerationForm isSubmitting={generateMutation.isPending} onSubmit={handleFormSubmit} onCancel={() => setCommercialScheme(null)} /></Box>
         ) : null}
       </Stack>
 
