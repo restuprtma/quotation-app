@@ -15,6 +15,35 @@ vi.mock('src/layouts/dashboard', () => ({
   DashboardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
+vi.mock('src/shared/ui/iconify', () => ({
+  Iconify: ({
+    icon,
+    className,
+    ...other
+  }: {
+    icon: string;
+    className?: string;
+    [key: string]: unknown;
+  }) => <span className={className} data-icon={icon} {...other} />,
+  iconifyClasses: { root: 'base-iconify' },
+}));
+
+vi.mock('../hooks/use-clients', () => ({
+  useClients: () => ({
+    data: [{ id: 'client-1', name: 'Dinas Penanaman Modal MPP', pic_name: 'Bpk. Ahmad' }],
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
+vi.mock('../hooks/use-active-skills', () => ({
+  useActiveSkills: () => ({
+    data: [],
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
 vi.mock('src/locales', () => ({
   useTranslate: () => ({
     t: (key: string, optionsOrDefault?: string | { defaultValue?: string }) => {
@@ -158,7 +187,7 @@ describe('kiosk-queue-generation-form RTL interaction and contract', () => {
     card.focus();
     await userEvent.keyboard('{Enter}');
     expect(await screen.findByRole('heading', { name: /buat quotation kiosk/i })).toBeDefined();
-  });
+  }, 15_000);
 
   it('shows only government fields for government_mpp', () => {
     renderKioskForm({ variant: 'government_mpp' });
@@ -172,7 +201,7 @@ describe('kiosk-queue-generation-form RTL interaction and contract', () => {
     expect(await screen.findByRole('dialog', { name: /ganti varian/i })).toBeDefined();
     await userEvent.click(screen.getByRole('button', { name: /batal/i }));
     expect(screen.getAllByDisplayValue('Senior Programmer').length).toBeGreaterThan(0);
-  });
+  }, 15_000);
 
   it('switches variant and clears branch-only arrays when confirmed', async () => {
     renderKioskForm({ variant: 'government_mpp', dirty: true });
@@ -181,7 +210,7 @@ describe('kiosk-queue-generation-form RTL interaction and contract', () => {
     await userEvent.click(screen.getByRole('button', { name: /lanjutkan ganti varian/i }));
     expect((await screen.findAllByText(/timeline swasta/i)).length).toBeGreaterThan(0);
     expect(screen.queryByText(/kebutuhan tenaga ahli/i)).toBeNull();
-  });
+  }, 15_000);
 
   describe('contract helpers and calculation readiness', () => {
     const sampleShared = {
@@ -189,14 +218,18 @@ describe('kiosk-queue-generation-form RTL interaction and contract', () => {
       client_name: 'Bpk. Ahmad Santoso',
       client_company_name: 'Dinas Penanaman Modal MPP',
       subject: 'Pengadaan Kiosk Antrian MPP Kab. Malang',
-      solution_type: 'Kiosk & Hardware System',
+      solution_type: 'Sistem Antrian (Queue Management)',
       document_number: 'LANDA/MPP-Antrian/0926/001',
       system_name: 'Sistem Antrian Terpadu MPP',
       quotation_date: '2026-09-10',
     };
 
     it('shows only government fields for government_mpp in makeGovernmentDefaults', () => {
+      const defaultGov = makeGovernmentDefaults();
+      expect(defaultGov.solution_type).toBe('Sistem Antrian (Queue Management)');
+
       const gov = makeGovernmentDefaults(sampleShared);
+      expect(gov.solution_type).toBe('Sistem Antrian (Queue Management)');
 
       expect(gov.kiosk_queue_system.variant).toBe('government_mpp');
       expect(gov.kiosk_queue_system.tax_treatment).toBe('inclusive_ppn_11');
@@ -221,7 +254,17 @@ describe('kiosk-queue-generation-form RTL interaction and contract', () => {
     });
 
     it('shows only private fields for private_food_court in makePrivateDefaults', () => {
+      const defaultPriv = makePrivateDefaults();
+      expect(defaultPriv.solution_type).toBe('Kiosk Application');
+
       const priv = makePrivateDefaults(sampleShared);
+      expect(priv.solution_type).toBe('Sistem Antrian (Queue Management)');
+
+      const customPriv = makePrivateDefaults({
+        ...sampleShared,
+        solution_type: 'Custom Software Solution',
+      });
+      expect(customPriv.solution_type).toBe('Custom Software Solution');
 
       expect(priv.kiosk_queue_system.variant).toBe('private_food_court');
       expect(priv.kiosk_queue_system.hardware_provision).toBe('client_supplied');

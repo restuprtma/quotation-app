@@ -5,13 +5,11 @@ import { useRef, useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Grid from '@mui/material/Grid';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import CardActionArea from '@mui/material/CardActionArea';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { paths } from 'src/routes/paths';
@@ -33,6 +31,10 @@ import { CustomDevelopmentGenerationForm } from '../components/custom-developmen
 import { TalentOutsourcingGenerationForm } from '../components/talent-outsourcing-generation-form';
 import { CloudInfrastructureGenerationForm } from '../components/cloud-infrastructure-generation-form';
 import { StandaloneMaintenanceGenerationForm } from '../components/standalone-maintenance-generation-form';
+import {
+  CommercialSchemeSelector,
+  type CommercialSchemeType,
+} from '../components/commercial-scheme-selector';
 
 // ----------------------------------------------------------------------
 
@@ -52,17 +54,7 @@ export function QuotationPromptView() {
   // Form view state
   const [activeSkill, setActiveSkill] = useState<ActiveSkill | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [commercialScheme, setCommercialScheme] = useState<
-    | 'dedicated_squad'
-    | 'subscription_saas'
-    | 'white_label'
-    | 'standalone_maintenance'
-    | 'custom_development'
-    | 'kiosk_queue_system'
-    | 'talent_outsourcing'
-    | 'cloud_infrastructure'
-    | null
-  >(null);
+  const [commercialScheme, setCommercialScheme] = useState<CommercialSchemeType | null>(null);
 
   // Generation state machine
   const [isProgressOpen, setIsProgressOpen] = useState(false);
@@ -418,331 +410,14 @@ export function QuotationPromptView() {
               </Button>
             </Stack>
           </Box>
-        ) : /* When Form is Open -> Render Scheme Selector or Selected Scheme Form */
-        commercialScheme === null ? (
-          <Box sx={{ maxWidth: 960, mx: 'auto', width: '100%' }}>
-            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 4 }}>
-              <Button
-                size="small"
-                variant="outlined"
-                color="inherit"
-                startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-                onClick={() => {
-                  setIsFormOpen(false);
-                  setPromptText('');
-                }}
-              >
-                {t('prompt.backToPrompt')}
-              </Button>
-            </Stack>
-
-            <Box sx={{ textAlign: 'center', mb: 5 }}>
-              <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
-                {t('prompt.schemeSelectorTitle')}
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                {t('prompt.schemeSelectorSubtitle')}
-              </Typography>
-            </Box>
-
-            <Grid container spacing={3} columns={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
-                <Card
-                  variant="outlined"
-                  sx={{
-                    height: '100%',
-                    transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
-                    '&:hover': {
-                      borderColor: 'primary.main',
-                      boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}22`,
-                    },
-                  }}
-                >
-                  <CardActionArea
-                    onClick={() => setCommercialScheme('dedicated_squad')}
-                    sx={{
-                      p: 4,
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      justifyContent: 'flex-start',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        mb: 2.5,
-                        p: 1.5,
-                        borderRadius: '12px',
-                        bgcolor: (theme) =>
-                          theme.palette.mode === 'light' ? 'primary.lighter' : 'primary.dark',
-                        color: 'primary.main',
-                        display: 'inline-flex',
-                      }}
-                    >
-                      <Iconify icon="solar:users-group-two-rounded-bold-duotone" width={36} />
-                    </Box>
-                    <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
-                      {t('prompt.dedicatedSquadTitle')}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {t('prompt.dedicatedSquadDesc')}
-                    </Typography>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
-                <Card variant="outlined"><CardActionArea onClick={() => setCommercialScheme('cloud_infrastructure')} aria-label={t('prompt.cloudInfrastructureTitle')} sx={{ p: 4, minHeight: 220 }}>
-                  <Iconify icon="solar:server-square-cloud-bold-duotone" width={36} /><Typography variant="h6" fontWeight={700} sx={{ mt: 2 }}>{t('prompt.cloudInfrastructureTitle')}</Typography><Typography variant="body2" color="text.secondary">{t('prompt.cloudInfrastructureDesc')}</Typography>
-                </CardActionArea></Card>
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
-                <Card variant="outlined">
-                  <CardActionArea onClick={() => setCommercialScheme('talent_outsourcing')} aria-label={t('prompt.talentOutsourcingTitle')} sx={{ p: 4, minHeight: 220 }}>
-                    <Iconify icon="solar:users-group-rounded-bold-duotone" width={36} />
-                    <Typography variant="h6" fontWeight={700} sx={{ mt: 2 }}>{t('prompt.talentOutsourcingTitle')}</Typography>
-                    <Typography variant="body2" color="text.secondary">{t('prompt.talentOutsourcingDesc')}</Typography>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
-                <Card
-                  variant="outlined"
-                  sx={{
-                    height: '100%',
-                    transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
-                    '&:hover': {
-                      borderColor: 'primary.main',
-                      boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}22`,
-                    },
-                  }}
-                >
-                  <CardActionArea
-                    onClick={() => setCommercialScheme('subscription_saas')}
-                    sx={{
-                      p: 4,
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      justifyContent: 'flex-start',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        mb: 2.5,
-                        p: 1.5,
-                        borderRadius: '12px',
-                        bgcolor: (theme) =>
-                          theme.palette.mode === 'light' ? 'info.lighter' : 'info.dark',
-                        color: 'info.main',
-                        display: 'inline-flex',
-                      }}
-                    >
-                      <Iconify icon="solar:cloud-square-bold-duotone" width={36} />
-                    </Box>
-                    <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
-                      {t('prompt.subscriptionSaaSTitle')}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {t('prompt.subscriptionSaaSDesc')}
-                    </Typography>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
-                <Card
-                  variant="outlined"
-                  sx={{
-                    height: '100%',
-                    transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
-                    '&:hover': {
-                      borderColor: 'primary.main',
-                      boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}22`,
-                    },
-                  }}
-                >
-                  <CardActionArea
-                    onClick={() => setCommercialScheme('white_label')}
-                    sx={{
-                      p: 4,
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      justifyContent: 'flex-start',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        mb: 2.5,
-                        p: 1.5,
-                        borderRadius: '12px',
-                        bgcolor: (theme) =>
-                          theme.palette.mode === 'light' ? 'secondary.lighter' : 'secondary.dark',
-                        color: 'secondary.main',
-                        display: 'inline-flex',
-                      }}
-                    >
-                      <Iconify icon="solar:tag-price-bold-duotone" width={36} />
-                    </Box>
-                    <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
-                      {t('prompt.whiteLabelTitle')}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {t('prompt.whiteLabelDesc')}
-                    </Typography>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
-                <Card
-                  variant="outlined"
-                  sx={{
-                    height: '100%',
-                    transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
-                    '&:hover': {
-                      borderColor: 'primary.main',
-                      boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}22`,
-                    },
-                  }}
-                >
-                  <CardActionArea
-                    onClick={() => setCommercialScheme('standalone_maintenance')}
-                    sx={{
-                      p: 4,
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      justifyContent: 'flex-start',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        mb: 2.5,
-                        p: 1.5,
-                        borderRadius: '12px',
-                        bgcolor: (theme) =>
-                          theme.palette.mode === 'light' ? 'warning.lighter' : 'warning.dark',
-                        color: 'warning.main',
-                        display: 'inline-flex',
-                      }}
-                    >
-                      <Iconify icon="solar:tuning-square-2-bold-duotone" width={36} />
-                    </Box>
-                    <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
-                      {t('prompt.standaloneMaintenanceTitle')}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {t('prompt.standaloneMaintenanceDesc')}
-                    </Typography>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
-                <Card
-                  variant="outlined"
-                  sx={{
-                    height: '100%',
-                    transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
-                    '&:hover': {
-                      borderColor: 'primary.main',
-                      boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}22`,
-                    },
-                  }}
-                >
-                  <CardActionArea
-                    onClick={() => setCommercialScheme('custom_development')}
-                    sx={{
-                      p: 4,
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      justifyContent: 'flex-start',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        mb: 2.5,
-                        p: 1.5,
-                        borderRadius: '12px',
-                        bgcolor: (theme) =>
-                          theme.palette.mode === 'light' ? 'success.lighter' : 'success.dark',
-                        color: 'success.main',
-                        display: 'inline-flex',
-                      }}
-                    >
-                      <Iconify icon="solar:code-square-bold-duotone" width={36} />
-                    </Box>
-                    <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
-                      {t('prompt.customDevelopmentTitle')}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {t('prompt.customDevelopmentDesc')}
-                    </Typography>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
-                <Card
-                  variant="outlined"
-                  sx={{
-                    height: '100%',
-                    transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
-                    '&:hover': {
-                      borderColor: 'primary.main',
-                      boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}22`,
-                    },
-                  }}
-                >
-                  <CardActionArea
-                    onClick={() => setCommercialScheme('kiosk_queue_system')}
-                    aria-label={t('prompt.kioskQueueTitle', 'Sistem & Integrasi Perangkat Keras')}
-                    sx={{
-                      p: 4,
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      justifyContent: 'flex-start',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        mb: 2.5,
-                        p: 1.5,
-                        borderRadius: '12px',
-                        bgcolor: (theme) =>
-                          theme.palette.mode === 'light' ? 'error.lighter' : 'error.dark',
-                        color: 'error.main',
-                        display: 'inline-flex',
-                      }}
-                    >
-                      <Iconify icon="solar:devices-bold-duotone" width={36} />
-                    </Box>
-                    <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
-                      {t('prompt.kioskQueueTitle', 'Sistem & Integrasi Perangkat Keras')}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {t(
-                        'prompt.kioskQueueDesc',
-                        'Kiosk, sistem antrian, integrasi printer/display, dan perangkat kondisional.'
-                      )}
-                    </Typography>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            </Grid>
-          </Box>
+        ) : commercialScheme === null ? (
+          <CommercialSchemeSelector
+            onSelectScheme={(scheme) => setCommercialScheme(scheme)}
+            onBack={() => {
+              setIsFormOpen(false);
+              setPromptText('');
+            }}
+          />
         ) : commercialScheme === 'dedicated_squad' ? (
           <Box>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
@@ -890,13 +565,48 @@ export function QuotationPromptView() {
         ) : commercialScheme === 'talent_outsourcing' ? (
           <Box>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
-              <Button size="small" variant="outlined" color="inherit" startIcon={<Iconify icon="eva:arrow-ios-back-fill" />} onClick={() => setCommercialScheme(null)}>{t('prompt.backToSchemes')}</Button>
-              <Typography variant="h5" fontWeight={700}>{t('talentOutsourcingForm.title')}</Typography>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+                onClick={() => setCommercialScheme(null)}
+              >
+                {t('prompt.backToSchemes')}
+              </Button>
+              <Typography variant="h5" fontWeight={700}>
+                {t('talentOutsourcingForm.title')}
+              </Typography>
             </Stack>
-            <TalentOutsourcingGenerationForm selectedSkill={activeSkill} isSubmitting={generateMutation.isPending} onSubmit={handleFormSubmit} onCancel={() => setCommercialScheme(null)} />
+            <TalentOutsourcingGenerationForm
+              selectedSkill={activeSkill}
+              isSubmitting={generateMutation.isPending}
+              onSubmit={handleFormSubmit}
+              onCancel={() => setCommercialScheme(null)}
+            />
           </Box>
         ) : commercialScheme === 'cloud_infrastructure' ? (
-          <Box><Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}><Button size="small" variant="outlined" color="inherit" startIcon={<Iconify icon="eva:arrow-ios-back-fill" />} onClick={() => setCommercialScheme(null)}>{t('prompt.backToSchemes')}</Button><Typography variant="h5" fontWeight={700}>{t('cloudInfrastructure.title')}</Typography></Stack><CloudInfrastructureGenerationForm isSubmitting={generateMutation.isPending} onSubmit={handleFormSubmit} onCancel={() => setCommercialScheme(null)} /></Box>
+          <Box>
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+                onClick={() => setCommercialScheme(null)}
+              >
+                {t('prompt.backToSchemes')}
+              </Button>
+              <Typography variant="h5" fontWeight={700}>
+                {t('cloudInfrastructure.title')}
+              </Typography>
+            </Stack>
+            <CloudInfrastructureGenerationForm
+              isSubmitting={generateMutation.isPending}
+              onSubmit={handleFormSubmit}
+              onCancel={() => setCommercialScheme(null)}
+            />
+          </Box>
         ) : null}
       </Stack>
 

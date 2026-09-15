@@ -6,6 +6,7 @@ import {
   calculateKioskQueueLocal,
   normalizeKioskQueueSystem,
   KIOSK_QUEUE_DEFAULT_VALUES,
+  createDefaultKioskQueueValues,
 } from './kiosk-queue-system';
 
 export const governmentHardwareValues: KioskQueueSystemInput = {
@@ -18,10 +19,7 @@ export const governmentHardwareValues: KioskQueueSystemInput = {
   government_scope_phases: [
     {
       title: 'Fase 1: Persiapan & Desain',
-      deliverables: [
-        'Dokumen Analisis Kebutuhan',
-        'UI/UX Design Mockup',
-      ],
+      deliverables: ['Dokumen Analisis Kebutuhan', 'UI/UX Design Mockup'],
     },
   ],
   expert_requirements: [
@@ -73,9 +71,7 @@ export const governmentHardwareValues: KioskQueueSystemInput = {
   ],
   payment_due_days: 14,
   limitation_codes: ['civil_electrical'],
-  additional_limitations: [
-    'Pekerjaan sipil dan perkabelan tidak termasuk penawaran ini.',
-  ],
+  additional_limitations: ['Pekerjaan sipil dan perkabelan tidak termasuk penawaran ini.'],
   rights_statements: [],
 };
 
@@ -89,10 +85,7 @@ export const governmentServiceOnlyValues: KioskQueueSystemInput = {
   government_scope_phases: [
     {
       title: 'Fase 1: Persiapan & Desain',
-      deliverables: [
-        'Dokumen Analisis Kebutuhan',
-        'UI/UX Design Mockup',
-      ],
+      deliverables: ['Dokumen Analisis Kebutuhan', 'UI/UX Design Mockup'],
     },
   ],
   expert_requirements: [
@@ -109,7 +102,12 @@ export const governmentServiceOnlyValues: KioskQueueSystemInput = {
       items: [
         { name: 'UI UX', monthly_rate: 13_370_000, headcount: 1, period_quarters: 1 },
         { name: 'Senior Programmer', monthly_rate: 16_170_000, headcount: 1, period_quarters: 4 },
-        { name: 'Intermediate Web Programmer', monthly_rate: 13_370_000, headcount: 1, period_quarters: 4 },
+        {
+          name: 'Intermediate Web Programmer',
+          monthly_rate: 13_370_000,
+          headcount: 1,
+          period_quarters: 4,
+        },
         { name: 'Quality Assurance', monthly_rate: 13_370_000, headcount: 1, period_quarters: 3 },
       ],
     },
@@ -153,8 +151,18 @@ export const privateFoodCourtValues: KioskQueueSystemInput = {
     {
       title: 'Engineering Kick-off',
       items: [
-        { name: 'Senior Web Developer', monthly_rate: 11_550_000, headcount: 1, period_quarters: 4 },
-        { name: 'Senior Mobile Developer', monthly_rate: 11_550_000, headcount: 1, period_quarters: 4 },
+        {
+          name: 'Senior Web Developer',
+          monthly_rate: 11_550_000,
+          headcount: 1,
+          period_quarters: 4,
+        },
+        {
+          name: 'Senior Mobile Developer',
+          monthly_rate: 11_550_000,
+          headcount: 1,
+          period_quarters: 4,
+        },
         { name: 'UI/UX Designer', monthly_rate: 9_550_000, headcount: 1, period_quarters: 4 },
         { name: 'Quality Assurance', monthly_rate: 9_550_000, headcount: 1, period_quarters: 4 },
       ],
@@ -168,17 +176,37 @@ export const privateFoodCourtValues: KioskQueueSystemInput = {
     {
       title: 'Development',
       items: [
-        { name: 'Senior Web Developer', monthly_rate: 11_550_000, headcount: 1, period_quarters: 4 },
+        {
+          name: 'Senior Web Developer',
+          monthly_rate: 11_550_000,
+          headcount: 1,
+          period_quarters: 4,
+        },
         { name: 'Quality Assurance', monthly_rate: 9_550_000, headcount: 1, period_quarters: 4 },
-        { name: 'Senior Mobile Developer', monthly_rate: 11_550_000, headcount: 1, period_quarters: 4 },
+        {
+          name: 'Senior Mobile Developer',
+          monthly_rate: 11_550_000,
+          headcount: 1,
+          period_quarters: 4,
+        },
         { name: 'Frontend Developer', monthly_rate: 9_550_000, headcount: 1, period_quarters: 4 },
       ],
     },
     {
       title: 'SIT, UAT & Go-Live',
       items: [
-        { name: 'Senior Web Developer', monthly_rate: 11_550_000, headcount: 1, period_quarters: 4 },
-        { name: 'Senior Mobile Developer', monthly_rate: 11_550_000, headcount: 1, period_quarters: 4 },
+        {
+          name: 'Senior Web Developer',
+          monthly_rate: 11_550_000,
+          headcount: 1,
+          period_quarters: 4,
+        },
+        {
+          name: 'Senior Mobile Developer',
+          monthly_rate: 11_550_000,
+          headcount: 1,
+          period_quarters: 4,
+        },
         { name: 'UI/UX Designer', monthly_rate: 9_550_000, headcount: 1, period_quarters: 4 },
         { name: 'Quality Assurance', monthly_rate: 16_170_000, headcount: 1, period_quarters: 2 },
       ],
@@ -188,7 +216,12 @@ export const privateFoodCourtValues: KioskQueueSystemInput = {
   show_service_discount_row: true,
   maintenance_items: [
     { name: 'Senior Web Programmer', monthly_rate: 11_550_000, headcount: 1, period_quarters: 12 },
-    { name: 'Senior Mobile Programmer', monthly_rate: 11_550_000, headcount: 1, period_quarters: 12 },
+    {
+      name: 'Senior Mobile Programmer',
+      monthly_rate: 11_550_000,
+      headcount: 1,
+      period_quarters: 12,
+    },
     { name: 'Quality Assurance', monthly_rate: 9_550_000, headcount: 1, period_quarters: 6 },
   ],
   private_timeline_rows: [
@@ -200,10 +233,34 @@ export const privateFoodCourtValues: KioskQueueSystemInput = {
     { description: 'Go-Live', timeline: 'Bulan 3' },
   ],
   private_payment_schedule: [
-    { work_period: 'Termin 1', terms: 'DP Kick Off', invoice_date_label: '01/08/2026', due_date_label: '15/08/2026', nominal: 6_685_000 },
-    { work_period: 'Termin 2', terms: 'Desain Selesai', invoice_date_label: '01/09/2026', due_date_label: '15/09/2026', nominal: 6_685_000 },
-    { work_period: 'Termin 3', terms: 'Development', invoice_date_label: '01/10/2026', due_date_label: '15/10/2026', nominal: 42_200_000 },
-    { work_period: 'Termin 4', terms: 'Pelunasan UAT', invoice_date_label: '01/11/2026', due_date_label: '15/11/2026', nominal: 40_735_000 },
+    {
+      work_period: 'Termin 1',
+      terms: 'DP Kick Off',
+      invoice_date_label: '01/08/2026',
+      due_date_label: '15/08/2026',
+      nominal: 6_685_000,
+    },
+    {
+      work_period: 'Termin 2',
+      terms: 'Desain Selesai',
+      invoice_date_label: '01/09/2026',
+      due_date_label: '15/09/2026',
+      nominal: 6_685_000,
+    },
+    {
+      work_period: 'Termin 3',
+      terms: 'Development',
+      invoice_date_label: '01/10/2026',
+      due_date_label: '15/10/2026',
+      nominal: 42_200_000,
+    },
+    {
+      work_period: 'Termin 4',
+      terms: 'Pelunasan UAT',
+      invoice_date_label: '01/11/2026',
+      due_date_label: '15/11/2026',
+      nominal: 40_735_000,
+    },
   ],
   payment_due_days: 0,
   limitation_codes: ['client_hardware'],
@@ -257,5 +314,13 @@ describe('kiosk-queue-system constants & pure helpers', () => {
     expect(KIOSK_QUEUE_DEFAULT_VALUES.tax_treatment).toBe('inclusive_ppn_11');
     expect(KIOSK_QUEUE_DEFAULT_VALUES.payment_due_days).toBe(14);
     expect(KIOSK_QUEUE_DEFAULT_VALUES.limitation_codes).toContain('civil_electrical');
+  });
+
+  it('creates default values with valid solution_type aligned to variant', () => {
+    const gov = createDefaultKioskQueueValues('2026-09-14', undefined, 'government_mpp');
+    expect(gov.solution_type).toBe('Sistem Antrian (Queue Management)');
+
+    const priv = createDefaultKioskQueueValues('2026-09-14', undefined, 'private_food_court');
+    expect(priv.solution_type).toBe('Kiosk Application');
   });
 });

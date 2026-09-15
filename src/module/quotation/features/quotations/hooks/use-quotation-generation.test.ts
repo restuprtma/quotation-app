@@ -3,7 +3,6 @@ import type {
   SubscriptionSaaSPreviewResponse,
   CustomDevelopmentPreviewResponse,
   StandaloneMaintenancePreviewResponse,
-  CloudInfrastructurePreviewResponse,
 } from '../types';
 
 import { it, vi, expect, describe } from 'vitest';
@@ -14,7 +13,6 @@ import {
   previewSubscriptionSaaS,
   previewCustomDevelopment,
   previewStandaloneMaintenance,
-  previewCloudInfrastructure,
 } from '../api/generation';
 import {
   useSubscriptionSaaSPreview,
@@ -26,9 +24,6 @@ import {
   STANDALONE_MAINTENANCE_PREVIEW_QUERY_KEY,
   normalizeCustomDevelopmentPreviewPayload,
   normalizeStandaloneMaintenancePreviewPayload,
-  CLOUD_INFRASTRUCTURE_PREVIEW_QUERY_KEY,
-  normalizeCloudInfrastructurePreviewPayload,
-  useCloudInfrastructurePreview,
 } from './use-quotation-generation';
 
 describe('Subscription SaaS preview API & hook', () => {
@@ -77,10 +72,7 @@ describe('Subscription SaaS preview API & hook', () => {
   });
 
   it('defines the query key matching the specification', () => {
-    expect(SUBSCRIPTION_SAAS_PREVIEW_QUERY_KEY).toEqual([
-      'quotation',
-      'subscription-saas-preview',
-    ]);
+    expect(SUBSCRIPTION_SAAS_PREVIEW_QUERY_KEY).toEqual(['quotation', 'subscription-saas-preview']);
   });
 
   describe('normalizeSubscriptionSaaSPreviewPayload', () => {
@@ -189,7 +181,12 @@ describe('Standalone Maintenance preview API & hook', () => {
       mode: 'retainer',
       tax_treatment: 'exclusive_ppn',
       retainer_items: [
-        { name: 'Senior Web Programmer', monthly_rate: 16_050_000, fte_quarters: 4, period_months: 1 },
+        {
+          name: 'Senior Web Programmer',
+          monthly_rate: 16_050_000,
+          fte_quarters: 4,
+          period_months: 1,
+        },
       ],
       defect_groups: [
         {
@@ -297,7 +294,10 @@ describe('Standalone Maintenance preview API & hook', () => {
       });
 
       const abortController = new AbortController();
-      const result = await previewStandaloneMaintenance(sampleStandalonePayload, abortController.signal);
+      const result = await previewStandaloneMaintenance(
+        sampleStandalonePayload,
+        abortController.signal
+      );
 
       expect(postSpy).toHaveBeenCalledWith(
         '/quotation/v1/quotations/preview/standalone-maintenance',
@@ -518,5 +518,3 @@ describe('Custom Development preview API & hook', () => {
     });
   });
 });
-
-

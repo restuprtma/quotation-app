@@ -94,13 +94,9 @@ export const KIOSK_QUEUE_LIMITATION_OPTIONS = [
   },
 ] as const;
 
-export const DEFAULT_GOVERNMENT_LIMITATION_CODES: KioskQueueLimitationCode[] = [
-  'civil_electrical',
-];
+export const DEFAULT_GOVERNMENT_LIMITATION_CODES: KioskQueueLimitationCode[] = ['civil_electrical'];
 
-export const DEFAULT_PRIVATE_LIMITATION_CODES: KioskQueueLimitationCode[] = [
-  'client_hardware',
-];
+export const DEFAULT_PRIVATE_LIMITATION_CODES: KioskQueueLimitationCode[] = ['client_hardware'];
 
 export const KIOSK_QUEUE_DEFAULT_VALUES: KioskQueueSystemInput = {
   variant: 'government_mpp',
@@ -110,9 +106,7 @@ export const KIOSK_QUEUE_DEFAULT_VALUES: KioskQueueSystemInput = {
   hardware_provision: 'client_supplied',
   tax_treatment: 'inclusive_ppn_11',
   government_scope_phases: [{ title: '', deliverables: [''] }],
-  expert_requirements: [
-    { role: '', headcount: 1, duration_label: '', minimum_qualification: '' },
-  ],
+  expert_requirements: [{ role: '', headcount: 1, duration_label: '', minimum_qualification: '' }],
   service_groups: [
     {
       title: '',
@@ -191,18 +185,13 @@ export function calculateKioskQueueLocal(
   let serviceSubtotal = 0;
   for (const group of input.service_groups || []) {
     for (const item of group.items || []) {
-      const line = kioskQuarterLineTotal(
-        item.monthly_rate,
-        item.headcount,
-        item.period_quarters
-      );
+      const line = kioskQuarterLineTotal(item.monthly_rate, item.headcount, item.period_quarters);
       serviceSubtotal += line;
     }
   }
 
   const serviceDiscountAmount =
-    Number.isSafeInteger(input.service_discount_amount) &&
-    input.service_discount_amount! >= 0
+    Number.isSafeInteger(input.service_discount_amount) && input.service_discount_amount! >= 0
       ? input.service_discount_amount!
       : 0;
 
@@ -221,10 +210,7 @@ export function calculateKioskQueueLocal(
     serviceTaxAmount = Math.floor((serviceSubtotal * 1100) / 10000);
     serviceTotal = serviceAfterDiscount + serviceTaxAmount;
 
-    if (
-      input.hardware_provision === 'venturo_supplied' &&
-      Array.isArray(input.hardware_items)
-    ) {
+    if (input.hardware_provision === 'venturo_supplied' && Array.isArray(input.hardware_items)) {
       for (const item of input.hardware_items) {
         hardwareSubtotal += kioskHardwareLineTotal(item.unit_price, item.quantity);
       }
@@ -284,9 +270,7 @@ export function calculateKioskQueueLocal(
   };
 }
 
-export function normalizeKioskQueueSystem(
-  input: KioskQueueSystemInput
-): KioskQueueSystemInput {
+export function normalizeKioskQueueSystem(input: KioskQueueSystemInput): KioskQueueSystemInput {
   return {
     variant: input.variant,
     document_number: input.document_number.trim(),
@@ -356,8 +340,7 @@ export function normalizeKioskQueueSystem(
           nominal: p.nominal,
         }))
       : undefined,
-    payment_due_days:
-      input.payment_due_days ?? (input.variant === 'government_mpp' ? 14 : 0),
+    payment_due_days: input.payment_due_days ?? (input.variant === 'government_mpp' ? 14 : 0),
     limitation_codes: input.limitation_codes ? [...input.limitation_codes] : [],
     additional_limitations: input.additional_limitations
       ? input.additional_limitations.map((a: string) => a.trim()).filter(Boolean)
@@ -398,29 +381,32 @@ export function createDefaultKioskQueueValues(
     subject: isGov
       ? 'Penawaran Pengadaan Sistem Antrian Terpadu MPP'
       : 'Penawaran Self-Ordering Kiosk Food Court',
-    solution_type: 'Kiosk & Hardware System',
+    solution_type: isGov ? 'Sistem Antrian (Queue Management)' : 'Kiosk Application',
     commercial_scheme: 'kiosk_queue_system',
     kiosk_queue_system: {
       ...KIOSK_QUEUE_DEFAULT_VALUES,
       variant,
       quotation_date: today,
       document_number: '',
-      system_name: isGov
-        ? 'Sistem Antrian Terpadu MPP'
-        : 'Self-Ordering Kiosk Food Court',
+      system_name: isGov ? 'Sistem Antrian Terpadu MPP' : 'Self-Ordering Kiosk Food Court',
       hardware_provision: isGov ? 'venturo_supplied' : 'client_supplied',
       tax_treatment: isGov ? 'inclusive_ppn_11' : 'exclusive_ppn',
       payment_due_days: isGov ? 14 : 0,
-      limitation_codes: isGov
-        ? ['civil_electrical']
-        : ['client_hardware'],
+      limitation_codes: isGov ? ['civil_electrical'] : ['client_hardware'],
       additional_limitations: [],
       rights_statements: [],
       government_scope_phases: isGov
         ? [{ title: 'Fase 1: Persiapan & Desain', deliverables: ['Dokumen Analisis Kebutuhan'] }]
         : [],
       expert_requirements: isGov
-        ? [{ role: 'Project Manager', headcount: 1, duration_label: '3 Bulan', minimum_qualification: 'S1 Sistem Informasi' }]
+        ? [
+            {
+              role: 'Project Manager',
+              headcount: 1,
+              duration_label: '3 Bulan',
+              minimum_qualification: 'S1 Sistem Informasi',
+            },
+          ]
         : [],
       hardware_items: isGov ? [] : [],
       maintenance_items: isGov ? [] : [],
@@ -432,7 +418,15 @@ export function createDefaultKioskQueueValues(
         : [],
       private_payment_schedule: isGov
         ? []
-        : [{ work_period: 'Termin 1', terms: 'DP Kick Off', invoice_date_label: today, due_date_label: 'H+14', nominal: 0 }],
+        : [
+            {
+              work_period: 'Termin 1',
+              terms: 'DP Kick Off',
+              invoice_date_label: today,
+              due_date_label: 'H+14',
+              nominal: 0,
+            },
+          ],
     },
   };
 }

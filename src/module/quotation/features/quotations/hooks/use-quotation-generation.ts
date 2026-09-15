@@ -17,10 +17,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { normalizeWhiteLabel } from '../constants/white-label';
 import { normalizeSubscriptionSaaS } from '../constants/subscription-saas';
 import { normalizeKioskQueueSystem } from '../constants/kiosk-queue-system';
-import { normalizeCustomDevelopment } from '../constants/custom-development';
 import { normalizeTalentOutsourcing } from '../constants/talent-outsourcing';
-import { normalizeStandaloneMaintenance } from '../constants/standalone-maintenance';
+import { normalizeCustomDevelopment } from '../constants/custom-development';
 import { normalizeCloudInfrastructure } from '../constants/cloud-infrastructure';
+import { normalizeStandaloneMaintenance } from '../constants/standalone-maintenance';
 import { cloudInfrastructureFormSchema } from '../components/cloud-infrastructure-form-model';
 import {
   generateQuotation,
@@ -30,8 +30,8 @@ import {
   previewSubscriptionSaaS,
   previewCustomDevelopment,
   previewTalentOutsourcing,
-  previewStandaloneMaintenance,
   previewCloudInfrastructure,
+  previewStandaloneMaintenance,
 } from '../api';
 
 function generateUUID(): string {
@@ -393,10 +393,7 @@ export function useCustomDevelopmentPreview(
   payload: GenerateQuotationPayload | null | undefined,
   enabled = true
 ) {
-  const normalized = useMemo(
-    () => normalizeCustomDevelopmentPreviewPayload(payload),
-    [payload]
-  );
+  const normalized = useMemo(() => normalizeCustomDevelopmentPreviewPayload(payload), [payload]);
   const [debounced, setDebounced] = useState(normalized);
   const [isDebouncing, setIsDebouncing] = useState(false);
 
@@ -443,10 +440,7 @@ export function useCustomDevelopmentPreview(
   return { ...query, isDebouncing };
 }
 
-export const KIOSK_QUEUE_PREVIEW_QUERY_KEY = [
-  'quotation',
-  'kiosk-queue-preview',
-] as const;
+export const KIOSK_QUEUE_PREVIEW_QUERY_KEY = ['quotation', 'kiosk-queue-preview'] as const;
 
 export function normalizeKioskQueuePreviewPayload(
   payload: GenerateQuotationPayload | null | undefined
@@ -467,10 +461,7 @@ export function useKioskQueuePreview(
   payload: GenerateQuotationPayload | null | undefined,
   enabled = true
 ) {
-  const normalized = useMemo(
-    () => normalizeKioskQueuePreviewPayload(payload),
-    [payload]
-  );
+  const normalized = useMemo(() => normalizeKioskQueuePreviewPayload(payload), [payload]);
   const [debounced, setDebounced] = useState(normalized);
   const [isDebouncing, setIsDebouncing] = useState(false);
 
@@ -517,39 +508,95 @@ export function useKioskQueuePreview(
   return { ...query, isDebouncing };
 }
 
-export const TALENT_OUTSOURCING_PREVIEW_QUERY_KEY = ['quotation', 'talent-outsourcing-preview'] as const;
-export function normalizeTalentOutsourcingPreviewPayload(payload: GenerateQuotationPayload | null | undefined) {
+export const TALENT_OUTSOURCING_PREVIEW_QUERY_KEY = [
+  'quotation',
+  'talent-outsourcing-preview',
+] as const;
+export function normalizeTalentOutsourcingPreviewPayload(
+  payload: GenerateQuotationPayload | null | undefined
+) {
   if (!payload || payload.commercial_scheme !== 'talent_outsourcing') return null;
-  return { commercial_scheme: 'talent_outsourcing' as const, talent_outsourcing: normalizeTalentOutsourcing(payload.talent_outsourcing) };
+  return {
+    commercial_scheme: 'talent_outsourcing' as const,
+    talent_outsourcing: normalizeTalentOutsourcing(payload.talent_outsourcing),
+  };
 }
-export function useTalentOutsourcingPreview(payload: GenerateQuotationPayload | null | undefined, enabled = true) {
+export function useTalentOutsourcingPreview(
+  payload: GenerateQuotationPayload | null | undefined,
+  enabled = true
+) {
   const normalized = useMemo(() => normalizeTalentOutsourcingPreviewPayload(payload), [payload]);
   const [debounced, setDebounced] = useState(normalized);
   const [isDebouncing, setIsDebouncing] = useState(false);
-  useEffect(() => { if (!enabled || !normalized) { setDebounced(null); setIsDebouncing(false); return undefined; } setIsDebouncing(true); const timer = setTimeout(() => { setDebounced(normalized); setIsDebouncing(false); }, 400); return () => clearTimeout(timer); }, [enabled, normalized]);
+  useEffect(() => {
+    if (!enabled || !normalized) {
+      setDebounced(null);
+      setIsDebouncing(false);
+      return undefined;
+    }
+    setIsDebouncing(true);
+    const timer = setTimeout(() => {
+      setDebounced(normalized);
+      setIsDebouncing(false);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [enabled, normalized]);
   const query = useQuery<TalentOutsourcingPreviewResponse, Error>({
-    queryKey: [...TALENT_OUTSOURCING_PREVIEW_QUERY_KEY, debounced ? JSON.stringify(debounced) : 'disabled'],
-    queryFn: ({ signal }) => { if (!payload || !debounced || payload.commercial_scheme !== 'talent_outsourcing') throw new Error('Talent outsourcing preview is disabled'); return previewTalentOutsourcing({ ...payload, talent_outsourcing: debounced.talent_outsourcing }, signal); },
-    enabled: Boolean(enabled && payload && debounced), staleTime: 30_000, gcTime: 5 * 60_000, retry: false,
+    queryKey: [
+      ...TALENT_OUTSOURCING_PREVIEW_QUERY_KEY,
+      debounced ? JSON.stringify(debounced) : 'disabled',
+    ],
+    queryFn: ({ signal }) => {
+      if (!payload || !debounced || payload.commercial_scheme !== 'talent_outsourcing')
+        throw new Error('Talent outsourcing preview is disabled');
+      return previewTalentOutsourcing(
+        { ...payload, talent_outsourcing: debounced.talent_outsourcing },
+        signal
+      );
+    },
+    enabled: Boolean(enabled && payload && debounced),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
   });
   return { ...query, isDebouncing };
 }
 
-export const CLOUD_INFRASTRUCTURE_PREVIEW_QUERY_KEY = ['quotation', 'cloud-infrastructure-preview'] as const;
-export function normalizeCloudInfrastructurePreviewPayload(payload: GenerateQuotationPayload | null | undefined) {
+export const CLOUD_INFRASTRUCTURE_PREVIEW_QUERY_KEY = [
+  'quotation',
+  'cloud-infrastructure-preview',
+] as const;
+export function normalizeCloudInfrastructurePreviewPayload(
+  payload: GenerateQuotationPayload | null | undefined
+) {
   if (!payload || payload.commercial_scheme !== 'cloud_infrastructure') return null;
-  return { ...payload, cloud_infrastructure: normalizeCloudInfrastructure(payload.cloud_infrastructure) };
+  return {
+    ...payload,
+    cloud_infrastructure: normalizeCloudInfrastructure(payload.cloud_infrastructure),
+  };
 }
-export function useCloudInfrastructurePreview(payload: GenerateQuotationPayload | null | undefined, enabled = true) {
+export function useCloudInfrastructurePreview(
+  payload: GenerateQuotationPayload | null | undefined,
+  enabled = true
+) {
   const normalized = useMemo(() => normalizeCloudInfrastructurePreviewPayload(payload), [payload]);
-  const isValid = Boolean(normalized && cloudInfrastructureFormSchema.safeParse(normalized).success);
+  const isValid = Boolean(
+    normalized && cloudInfrastructureFormSchema.safeParse(normalized).success
+  );
   const currentFingerprint = normalized ? JSON.stringify(normalized) : null;
   const [debounced, setDebounced] = useState<typeof normalized>(null);
   const [isDebouncing, setIsDebouncing] = useState(false);
   useEffect(() => {
-    if (!enabled || !isValid || !normalized) { setDebounced(null); setIsDebouncing(false); return undefined; }
+    if (!enabled || !isValid || !normalized) {
+      setDebounced(null);
+      setIsDebouncing(false);
+      return undefined;
+    }
     setIsDebouncing(true);
-    const timer = setTimeout(() => { setDebounced(normalized); setIsDebouncing(false); }, 350);
+    const timer = setTimeout(() => {
+      setDebounced(normalized);
+      setIsDebouncing(false);
+    }, 350);
     return () => clearTimeout(timer);
   }, [enabled, isValid, normalized]);
   const debouncedFingerprint = debounced ? JSON.stringify(debounced) : null;
@@ -559,8 +606,14 @@ export function useCloudInfrastructurePreview(payload: GenerateQuotationPayload 
       if (!debounced) throw new Error('Cloud infrastructure preview is disabled');
       return previewCloudInfrastructure(debounced, signal);
     },
-    enabled: Boolean(enabled && isValid && debounced), staleTime: 30_000, gcTime: 5 * 60_000, retry: false,
+    enabled: Boolean(enabled && isValid && debounced),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
   });
-  const successfulFingerprint = query.isSuccess && !isDebouncing && currentFingerprint === debouncedFingerprint ? debouncedFingerprint : null;
+  const successfulFingerprint =
+    query.isSuccess && !isDebouncing && currentFingerprint === debouncedFingerprint
+      ? debouncedFingerprint
+      : null;
   return { ...query, isDebouncing, currentFingerprint, successfulFingerprint };
 }

@@ -68,7 +68,7 @@ export function makeGovernmentDefaults(shared?: KioskQueueSharedIdentity): Kiosk
     client_company_name: shared?.client_company_name ?? '',
     client_name: shared?.client_name || 'Pejabat Pembuat Komitmen (PPK)',
     subject: shared?.subject || 'Penawaran Pengadaan Sistem Antrian Terpadu MPP',
-    solution_type: shared?.solution_type || 'Kiosk & Hardware System',
+    solution_type: shared?.solution_type || 'Sistem Antrian (Queue Management)',
     commercial_scheme: 'kiosk_queue_system',
     kiosk_queue_system: {
       variant: 'government_mpp',
@@ -132,7 +132,7 @@ export function makePrivateDefaults(shared?: KioskQueueSharedIdentity): KioskQue
     client_company_name: shared?.client_company_name ?? '',
     client_name: shared?.client_name || 'Pimpinan Perusahaan',
     subject: shared?.subject || 'Penawaran Self-Ordering Kiosk Food Court',
-    solution_type: shared?.solution_type || 'Kiosk & Hardware System',
+    solution_type: shared?.solution_type || 'Kiosk Application',
     commercial_scheme: 'kiosk_queue_system',
     kiosk_queue_system: {
       variant: 'private_food_court',

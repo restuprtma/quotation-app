@@ -2,19 +2,19 @@
 
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
-import { describe, expect, it } from 'vitest';
+import { it, expect, describe } from 'vitest';
 
 import { wrapOfficialDocument } from './quotation-editor';
 import {
-  LegalBlockExtension,
-  QuotationFieldAttributesExtension,
   QuotationFieldMark,
-  QuotationListItemExtension,
-  QuotationSectionExtension,
-  QuotationTableCellExtension,
+  LegalBlockExtension,
   QuotationTableExtension,
-  QuotationTableHeaderExtension,
+  QuotationSectionExtension,
+  QuotationListItemExtension,
   QuotationTableRowExtension,
+  QuotationTableCellExtension,
+  QuotationTableHeaderExtension,
+  QuotationFieldAttributesExtension,
 } from './legal-block-extension';
 
 const authenCloudHtml = `<article class="quotation-document quotation-document--cloud-infrastructure" data-service="cloud_infrastructure">
@@ -70,5 +70,6 @@ describe('cloud infrastructure document round-trip', () => {
     expect(saved).toContain('data-cloud-payment-component="monthly_service"');
     expect(saved).toContain('production-ready staging environment');
     expect(saved).toContain('data-limitation-code="scope_change"');
+    expect(saved).toContain('data-section-code="limitations"');
   });
 });

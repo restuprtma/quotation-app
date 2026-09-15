@@ -254,8 +254,7 @@ export const QuotationTableRowExtension = TableRow.extend({
       },
       'data-group-index': {
         default: null,
-        parseHTML: (element: HTMLElement) =>
-          readMarker(element, 'data-group-index', INDEX_PATTERN),
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-group-index', INDEX_PATTERN),
         renderHTML: (attributes: Record<string, unknown>) =>
           renderMarker(attributes, 'data-group-index', INDEX_PATTERN),
       },
@@ -496,6 +495,12 @@ export const LegalBlockExtension = Node.create<LegalBlockOptions, LegalBlockStor
           readMarker(element, 'data-section-number', SECTION_NUMBER_PATTERN),
         renderHTML: (attributes: Record<string, unknown>) =>
           renderMarker(attributes, 'data-section-number', SECTION_NUMBER_PATTERN),
+      },
+      'data-section-code': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-section-code'),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-section-code'),
       },
     };
   },

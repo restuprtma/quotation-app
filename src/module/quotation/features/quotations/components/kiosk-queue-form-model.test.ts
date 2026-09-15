@@ -1,9 +1,6 @@
 import { it, expect, describe } from 'vitest';
 
-import {
-  makeKioskQueueSchema,
-  kioskQueueFormSchema,
-} from './kiosk-queue-form-model';
+import { makeKioskQueueSchema, kioskQueueFormSchema } from './kiosk-queue-form-model';
 import {
   privateFoodCourtValues,
   governmentHardwareValues,
@@ -111,7 +108,7 @@ describe('kiosk-queue-form-model Zod validation', () => {
     const formValues = {
       client_name: 'Pejabat Pembuat Komitmen',
       subject: 'Penawaran MPP',
-      solution_type: 'Kiosk & Hardware System',
+      solution_type: 'Sistem Antrian (Queue Management)',
       commercial_scheme: 'kiosk_queue_system',
       kiosk_queue_system: governmentHardwareValues,
     };
