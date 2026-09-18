@@ -57,6 +57,7 @@ export function QuotationEditorView({ id = '' }: Props) {
   const [isUnlockDialogOpen, setIsUnlockDialogOpen] = useState(false);
   const [isRegenerateDialogOpen, setIsRegenerateDialogOpen] = useState(false);
   const [isUnsavedDialogOpen, setIsUnsavedDialogOpen] = useState(false);
+  const [isBlueprintWarningOpen, setIsBlueprintWarningOpen] = useState(false);
 
   // Initialize session state once data is loaded
   useEffect(() => {
@@ -220,6 +221,18 @@ export function QuotationEditorView({ id = '' }: Props) {
     }
   };
 
+  // Create Blueprint from currently viewed revision
+  const handleCreateBlueprint = () => {
+    if (!session || !id) return;
+    if (session.isDirty) {
+      setIsBlueprintWarningOpen(true);
+    } else {
+      navigate(
+        `${paths.dashboard.blueprint.root}?quotation_id=${id}&revision_id=${session.revisionId}`
+      );
+    }
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Stack spacing={3}>
@@ -284,6 +297,16 @@ export function QuotationEditorView({ id = '' }: Props) {
                 disabled={session.isConflict || regenerateMutation.isPending}
               >
                 {t('editor.regenerate')}
+              </Button>
+
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<Iconify icon="solar:file-check-bold-duotone" />}
+                onClick={handleCreateBlueprint}
+                disabled={session.isConflict || !session.revisionId}
+              >
+                Buat Blueprint
               </Button>
 
               <Button
@@ -406,6 +429,57 @@ export function QuotationEditorView({ id = '' }: Props) {
             }}
           >
             {t('editor.dialog.unsavedLeave')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Blueprint Unsaved Warning Modal */}
+      <Dialog
+        open={isBlueprintWarningOpen}
+        onClose={() => setIsBlueprintWarningOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Buat Blueprint dari Revisi Tersimpan?</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ typography: 'body2' }}>
+            Perubahan pada editor draft belum disimpan. Pembuatan Blueprint akan menggunakan revisi
+            tersimpan saat ini (v{session?.canonicalVersion}). Simpan draft terlebih dahulu jika Anda
+            ingin menyertakan perubahan terbaru ke dalam Blueprint.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={() => setIsBlueprintWarningOpen(false)}
+          >
+            Batal
+          </Button>
+          <Button
+            variant="outlined"
+            color="warning"
+            onClick={() => {
+              setIsBlueprintWarningOpen(false);
+              navigate(
+                `${paths.dashboard.blueprint.root}?quotation_id=${id}&revision_id=${session?.revisionId}`
+              );
+            }}
+          >
+            Lanjutkan Tanpa Simpan
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={async () => {
+              setIsBlueprintWarningOpen(false);
+              await handleSaveDraft();
+              navigate(
+                `${paths.dashboard.blueprint.root}?quotation_id=${id}&revision_id=${session?.revisionId}`
+              );
+            }}
+          >
+            Simpan &amp; Lanjutkan
           </Button>
         </DialogActions>
       </Dialog>

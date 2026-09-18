@@ -1,0 +1,118 @@
+{
+  "generator": {
+    "title": "Generator Blueprint Arsitektur",
+    "subtitle": "Hasilkan spesifikasi teknis dan blueprint arsitektur secara bertahap dari dokumen Quotation yang telah disetujui.",
+    "source_selection": "Pilih Dokumen Sumber",
+    "select_quotation": "Pilih Quotation",
+    "select_revision": "Pilih Revisi Quotation",
+    "create_button": "Buat Blueprint",
+    "creating": "Membuat Blueprint..."
+  },
+  "eligibility": {
+    "eligible": "Memenuhi Syarat Blueprint",
+    "ineligible": "Tidak Memenuhi Syarat",
+    "draft_ineligible": "Revisi masih berstatus Draft dan belum disetujui.",
+    "missing_scope": "Ruang lingkup pekerjaan belum ditentukan.",
+    "unsupported_scheme": "Skema komersial tidak didukung untuk generasi blueprint otomatis.",
+    "superseding_warning": "Revisi ini telah digantikan oleh revisi yang lebih baru."
+  },
+  "statuses": {
+    "pending": "Menunggu",
+    "in_progress": "Sedang Berjalan",
+    "completed": "Generasi Selesai",
+    "failed": "Generasi Gagal",
+    "partial_failed": "Gagal Sebagian",
+    "stopping": "Menghentikan...",
+    "recovery": "Perlu Pemulihan",
+    "waiting": "Menunggu Giliran"
+  },
+  "sections": {
+    "context": {
+      "title": "Konteks Solusi & Bisnis",
+      "description": "Menyusun ringkasan tujuan bisnis, target pengguna, dan batasan teknis dari Quotation."
+    },
+    "journey": {
+      "title": "User Journey",
+      "description": "Memetakan alur interaksi pengguna, tahapan waktu, aktor, dan titik sentuh sistem."
+    },
+    "architecture": {
+      "title": "Arsitektur Sistem",
+      "description": "Menyusun diagram komponen, modul arsitektur, basis data, dan relasi antarlayanan."
+    },
+    "state_machine": {
+      "title": "Mesin Status (State Machine)",
+      "description": "Mendefinisikan entitas utama, siklus status, pemicu transisi, dan aturan aksi sistem."
+    },
+    "workflow": {
+      "title": "Alur Kerja Proses (Workflow)",
+      "description": "Menyusun diagram proses bisnis lintas divisi dengan lintasan peran (swimlane)."
+    },
+    "wbs": {
+      "title": "Struktur Rincian Kerja (WBS)",
+      "description": "Menyusun hierarki modul, fitur, kriteria keberterimaan, dan pemetaan referensi silang."
+    },
+    "cross_validation": {
+      "title": "Validasi & Konsistensi Silang",
+      "description": "Memeriksa integritas dependensi dan konsistensi antar-bagian arsitektur yang telah dibuat."
+    }
+  },
+  "actions": {
+    "start": "Mulai Generasi",
+    "stop": "Hentikan",
+    "stopping": "Menghentikan...",
+    "recover": "Periksa & Pulihkan",
+    "retry": "Coba Lagi",
+    "refresh": "Segarkan",
+    "continue": "Lanjutkan Generasi",
+    "complete_manual": "Lengkapi Manual",
+    "save_and_validate": "Simpan & Validasi",
+    "saving": "Menyimpan...",
+    "cancel": "Batal",
+    "discard": "Buang Perubahan",
+    "discard_confirm": "Tutup Form Pengisian?",
+    "reload_latest": "Muat Versi Terbaru",
+    "confirm_reload": "Konfirmasi Muat Terbaru",
+    "back_to_generator": "Kembali ke Generator",
+    "back_to_form": "Kembali ke Form"
+  },
+  "errors": {
+    "foreign_404_title": "Blueprint Tidak Ditemukan",
+    "foreign_404_desc": "Blueprint dengan ID ini tidak ditemukan atau Anda tidak memiliki akses ke data tenant ini.",
+    "stale_lease_title": "Stale Lease Terdeteksi",
+    "stale_lease_desc": "Pipeline tidak menerima pembaruan selama lebih dari 5 menit. Kunci eksekusi mungkin telah kadaluarsa.",
+    "stale_conflict_title": "Konflik Versi Terdeteksi (409)",
+    "stale_conflict_desc": "Versi konten di server telah diperbarui oleh pengguna lain atau proses background.",
+    "server_validation_title": "Terdapat Kesalahan Validasi Konten (422)",
+    "empty_section_warning": "Bagian ini belum memiliki baris data bisnis.",
+    "provider_config_missing": "Konfigurasi provider AI belum diatur atau API key tidak valid. Silakan periksa pengaturan sistem.",
+    "provider_config_link": "Buka Pengaturan Provider"
+  },
+  "invalidation": {
+    "warning_title": "Peringatan Pembatalan Downstream",
+    "warning_desc": "Tahap ini sebelumnya telah selesai. Mengubah dan menyimpan ulang tahap ini akan membatalkan status valid dan mengulang seluruh tahap downstream berikut:",
+    "confirm_checkbox": "Saya mengerti dan menyetujui bahwa tahap-tahap downstream di atas akan diulang kembali."
+  },
+  "recovery": {
+    "success_title": "Tahap Berhasil Dilengkapi",
+    "success_desc": "Data section telah disimpan dan tervalidasi. Klik \"Lanjutkan Generasi\" untuk meneruskan pembuatan blueprint ke tahap berikutnya."
+  },
+  "empty_states": {
+    "no_blueprints": "Belum ada blueprint yang dibuat.",
+    "no_revisions": "Tidak ada revisi yang memenuhi syarat untuk pembuatan blueprint.",
+    "no_phases": "Belum ada Phase yang ditambahkan.",
+    "no_actors": "Belum ada Actor yang ditambahkan.",
+    "no_activities": "Belum ada Activity yang ditambahkan.",
+    "no_groups": "Belum ada Group arsitektur.",
+    "no_nodes": "Belum ada Node arsitektur.",
+    "no_edges": "Belum ada Relasi / Edge arsitektur.",
+    "no_states": "Belum ada State yang ditambahkan.",
+    "no_transitions": "Belum ada Transisi yang ditambahkan.",
+    "no_workflows": "Belum ada Alur Kerja yang dibuat.",
+    "no_modules": "Belum ada Modul yang dibuat.",
+    "no_features": "Belum ada Fitur dalam modul ini.",
+    "no_cross_references": "Belum ada referensi silang yang ditambahkan."
+  },
+  "mobile_notice": {
+    "desktop_authoring_hint": "Formulir pengisian manual dan authoring blueprint dioptimalkan untuk layar desktop. Pada perangkat seluler, data ditampilkan dalam mode ringkasan read-only."
+  }
+}

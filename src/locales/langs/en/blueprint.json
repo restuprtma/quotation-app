@@ -1,0 +1,118 @@
+{
+  "generator": {
+    "title": "Architecture Blueprint Generator",
+    "subtitle": "Step-by-step technical specifications and architectural blueprints generation from approved Quotations.",
+    "source_selection": "Select Source Document",
+    "select_quotation": "Select Quotation",
+    "select_revision": "Select Quotation Revision",
+    "create_button": "Create Blueprint",
+    "creating": "Creating Blueprint..."
+  },
+  "eligibility": {
+    "eligible": "Eligible for Blueprint Generation",
+    "ineligible": "Ineligible for Blueprint Generation",
+    "draft_ineligible": "Revision is in Draft status and has not been approved.",
+    "missing_scope": "Scope of work has not been defined.",
+    "unsupported_scheme": "Commercial scheme is not supported for automated blueprint generation.",
+    "superseding_warning": "This revision has been superseded by a newer approved revision."
+  },
+  "statuses": {
+    "pending": "Pending",
+    "in_progress": "In Progress",
+    "completed": "Generation Completed",
+    "failed": "Generation Failed",
+    "partial_failed": "Partially Failed",
+    "stopping": "Stopping...",
+    "recovery": "Needs Recovery",
+    "waiting": "Waiting"
+  },
+  "sections": {
+    "context": {
+      "title": "Solution Context & Business Goals",
+      "description": "Synthesizes business goals, target personas, and technical constraints from the source quotation."
+    },
+    "journey": {
+      "title": "User Journey",
+      "description": "Maps user interaction flows, chronological phases, actors, and system touchpoints."
+    },
+    "architecture": {
+      "title": "System Architecture",
+      "description": "Designs component diagrams, architectural modules, databases, and service relations."
+    },
+    "state_machine": {
+      "title": "State Machine",
+      "description": "Defines core entities, state lifecycles, transition events, and system action guards."
+    },
+    "workflow": {
+      "title": "Business Workflow",
+      "description": "Structures cross-functional business process flows with role-based swimlanes."
+    },
+    "wbs": {
+      "title": "Work Breakdown Structure (WBS)",
+      "description": "Organizes module hierarchies, feature acceptance criteria, and cross-reference matrices."
+    },
+    "cross_validation": {
+      "title": "Cross-Validation & Consistency",
+      "description": "Validates architectural dependency integrity and structural consistency across all sections."
+    }
+  },
+  "actions": {
+    "start": "Start Generation",
+    "stop": "Stop",
+    "stopping": "Stopping...",
+    "recover": "Check & Recover",
+    "retry": "Retry",
+    "refresh": "Refresh",
+    "continue": "Continue Generation",
+    "complete_manual": "Complete Manually",
+    "save_and_validate": "Save & Validate",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "discard": "Discard Changes",
+    "discard_confirm": "Close Form?",
+    "reload_latest": "Load Latest Version",
+    "confirm_reload": "Confirm Load Latest",
+    "back_to_generator": "Back to Generator",
+    "back_to_form": "Back to Form"
+  },
+  "errors": {
+    "foreign_404_title": "Blueprint Not Found",
+    "foreign_404_desc": "The requested blueprint was not found or you do not have permission to access this tenant data.",
+    "stale_lease_title": "Stale Lease Detected",
+    "stale_lease_desc": "Pipeline has not received updates for over 5 minutes. The execution lock may have expired.",
+    "stale_conflict_title": "Version Conflict Detected (409)",
+    "stale_conflict_desc": "The content version on the server was updated by another user or background job.",
+    "server_validation_title": "Content Validation Errors (422)",
+    "empty_section_warning": "This section does not yet have any business data rows.",
+    "provider_config_missing": "AI provider configuration is missing or the API key is invalid. Please check system settings.",
+    "provider_config_link": "Open Provider Settings"
+  },
+  "invalidation": {
+    "warning_title": "Downstream Invalidation Warning",
+    "warning_desc": "This section was previously completed. Editing and resaving it will invalidate the current results and re-run the following downstream sections:",
+    "confirm_checkbox": "I understand and agree that the downstream sections listed above will be re-run."
+  },
+  "recovery": {
+    "success_title": "Section Successfully Completed",
+    "success_desc": "Section data has been saved and validated. Click \"Continue Generation\" to proceed to the next blueprint stage."
+  },
+  "empty_states": {
+    "no_blueprints": "No blueprints created yet.",
+    "no_revisions": "No eligible revisions available for blueprint generation.",
+    "no_phases": "No phases added yet.",
+    "no_actors": "No actors added yet.",
+    "no_activities": "No activities added yet.",
+    "no_groups": "No architecture groups added yet.",
+    "no_nodes": "No architecture nodes added yet.",
+    "no_edges": "No architecture edges added yet.",
+    "no_states": "No states added yet.",
+    "no_transitions": "No transitions added yet.",
+    "no_workflows": "No workflows created yet.",
+    "no_modules": "No modules created yet.",
+    "no_features": "No features in this module.",
+    "no_cross_references": "No cross references added yet."
+  },
+  "mobile_notice": {
+    "desktop_authoring_hint": "Blueprint manual authoring and data entry forms are optimized for desktop screens. On mobile devices, data is displayed in a read-only summary mode."
+  }
+}

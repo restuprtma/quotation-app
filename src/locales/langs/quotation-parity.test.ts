@@ -1,7 +1,9 @@
 import { it, expect, describe } from 'vitest';
 
-import en from './en/quotation.json';
-import id from './id/quotation.json';
+import enBlueprint from './en/blueprint.json';
+import idBlueprint from './id/blueprint.json';
+import enQuotation from './en/quotation.json';
+import idQuotation from './id/quotation.json';
 
 const flattenKeys = (value: unknown, prefix = ''): string[] => {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return [prefix];
@@ -11,8 +13,12 @@ const flattenKeys = (value: unknown, prefix = ''): string[] => {
   );
 };
 
-describe('quotation locale parity', () => {
+describe('locale parity', () => {
   it('keeps Indonesian and English quotation keys identical', () => {
-    expect(flattenKeys(id).sort()).toEqual(flattenKeys(en).sort());
+    expect(flattenKeys(idQuotation).sort()).toEqual(flattenKeys(enQuotation).sort());
+  });
+
+  it('keeps Indonesian and English blueprint keys identical', () => {
+    expect(flattenKeys(idBlueprint).sort()).toEqual(flattenKeys(enBlueprint).sort());
   });
 });

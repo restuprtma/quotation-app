@@ -45,6 +45,7 @@ export const allLangs: LangOption[] = [
 
 const productionNamespaces = new Set([
   'auth',
+  'blueprint',
   'common',
   'contract',
   'error',

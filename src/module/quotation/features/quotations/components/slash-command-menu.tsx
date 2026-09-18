@@ -64,10 +64,10 @@ export function SlashCommandMenu({
         id: 'cmd-blueprint',
         name: 'Blueprint Generator',
         command: '/blueprint',
-        content_instruction: 'Generate system architecture and workflow blueprint (Phase 8)',
-        is_active: false,
+        content_instruction: 'Generate system architecture and workflow blueprint',
+        is_active: true,
         isBuiltin: true,
-        disabled: true,
+        disabled: false,
       },
     ];
 
@@ -184,7 +184,6 @@ export function SlashCommandMenu({
         <List disablePadding sx={{ overflowY: 'auto', py: 0.5 }}>
           {commandItems.map((item, idx) => {
             const isSelected = idx === selectedIndex;
-            const isBlueprint = item.command === '/blueprint';
 
             return (
               <ListItem key={item.id} disablePadding sx={{ px: 1, py: 0.25 }}>
@@ -217,17 +216,15 @@ export function SlashCommandMenu({
                       sx={{
                         p: 0.75,
                         borderRadius: 1,
-                        bgcolor: isBlueprint ? 'action.hover' : 'primary.main',
-                        color: isBlueprint ? 'text.secondary' : 'primary.contrastText',
+                        bgcolor: item.disabled ? 'action.hover' : 'primary.main',
+                        color: item.disabled ? 'text.secondary' : 'primary.contrastText',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                       }}
                     >
                       <Iconify
-                        icon={
-                          isBlueprint ? 'solar:file-bold-duotone' : 'solar:file-check-bold-duotone'
-                        }
+                        icon="solar:file-check-bold-duotone"
                         width={18}
                       />
                     </Box>
@@ -271,14 +268,7 @@ export function SlashCommandMenu({
                       )
                     }
                   />
-                  {isBlueprint ? (
-                    <Chip
-                      size="small"
-                      label="Phase 8 Info"
-                      variant="outlined"
-                      sx={{ fontSize: '0.675rem', height: 20, color: 'text.secondary' }}
-                    />
-                  ) : item.is_active ? (
+                  {item.is_active ? (
                     <Chip
                       size="small"
                       label="Active"

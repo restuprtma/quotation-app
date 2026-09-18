@@ -28,6 +28,12 @@ const RateCardListPage = lazy(
 const RateCardDetailPage = lazy(
   () => import('src/module/quotation/features/rate-cards/pages/rate-card-detail-page')
 );
+const BlueprintCreatePage = lazy(
+  () => import('src/module/quotation/features/blueprints/pages/create')
+);
+const BlueprintProgressPage = lazy(
+  () => import('src/module/quotation/features/blueprints/pages/progress')
+);
 
 // ----------------------------------------------------------------------
 
@@ -61,6 +67,13 @@ export const dashboardRoutes: RouteObject[] = [
           { path: 'ai-settings', element: <AISettingsPage /> },
           { path: 'rate-cards', element: <RateCardListPage /> },
           { path: 'rate-cards/:id', element: <RateCardDetailPage /> },
+        ],
+      },
+      {
+        path: 'blueprint',
+        children: [
+          { index: true, element: <BlueprintCreatePage /> },
+          { path: ':id', element: <BlueprintProgressPage /> },
         ],
       },
       {

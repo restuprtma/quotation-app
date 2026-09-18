@@ -23,6 +23,11 @@ export const paths = {
       root: '/contract',
       edit: (id: string) => `/contract/${id}/edit`,
     },
+    blueprint: {
+      root: '/blueprint',
+      create: '/blueprint',
+      detail: (id: string) => `/blueprint/${id}`,
+    },
   },
   public: {
     contract: (token: string) => `/p/c/${token}`,

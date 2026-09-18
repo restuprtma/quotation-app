@@ -167,6 +167,7 @@ export const endpoints = {
       regenerate: (id: string) => `/quotation/v1/quotations/${id}/regenerate`,
       generationStatus: (id: string) => `/quotation/v1/quotations/${id}/generation-status`,
       saveDraft: (id: string) => `/quotation/v1/quotations/${id}/draft`,
+      revisions: (id: string) => `/quotation/v1/quotations/${id}/revisions`,
     },
     ai: {
       skills: '/quotation/v1/ai/skills',
@@ -178,6 +179,17 @@ export const endpoints = {
       details: (id: string) => `/quotation/v1/rate-cards/${id}/details`,
       create: '/quotation/v1/rate-cards',
       delete: (id: string) => `/quotation/v1/rate-cards/${id}`,
+    },
+    blueprints: {
+      root: '/quotation/v1/blueprints',
+      generate: '/quotation/v1/blueprints/generate',
+      byId: (id: string) => `/quotation/v1/blueprints/${id}`,
+      generationStatus: (id: string) => `/quotation/v1/blueprints/${id}/generation-status`,
+      continue: (id: string) => `/quotation/v1/blueprints/${id}/continue`,
+      retrySection: (id: string, section: string) =>
+        `/quotation/v1/blueprints/${id}/sections/${section}/retry`,
+      manualComplete: (id: string, section: string) =>
+        `/quotation/v1/blueprints/${id}/sections/${section}/manual`,
     },
   },
 } as const;

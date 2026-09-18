@@ -1,0 +1,81 @@
+import { expect, test } from '@playwright/test';
+import { qaApi, qaSession } from './fixtures';
+import { saveEvidence } from './artifacts';
+
+test('two tabs observe busy and Stop prevents the next stage', async ({ page, context }) => {
+  test.setTimeout(180_000);
+  const session = await qaSession(page);
+  const headers = { Authorization: `Bearer ${session.token}` };
+  await page.goto(`http://127.0.0.1:18081/blueprint?quotation_id=${session.quotation_id}&revision_id=${session.revision_id}`);
+  await expect(page.getByLabel('Pilih Revisi')).toHaveValue(session.revision_id, { timeout: 20_000 });
+  await page.getByLabel('Judul Blueprint').fill('Sistem Antrian Dua Tab');
+  await page.getByLabel('Tujuan Bisnis 1').fill('Mengurangi waktu tunggu pemohon');
+  await page.getByLabel('Aktor 1').fill('Pemohon Layanan');
+  await page.getByLabel('Fase Bisnis 1').fill('Pendaftaran dan Reservasi');
+  await page.getByRole('button', { name: 'Buat Blueprint' }).click();
+  await expect(page).toHaveURL(/\/blueprint\/[0-9a-f-]{36}/, { timeout: 20_000 });
+  const id = page.url().split('/').pop()!;
+  await expect(page.getByRole('button', { name: 'Mulai Generasi' })).toBeVisible({ timeout: 20_000 });
+  expect((await page.request.post(`${qaApi}/qa/delay/10000`, { headers })).status()).toBe(204);
+  const second = await context.newPage();
+  await second.addInitScript((token) => sessionStorage.setItem('tuai.access_token', token), session.token);
+  await second.goto(`http://127.0.0.1:18081/blueprint/${id}`);
+  await expect(second.getByRole('button', { name: 'Mulai Generasi' })).toBeVisible({ timeout: 20_000 });
+  const continueResponses: number[] = [];
+  const secondExchanges: string[] = [];
+  const resumeExchanges: string[] = [];
+  let recordingResume = false;
+  const exchange = (r: { url(): string; status(): number; request(): { method(): string } }) => {
+    const url = new URL(r.url());
+    if (url.origin !== qaApi || !url.pathname.startsWith('/quotation/v1/blueprints')) return null;
+    return `${r.request().method()} ${url.pathname.replace(/[0-9a-f]{8}-[0-9a-f-]{27,}/gi, ':id')} ${r.status()}`;
+  };
+  page.on('response', (r) => { if (r.request().method() === 'POST' && r.url().endsWith(`/${id}/continue`)) continueResponses.push(r.status()); });
+  page.on('response', (r) => { if (recordingResume) { const line = exchange(r); if (line) resumeExchanges.push(line); } });
+  second.on('response', (r) => { const line = exchange(r); if (line) secondExchanges.push(line); });
+  const firstContinue = page.waitForResponse((r) => r.url().endsWith(`/${id}/continue`) && r.status() === 200);
+  await page.getByRole('button', { name: 'Mulai Generasi' }).click();
+  await firstContinue;
+  const busy = second.waitForResponse((r) => r.url().endsWith(`/${id}/continue`) && r.status() === 409);
+  await second.getByRole('button', { name: 'Mulai Generasi' }).click();
+  await busy;
+  const beforeMidStageReload = await (await page.request.get(`${qaApi}/qa/verify/${id}`, { headers })).json();
+  const secondPostsBeforeReload = secondExchanges.filter((line) => line.includes('POST') && line.includes('/continue')).length;
+  const reloadedStatus = second.waitForResponse((r) => r.url().endsWith(`/${id}/generation-status`) && r.status() === 200);
+  await second.reload();
+  await reloadedStatus;
+  const secondPostsAfterReload = secondExchanges.filter((line) => line.includes('POST') && line.includes('/continue')).length;
+  expect(secondPostsAfterReload).toBe(secondPostsBeforeReload);
+  await saveEvidence('mid-stage-reload-1440', second, secondExchanges, {
+    ...beforeMidStageReload,
+    continue_before: secondPostsBeforeReload,
+    continue_after: secondPostsAfterReload,
+  });
+  await page.getByRole('button', { name: 'Hentikan Proses Generasi' }).click();
+  const before = await (await page.request.get(`${qaApi}/qa/verify/${id}`, { headers })).json();
+  await expect(page.getByRole('button', { name: 'Lanjutkan Generasi' })).toBeVisible({ timeout: 20_000 });
+  await page.waitForTimeout(11000);
+  const posts = continueResponses.length;
+  await page.waitForTimeout(2000);
+  const postsAfter = continueResponses.length;
+  expect(posts).toBeGreaterThan(0);
+  expect(postsAfter).toBe(posts);
+  const after = await (await page.request.get(`${qaApi}/qa/verify/${id}`, { headers })).json();
+  await saveEvidence('two-tab-stop-1440', page, [...continueResponses.map((status) => `POST /quotation/v1/blueprints/:id/continue ${status}`), 'SECOND TAB POST /quotation/v1/blueprints/:id/continue 409'], { before, after, posts, posts_after: postsAfter });
+  const postsBeforeResume = continueResponses.length;
+  recordingResume = true;
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Lanjutkan Generasi' })).toBeVisible({ timeout: 20_000 });
+  await page.goto('http://127.0.0.1:18081/blueprint');
+  await expect(page.getByRole('button', { name: 'Buka' })).toBeVisible({ timeout: 20_000 });
+  await page.getByRole('button', { name: 'Buka' }).click();
+  await expect(page).toHaveURL(new RegExp(`/blueprint/${id}$`), { timeout: 20_000 });
+  expect(continueResponses.length).toBe(postsBeforeResume);
+  expect(resumeExchanges).toContain('GET /quotation/v1/blueprints 200');
+  expect(resumeExchanges).toContain('GET /quotation/v1/blueprints/:id 200');
+  expect(resumeExchanges.some((line) => line.includes('POST'))).toBe(false);
+  const resumed = await (await page.request.get(`${qaApi}/qa/verify/${id}`, { headers })).json();
+  await saveEvidence('list-resume-1440', page, resumeExchanges, { ...resumed, continue_before: postsBeforeResume, continue_after: continueResponses.length });
+  await second.close();
+  expect((await page.request.post(`${qaApi}/qa/cleanup`, { headers })).status()).toBe(204);
+});

@@ -1,0 +1,1330 @@
+{
+  "schema_version": "1.0",
+  "title": "Sistem Antrian Pelayanan Terpadu dan Manajemen Loket Publik",
+  "summary": "Arsitektur platform pengelolaan antrean multi-layanan terpadu untuk instansi publik dengan kapabilitas pendaftaran daring, tiket mandiri kiosk onsite, manajemen loket berbasis web, pemanggilan suara Text-to-Speech (TTS) lokal, serta sinkronisasi display ruang tunggu real-time via WebSocket.",
+  "journey": {
+    "phases": [
+      {
+        "id": "phase-pendaftaran-reservasi",
+        "label": "Pendaftaran & Reservasi",
+        "order": 1
+      },
+      {
+        "id": "phase-check-in-kedatangan",
+        "label": "Check-in & Kedatangan",
+        "order": 2
+      },
+      {
+        "id": "phase-menunggu-antrean",
+        "label": "Menunggu Antrean",
+        "order": 3
+      },
+      {
+        "id": "phase-pemanggilan-verifikasi",
+        "label": "Pemanggilan & Verifikasi Loket",
+        "order": 4
+      },
+      {
+        "id": "phase-pelayanan-pemrosesan",
+        "label": "Pelayanan & Pemrosesan Dokumen",
+        "order": 5
+      },
+      {
+        "id": "phase-penyelesaian-evaluasi",
+        "label": "Penyelesaian & Evaluasi Kepuasan",
+        "order": 6
+      }
+    ],
+    "actors": [
+      {
+        "id": "actor-pemohon-layanan",
+        "label": "Pemohon Layanan",
+        "order": 1
+      },
+      {
+        "id": "actor-petugas-loket",
+        "label": "Petugas Loket",
+        "order": 2
+      },
+      {
+        "id": "actor-supervisor-layanan",
+        "label": "Supervisor Layanan",
+        "order": 3
+      },
+      {
+        "id": "actor-administrator-sistem",
+        "label": "Administrator Sistem",
+        "order": 4
+      },
+      {
+        "id": "actor-sistem-otomasi-suara",
+        "label": "Sistem Otomasi Suara (TTS)",
+        "order": 5
+      }
+    ],
+    "activities": [
+      {
+        "id": "act-buat-reservasi-online",
+        "phase_id": "phase-pendaftaran-reservasi",
+        "actor_id": "actor-pemohon-layanan",
+        "label": "Membuat Reservasi Antrean Daring",
+        "description": "Pemohon memilih jenis layanan dan jadwal kunjungan melalui portal web, lalu menerima konfirmasi tiket digital.",
+        "touchpoints": [
+          "Web Portal Pemohon",
+          "WhatsApp Notification Bot"
+        ],
+        "references": []
+      },
+      {
+        "id": "act-kiosk-check-in",
+        "phase_id": "phase-check-in-kedatangan",
+        "actor_id": "actor-pemohon-layanan",
+        "label": "Check-in atau Ambil Tiket Kiosk Onsite",
+        "description": "Pemohon melakukan scan QR tiket reservasi atau memilih layanan langsung di mesin kiosk untuk mencetak nomor antrean fisik.",
+        "touchpoints": [
+          "Kiosk Mesin Antrian Onsite",
+          "Tiket Cetak Termal"
+        ],
+        "references": []
+      },
+      {
+        "id": "act-pantau-ruang-tunggu",
+        "phase_id": "phase-menunggu-antrean",
+        "actor_id": "actor-pemohon-layanan",
+        "label": "Memantau Status Antrean di Ruang Tunggu",
+        "description": "Pemohon mengamati monitor display ruang tunggu atau perangkat seluler untuk memantau nomor antrean yang sedang dilayani.",
+        "touchpoints": [
+          "Display TV Ruang Tunggu",
+          "Web Portal Pemohon"
+        ],
+        "references": []
+      },
+      {
+        "id": "act-panggil-nomor-loket",
+        "phase_id": "phase-pemanggilan-verifikasi",
+        "actor_id": "actor-petugas-loket",
+        "label": "Memanggil Nomor Antrean Loket",
+        "description": "Petugas menekan tombol panggil pada console web loket untuk memanggil nomor antrean berikutnya secara berurutan.",
+        "touchpoints": [
+          "Loket Counter Web Application"
+        ],
+        "references": []
+      },
+      {
+        "id": "act-eksekusi-tts-suara",
+        "phase_id": "phase-pemanggilan-verifikasi",
+        "actor_id": "actor-sistem-otomasi-suara",
+        "label": "Menjalankan Pengumuman Suara Otomatis",
+        "description": "Sistem otomatis membunyikan pengumuman panggilan suara Text-to-Speech melalui speaker ruang tunggu saat tombol panggil ditekan.",
+        "touchpoints": [
+          "Audio Speaker Panggilan",
+          "Local Offline Text-to-Speech Engine"
+        ],
+        "references": []
+      },
+      {
+        "id": "act-verifikasi-dokumen-loket",
+        "phase_id": "phase-pemanggilan-verifikasi",
+        "actor_id": "actor-pemohon-layanan",
+        "label": "Menyerahkan Berkas ke Petugas",
+        "description": "Pemohon mendatangi loket pelayanan dan menyerahkan dokumen persyaratan kepada petugas untuk divalidasi.",
+        "touchpoints": [
+          "Loket Counter Web Application"
+        ],
+        "references": []
+      },
+      {
+        "id": "act-proses-layanan-dokumen",
+        "phase_id": "phase-pelayanan-pemrosesan",
+        "actor_id": "actor-petugas-loket",
+        "label": "Memproses Dokumen Layanan Pemohon",
+        "description": "Petugas loket memproses permohonan layanan, memperbarui status tiket, dan menyelesaikan transaksi data pada sistem.",
+        "touchpoints": [
+          "Loket Counter Web Application"
+        ],
+        "references": []
+      },
+      {
+        "id": "act-transfer-antrean-supervisor",
+        "phase_id": "phase-pelayanan-pemrosesan",
+        "actor_id": "actor-supervisor-layanan",
+        "label": "Mengelola Antrean dan Transfer Loket",
+        "description": "Supervisor memantau beban layanan dan melakukan transfer antrean antar-loket jika terjadi penumpukan.",
+        "touchpoints": [
+          "Dashboard Analitik SLA",
+          "Loket Counter Web Application"
+        ],
+        "references": []
+      },
+      {
+        "id": "act-selesai-isi-survey",
+        "phase_id": "phase-penyelesaian-evaluasi",
+        "actor_id": "actor-pemohon-layanan",
+        "label": "Menyelesaikan Layanan & Mengisi Survey Kepuasan",
+        "description": "Pemohon menerima hasil layanan dan memberikan penilaian kepuasan pada perangkat survey atau melalui tautan digital.",
+        "touchpoints": [
+          "Web Portal Pemohon",
+          "WhatsApp Notification Bot"
+        ],
+        "references": []
+      },
+      {
+        "id": "act-pantau-performa-sistem",
+        "phase_id": "phase-penyelesaian-evaluasi",
+        "actor_id": "actor-administrator-sistem",
+        "label": "Memantau Kinerja Infrastruktur dan SLA",
+        "description": "Administrator memantau stabilitas sistem, koneksi jaringan lokal, serta rekapitulasi data analitik performa loket.",
+        "touchpoints": [
+          "Dashboard Analitik SLA"
+        ],
+        "references": []
+      }
+    ]
+  },
+  "architecture": {
+    "groups": [
+      {
+        "id": "grp-client-tier",
+        "label": "Presentation & Channel Tier",
+        "order": 1
+      },
+      {
+        "id": "grp-gateway-tier",
+        "label": "API Gateway & Ingress Tier",
+        "order": 2
+      },
+      {
+        "id": "grp-service-tier",
+        "label": "Application & Service Tier",
+        "order": 3
+      },
+      {
+        "id": "grp-data-tier",
+        "label": "Data & Persistence Tier",
+        "order": 4
+      },
+      {
+        "id": "grp-integration-tier",
+        "label": "External Integration & Hardware Tier",
+        "order": 5
+      }
+    ],
+    "nodes": [
+      {
+        "id": "node-web-portal",
+        "group_id": "grp-client-tier",
+        "type": "application",
+        "label": "Web Portal Pemohon",
+        "description": "Aplikasi web responsif untuk pendaftaran reservasi online dan pemantauan status antrean mandiri.",
+        "layout": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": "node-kiosk-app",
+        "group_id": "grp-client-tier",
+        "type": "application",
+        "label": "Kiosk Mesin Antrian Onsite",
+        "description": "Aplikasi layar sentuh kiosk mandiri untuk pengambilan tiket fisik dan check-in kedatangan.",
+        "layout": {
+          "x": 260,
+          "y": 0
+        }
+      },
+      {
+        "id": "node-counter-app",
+        "group_id": "grp-client-tier",
+        "type": "application",
+        "label": "Loket Counter Web Application",
+        "description": "Dashboard konsol petugas loket untuk pemanggilan, pengelolaan, dan pemrosesan dokumen antrean.",
+        "layout": {
+          "x": 520,
+          "y": 0
+        }
+      },
+      {
+        "id": "node-display-board",
+        "group_id": "grp-client-tier",
+        "type": "device",
+        "label": "Display TV Ruang Tunggu",
+        "description": "Smart TV / Monitor ruang tunggu penampil visual status antrean real-time.",
+        "layout": {
+          "x": 780,
+          "y": 0
+        }
+      },
+      {
+        "id": "node-api-gateway",
+        "group_id": "grp-gateway-tier",
+        "type": "service",
+        "label": "API Gateway & Reverse Proxy",
+        "description": "Pintu gerbang routing HTTP/HTTPS dan manajemen koneksi WebSocket klaster.",
+        "layout": {
+          "x": 390,
+          "y": 160
+        }
+      },
+      {
+        "id": "node-queue-service",
+        "group_id": "grp-service-tier",
+        "type": "service",
+        "label": "Queue Engine & API Service",
+        "description": "Backend modular monolith berbasis Go (Golang) pengelola inti antrean, status mesin, dan logika SLA.",
+        "layout": {
+          "x": 260,
+          "y": 320
+        }
+      },
+      {
+        "id": "node-websocket-hub",
+        "group_id": "grp-service-tier",
+        "type": "service",
+        "label": "WebSocket Real-Time Hub",
+        "description": "Layanan manajemen koneksi real-time untuk broadcast perubahan status ke display dan konsol loket.",
+        "layout": {
+          "x": 520,
+          "y": 320
+        }
+      },
+      {
+        "id": "node-postgres-db",
+        "group_id": "grp-data-tier",
+        "type": "database",
+        "label": "Relational Database (PostgreSQL)",
+        "description": "Penyimpanan persisten data transaksional tiket, riwayat pelayanan, dan parameter konfigurasi loket.",
+        "layout": {
+          "x": 260,
+          "y": 480
+        }
+      },
+      {
+        "id": "node-redis-cache",
+        "group_id": "grp-data-tier",
+        "type": "cache",
+        "label": "Redis Cache & Pub/Sub",
+        "description": "In-memory cache antrean aktif dan message broker untuk sinkronisasi WebSocket.",
+        "layout": {
+          "x": 520,
+          "y": 480
+        }
+      },
+      {
+        "id": "node-whatsapp-gateway",
+        "group_id": "grp-integration-tier",
+        "type": "integration",
+        "label": "WhatsApp Business API Gateway",
+        "description": "Integrasi layanan pihak ketiga untuk pengiriman notifikasi pesan tiket dan pengingat reservasi.",
+        "layout": {
+          "x": 130,
+          "y": 640
+        }
+      },
+      {
+        "id": "node-tts-engine",
+        "group_id": "grp-integration-tier",
+        "type": "integration",
+        "label": "Local Offline Text-to-Speech Engine",
+        "description": "Engine audio lokal untuk mengonversi teks panggilan nomor loket menjadi suara audio di ruang tunggu.",
+        "layout": {
+          "x": 390,
+          "y": 640
+        }
+      },
+      {
+        "id": "node-thermal-printer",
+        "group_id": "grp-integration-tier",
+        "type": "device",
+        "label": "Thermal Printer Driver Kiosk",
+        "description": "Perangkat pencetak tiket fisik berbasis perintah ESC/POS di unit kiosk.",
+        "layout": {
+          "x": 650,
+          "y": 640
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge-web-to-gateway",
+        "source": "node-web-portal",
+        "target": "node-api-gateway",
+        "label": "HTTPS REST / JSON",
+        "type": "sync"
+      },
+      {
+        "id": "edge-kiosk-to-gateway",
+        "source": "node-kiosk-app",
+        "target": "node-api-gateway",
+        "label": "HTTPS REST API",
+        "type": "sync"
+      },
+      {
+        "id": "edge-counter-to-gateway",
+        "source": "node-counter-app",
+        "target": "node-api-gateway",
+        "label": "HTTPS REST & WSS",
+        "type": "sync"
+      },
+      {
+        "id": "edge-display-to-gateway",
+        "source": "node-display-board",
+        "target": "node-api-gateway",
+        "label": "WebSocket Connection",
+        "type": "event"
+      },
+      {
+        "id": "edge-gateway-to-service",
+        "source": "node-api-gateway",
+        "target": "node-queue-service",
+        "label": "Internal HTTP Proxy",
+        "type": "sync"
+      },
+      {
+        "id": "edge-gateway-to-ws",
+        "source": "node-api-gateway",
+        "target": "node-websocket-hub",
+        "label": "WebSocket Protocol Proxy",
+        "type": "event"
+      },
+      {
+        "id": "edge-service-to-db",
+        "source": "node-queue-service",
+        "target": "node-postgres-db",
+        "label": "SQL Transactions",
+        "type": "data_flow"
+      },
+      {
+        "id": "edge-service-to-redis",
+        "source": "node-queue-service",
+        "target": "node-redis-cache",
+        "label": "Atomic Counter & Pub/Sub",
+        "type": "data_flow"
+      },
+      {
+        "id": "edge-service-to-whatsapp",
+        "source": "node-queue-service",
+        "target": "node-whatsapp-gateway",
+        "label": "HTTPS POST /v1/messages",
+        "type": "async"
+      },
+      {
+        "id": "edge-service-to-tts",
+        "source": "node-queue-service",
+        "target": "node-tts-engine",
+        "label": "Local Audio Dispatch Event",
+        "type": "event"
+      },
+      {
+        "id": "edge-kiosk-to-printer",
+        "source": "node-kiosk-app",
+        "target": "node-thermal-printer",
+        "label": "TCP / ESC/POS Command",
+        "type": "sync"
+      }
+    ]
+  },
+  "state_machine": {
+    "entity": "Tiket Antrean Layanan",
+    "initial_state": "state-booked",
+    "states": [
+      {
+        "id": "state-booked",
+        "label": "Telah Dipesan (Booked)",
+        "type": "normal",
+        "layout": {
+          "x": 0,
+          "y": 100
+        }
+      },
+      {
+        "id": "state-checked-in",
+        "label": "Check-in Hadir (Checked In)",
+        "type": "normal",
+        "layout": {
+          "x": 200,
+          "y": 100
+        }
+      },
+      {
+        "id": "state-waiting",
+        "label": "Menunggu Antrean (Waiting)",
+        "type": "normal",
+        "layout": {
+          "x": 400,
+          "y": 100
+        }
+      },
+      {
+        "id": "state-called",
+        "label": "Sedang Dipanggil (Called)",
+        "type": "normal",
+        "layout": {
+          "x": 600,
+          "y": 100
+        }
+      },
+      {
+        "id": "state-recalled",
+        "label": "Pemanggilan Ulang (Recalled)",
+        "type": "normal",
+        "layout": {
+          "x": 600,
+          "y": 280
+        }
+      },
+      {
+        "id": "state-serving",
+        "label": "Sedang Dilayani (Serving)",
+        "type": "normal",
+        "layout": {
+          "x": 800,
+          "y": 100
+        }
+      },
+      {
+        "id": "state-completed",
+        "label": "Selesai Dilayani (Completed)",
+        "type": "terminal",
+        "layout": {
+          "x": 1000,
+          "y": 100
+        }
+      },
+      {
+        "id": "state-skipped",
+        "label": "Terlewati / No-Show (Skipped)",
+        "type": "exception",
+        "layout": {
+          "x": 600,
+          "y": 460
+        }
+      },
+      {
+        "id": "state-cancelled",
+        "label": "Dibatalkan (Cancelled)",
+        "type": "exception",
+        "layout": {
+          "x": 200,
+          "y": 300
+        }
+      }
+    ],
+    "transitions": [
+      {
+        "id": "trans-kiosk-check-in",
+        "source": "state-booked",
+        "target": "state-checked-in",
+        "event": "Check-in Kiosk / Scan QR",
+        "actor": "Pemohon Layanan",
+        "guard": "Tiket reservasi valid dan waktu kunjungan sesuai dengan jadwal hari ini",
+        "actions": [
+          "Catat timestamp kedatangan pada database",
+          "Kirim konfirmasi check-in via WhatsApp bot"
+        ]
+      },
+      {
+        "id": "trans-direct-walk-in",
+        "source": "state-booked",
+        "target": "state-waiting",
+        "event": "Ambil Tiket Langsung (Walk-in)",
+        "actor": "Pemohon Layanan",
+        "guard": "Kiosk mencetak nomor antrean fisik baru untuk kategori layanan yang dipilih",
+        "actions": [
+          "Cetak nomor antrean via printer termal kiosk",
+          "Daftarkan tiket baru ke dalam antrean aktif Redis"
+        ]
+      },
+      {
+        "id": "trans-queue-enqueue",
+        "source": "state-checked-in",
+        "target": "state-waiting",
+        "event": "Masuk Antrean Aktif",
+        "actor": "Sistem Otomasi Scheduller",
+        "guard": "Pemohon telah melakukan check-in di lokasi pelayanan",
+        "actions": [
+          "Masukkan tiket ke dalam urutan antrean aktif",
+          "Broadcast pembaruan posisi antrean via WebSocket"
+        ]
+      },
+      {
+        "id": "trans-call-next",
+        "source": "state-waiting",
+        "target": "state-called",
+        "event": "Panggil Nomor Antrean",
+        "actor": "Petugas Loket",
+        "guard": "Loket petugas dalam status aktif dan tidak sedang melayani tiket lain",
+        "actions": [
+          "Kirim perintah Text-to-Speech lokal untuk pengumuman suara",
+          "Broadcast perubahan status tiket ke display TV ruang tunggu via WebSocket",
+          "Catat timestamp pemanggilan pertama"
+        ]
+      },
+      {
+        "id": "trans-recall-number",
+        "source": "state-called",
+        "target": "state-recalled",
+        "event": "Panggil Ulang Nomor",
+        "actor": "Petugas Loket",
+        "guard": "Pemohon belum hadir di depan loket pada pemanggilan sebelumnya",
+        "actions": [
+          "Bunyikan ulang pengumuman TTS",
+          "Perbarui status panggilan ulang pada konsol loket dan display"
+        ]
+      },
+      {
+        "id": "trans-recalled-back-to-called",
+        "source": "state-recalled",
+        "target": "state-called",
+        "event": "Respon Panggilan Ulang",
+        "actor": "Pemohon Layanan",
+        "guard": "Pemohon merespon panggilan dan mendekati loket",
+        "actions": [
+          "Catat kehadiran pemohon pada log interaksi"
+        ]
+      },
+      {
+        "id": "trans-start-service",
+        "source": "state-called",
+        "target": "state-serving",
+        "event": "Mulai Pelayanan Loket",
+        "actor": "Petugas Loket",
+        "guard": "Pemohon hadir di depan loket dan menyerahkan berkas persyaratan",
+        "actions": [
+          "Catat timestamp mulai pelayanan",
+          "Ubah status loket menjadi SIBUK"
+        ]
+      },
+      {
+        "id": "trans-start-service-from-recall",
+        "source": "state-recalled",
+        "target": "state-serving",
+        "event": "Mulai Pelayanan Setelah Panggil Ulang",
+        "actor": "Petugas Loket",
+        "guard": "Pemohon hadir setelah panggilan ulang",
+        "actions": [
+          "Catat timestamp mulai pelayanan",
+          "Ubah status loket menjadi SIBUK"
+        ]
+      },
+      {
+        "id": "trans-finish-service",
+        "source": "state-serving",
+        "target": "state-completed",
+        "event": "Selesaikan Pelayanan",
+        "actor": "Petugas Loket",
+        "guard": "Seluruh proses verifikasi dokumen dan transaksi layanan tuntas",
+        "actions": [
+          "Catat durasi total pelayanan dan simpan ke database",
+          "Kirim tautan survey kepuasan pelanggan via WhatsApp",
+          "Ubah status loket menjadi TERSEDIA"
+        ]
+      },
+      {
+        "id": "trans-mark-skipped",
+        "source": "state-called",
+        "target": "state-skipped",
+        "event": "Tandai Terlewati (No-Show)",
+        "actor": "Petugas Loket",
+        "guard": "Nomor telah dipanggil maksimal 3 kali dan melewati batas waktu tunggu tanpa kehadiran",
+        "actions": [
+          "Catat status terlewati pada riwayat tiket",
+          "Ubah status loket menjadi TERSEDIA untuk memanggil antrean berikutnya"
+        ]
+      },
+      {
+        "id": "trans-mark-skipped-from-recall",
+        "source": "state-recalled",
+        "target": "state-skipped",
+        "event": "Tandai Terlewati Setelah Panggil Ulang",
+        "actor": "Petugas Loket",
+        "guard": "Pemohon tetap tidak hadir setelah proses panggil ulang",
+        "actions": [
+          "Catat status terlewati pada riwayat tiket",
+          "Ubah status loket menjadi TERSEDIA"
+        ]
+      },
+      {
+        "id": "trans-cancel-booking",
+        "source": "state-booked",
+        "target": "state-cancelled",
+        "event": "Batalkan Reservasi",
+        "actor": "Pemohon Layanan",
+        "guard": "Pemohon membatalkan jadwal sebelum waktu check-in atau kedaluwarsa",
+        "actions": [
+          "Hapus slot reservasi dari sistem aktif",
+          "Kirim notifikasi pembatalan via WhatsApp"
+        ]
+      },
+      {
+        "id": "trans-auto-cancel-late",
+        "source": "state-booked",
+        "target": "state-cancelled",
+        "event": "Kecelakaan / Kedaluwarsa Keterlambatan",
+        "actor": "Sistem Otomasi Scheduller",
+        "guard": "Pemohon terlambat lebih dari 15 menit dari jadwal reservasi tanpa check-in",
+        "actions": [
+          "Ubah status tiket menjadi kedaluwarsa/dibatalkan otomatis",
+          "Catat log pelanggaran SLA kedatangan"
+        ]
+      }
+    ]
+  },
+  "workflows": [
+    {
+      "id": "wf-pendaftaran-reservasi-online",
+      "name": "Alur Pendaftaran dan Reservasi Layanan Daring",
+      "description": "Proses pemohon layanan melakukan reservasi jadwal kunjungan melalui web portal dan menerima tiket digital serta notifikasi WhatsApp.",
+      "lanes": [
+        {
+          "id": "lane-pemohon-web",
+          "label": "Pemohon Layanan",
+          "order": 1
+        },
+        {
+          "id": "lane-portal-web",
+          "label": "Web Portal & API Gateway",
+          "order": 2
+        },
+        {
+          "id": "lane-backend-queue",
+          "label": "Sistem Queue Engine",
+          "order": 3
+        },
+        {
+          "id": "lane-whatsapp-bot",
+          "label": "WhatsApp Notification Bot",
+          "order": 4
+        }
+      ],
+      "nodes": [
+        {
+          "id": "wnode-start-reservasi",
+          "lane_id": "lane-pemohon-web",
+          "type": "start",
+          "label": "Mulai Reservasi Online",
+          "description": "Pemohon mengakses portal web untuk mengajukan reservasi antrean.",
+          "layout": {
+            "x": 50,
+            "y": 50
+          }
+        },
+        {
+          "id": "wnode-pilih-jadwal-layanan",
+          "lane_id": "lane-pemohon-web",
+          "type": "action",
+          "label": "Pilih Kategori & Jadwal",
+          "description": "Pemohon memilih jenis layanan publik dan slot waktu kunjungan yang tersedia.",
+          "layout": {
+            "x": 220,
+            "y": 50
+          }
+        },
+        {
+          "id": "wnode-validasi-slot-tersedia",
+          "lane_id": "lane-backend-queue",
+          "type": "decision",
+          "label": "Cek Ketersediaan Slot?",
+          "description": "Sistem memeriksa kuota slot waktu pada database PostgreSQL.",
+          "layout": {
+            "x": 400,
+            "y": 450
+          }
+        },
+        {
+          "id": "wnode-simpan-data-booking",
+          "lane_id": "lane-backend-queue",
+          "type": "system_action",
+          "label": "Simpan Status BOOKED",
+          "description": "Sistem merekam data reservasi dengan status awal BOOKED.",
+          "layout": {
+            "x": 600,
+            "y": 450
+          }
+        },
+        {
+          "id": "wnode-kirim-notif-wa",
+          "lane_id": "lane-whatsapp-bot",
+          "type": "system_action",
+          "label": "Kirim Tiket via WhatsApp",
+          "description": "Gateway mengirimkan pesan konfirmasi reservasi dan QR code kepada pemohon.",
+          "layout": {
+            "x": 800,
+            "y": 650
+          }
+        },
+        {
+          "id": "wnode-tampilkan-error-penuh",
+          "lane_id": "lane-portal-web",
+          "type": "system_action",
+          "label": "Tampilkan Pesan Slot Penuh",
+          "description": "Portal web memberitahu pemohon bahwa slot waktu telah habis.",
+          "layout": {
+            "x": 600,
+            "y": 250
+          }
+        },
+        {
+          "id": "wnode-end-reservasi-sukses",
+          "lane_id": "lane-pemohon-web",
+          "type": "end",
+          "label": "Reservasi Selesai",
+          "description": "Pemohon menerima tiket digital dan siap melakukan kunjungan.",
+          "layout": {
+            "x": 1000,
+            "y": 50
+          }
+        },
+        {
+          "id": "wnode-end-reservasi-gagal",
+          "lane_id": "lane-pemohon-web",
+          "type": "end",
+          "label": "Reservasi Ditolak",
+          "description": "Pemohon mengakhiri sesi karena slot penuh.",
+          "layout": {
+            "x": 800,
+            "y": 250
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "wedge-res-1",
+          "source": "wnode-start-reservasi",
+          "target": "wnode-pilih-jadwal-layanan",
+          "label": ""
+        },
+        {
+          "id": "wedge-res-2",
+          "source": "wnode-pilih-jadwal-layanan",
+          "target": "wnode-validasi-slot-tersedia",
+          "label": "Submit Form"
+        },
+        {
+          "id": "wedge-res-3",
+          "source": "wnode-validasi-slot-tersedia",
+          "target": "wnode-simpan-data-booking",
+          "label": "Slot Tersedia"
+        },
+        {
+          "id": "wedge-res-4",
+          "source": "wnode-validasi-slot-tersedia",
+          "target": "wnode-tampilkan-error-penuh",
+          "label": "Slot Penuh"
+        },
+        {
+          "id": "wedge-res-5",
+          "source": "wnode-simpan-data-booking",
+          "target": "wnode-kirim-notif-wa",
+          "label": "Trigger WA"
+        },
+        {
+          "id": "wedge-res-6",
+          "source": "wnode-kirim-notif-wa",
+          "target": "wnode-end-reservasi-sukses",
+          "label": "Selesai"
+        },
+        {
+          "id": "wedge-res-7",
+          "source": "wnode-tampilkan-error-penuh",
+          "target": "wnode-end-reservasi-gagal",
+          "label": "Tutup"
+        }
+      ]
+    },
+    {
+      "id": "wf-pemanggilan-pelayanan-loket",
+      "name": "Alur Pemanggilan, Verifikasi, dan Pelayanan Loket",
+      "description": "Proses operasional petugas memanggil nomor antrean, membunyikan pengumuman suara TTS, dan memproses layanan hingga selesai.",
+      "lanes": [
+        {
+          "id": "lane-petugas-loket",
+          "label": "Petugas Loket",
+          "order": 1
+        },
+        {
+          "id": "lane-counter-app",
+          "label": "Loket Counter Web App",
+          "order": 2
+        },
+        {
+          "id": "lane-tts-speaker",
+          "label": "Engine TTS & Speaker",
+          "order": 3
+        },
+        {
+          "id": "lane-display-tv",
+          "label": "Display TV Ruang Tunggu",
+          "order": 4
+        }
+      ],
+      "nodes": [
+        {
+          "id": "wnode-start-panggil",
+          "lane_id": "lane-petugas-loket",
+          "type": "start",
+          "label": "Siap Panggil Antrean",
+          "description": "Petugas loket berada dalam status tersedia untuk melayani antrean.",
+          "layout": {
+            "x": 50,
+            "y": 50
+          }
+        },
+        {
+          "id": "wnode-klik-tombol-panggil",
+          "lane_id": "lane-petugas-loket",
+          "type": "action",
+          "label": "Tekan Tombol Panggil",
+          "description": "Petugas menekan tombol panggil nomor berikutnya pada konsol web.",
+          "layout": {
+            "x": 220,
+            "y": 50
+          }
+        },
+        {
+          "id": "wnode-cek-status-antrean",
+          "lane_id": "lane-counter-app",
+          "type": "decision",
+          "label": "Antrean Tersedia?",
+          "description": "Sistem memeriksa apakah masih terdapat nomor antrean dalam status WAITING.",
+          "layout": {
+            "x": 400,
+            "y": 250
+          }
+        },
+        {
+          "id": "wnode-eksekusi-suara-tts",
+          "lane_id": "lane-tts-speaker",
+          "type": "system_action",
+          "label": "Bunyikan Suara TTS",
+          "description": "Engine audio lokal membunyikan panggilan suara nomor loket ke ruang tunggu.",
+          "layout": {
+            "x": 600,
+            "y": 450
+          }
+        },
+        {
+          "id": "wnode-broadcast-display",
+          "lane_id": "lane-display-tv",
+          "type": "system_action",
+          "label": "Update Display TV Real-Time",
+          "description": "WebSocket memperbarui nomor yang sedang dipanggil pada monitor ruang tunggu.",
+          "layout": {
+            "x": 600,
+            "y": 650
+          }
+        },
+        {
+          "id": "wnode-tunggu-kehadiran",
+          "lane_id": "lane-petugas-loket",
+          "type": "wait",
+          "label": "Menunggu Pemohon Hadir",
+          "description": "Petugas menunggu pemohon datang ke loket atau merespon panggilan.",
+          "layout": {
+            "x": 800,
+            "y": 50
+          }
+        },
+        {
+          "id": "wnode-keputusan-hadir",
+          "lane_id": "lane-petugas-loket",
+          "type": "decision",
+          "label": "Pemohon Hadir?",
+          "description": "Memeriksa apakah pemohon hadir di depan loket atau melebihi batas waktu panggil.",
+          "layout": {
+            "x": 980,
+            "y": 50
+          }
+        },
+        {
+          "id": "wnode-mulai-layanan-loket",
+          "lane_id": "lane-petugas-loket",
+          "type": "action",
+          "label": "Mulai Proses Pelayanan",
+          "description": "Petugas menerima berkas, memvalidasi dokumen, dan memproses transaksi layanan.",
+          "layout": {
+            "x": 1180,
+            "y": 50
+          }
+        },
+        {
+          "id": "wnode-tandai-skipped",
+          "lane_id": "lane-petugas-loket",
+          "type": "system_action",
+          "label": "Tandai No-Show (SKIPPED)",
+          "description": "Sistem mengubah status tiket menjadi SKIPPED jika pemohon tidak hadir setelah panggilan berulang.",
+          "layout": {
+            "x": 980,
+            "y": 250
+          }
+        },
+        {
+          "id": "wnode-selesai-layanan",
+          "lane_id": "lane-petugas-loket",
+          "type": "end",
+          "label": "Pelayanan Selesai",
+          "description": "Transaksi layanan tuntas dan petugas kembali tersedia untuk panggilan berikutnya.",
+          "layout": {
+            "x": 1380,
+            "y": 50
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "wedge-pan-1",
+          "source": "wnode-start-panggil",
+          "target": "wnode-klik-tombol-panggil",
+          "label": ""
+        },
+        {
+          "id": "wedge-pan-2",
+          "source": "wnode-klik-tombol-panggil",
+          "target": "wnode-cek-status-antrean",
+          "label": "Request Next"
+        },
+        {
+          "id": "wedge-pan-3",
+          "source": "wnode-cek-status-antrean",
+          "target": "wnode-eksekusi-suara-tts",
+          "label": "Antrean Ada"
+        },
+        {
+          "id": "wedge-pan-4",
+          "source": "wnode-cek-status-antrean",
+          "target": "wnode-tunggu-kehadiran",
+          "label": "Antrean Kosong"
+        },
+        {
+          "id": "wedge-pan-5",
+          "source": "wnode-eksekusi-suara-tts",
+          "target": "wnode-broadcast-display",
+          "label": "Audio Event"
+        },
+        {
+          "id": "wedge-pan-6",
+          "source": "wnode-broadcast-display",
+          "target": "wnode-tunggu-kehadiran",
+          "label": "Display Ready"
+        },
+        {
+          "id": "wedge-pan-7",
+          "source": "wnode-tunggu-kehadiran",
+          "target": "wnode-keputusan-hadir",
+          "label": "Cek Kehadiran"
+        },
+        {
+          "id": "wedge-pan-8",
+          "source": "wnode-keputusan-hadir",
+          "target": "wnode-mulai-layanan-loket",
+          "label": "Hadir / Respon"
+        },
+        {
+          "id": "wedge-pan-9",
+          "source": "wnode-keputusan-hadir",
+          "target": "wnode-tandai-skipped",
+          "label": "Tidak Hadir (No-Show)"
+        },
+        {
+          "id": "wedge-pan-10",
+          "source": "wnode-mulai-layanan-loket",
+          "target": "wnode-selesai-layanan",
+          "label": "Proses Tuntas"
+        },
+        {
+          "id": "wedge-pan-11",
+          "source": "wnode-tandai-skipped",
+          "target": "wnode-selesai-layanan",
+          "label": "Tutup Tiket"
+        }
+      ]
+    }
+  ],
+  "wbs": {
+    "modules": [
+      {
+        "id": "mod-core-queue-engine",
+        "name": "Modul Core Queue Engine & API",
+        "description": "Backend modular monolith berbasis Go (Golang) yang mengelola logika inti antrean, status mesin (state machine) tiket, penjadwalan, dan sinkronisasi real-time.",
+        "priority": "high",
+        "dependencies": [],
+        "references": [
+          "architecture.node.node-queue-service",
+          "architecture.node.node-postgres-db",
+          "architecture.node.node-redis-cache",
+          "state.state-booked",
+          "state.state-waiting",
+          "state.state-called",
+          "state.state-serving",
+          "state.state-completed"
+        ],
+        "features": [
+          {
+            "id": "feat-ticket-allocation-engine",
+            "name": "Alokasi Nomor Tiket & Pengelolaan Slot",
+            "description": "Logika bisnis untuk menerbitkan nomor antrean berurutan secara atomik dan memvalidasi kuota slot reservasi.",
+            "acceptance_criteria": [
+              "Nomor antrean diterbitkan secara unik dan berurutan per kategori tanpa duplikat pada akses konkuren tinggi.",
+              "Sistem menolak reservasi online secara otomatis apabila kuota slot waktu pada database PostgreSQL telah penuh."
+            ]
+          },
+          {
+            "id": "feat-state-machine-manager",
+            "name": "Manajer Mesin Status Tiket (State Machine)",
+            "description": "Pengelola transisi status tiket dari BOOKED, WAITING, CALLED, SERVING, hingga COMPLETED atau SKIPPED beserta penjagaan aturan (guard).",
+            "acceptance_criteria": [
+              "Transisi status tiket hanya dapat dieksekusi jika memenuhi kondisi guard yang valid.",
+              "Tiket yang melewati batas waktu kedatangan otomatis diubah statusnya menjadi SKIPPED oleh sistem scheduler."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mod-websocket-hub",
+        "name": "Modul Real-Time WebSocket Hub",
+        "description": "Layanan manajemen koneksi real-time untuk broadcast perubahan status antrean secara instan ke display TV ruang tunggu dan konsol loket.",
+        "priority": "high",
+        "dependencies": [
+          "mod-core-queue-engine"
+        ],
+        "references": [
+          "architecture.node.node-websocket-hub",
+          "architecture.node.node-display-board",
+          "journey.activity.act-pantau-ruang-tunggu"
+        ],
+        "features": [
+          {
+            "id": "feat-ws-broadcast-engine",
+            "name": "Broadcast Event Perubahan Status",
+            "description": "Mekanisme pub/sub menggunakan Redis untuk mendistribusikan pembaruan data antrean ke seluruh klien terhubung.",
+            "acceptance_criteria": [
+              "Perubahan status antrean pada konsol loket langsung disiarkan ke display TV dengan latensi di bawah 500 milidetik.",
+              "Klien web portal dan display TV secara otomatis melakukan reconnect jika koneksi WebSocket terputus."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mod-web-portal",
+        "name": "Modul Web Portal Pemohon",
+        "description": "Aplikasi web responsif untuk pemohon layanan melakukan reservasi online, pemilihan jadwal, dan pemantauan status antrean mandiri.",
+        "priority": "medium",
+        "dependencies": [
+          "mod-core-queue-engine"
+        ],
+        "references": [
+          "architecture.node.node-web-portal",
+          "journey.activity.act-buat-reservasi-online",
+          "workflow.wf-pendaftaran-reservasi-online"
+        ],
+        "features": [
+          {
+            "id": "feat-online-reservation-form",
+            "name": "Formulir Pendaftaran & Pemilihan Jadwal",
+            "description": "Antarmuka bagi pemohon untuk memilih kategori layanan publik, tanggal, dan slot waktu kunjungan.",
+            "acceptance_criteria": [
+              "Formulir menampilkan pilihan kategori layanan dan slot waktu yang masih tersedia secara real-time.",
+              "Pemohon menerima konfirmasi reservasi setelah formulir berhasil disubmit."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mod-kiosk-client",
+        "name": "Modul Kiosk Pendaftaran Mandiri Onsite",
+        "description": "Aplikasi layar sentuh kiosk onsite untuk check-in tiket reservasi dan pengambilan nomor antrean fisik.",
+        "priority": "high",
+        "dependencies": [
+          "mod-core-queue-engine"
+        ],
+        "references": [
+          "architecture.node.node-kiosk-app",
+          "architecture.node.node-thermal-printer",
+          "journey.activity.act-kiosk-check-in"
+        ],
+        "features": [
+          {
+            "id": "feat-kiosk-touchscreen-ui",
+            "name": "Antarmuka Kiosk & Pencetakan Tiket",
+            "description": "Navigasi layar sentuh untuk scan QR code reservasi atau cetak tiket walk-in baru beserta driver printer termal.",
+            "acceptance_criteria": [
+              "Kiosk berhasil melakukan check-in tiket ketika QR code valid dipindai.",
+              "Printer termal mencetak tiket fisik berisi nomor antrean dan barcode dalam waktu maksimal 2 detik."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mod-counter-portal",
+        "name": "Modul Portal Konsol Loket Petugas",
+        "description": "Aplikasi web dashboard bagi petugas loket untuk mengontrol pemanggilan nomor antrean, panggil ulang, dan pemrosesan dokumen.",
+        "priority": "high",
+        "dependencies": [
+          "mod-core-queue-engine",
+          "mod-websocket-hub"
+        ],
+        "references": [
+          "architecture.node.node-counter-app",
+          "journey.activity.act-panggil-nomor-loket",
+          "workflow.wf-pemanggilan-pelayanan-loket"
+        ],
+        "features": [
+          {
+            "id": "feat-counter-call-controls",
+            "name": "Kontrol Pemanggilan, Recall, dan Pelayanan",
+            "description": "Tombol aksi bagi petugas untuk memanggil antrean berikutnya, melakukan recall, dan menyelesaikan pelayanan dokumen.",
+            "acceptance_criteria": [
+              "Tombol panggil memicu pembaruan status antrean menjadi CALLED dan membunyikan pengumuman suara.",
+              "Petugas dapat menandai tiket sebagai SKIPPED jika pemohon tidak hadir setelah pemanggilan berulang."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mod-integration-gateway",
+        "name": "Modul Integrasi Eksternal & Audio TTS",
+        "description": "Modul penghubung layanan WhatsApp Business API untuk notifikasi pesan dan local Text-to-Speech (TTS) engine untuk pengumuman suara.",
+        "priority": "medium",
+        "dependencies": [
+          "mod-core-queue-engine"
+        ],
+        "references": [
+          "architecture.node.node-whatsapp-gateway",
+          "architecture.node.node-tts-engine",
+          "journey.activity.act-eksekusi-tts-suara"
+        ],
+        "features": [
+          {
+            "id": "feat-whatsapp-notification",
+            "name": "Pengiriman Notifikasi Pesan WhatsApp",
+            "description": "Layanan pengiriman tiket digital, QR code, dan tautan survey kepuasan melalui WhatsApp API gateway.",
+            "acceptance_criteria": [
+              "Pesan konfirmasi reservasi dan tiket digital terkirim ke nomor WhatsApp pemohon setelah pendaftaran berhasil."
+            ]
+          },
+          {
+            "id": "feat-local-tts-audio",
+            "name": "Pengumuman Suara Text-to-Speech Lokal",
+            "description": "Engine audio offline yang mengonversi nomor panggilan loket menjadi suara audio di ruang tunggu.",
+            "acceptance_criteria": [
+              "Suara pengumuman panggilan nomor loket berbunyi melalui speaker ruang tunggu saat perintah panggil dieksekusi."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "assumptions": [
+    "Perangkat kiosk tiket mandiri dilengkapi dengan perangkat printer termal yang mendukung koneksi jaringan lokal atau driver langsung.",
+    "Jaringan lokal (LAN) di lokasi pelayanan instansi dirancang untuk menyediakan ketersediaan koneksi offline resilience bagi modul pemanggilan antrean onsite saat internet terputus.",
+    "Infrastruktur server mendukung deployment layanan berbasis Golang dengan penyimpanan PostgreSQL dan Redis untuk sinkronisasi antrean in-memory."
+  ],
+  "open_questions": [
+    {
+      "id": "oq-kiosk-printer-interface",
+      "question": "Apakah printer termal pada kiosk tiket mandiri menggunakan antarmuka jaringan IP lokal (TCP/IP) atau koneksi USB langsung ke mini PC kiosk?",
+      "target_section": "architecture",
+      "impact": "Menentukan apakah modul pencetakan memerlukan print server daemon lokal atau direct socket printer driver pada perangkat kiosk.",
+      "status": "open"
+    },
+    {
+      "id": "oq-tts-audio-hardware",
+      "question": "Bagaimana spesifikasi pengeras suara (audio output) di ruang tunggu terhubung ke sistem pemanggilan loket untuk engine Text-to-Speech lokal?",
+      "target_section": "architecture",
+      "impact": "Memengaruhi perancangan modul audio player pada client console petugas loket atau perangkat sound gateway di ruang tunggu.",
+      "status": "open"
+    }
+  ],
+  "cross_references": [
+    {
+      "id": "xref-wbs-to-arch-queue-svc",
+      "source_ref": "wbs.module.mod-core-queue-engine",
+      "target_ref": "architecture.node.node-queue-service",
+      "relation_type": "implements",
+      "description": "Modul core queue engine mengimplementasikan layanan backend service pada arsitektur sistem."
+    },
+    {
+      "id": "xref-wbs-to-arch-db",
+      "source_ref": "wbs.module.mod-core-queue-engine",
+      "target_ref": "architecture.node.node-postgres-db",
+      "relation_type": "depends_on",
+      "description": "Modul core queue engine bergantung pada relational database untuk penyimpanan transaksional."
+    },
+    {
+      "id": "xref-wbs-to-arch-redis",
+      "source_ref": "wbs.module.mod-core-queue-engine",
+      "target_ref": "architecture.node.node-redis-cache",
+      "relation_type": "depends_on",
+      "description": "Modul core queue engine menggunakan redis cache untuk pengelolaan antrean in-memory dan pub/sub."
+    },
+    {
+      "id": "xref-wbs-to-arch-ws",
+      "source_ref": "wbs.module.mod-websocket-hub",
+      "target_ref": "architecture.node.node-websocket-hub",
+      "relation_type": "implements",
+      "description": "Modul websocket hub mengimplementasikan layanan komunikasi real-time pada arsitektur."
+    },
+    {
+      "id": "xref-wbs-to-arch-web",
+      "source_ref": "wbs.module.mod-web-portal",
+      "target_ref": "architecture.node.node-web-portal",
+      "relation_type": "implements",
+      "description": "Modul web portal mengimplementasikan aplikasi web pemohon pada presentation tier."
+    },
+    {
+      "id": "xref-wbs-to-arch-kiosk",
+      "source_ref": "wbs.module.mod-kiosk-client",
+      "target_ref": "architecture.node.node-kiosk-app",
+      "relation_type": "implements",
+      "description": "Modul kiosk client mengimplementasikan perangkat lunak kiosk mandiri onsite."
+    },
+    {
+      "id": "xref-wbs-to-arch-counter",
+      "source_ref": "wbs.module.mod-counter-portal",
+      "target_ref": "architecture.node.node-counter-app",
+      "relation_type": "implements",
+      "description": "Modul counter portal mengimplementasikan aplikasi konsol web petugas loket."
+    },
+    {
+      "id": "xref-wbs-to-arch-whatsapp",
+      "source_ref": "wbs.module.mod-integration-gateway",
+      "target_ref": "architecture.node.node-whatsapp-gateway",
+      "relation_type": "implements",
+      "description": "Modul integrasi mengimplementasikan gateway WhatsApp untuk pengiriman notifikasi."
+    },
+    {
+      "id": "xref-wbs-to-arch-tts",
+      "source_ref": "wbs.module.mod-integration-gateway",
+      "target_ref": "architecture.node.node-tts-engine",
+      "relation_type": "implements",
+      "description": "Modul integrasi mengimplementasikan engine Text-to-Speech lokal untuk pengumuman suara ruang tunggu."
+    },
+    {
+      "id": "xref-workflow-res-to-state",
+      "source_ref": "workflow.wnode-simpan-data-booking",
+      "target_ref": "state.state-booked",
+      "relation_type": "transitions_on",
+      "description": "Langkah penyimpanan reservasi pada workflow menempatkan entitas tiket pada status BOOKED."
+    },
+    {
+      "id": "xref-workflow-call-to-state",
+      "source_ref": "workflow.wnode-klik-tombol-panggil",
+      "target_ref": "state.state-called",
+      "relation_type": "transitions_on",
+      "description": "Aksi tombol panggil petugas pada workflow mengubah status antrean menjadi CALLED."
+    },
+    {
+      "id": "xref-journey-kiosk-to-wbs",
+      "source_ref": "journey.activity.act-kiosk-check-in",
+      "target_ref": "wbs.module.mod-kiosk-client",
+      "relation_type": "implements",
+      "description": "Aktivitas check-in kiosk diimplementasikan oleh modul kiosk client WBS."
+    },
+    {
+      "id": "xref-journey-call-to-wbs",
+      "source_ref": "journey.activity.act-panggil-nomor-loket",
+      "target_ref": "wbs.module.mod-counter-portal",
+      "relation_type": "implements",
+      "description": "Aktivitas pemanggilan nomor loket diimplementasikan oleh modul portal konsol petugas."
+    }
+  ]
+}

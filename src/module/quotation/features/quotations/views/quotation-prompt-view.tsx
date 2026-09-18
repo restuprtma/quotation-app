@@ -115,7 +115,7 @@ export function QuotationPromptView() {
         if (trimmed === '/quotation') {
           handleExecuteSkill(resolveQuotationSkill('/quotation'));
         } else if (trimmed === '/blueprint') {
-          toast.info('Blueprint generation will be available in Phase 8.');
+          navigate(paths.dashboard.blueprint.root);
         } else if (trimmed) {
           toast.warning('Unrecognized slash command. Type / to see available AI skills.');
         }
@@ -144,7 +144,7 @@ export function QuotationPromptView() {
       setPromptText(skill.command);
 
       if (skill.command === '/blueprint') {
-        toast.info('Blueprint generator is scheduled for Phase 8. Please select /quotation.');
+        navigate(paths.dashboard.blueprint.root);
         return;
       }
 
@@ -153,7 +153,7 @@ export function QuotationPromptView() {
       setCommercialScheme(null);
       setIsFormOpen(true);
     },
-    [resolveQuotationSkill]
+    [navigate, resolveQuotationSkill]
   );
 
   // Submit Handler
@@ -382,9 +382,11 @@ export function QuotationPromptView() {
               <Chip
                 icon={<Iconify icon="solar:file-bold-duotone" width={16} />}
                 label="/blueprint — System Blueprint"
+                clickable
+                color="primary"
                 variant="outlined"
-                onClick={() => toast.info('Blueprint generator will be available in Phase 8.')}
-                sx={{ color: 'text.secondary', borderColor: 'divider' }}
+                onClick={() => navigate(paths.dashboard.blueprint.root)}
+                sx={{ fontWeight: 600 }}
               />
             </Stack>
 
