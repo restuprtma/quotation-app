@@ -43,11 +43,18 @@ type Props = {
 export function wrapOfficialDocument(html: string): string {
   const trimmed = html.trim();
   if (!trimmed) return '<article class="quotation-document"></article>';
-  const cloudDocument = /data-section-code=["']cloud_cost["']/i.test(trimmed) || /data-cloud-(?:package-row|scope-row|payment-row|field|package-field|scope-field)=/i.test(trimmed);
+  const cloudDocument =
+    /data-section-code=["']cloud_cost["']/i.test(trimmed) ||
+    /data-cloud-(?:package-row|scope-row|payment-row|field|package-field|scope-field)=/i.test(
+      trimmed
+    );
   if (/^<article\b[^>]*class=["'][^"']*\bquotation-document\b/i.test(trimmed)) {
     if (cloudDocument) {
       return trimmed
-        .replace(/(<article\b[^>]*class=["'])[^"']*(["'])/i, '$1quotation-document quotation-document--cloud-infrastructure$2')
+        .replace(
+          /(<article\b[^>]*class=["'])[^"']*(["'])/i,
+          '$1quotation-document quotation-document--cloud-infrastructure$2'
+        )
         .replace(/\sdata-service=["'][^"']*["']/i, '')
         .replace('<article ', '<article data-service="cloud_infrastructure" ');
     }
@@ -57,9 +64,11 @@ export function wrapOfficialDocument(html: string): string {
   // identify themselves with approved child section codes, so restore their
   // fixed service marker when saving rather than accepting arbitrary wrapper
   // attributes from editable HTML.
-  const talentDocument = !cloudDocument && /\bdata-section-code=["'](?:development_cost|scope_timeline|payment|limitations)["']/i.test(
-    trimmed
-  );
+  const talentDocument =
+    !cloudDocument &&
+    /\bdata-section-code=["'](?:development_cost|scope_timeline|payment|limitations)["']/i.test(
+      trimmed
+    );
   const className = talentDocument
     ? 'quotation-document talent-outsourcing-document'
     : cloudDocument

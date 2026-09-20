@@ -94,7 +94,9 @@ describe('BlueprintProgressView', () => {
     source_quotation_revision_id: 'rev-001',
     content_json: {
       journey: {
-        journeys: [{ title: 'Pendaftaran Pasien' }],
+        phases: [{ id: 'phase-1', label: 'Pendaftaran Pasien', order: 1 }],
+        actors: [{ id: 'actor-1', label: 'Pasien', order: 1 }],
+        activities: [],
       },
     },
     validation_result: {

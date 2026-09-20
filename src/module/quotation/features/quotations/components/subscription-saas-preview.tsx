@@ -183,8 +183,8 @@ export function SubscriptionSaaSPreview({
                     vm.resolvedProfile.tax_treatment === 'exclusive_ppn'
                       ? 'Belum PPN'
                       : vm.resolvedProfile.tax_treatment === 'inclusive_ppn'
-                      ? 'Sudah PPN'
-                      : 'Tidak Dicantumkan'
+                        ? 'Sudah PPN'
+                        : 'Tidak Dicantumkan'
                   }`}
                   variant="outlined"
                 />
@@ -209,17 +209,32 @@ export function SubscriptionSaaSPreview({
               </Stack>
 
               {vm.resolvedProfile.rights_clause_text && (
-                <Typography variant="caption" display="block" color="text.secondary" sx={{ mb: 0.5 }}>
+                <Typography
+                  variant="caption"
+                  display="block"
+                  color="text.secondary"
+                  sx={{ mb: 0.5 }}
+                >
                   <strong>Klausul Hak Cipta:</strong> {vm.resolvedProfile.rights_clause_text}
                 </Typography>
               )}
               {vm.resolvedProfile.income_sharing_text && (
-                <Typography variant="caption" display="block" color="text.secondary" sx={{ mb: 0.5 }}>
+                <Typography
+                  variant="caption"
+                  display="block"
+                  color="text.secondary"
+                  sx={{ mb: 0.5 }}
+                >
                   <strong>Bagi Hasil:</strong> {vm.resolvedProfile.income_sharing_text}
                 </Typography>
               )}
               {vm.resolvedProfile.auto_renewal_text && (
-                <Typography variant="caption" display="block" color="text.secondary" sx={{ mb: 0.5 }}>
+                <Typography
+                  variant="caption"
+                  display="block"
+                  color="text.secondary"
+                  sx={{ mb: 0.5 }}
+                >
                   <strong>Perpanjangan:</strong> {vm.resolvedProfile.auto_renewal_text}
                 </Typography>
               )}
@@ -260,10 +275,14 @@ export function SubscriptionSaaSPreview({
                   <TableHead>
                     <TableRow>
                       <TableCell>{t('subscriptionSaaSForm.payment.workPeriod')}</TableCell>
-                      <TableCell align="center">{t('subscriptionSaaSForm.payment.coveredMonths')}</TableCell>
+                      <TableCell align="center">
+                        {t('subscriptionSaaSForm.payment.coveredMonths')}
+                      </TableCell>
                       <TableCell>{t('subscriptionSaaSForm.payment.invoiceDate')}</TableCell>
                       <TableCell>{t('subscriptionSaaSForm.payment.dueDate')}</TableCell>
-                      <TableCell align="right">{t('subscriptionSaaSForm.payment.nominal')}</TableCell>
+                      <TableCell align="right">
+                        {t('subscriptionSaaSForm.payment.nominal')}
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

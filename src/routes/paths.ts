@@ -27,6 +27,7 @@ export const paths = {
       root: '/blueprint',
       create: '/blueprint',
       detail: (id: string) => `/blueprint/${id}`,
+      edit: (id: string) => `/blueprint/${id}/edit`,
     },
   },
   public: {

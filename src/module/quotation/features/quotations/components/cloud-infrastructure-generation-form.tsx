@@ -115,7 +115,8 @@ export function CloudInfrastructureGenerationForm({
   }, [activeSkills, selectedSkill, parsed]);
   const preview = useCloudInfrastructurePreview(payload, Boolean(payload) && !isSubmitting);
   const canSubmit = Boolean(
-    payload && formState.isValid &&
+    payload &&
+    formState.isValid &&
     preview.isSuccess &&
     !preview.isFetching &&
     !preview.isDebouncing &&
@@ -140,9 +141,33 @@ export function CloudInfrastructureGenerationForm({
     <Form methods={methods} onSubmit={submit} sx={{ width: '100%', maxWidth: 960, mx: 'auto' }}>
       <Stack spacing={3}>
         {showErrors && !parsed.success && (
-          <Alert ref={errorRef} tabIndex={-1} role="alert" aria-label={t('cloudInfrastructure.validation.title')} severity="error">
+          <Alert
+            ref={errorRef}
+            tabIndex={-1}
+            role="alert"
+            aria-label={t('cloudInfrastructure.validation.title')}
+            severity="error"
+          >
             {t('cloudInfrastructure.validation.title')}
-            <Stack>{parsed.error.issues.map((issue, index) => <Button key={`${issue.path.join('.')}-${index}`} component="a" href={`#${issue.path.join('.')}`} sx={{ minHeight: 44 }} onClick={(event) => { event.preventDefault(); const path = issue.path.join('.'); const element = document.getElementById(path); if (element) element.focus(); else setFocus(path as FieldPath<CloudInfrastructureFormValues>); }}>{t('cloudInfrastructure.validation.focus')} {index + 1}</Button>)}</Stack>
+            <Stack>
+              {parsed.error.issues.map((issue, index) => (
+                <Button
+                  key={`${issue.path.join('.')}-${index}`}
+                  component="a"
+                  href={`#${issue.path.join('.')}`}
+                  sx={{ minHeight: 44 }}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    const path = issue.path.join('.');
+                    const element = document.getElementById(path);
+                    if (element) element.focus();
+                    else setFocus(path as FieldPath<CloudInfrastructureFormValues>);
+                  }}
+                >
+                  {t('cloudInfrastructure.validation.focus')} {index + 1}
+                </Button>
+              ))}
+            </Stack>
           </Alert>
         )}
         <Card>
@@ -177,7 +202,11 @@ export function CloudInfrastructureGenerationForm({
                 </RHFSelect>
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <RHFTextField name="client_company_name" label={t('cloudInfrastructure.clientCompany')} disabled={isSubmitting || Boolean(values.client_id)} />
+                <RHFTextField
+                  name="client_company_name"
+                  label={t('cloudInfrastructure.clientCompany')}
+                  disabled={isSubmitting || Boolean(values.client_id)}
+                />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
                 <RHFTextField
@@ -230,8 +259,23 @@ export function CloudInfrastructureGenerationForm({
           error={preview.error}
           isStale={!payload || preview.successfulFingerprint !== preview.currentFingerprint}
         />
-        <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="flex-end" spacing={2} sx={{ pb: 4 }}>
-          <Button disabled={isSubmitting} sx={{ minHeight: 44 }} onClick={async () => { await methods.trigger(); setShowErrors(true); errorRef.current?.focus(); }}>{t('cloudInfrastructure.actions.validate')}</Button>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          justifyContent="flex-end"
+          spacing={2}
+          sx={{ pb: 4 }}
+        >
+          <Button
+            disabled={isSubmitting}
+            sx={{ minHeight: 44 }}
+            onClick={async () => {
+              await methods.trigger();
+              setShowErrors(true);
+              errorRef.current?.focus();
+            }}
+          >
+            {t('cloudInfrastructure.actions.validate')}
+          </Button>
           <Button
             variant="outlined"
             onClick={onCancel}

@@ -54,7 +54,9 @@ describe('dedicated squad visibility', () => {
 
 describe('quotation profile helpers', () => {
   it('reveals only controls required by the selected modes', () => {
-    expect(getQuotationProfileVisibility({ preparation_mode: 'hiring', payment_mode: 'explicit_rows' })).toMatchObject({
+    expect(
+      getQuotationProfileVisibility({ preparation_mode: 'hiring', payment_mode: 'explicit_rows' })
+    ).toMatchObject({
       showDiscount: true,
       showPaymentRows: true,
       showMaintenanceSquad: false,
@@ -62,14 +64,23 @@ describe('quotation profile helpers', () => {
   });
 
   it('removes dependent fields before payload serialization', () => {
-    expect(normalizeQuotationProfileForMode({
-      preparation_mode: 'none',
-      preparation_discount_bps: 2500,
-      scope_timeline_mode: 'none',
-      included_phases: ['development'],
-      payment_mode: 'preset',
-      payment_rows: [{ work_period: 'Kick off', terms: 'DP', allocation_kind: 'investment_bps', allocation_bps: 10_000 }],
-    })).toEqual({ preparation_mode: 'none', scope_timeline_mode: 'none', payment_mode: 'preset' });
+    expect(
+      normalizeQuotationProfileForMode({
+        preparation_mode: 'none',
+        preparation_discount_bps: 2500,
+        scope_timeline_mode: 'none',
+        included_phases: ['development'],
+        payment_mode: 'preset',
+        payment_rows: [
+          {
+            work_period: 'Kick off',
+            terms: 'DP',
+            allocation_kind: 'investment_bps',
+            allocation_bps: 10_000,
+          },
+        ],
+      })
+    ).toEqual({ preparation_mode: 'none', scope_timeline_mode: 'none', payment_mode: 'preset' });
   });
 });
 

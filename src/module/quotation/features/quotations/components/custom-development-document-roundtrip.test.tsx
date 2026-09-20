@@ -55,7 +55,12 @@ const representativeCustomDevelopmentDocument: JSONContent = {
             {
               type: 'text',
               text: 'BENCH-KOPI-STUDIO24',
-              marks: [{ type: 'quotationField', attrs: { 'data-field': 'quotation_number', 'data-quotation-field': null } }],
+              marks: [
+                {
+                  type: 'quotationField',
+                  attrs: { 'data-field': 'quotation_number', 'data-quotation-field': null },
+                },
+              ],
             },
           ],
         },
@@ -67,7 +72,12 @@ const representativeCustomDevelopmentDocument: JSONContent = {
             {
               type: 'text',
               text: 'Penawaran Sistem Kopi Studio24',
-              marks: [{ type: 'quotationField', attrs: { 'data-field': 'subject', 'data-quotation-field': null } }],
+              marks: [
+                {
+                  type: 'quotationField',
+                  attrs: { 'data-field': 'subject', 'data-quotation-field': null },
+                },
+              ],
             },
           ],
         },
@@ -134,7 +144,9 @@ const representativeCustomDevelopmentDocument: JSONContent = {
                 makeCell('tableCell', 'Rp 15.000.000'),
                 makeCell('tableCell', '1'),
                 makeCell('tableCell', '1'),
-                makeCell('tableCell', 'Rp 15.000.000', { 'data-quotation-field': 'development_line_0_0' }),
+                makeCell('tableCell', 'Rp 15.000.000', {
+                  'data-quotation-field': 'development_line_0_0',
+                }),
               ],
             },
             {
@@ -145,28 +157,36 @@ const representativeCustomDevelopmentDocument: JSONContent = {
                 makeCell('tableCell', 'Rp 5.062.500'),
                 makeCell('tableCell', '1'),
                 makeCell('tableCell', '1'),
-                makeCell('tableCell', 'Rp 5.062.500', { 'data-quotation-field': 'development_line_0_1' }),
+                makeCell('tableCell', 'Rp 5.062.500', {
+                  'data-quotation-field': 'development_line_0_1',
+                }),
               ],
             },
             {
               type: 'tableRow',
               content: [
                 makeCell('tableCell', 'Subtotal', { colspan: 4 }),
-                makeCell('tableCell', 'Rp 20.062.500', { 'data-quotation-field': 'development_subtotal' }),
+                makeCell('tableCell', 'Rp 20.062.500', {
+                  'data-quotation-field': 'development_subtotal',
+                }),
               ],
             },
             {
               type: 'tableRow',
               content: [
                 makeCell('tableCell', 'DISCOUNT', { colspan: 4 }),
-                makeCell('tableCell', 'Rp 2.062.500', { 'data-quotation-field': 'discount_amount' }),
+                makeCell('tableCell', 'Rp 2.062.500', {
+                  'data-quotation-field': 'discount_amount',
+                }),
               ],
             },
             {
               type: 'tableRow',
               content: [
                 makeCell('tableCell', 'TOTAL INVESTMENT', { colspan: 4 }),
-                makeCell('tableCell', 'Rp 18.000.000', { 'data-quotation-field': 'total_investment' }),
+                makeCell('tableCell', 'Rp 18.000.000', {
+                  'data-quotation-field': 'total_investment',
+                }),
               ],
             },
           ],
@@ -267,7 +287,12 @@ const representativeCustomDevelopmentDocument: JSONContent = {
           content: [
             {
               type: 'listItem',
-              content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Pencatatan order dan invoice' }] }],
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: 'Pencatatan order dan invoice' }],
+                },
+              ],
             },
           ],
         },
@@ -347,7 +372,9 @@ const representativeCustomDevelopmentDocument: JSONContent = {
                 makeCell('tableCell', 'Termin 1'),
                 makeCell('tableCell', 'Saat tanda tangan kontrak'),
                 makeCell('tableCell', 'H+7'),
-                makeCell('tableCell', 'Rp 9.000.000', { 'data-quotation-field': 'payment_nominal_0' }),
+                makeCell('tableCell', 'Rp 9.000.000', {
+                  'data-quotation-field': 'payment_nominal_0',
+                }),
               ],
             },
             {
@@ -361,7 +388,9 @@ const representativeCustomDevelopmentDocument: JSONContent = {
                 makeCell('tableCell', 'Layanan Bulanan Cloud & Support'),
                 makeCell('tableCell', 'Awal bulan berjalan'),
                 makeCell('tableCell', 'H+7'),
-                makeCell('tableCell', 'Rp 1.272.000', { 'data-quotation-field': 'payment_nominal_1' }),
+                makeCell('tableCell', 'Rp 1.272.000', {
+                  'data-quotation-field': 'payment_nominal_1',
+                }),
               ],
             },
           ],
@@ -473,7 +502,12 @@ const representativeCustomDevelopmentDocument: JSONContent = {
             {
               type: 'text',
               text: '15 Juli 2026',
-              marks: [{ type: 'quotationField', attrs: { 'data-field': 'issue_date', 'data-quotation-field': null } }],
+              marks: [
+                {
+                  type: 'quotationField',
+                  attrs: { 'data-field': 'issue_date', 'data-quotation-field': null },
+                },
+              ],
             },
           ],
         },
@@ -523,7 +557,9 @@ function createCustomDevEditor(
 describe('custom development quotation document round-trip', () => {
   it('wraps editor fragments in the official article marker before persistence', () => {
     expect(
-      wrapOfficialDocument('<section data-quotation-section="commercial-development"><p>Draft</p></section>')
+      wrapOfficialDocument(
+        '<section data-quotation-section="commercial-development"><p>Draft</p></section>'
+      )
     ).toBe(
       '<article class="quotation-document"><section data-quotation-section="commercial-development"><p>Draft</p></section></article>'
     );
@@ -555,18 +591,7 @@ describe('custom development quotation document round-trip', () => {
 
     // Verify section numbers
     const sectionNumbers = sections.map((node) => node.attrs?.['data-quotation-section-number']);
-    expect(sectionNumbers).toEqual([
-      null,
-      null,
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      null,
-      null,
-    ]);
+    expect(sectionNumbers).toEqual([null, null, '1', '2', '3', '4', '5', '6', null, null]);
 
     // Verify rights, limitations, and legal blocks are parsed as legalBlock
     const rightsSection = sections.find((s) => s.attrs?.['data-quotation-section'] === 'rights');
@@ -590,7 +615,9 @@ describe('custom development quotation document round-trip', () => {
     expect(commJson).toContain('Rp 18.000.000');
 
     // Verify commercial monthly fields, totals, and notes component
-    const monthlySection = sections.find((s) => s.attrs?.['data-quotation-section'] === 'commercial-monthly');
+    const monthlySection = sections.find(
+      (s) => s.attrs?.['data-quotation-section'] === 'commercial-monthly'
+    );
     const monthlyJson = JSON.stringify(monthlySection);
     expect(monthlyJson).toContain('monthly_line_0');
     expect(monthlyJson).toContain('monthly_total');
@@ -599,14 +626,18 @@ describe('custom development quotation document round-trip', () => {
     expect(monthlyJson).toContain('Biaya API Gemini ditandai out-of-pocket.');
 
     // Verify timeline nested section inside scope
-    const scopeJson = JSON.stringify(sections.find((s) => s.attrs?.['data-quotation-section'] === 'scope'));
+    const scopeJson = JSON.stringify(
+      sections.find((s) => s.attrs?.['data-quotation-section'] === 'scope')
+    );
     expect(scopeJson).toContain('timeline');
     expect(scopeJson).toContain('75');
     expect(scopeJson).toContain('25');
     expect(scopeJson).toContain('4 Minggu');
 
     // Verify payment components and nominals
-    const paymentJson = JSON.stringify(sections.find((s) => s.attrs?.['data-quotation-section'] === 'payment'));
+    const paymentJson = JSON.stringify(
+      sections.find((s) => s.attrs?.['data-quotation-section'] === 'payment')
+    );
     expect(paymentJson).toContain('development');
     expect(paymentJson).toContain('monthly_recurring');
     expect(paymentJson).toContain('payment_nominal_0');
@@ -614,7 +645,9 @@ describe('custom development quotation document round-trip', () => {
     expect(paymentJson).toContain('tax_clause');
 
     // Verify signature table class
-    const sigJson = JSON.stringify(sections.find((s) => s.attrs?.['data-quotation-section'] === 'signature'));
+    const sigJson = JSON.stringify(
+      sections.find((s) => s.attrs?.['data-quotation-section'] === 'signature')
+    );
     expect(sigJson).toContain('signature-table');
 
     editor.destroy();
@@ -626,30 +659,49 @@ describe('custom development quotation document round-trip', () => {
       content: [
         {
           type: 'quotationSection',
-          attrs: { 'data-quotation-section': 'commercial-development', 'data-quotation-section-number': '1' },
+          attrs: {
+            'data-quotation-section': 'commercial-development',
+            'data-quotation-section-number': '1',
+          },
           content: [
-            { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: '1. Biaya Development' }] },
+            {
+              type: 'heading',
+              attrs: { level: 2 },
+              content: [{ type: 'text', text: '1. Biaya Development' }],
+            },
           ],
         },
         {
           type: 'quotationSection',
           attrs: { 'data-quotation-section': 'scope', 'data-quotation-section-number': '2' },
           content: [
-            { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: '2. Lingkup Pekerjaan & Timeline' }] },
+            {
+              type: 'heading',
+              attrs: { level: 2 },
+              content: [{ type: 'text', text: '2. Lingkup Pekerjaan & Timeline' }],
+            },
           ],
         },
         {
           type: 'quotationSection',
           attrs: { 'data-quotation-section': 'payment', 'data-quotation-section-number': '3' },
           content: [
-            { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: '3. Pembayaran' }] },
+            {
+              type: 'heading',
+              attrs: { level: 2 },
+              content: [{ type: 'text', text: '3. Pembayaran' }],
+            },
           ],
         },
         {
           type: 'legalBlock',
           attrs: { 'data-quotation-section': 'limitations', 'data-quotation-section-number': '4' },
           content: [
-            { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: '4. Batasan dan Pengecualian' }] },
+            {
+              type: 'heading',
+              attrs: { level: 2 },
+              content: [{ type: 'text', text: '4. Batasan dan Pengecualian' }],
+            },
           ],
         },
       ],
@@ -678,7 +730,9 @@ describe('custom development quotation document round-trip', () => {
   });
 
   it('locks rights, limitations, and legal blocks when locked, while allowing edits in standard sections', () => {
-    const editor = createCustomDevEditor(representativeCustomDevelopmentDocument, { unlocked: false });
+    const editor = createCustomDevEditor(representativeCustomDevelopmentDocument, {
+      unlocked: false,
+    });
 
     let rightsPos = -1;
     let limPos = -1;
@@ -689,13 +743,19 @@ describe('custom development quotation document round-trip', () => {
       if (node.type.name === 'legalBlock' && node.attrs?.['data-quotation-section'] === 'rights') {
         rightsPos = pos + 2;
       }
-      if (node.type.name === 'legalBlock' && node.attrs?.['data-quotation-section'] === 'limitations') {
+      if (
+        node.type.name === 'legalBlock' &&
+        node.attrs?.['data-quotation-section'] === 'limitations'
+      ) {
         limPos = pos + 2;
       }
       if (node.type.name === 'legalBlock' && node.attrs?.['data-quotation-section'] === 'legal') {
         legalPos = pos + 2;
       }
-      if (node.type.name === 'quotationSection' && node.attrs?.['data-quotation-section'] === 'scope') {
+      if (
+        node.type.name === 'quotationSection' &&
+        node.attrs?.['data-quotation-section'] === 'scope'
+      ) {
         scopePos = pos + 2;
       }
     });
@@ -728,7 +788,9 @@ describe('custom development quotation document round-trip', () => {
   });
 
   it('allows editing rights, limitations, and legal blocks once unlocked', () => {
-    const editor = createCustomDevEditor(representativeCustomDevelopmentDocument, { unlocked: true });
+    const editor = createCustomDevEditor(representativeCustomDevelopmentDocument, {
+      unlocked: true,
+    });
 
     let rightsPos = -1;
     let limPos = -1;
@@ -738,7 +800,10 @@ describe('custom development quotation document round-trip', () => {
       if (node.type.name === 'legalBlock' && node.attrs?.['data-quotation-section'] === 'rights') {
         rightsPos = pos + 2;
       }
-      if (node.type.name === 'legalBlock' && node.attrs?.['data-quotation-section'] === 'limitations') {
+      if (
+        node.type.name === 'legalBlock' &&
+        node.attrs?.['data-quotation-section'] === 'limitations'
+      ) {
         limPos = pos + 2;
       }
       if (node.type.name === 'legalBlock' && node.attrs?.['data-quotation-section'] === 'legal') {

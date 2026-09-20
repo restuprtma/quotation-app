@@ -49,15 +49,17 @@ export function SubscriptionPricingPeriodEditor({ disabled = false }: Props) {
     name: 'subscription_saas.one_time_items',
   });
 
-  const watchedPeriods = useWatch({
-    control,
-    name: 'subscription_saas.price_periods',
-  }) || [];
+  const watchedPeriods =
+    useWatch({
+      control,
+      name: 'subscription_saas.price_periods',
+    }) || [];
 
-  const initialTermMonths = useWatch({
-    control,
-    name: 'subscription_saas.initial_term_months',
-  }) || 12;
+  const initialTermMonths =
+    useWatch({
+      control,
+      name: 'subscription_saas.initial_term_months',
+    }) || 12;
 
   const coveredMonths = watchedPeriods.reduce(
     (sum, p) => sum + (Number(p?.duration_months) || 0),
@@ -94,7 +96,12 @@ export function SubscriptionPricingPeriodEditor({ disabled = false }: Props) {
         <Stack spacing={3}>
           {/* Recurring Price Periods Section */}
           <Box>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ mb: 2 }}
+            >
               <Typography variant="subtitle2" fontWeight={700}>
                 {t('subscriptionSaaSForm.pricing.periodsTitle')}
               </Typography>
@@ -115,7 +122,9 @@ export function SubscriptionPricingPeriodEditor({ disabled = false }: Props) {
                 severity={isCoverageValid ? 'success' : 'warning'}
                 icon={
                   <Iconify
-                    icon={isCoverageValid ? 'eva:checkmark-circle-2-fill' : 'eva:alert-triangle-fill'}
+                    icon={
+                      isCoverageValid ? 'eva:checkmark-circle-2-fill' : 'eva:alert-triangle-fill'
+                    }
                   />
                 }
               >
@@ -225,7 +234,12 @@ export function SubscriptionPricingPeriodEditor({ disabled = false }: Props) {
 
           {/* One-time Items Section */}
           <Box>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ mb: 2 }}
+            >
               <Box>
                 <Typography variant="subtitle2" fontWeight={700}>
                   {t('subscriptionSaaSForm.pricing.oneTimeTitle')}

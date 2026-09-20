@@ -152,9 +152,7 @@ export const customDevelopmentBaseSchema = z.object({
     .trim()
     .min(1, 'Nama sistem wajib diisi')
     .max(MAX_CUSTOM_DEVELOPMENT_SHORT_TEXT_RUNES, 'Nama sistem maksimal 200 karakter'),
-  quotation_date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Format tanggal harus YYYY-MM-DD'),
+  quotation_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format tanggal harus YYYY-MM-DD'),
   development_table_mode: z.enum(['monthly_period', 'daily_period', 'fixed_days']),
   tax_treatment: z.enum(['not_stated', 'exclusive_ppn', 'inclusive_ppn']),
   development_groups: z
@@ -398,7 +396,8 @@ export function validateCustomDevelopmentCrossFields(
   } else if (monthlyRows.length > 0) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'Jadwal pembayaran tidak boleh memiliki komponen bulanan jika tidak ada item bulanan',
+      message:
+        'Jadwal pembayaran tidak boleh memiliki komponen bulanan jika tidak ada item bulanan',
       path: ['payment_schedule'],
     });
   }
@@ -415,11 +414,7 @@ export const customDevelopmentFormSchema = z.object({
     .trim()
     .min(1, 'Nama penanggung jawab wajib diisi')
     .max(MAX_CUSTOM_DEVELOPMENT_SHORT_TEXT_RUNES),
-  client_company_name: z
-    .string()
-    .trim()
-    .max(MAX_CUSTOM_DEVELOPMENT_SHORT_TEXT_RUNES)
-    .optional(),
+  client_company_name: z.string().trim().max(MAX_CUSTOM_DEVELOPMENT_SHORT_TEXT_RUNES).optional(),
   subject: z
     .string()
     .trim()

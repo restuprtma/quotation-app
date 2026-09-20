@@ -34,6 +34,9 @@ const BlueprintCreatePage = lazy(
 const BlueprintProgressPage = lazy(
   () => import('src/module/quotation/features/blueprints/pages/progress')
 );
+const BlueprintEditorPage = lazy(
+  () => import('src/module/quotation/features/blueprints/pages/editor')
+);
 
 // ----------------------------------------------------------------------
 
@@ -74,6 +77,7 @@ export const dashboardRoutes: RouteObject[] = [
         children: [
           { index: true, element: <BlueprintCreatePage /> },
           { path: ':id', element: <BlueprintProgressPage /> },
+          { path: ':id/edit', element: <BlueprintEditorPage /> },
         ],
       },
       {

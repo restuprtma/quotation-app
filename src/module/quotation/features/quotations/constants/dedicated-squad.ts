@@ -13,22 +13,32 @@ export const QUOTATION_PROFILE_OPTIONS = {
 
 export function getQuotationProfileVisibility(profile?: QuotationProfileInput) {
   return {
-    showDiscount: profile?.preparation_mode === 'hiring' || profile?.preparation_mode === 'engineering_kickoff',
-    showMaintenanceSquad: profile?.maintenance_mode === 'separate_section' || profile?.maintenance_mode === 'within_development',
+    showDiscount:
+      profile?.preparation_mode === 'hiring' || profile?.preparation_mode === 'engineering_kickoff',
+    showMaintenanceSquad:
+      profile?.maintenance_mode === 'separate_section' ||
+      profile?.maintenance_mode === 'within_development',
     showPhases: Boolean(profile?.scope_timeline_mode && profile.scope_timeline_mode !== 'none'),
     showPaymentRows: profile?.payment_mode === 'explicit_rows',
   };
 }
 
 /** Removes dependent values before a profile is serialized to the API. */
-export function normalizeQuotationProfileForMode(profile?: QuotationProfileInput): QuotationProfileInput | undefined {
+export function normalizeQuotationProfileForMode(
+  profile?: QuotationProfileInput
+): QuotationProfileInput | undefined {
   if (!profile) return undefined;
   const next: QuotationProfileInput = {
     ...profile,
     included_phases: profile.included_phases ? [...profile.included_phases] : undefined,
     payment_rows: profile.payment_rows?.map((row) => ({ ...row })),
     document_options: profile.document_options
-      ? { ...profile.document_options, clause_codes: profile.document_options.clause_codes ? [...profile.document_options.clause_codes] : undefined }
+      ? {
+          ...profile.document_options,
+          clause_codes: profile.document_options.clause_codes
+            ? [...profile.document_options.clause_codes]
+            : undefined,
+        }
       : undefined,
   };
   if (next.preparation_mode === 'none') delete next.preparation_discount_bps;
@@ -37,7 +47,11 @@ export function normalizeQuotationProfileForMode(profile?: QuotationProfileInput
   next.payment_rows?.forEach((row) => {
     if (row.allocation_kind === 'net_preparation') delete row.allocation_bps;
   });
-  const hasValue = Object.entries(next).some(([key, value]) => key !== 'document_options' ? value !== undefined && value !== '' : value && Object.values(value).some(Boolean));
+  const hasValue = Object.entries(next).some(([key, value]) =>
+    key !== 'document_options'
+      ? value !== undefined && value !== ''
+      : value && Object.values(value).some(Boolean)
+  );
   return hasValue ? next : undefined;
 }
 

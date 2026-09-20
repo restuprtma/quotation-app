@@ -219,6 +219,7 @@ export type BundlePartial = {
   schema_version?: string;
   title?: string;
   summary?: string;
+  context?: Record<string, any>;
   journey?: Journey;
   architecture?: Architecture;
   state_machine?: StateMachine;
@@ -227,6 +228,7 @@ export type BundlePartial = {
   assumptions?: string[];
   open_questions?: OpenQuestion[];
   cross_references?: CrossReference[];
+  [key: string]: any;
 };
 
 export type ManualContentMap = {

@@ -118,7 +118,10 @@ export function SquadPicker({ name, model, maintenance = false, disabled = false
   const isSprint = model === '1D';
 
   return (
-    <Stack spacing={1.5} data-testid={`${maintenance ? 'maintenance' : 'development'}-squad-picker`}>
+    <Stack
+      spacing={1.5}
+      data-testid={`${maintenance ? 'maintenance' : 'development'}-squad-picker`}
+    >
       <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
         <Box>
           <Typography variant="subtitle2">

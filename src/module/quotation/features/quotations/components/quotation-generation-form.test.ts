@@ -40,4 +40,3 @@ describe('dedicated squad generation form contract', () => {
     expect(payload.dedicated_squad.development_squad[0].period_quarters).toBe(0);
   });
 });
-

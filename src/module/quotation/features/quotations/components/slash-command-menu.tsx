@@ -223,10 +223,7 @@ export function SlashCommandMenu({
                         justifyContent: 'center',
                       }}
                     >
-                      <Iconify
-                        icon="solar:file-check-bold-duotone"
-                        width={18}
-                      />
+                      <Iconify icon="solar:file-check-bold-duotone" width={18} />
                     </Box>
                   </ListItemIcon>
                   <ListItemText

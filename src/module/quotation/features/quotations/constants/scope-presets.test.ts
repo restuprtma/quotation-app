@@ -23,7 +23,9 @@ describe('Quotation Form Constants and Presets', () => {
     for (const solType of SOLUTION_TYPES) {
       const preset = SCOPE_PRESETS_BY_SOLUTION_TYPE[solType.value];
       expect(preset, `Missing preset for ${solType.value}`).toBeDefined();
-      expect(preset.mandatory.length, `Empty mandatory scope for ${solType.value}`).toBeGreaterThan(0);
+      expect(preset.mandatory.length, `Empty mandatory scope for ${solType.value}`).toBeGreaterThan(
+        0
+      );
     }
   });
 });

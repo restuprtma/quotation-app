@@ -522,64 +522,183 @@ export type TalentCostCategory = 'personnel' | 'non_personnel';
 export type TalentPeriodUnit = 'month' | 'workday';
 export type TalentTaxTreatment = 'bpjs_dpp_ppn_12' | 'exclusive_ppn' | 'not_stated';
 export type TalentLimitationCode = 'out_of_pocket' | 'overtime' | 'third_party' | 'scope_change';
-export type TalentCostItemInput = { name: string; quantity: number; quantity_unit: string; period_count: number; period_unit: TalentPeriodUnit; unit_rate: number };
-export type TalentCostGroupInput = { category: TalentCostCategory; title: string; items: TalentCostItemInput[] };
-export type TalentPreparationItemInput = { name: string; headcount: number; quoted_line_total: number };
-export type TalentSquadItemInput = { role: string; monthly_rate: number; headcount: number; period_months: number };
-export type TalentScopeBlockInput = { title: string; description?: string; responsibilities?: string[]; qualifications?: string[]; deliverables?: string[]; timeline?: string };
-export type TalentPaymentRowInput = { work_period: string; terms: string; invoice_date_label: string; due_date_label: string; nominal: number };
+export type TalentCostItemInput = {
+  name: string;
+  quantity: number;
+  quantity_unit: string;
+  period_count: number;
+  period_unit: TalentPeriodUnit;
+  unit_rate: number;
+};
+export type TalentCostGroupInput = {
+  category: TalentCostCategory;
+  title: string;
+  items: TalentCostItemInput[];
+};
+export type TalentPreparationItemInput = {
+  name: string;
+  headcount: number;
+  quoted_line_total: number;
+};
+export type TalentSquadItemInput = {
+  role: string;
+  monthly_rate: number;
+  headcount: number;
+  period_months: number;
+};
+export type TalentScopeBlockInput = {
+  title: string;
+  description?: string;
+  responsibilities?: string[];
+  qualifications?: string[];
+  deliverables?: string[];
+  timeline?: string;
+};
+export type TalentPaymentRowInput = {
+  work_period: string;
+  terms: string;
+  invoice_date_label: string;
+  due_date_label: string;
+  nominal: number;
+};
 export type TalentOutsourcingInput = {
-  engagement_mode: TalentEngagementMode; document_number: string; service_name: string; quotation_date: string; tax_treatment: TalentTaxTreatment;
-  cost_groups?: TalentCostGroupInput[]; preparation_items?: TalentPreparationItemInput[]; preparation_discount_amount: number; show_preparation_discount_row: boolean; squad_items?: TalentSquadItemInput[];
-  scope_blocks: TalentScopeBlockInput[]; payment_schedule: TalentPaymentRowInput[]; payment_due_days: number; limitation_codes: TalentLimitationCode[];
-  additional_limitations?: string[]; warranty_statements?: string[]; rights_statements?: string[];
+  engagement_mode: TalentEngagementMode;
+  document_number: string;
+  service_name: string;
+  quotation_date: string;
+  tax_treatment: TalentTaxTreatment;
+  cost_groups?: TalentCostGroupInput[];
+  preparation_items?: TalentPreparationItemInput[];
+  preparation_discount_amount: number;
+  show_preparation_discount_row: boolean;
+  squad_items?: TalentSquadItemInput[];
+  scope_blocks: TalentScopeBlockInput[];
+  payment_schedule: TalentPaymentRowInput[];
+  payment_due_days: number;
+  limitation_codes: TalentLimitationCode[];
+  additional_limitations?: string[];
+  warranty_statements?: string[];
+  rights_statements?: string[];
 };
 export type TalentCostLineCalculation = TalentCostItemInput & { line_total: number };
-export type TalentCostGroupCalculation = Omit<TalentCostGroupInput, 'items'> & { items: TalentCostLineCalculation[] };
+export type TalentCostGroupCalculation = Omit<TalentCostGroupInput, 'items'> & {
+  items: TalentCostLineCalculation[];
+};
 export type TalentPreparationLineCalculation = TalentPreparationItemInput & { line_total: number };
 export type TalentSquadLineCalculation = TalentSquadItemInput & { line_total: number };
 export type TalentOutsourcingCalculation = {
-  engagement_mode: TalentEngagementMode; cost_groups?: TalentCostGroupCalculation[]; preparation?: TalentPreparationLineCalculation[]; squad?: TalentSquadLineCalculation[];
-  personnel_subtotal: number; non_personnel_subtotal: number; preparation_subtotal: number; preparation_discount_amount: number; squad_subtotal: number;
-  total_before_tax: number; dpp_amount: number; tax_amount: number; grand_total: number; payment_total: number;
+  engagement_mode: TalentEngagementMode;
+  cost_groups?: TalentCostGroupCalculation[];
+  preparation?: TalentPreparationLineCalculation[];
+  squad?: TalentSquadLineCalculation[];
+  personnel_subtotal: number;
+  non_personnel_subtotal: number;
+  preparation_subtotal: number;
+  preparation_discount_amount: number;
+  squad_subtotal: number;
+  total_before_tax: number;
+  dpp_amount: number;
+  tax_amount: number;
+  grand_total: number;
+  payment_total: number;
 };
 export type ResolvedTalentOutsourcingProfile = {
-  engagement_mode: TalentEngagementMode; tax_treatment: TalentTaxTreatment; tax_clause_text?: string; show_non_personnel: boolean; show_preparation: boolean; show_preparation_discount: boolean; show_warranty: boolean; show_rights: boolean; sections: Array<{ number: number; code: string; title: string }>;
+  engagement_mode: TalentEngagementMode;
+  tax_treatment: TalentTaxTreatment;
+  tax_clause_text?: string;
+  show_non_personnel: boolean;
+  show_preparation: boolean;
+  show_preparation_discount: boolean;
+  show_warranty: boolean;
+  show_rights: boolean;
+  sections: Array<{ number: number; code: string; title: string }>;
 };
-export type TalentOutsourcingPreviewResponse = { calculation: TalentOutsourcingCalculation; resolved_profile: ResolvedTalentOutsourcingProfile };
+export type TalentOutsourcingPreviewResponse = {
+  calculation: TalentOutsourcingCalculation;
+  resolved_profile: ResolvedTalentOutsourcingProfile;
+};
 export type TalentOutsourcingGeneratePayload = GenerateQuotationBase & {
-  commercial_scheme: 'talent_outsourcing'; talent_outsourcing: TalentOutsourcingInput;
-  dedicated_squad?: never; subscription_saas?: never; white_label?: never; standalone_maintenance?: never; custom_development?: never; kiosk_queue_system?: never; rate_card_id?: never;
+  commercial_scheme: 'talent_outsourcing';
+  talent_outsourcing: TalentOutsourcingInput;
+  dedicated_squad?: never;
+  subscription_saas?: never;
+  white_label?: never;
+  standalone_maintenance?: never;
+  custom_development?: never;
+  kiosk_queue_system?: never;
+  rate_card_id?: never;
 };
 
 export type CloudPackageCategory = 'shared_hosting' | 'vps_cloud';
 export type CloudTaxTreatment = 'exclusive_ppn' | 'inclusive_ppn' | 'not_stated';
 export type CloudPaymentComponent = 'setup' | 'monthly_service';
 export type CloudLimitationCode = 'out_of_pocket' | 'overtime' | 'third_party' | 'scope_change';
-export type CloudPackageItemInput = { category: CloudPackageCategory; name: string; vcpu: number; ram_gb: number; storage_gb: number; unit_rate: number };
+export type CloudPackageItemInput = {
+  category: CloudPackageCategory;
+  name: string;
+  vcpu: number;
+  ram_gb: number;
+  storage_gb: number;
+  unit_rate: number;
+};
 export type CloudSetupItemInput = { name: string; amount: number };
 export type CloudScopeSectionInput = { title: string; activities: string[] };
 export type CloudScopeRowInput = { sections: CloudScopeSectionInput[]; timeline: string };
-export type CloudPaymentRowInput = { work_period: string; terms: string; invoice_date_label: string; due_date_label: string; component: CloudPaymentComponent; nominal: number };
+export type CloudPaymentRowInput = {
+  work_period: string;
+  terms: string;
+  invoice_date_label: string;
+  due_date_label: string;
+  component: CloudPaymentComponent;
+  nominal: number;
+};
 export type CloudInfrastructureInput = {
-  document_number: string; service_name: string; quotation_date: string; tax_treatment: CloudTaxTreatment;
-  package_items: CloudPackageItemInput[]; setup_items?: CloudSetupItemInput[]; scope_rows?: CloudScopeRowInput[];
-  payment_schedule: CloudPaymentRowInput[]; payment_due_days: number; limitation_codes: CloudLimitationCode[]; additional_limitations?: string[];
+  document_number: string;
+  service_name: string;
+  quotation_date: string;
+  tax_treatment: CloudTaxTreatment;
+  package_items: CloudPackageItemInput[];
+  setup_items?: CloudSetupItemInput[];
+  scope_rows?: CloudScopeRowInput[];
+  payment_schedule: CloudPaymentRowInput[];
+  payment_due_days: number;
+  limitation_codes: CloudLimitationCode[];
+  additional_limitations?: string[];
 };
 export type CloudPackageLineCalculation = CloudPackageItemInput & { line_total: number };
 export type CloudSetupLineCalculation = CloudSetupItemInput & { line_total: number };
 export type CloudInfrastructureCalculation = {
-  packages: CloudPackageLineCalculation[]; setup?: CloudSetupLineCalculation[]; monthly_subtotal: number; setup_subtotal: number;
-  setup_payment_total: number; monthly_payment_rows: number; scheduled_recurring_total: number; payment_total: number;
+  packages: CloudPackageLineCalculation[];
+  setup?: CloudSetupLineCalculation[];
+  monthly_subtotal: number;
+  setup_subtotal: number;
+  setup_payment_total: number;
+  monthly_payment_rows: number;
+  scheduled_recurring_total: number;
+  payment_total: number;
 };
 export type ResolvedCloudInfrastructureProfile = {
-  tax_treatment: CloudTaxTreatment; tax_clause_text?: string; show_setup: boolean; show_scope: boolean;
+  tax_treatment: CloudTaxTreatment;
+  tax_clause_text?: string;
+  show_setup: boolean;
+  show_scope: boolean;
   sections: Array<{ number: number; code: string; title: string }>;
 };
-export type CloudInfrastructurePreviewResponse = { calculation: CloudInfrastructureCalculation; resolved_profile: ResolvedCloudInfrastructureProfile };
+export type CloudInfrastructurePreviewResponse = {
+  calculation: CloudInfrastructureCalculation;
+  resolved_profile: ResolvedCloudInfrastructureProfile;
+};
 export type CloudInfrastructureGeneratePayload = GenerateQuotationBase & {
-  commercial_scheme: 'cloud_infrastructure'; cloud_infrastructure: CloudInfrastructureInput;
-  dedicated_squad?: never; subscription_saas?: never; white_label?: never; standalone_maintenance?: never; custom_development?: never; kiosk_queue_system?: never; talent_outsourcing?: never; rate_card_id?: never;
+  commercial_scheme: 'cloud_infrastructure';
+  cloud_infrastructure: CloudInfrastructureInput;
+  dedicated_squad?: never;
+  subscription_saas?: never;
+  white_label?: never;
+  standalone_maintenance?: never;
+  custom_development?: never;
+  kiosk_queue_system?: never;
+  talent_outsourcing?: never;
+  rate_card_id?: never;
 };
 
 export type GenerateQuotationPayload =

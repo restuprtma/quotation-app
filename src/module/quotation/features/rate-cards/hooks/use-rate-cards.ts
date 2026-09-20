@@ -7,12 +7,7 @@ import type {
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import {
-  getRateCards,
-  createRateCard,
-  deleteRateCard,
-  getRateCardDetail,
-} from '../api';
+import { getRateCards, createRateCard, deleteRateCard, getRateCardDetail } from '../api';
 
 export const RATE_CARDS_KEYS = {
   all: ['rate-cards'] as const,

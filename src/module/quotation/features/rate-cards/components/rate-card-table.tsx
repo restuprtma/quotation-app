@@ -77,12 +77,7 @@ export function RateCardTable({
               ) : (
                 <>
                   {paginatedRows.map((row) => (
-                    <RateCardTableRow
-                      key={row.id}
-                      row={row}
-                      onView={onView}
-                      onDelete={onDelete}
-                    />
+                    <RateCardTableRow key={row.id} row={row} onView={onView} onDelete={onDelete} />
                   ))}
 
                   <TableNoData

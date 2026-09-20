@@ -11,11 +11,7 @@ import { useTranslate } from 'src/locales';
 import { Label } from 'src/shared/ui/label';
 import { Iconify } from 'src/shared/ui/iconify';
 
-import {
-  getSeniorityColor,
-  getDisciplineColor,
-  formatCurrencyValue,
-} from '../utils/format';
+import { getSeniorityColor, getDisciplineColor, formatCurrencyValue } from '../utils/format';
 
 interface Props {
   item: RateCardItem;
@@ -118,7 +114,8 @@ export function CostBreakdownCard({ item, currency = 'IDR' }: Props) {
               {item.display_name || item.role}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {item.role} • {item.term_type === 'short_term' ? t('terms.shortTerm') : t('terms.longTerm')}
+              {item.role} •{' '}
+              {item.term_type === 'short_term' ? t('terms.shortTerm') : t('terms.longTerm')}
             </Typography>
           </Box>
         </Stack>

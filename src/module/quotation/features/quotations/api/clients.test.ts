@@ -4,7 +4,6 @@ import axios, { endpoints } from 'src/shared/lib/axios';
 
 import { getClients } from './generation';
 
-
 describe('Client Fetching & Quotation Form Client Resolution', () => {
   it('endpoints.core.clients is configured correctly', () => {
     expect((endpoints as any).core?.clients).toBe('/core/v1/admin/clients');
@@ -54,5 +53,3 @@ describe('Client Fetching & Quotation Form Client Resolution', () => {
     expect(result[0].name).toBe('Acme Corp');
   });
 });
-
-

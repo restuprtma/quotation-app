@@ -171,7 +171,8 @@ export function QuotationEditorView({ id = '' }: Props) {
     }
 
     // Replace legal section in HTML
-    const legalBlockRegex = /<section\s+[^>]*data-block-type=["']legal["'][^>]*>[\s\S]*?<\/section>/i;
+    const legalBlockRegex =
+      /<section\s+[^>]*data-block-type=["']legal["'][^>]*>[\s\S]*?<\/section>/i;
     let newHtml = currentHtml;
     if (legalBlockRegex.test(newHtml)) {
       newHtml = newHtml.replace(legalBlockRegex, snapshotHtml.trim());
@@ -413,11 +414,7 @@ export function QuotationEditorView({ id = '' }: Props) {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button
-            variant="outlined"
-            color="inherit"
-            onClick={() => setIsUnsavedDialogOpen(false)}
-          >
+          <Button variant="outlined" color="inherit" onClick={() => setIsUnsavedDialogOpen(false)}>
             {t('editor.dialog.unsavedStay')}
           </Button>
           <Button
@@ -444,8 +441,8 @@ export function QuotationEditorView({ id = '' }: Props) {
         <DialogContent>
           <DialogContentText sx={{ typography: 'body2' }}>
             Perubahan pada editor draft belum disimpan. Pembuatan Blueprint akan menggunakan revisi
-            tersimpan saat ini (v{session?.canonicalVersion}). Simpan draft terlebih dahulu jika Anda
-            ingin menyertakan perubahan terbaru ke dalam Blueprint.
+            tersimpan saat ini (v{session?.canonicalVersion}). Simpan draft terlebih dahulu jika
+            Anda ingin menyertakan perubahan terbaru ke dalam Blueprint.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

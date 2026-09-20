@@ -33,9 +33,7 @@ import { PageHeader } from 'src/shared/ui/page-header';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { DISCIPLINES } from '../types';
-import {
-  getClientTierColor,
-} from '../utils/format';
+import { getClientTierColor } from '../utils/format';
 import { useRateCardDetail } from '../hooks/use-rate-cards';
 import { RateCardItemRow } from '../components/rate-card-item-row';
 import { InfraPackageTable } from '../components/infra-package-table';
@@ -64,22 +62,29 @@ export default function RateCardDetailPage() {
   }, [items]);
 
   // Filtered items
-  const filteredItems = useMemo(() => items.filter((item) => {
-      const matchesDiscipline =
-        selectedDiscipline === 'all' || item.discipline === selectedDiscipline;
-      const matchesSearch =
-        !searchRole.trim() ||
-        item.role.toLowerCase().includes(searchRole.toLowerCase()) ||
-        (item.display_name && item.display_name.toLowerCase().includes(searchRole.toLowerCase())) ||
-        item.seniority.toLowerCase().includes(searchRole.toLowerCase());
+  const filteredItems = useMemo(
+    () =>
+      items.filter((item) => {
+        const matchesDiscipline =
+          selectedDiscipline === 'all' || item.discipline === selectedDiscipline;
+        const matchesSearch =
+          !searchRole.trim() ||
+          item.role.toLowerCase().includes(searchRole.toLowerCase()) ||
+          (item.display_name &&
+            item.display_name.toLowerCase().includes(searchRole.toLowerCase())) ||
+          item.seniority.toLowerCase().includes(searchRole.toLowerCase());
 
-      return matchesDiscipline && matchesSearch;
-    }), [items, selectedDiscipline, searchRole]);
+        return matchesDiscipline && matchesSearch;
+      }),
+    [items, selectedDiscipline, searchRole]
+  );
 
   if (isLoading) {
     return (
       <DashboardContent maxWidth="xl">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+        <Box
+          sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}
+        >
           <CircularProgress size={40} thickness={4} />
         </Box>
       </DashboardContent>
@@ -236,7 +241,11 @@ export default function RateCardDetailPage() {
                 justifyContent: 'center',
               }}
             >
-              <Typography variant="caption" color="text.secondary" sx={{ mb: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ mb: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}
+              >
                 {t('detail.catalogOverview')}
               </Typography>
               <Grid container spacing={2}>
@@ -434,10 +443,7 @@ export default function RateCardDetailPage() {
 
       {/* TAB 3: Infrastructure Packages */}
       {activeMainTab === 'infra' && (
-        <InfraPackageTable
-          packages={rateCard.infra_packages || []}
-          currency={rateCard.currency}
-        />
+        <InfraPackageTable packages={rateCard.infra_packages || []} currency={rateCard.currency} />
       )}
     </DashboardContent>
   );

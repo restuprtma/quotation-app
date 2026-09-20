@@ -41,17 +41,21 @@ export default function RateCardListPage() {
   const deleteMutation = useDeleteRateCard();
 
   // Filtered rows
-  const filteredRows = useMemo(() => rateCards.filter((card) => {
-      const matchesSearch =
-        !search.trim() ||
-        card.name.toLowerCase().includes(search.toLowerCase()) ||
-        card.code.toLowerCase().includes(search.toLowerCase());
+  const filteredRows = useMemo(
+    () =>
+      rateCards.filter((card) => {
+        const matchesSearch =
+          !search.trim() ||
+          card.name.toLowerCase().includes(search.toLowerCase()) ||
+          card.code.toLowerCase().includes(search.toLowerCase());
 
-      const matchesTier = selectedTier === 'all' || card.client_tier === selectedTier;
-      const matchesMarket = selectedMarket === 'all' || card.market === selectedMarket;
+        const matchesTier = selectedTier === 'all' || card.client_tier === selectedTier;
+        const matchesMarket = selectedMarket === 'all' || card.market === selectedMarket;
 
-      return matchesSearch && matchesTier && matchesMarket;
-    }), [rateCards, search, selectedTier, selectedMarket]);
+        return matchesSearch && matchesTier && matchesMarket;
+      }),
+    [rateCards, search, selectedTier, selectedMarket]
+  );
 
   const handleViewDetail = useCallback(
     (id: string) => {

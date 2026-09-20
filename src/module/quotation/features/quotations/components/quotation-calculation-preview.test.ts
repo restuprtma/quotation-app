@@ -8,4 +8,3 @@ describe('dedicated squad calculation preview formatting', () => {
     expect(formatDedicatedSquadCurrency(0)).toContain('0');
   });
 });
-

@@ -27,7 +27,11 @@ export const retainerItemSchema = z.object({
     .int()
     .min(1, 'Tarif bulanan harus lebih dari 0')
     .max(MAX_STANDALONE_MAINTENANCE_MONEY),
-  fte_quarters: z.number().int().min(1, 'FTE minimal 1 (0,25 FTE)').max(4, 'FTE maksimal 4 (1 FTE)'),
+  fte_quarters: z
+    .number()
+    .int()
+    .min(1, 'FTE minimal 1 (0,25 FTE)')
+    .max(4, 'FTE maksimal 4 (1 FTE)'),
   period_months: z
     .number()
     .int()

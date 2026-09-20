@@ -75,6 +75,7 @@ export interface SectionStatusListProps {
   sections?: BlueprintSectionStatus[];
   onRetry?: (section: ProviderSection) => void;
   onOpenManual?: (section: ProviderSection) => void;
+  onOpenEditor?: (section: ProviderSection) => void;
   isRetrying?: boolean;
   disabled?: boolean;
 }
@@ -83,6 +84,7 @@ export function SectionStatusList({
   sections = [],
   onRetry,
   onOpenManual,
+  onOpenEditor,
   isRetrying = false,
   disabled = false,
 }: SectionStatusListProps) {
@@ -94,7 +96,7 @@ export function SectionStatusList({
 
   const completedCount = CANONICAL_SECTIONS.filter((meta) => {
     const sec = sectionMap.get(meta.type);
-    return sec?.status === 'completed';
+    return sec?.status === 'completed' || sec?.status === 'validated';
   }).length;
 
   const totalCount = CANONICAL_SECTIONS.length;
@@ -116,6 +118,7 @@ export function SectionStatusList({
     const status: SectionStatus = section?.status ?? 'pending';
 
     switch (status) {
+      case 'validated':
       case 'completed':
         return {
           chip: (
@@ -128,6 +131,20 @@ export function SectionStatusList({
             />
           ),
           hint: 'Tahap berhasil diselesaikan',
+        };
+
+      case 'manual_edit':
+        return {
+          chip: (
+            <Chip
+              size="small"
+              icon={<Iconify icon="solar:pen-new-square-bold" width={16} />}
+              label="Draft Manual"
+              color="warning"
+              variant="soft"
+            />
+          ),
+          hint: 'Tersimpan sebagai draft manual BA',
         };
 
       case 'in_progress':
@@ -179,7 +196,7 @@ export function SectionStatusList({
         // Check if all previous stages are completed
         const isPreviousCompleted = CANONICAL_SECTIONS.slice(0, index).every((prevMeta) => {
           const prevSec = sectionMap.get(prevMeta.type);
-          return prevSec?.status === 'completed';
+          return prevSec?.status === 'completed' || prevSec?.status === 'validated';
         });
 
         if (!isPreviousCompleted && index > 0) {
@@ -340,6 +357,21 @@ export function SectionStatusList({
                         </Button>
                       )}
 
+                      {meta.isProvider && onOpenEditor && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="primary"
+                          disabled={disabled}
+                          startIcon={<Iconify icon="solar:pen-new-square-bold" width={14} />}
+                          onClick={() => onOpenEditor(meta.type as ProviderSection)}
+                          aria-label={`Edit Visual tahap ${meta.label}`}
+                          sx={{ minHeight: 40 }}
+                        >
+                          Edit Visual
+                        </Button>
+                      )}
+
                       {canManual && onOpenManual && (
                         <Button
                           size="small"
@@ -355,25 +387,40 @@ export function SectionStatusList({
                         </Button>
                       )}
 
-                      {meta.isProvider && status === 'completed' && onOpenManual && (
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          color="secondary"
-                          disabled={disabled}
-                          onClick={() => onOpenManual(meta.type as ProviderSection)}
-                          aria-label={`Koreksi tahap ${meta.label}`}
-                          sx={{ minHeight: 40 }}
-                        >
-                          Koreksi
-                        </Button>
-                      )}
+                      {meta.isProvider &&
+                        (status === 'completed' ||
+                          status === 'validated' ||
+                          status === 'manual_edit') &&
+                        onOpenManual &&
+                        !onOpenEditor && (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="secondary"
+                            disabled={disabled}
+                            onClick={() => onOpenManual(meta.type as ProviderSection)}
+                            aria-label={`Koreksi tahap ${meta.label}`}
+                            sx={{ minHeight: 40 }}
+                          >
+                            Koreksi
+                          </Button>
+                        )}
 
                       {!canRetry &&
                         !canManual &&
-                        !(meta.isProvider && status === 'completed' && onOpenManual) && (
+                        !(
+                          meta.isProvider &&
+                          (status === 'completed' ||
+                            status === 'validated' ||
+                            status === 'manual_edit') &&
+                          onOpenManual
+                        ) && (
                           <Typography variant="caption" color="text.disabled">
-                            {status === 'completed' ? 'Tervalidasi' : '-'}
+                            {status === 'completed' || status === 'validated'
+                              ? 'Tervalidasi'
+                              : status === 'manual_edit'
+                                ? 'Draft'
+                                : '-'}
                           </Typography>
                         )}
                     </Stack>

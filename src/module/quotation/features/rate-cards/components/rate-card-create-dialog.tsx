@@ -208,7 +208,9 @@ export function RateCardCreateDialog({ open, onClose, onSubmit, loading = false 
       fullWidth
       maxWidth="md"
     >
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}>
+      <DialogTitle
+        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}
+      >
         <Typography variant="h6">{t('dialog.createTitle')}</Typography>
         <IconButton size="small" onClick={onClose} disabled={isSubmitting || loading}>
           <Iconify icon="mingcute:close-line" width={20} />
@@ -416,9 +418,7 @@ export function RateCardCreateDialog({ open, onClose, onSubmit, loading = false 
                       }
                       label={
                         <Box>
-                          <Typography variant="subtitle2">
-                            {t('dialog.seedRolesTitle')}
-                          </Typography>
+                          <Typography variant="subtitle2">{t('dialog.seedRolesTitle')}</Typography>
                           <Typography variant="caption" color="text.secondary">
                             {t('dialog.seedRolesDescription')}
                           </Typography>

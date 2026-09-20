@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { it, expect, describe, afterEach } from 'vitest';
+import { it, vi, expect, describe, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 
 import { ValidationPanel } from './validation-panel';
@@ -131,5 +131,108 @@ describe('ValidationPanel', () => {
 
     expect(screen.getByText('<script>alert("xss")</script>')).toBeTruthy();
     expect(screen.getByText('<b>Tag</b> & "quotes" & {malformed}')).toBeTruthy();
+  });
+
+  it('adapts canonical backend issues from per-section validation_result and cross_validation_result', () => {
+    const canonicalValidationResult = {
+      journey: {
+        valid: false,
+        safe_outcome: 'invalid_schema',
+        issues: [
+          {
+            code: 'ERR_DANGLING_REFERENCE',
+            severity: 'error',
+            section: 'journey',
+            path: 'journey.activities[0].references[0]',
+            target_id: 'act-1',
+            message: 'Canonical reference tidak ditemukan',
+            blocking: true,
+            remediation: 'Pastikan reference menuju modul yang valid',
+          },
+        ],
+      },
+      architecture: {
+        valid: true,
+        issues: [
+          {
+            code: 'WARN_ARCH_NODE_UNREFERENCED_IN_WBS',
+            severity: 'warning',
+            section: 'architecture',
+            path: 'architecture.nodes[1]',
+            target_id: 'node-2',
+            message: 'Node arsitektur belum diimplementasikan di WBS',
+            blocking: false,
+          },
+        ],
+      },
+    };
+
+    const canonicalCrossResult = {
+      valid: false,
+      issues: [
+        {
+          code: 'WARN_JOURNEY_ACTIVITY_UNLINKED',
+          severity: 'warning',
+          section: 'journey',
+          path: 'journey.activities[1]',
+          target_id: 'act-2',
+          message: 'Activity belum terhubung ke workflow mana pun',
+          blocking: false,
+        },
+      ],
+      coverage: {
+        journey_to_workflow: 0.85,
+        architecture_to_wbs: 0.9,
+      },
+    };
+
+    render(
+      <ValidationPanel
+        validationResult={canonicalValidationResult}
+        crossValidationResult={canonicalCrossResult}
+      />
+    );
+
+    // 1 Error + 2 Warnings
+    expect(screen.getByText(/1 Error Ditemukan/i)).toBeTruthy();
+    expect(screen.getByText(/2 Peringatan/i)).toBeTruthy();
+    expect(screen.getByText('ERR_DANGLING_REFERENCE')).toBeTruthy();
+    expect(screen.getByText('Canonical reference tidak ditemukan')).toBeTruthy();
+    expect(screen.getByText('WARN_ARCH_NODE_UNREFERENCED_IN_WBS')).toBeTruthy();
+    expect(screen.getByText('WARN_JOURNEY_ACTIVITY_UNLINKED')).toBeTruthy();
+  });
+
+  it('invokes onFocusIssue callback when focus button is clicked', () => {
+    const onFocusIssue = vi.fn();
+    const resultWithIssue = {
+      issues: [
+        {
+          code: 'ERR_DUPLICATE_ID',
+          severity: 'error',
+          section: 'journey',
+          path: 'journey.phases[1]',
+          target_id: 'phase-2',
+          message: 'Duplicate phase ID detected',
+          blocking: true,
+        },
+      ],
+    };
+
+    render(<ValidationPanel validationResult={resultWithIssue} onFocusIssue={onFocusIssue} />);
+
+    expect(screen.getByText('ERR_DUPLICATE_ID')).toBeTruthy();
+    const focusButton = screen.getByRole('button', { name: /Fokus/i });
+    expect(focusButton).toBeTruthy();
+    focusButton.click();
+
+    expect(onFocusIssue).toHaveBeenCalledTimes(1);
+    expect(onFocusIssue).toHaveBeenCalledWith(
+      expect.objectContaining({
+        code: 'ERR_DUPLICATE_ID',
+        section: 'journey',
+        target_id: 'phase-2',
+        path: 'journey.phases[1]',
+      })
+    );
   });
 });

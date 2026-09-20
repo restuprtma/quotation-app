@@ -55,8 +55,21 @@ const sysDocument = `<article class="quotation-document talent-outsourcing-docum
 
 describe('talent outsourcing document round-trip', () => {
   it.each([
-    ['BPJS', bpjsDocument, ['data-group-index="0"', 'data-field="cost_groups.0.items.0.line_total"', 'data-value="557553333"', 'data-limitation-code="out_of_pocket"']],
-    ['SYS', sysDocument, ['data-row-index="0"', 'data-value="25000000"', 'data-section-code="payment"']],
+    [
+      'BPJS',
+      bpjsDocument,
+      [
+        'data-group-index="0"',
+        'data-field="cost_groups.0.items.0.line_total"',
+        'data-value="557553333"',
+        'data-limitation-code="out_of_pocket"',
+      ],
+    ],
+    [
+      'SYS',
+      sysDocument,
+      ['data-row-index="0"', 'data-value="25000000"', 'data-section-code="payment"'],
+    ],
   ])('%s retains every approved Talent marker and service wrapper', (_name, source, markers) => {
     const editor = createEditor(source);
     const saved = wrapOfficialDocument(editor.getHTML());

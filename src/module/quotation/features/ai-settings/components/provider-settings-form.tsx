@@ -141,7 +141,10 @@ export const ProviderSettingsForm = () => {
                     label="Provider"
                     placeholder="e.g. gemini, agentrouter"
                     error={!!errors.provider}
-                    helperText={errors.provider?.message || "Format protocol (contoh: 'agentrouter', 'gemini', 'openai')"}
+                    helperText={
+                      errors.provider?.message ||
+                      "Format protocol (contoh: 'agentrouter', 'gemini', 'openai')"
+                    }
                     fullWidth
                     variant="outlined"
                     InputProps={{

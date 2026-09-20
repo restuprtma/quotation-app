@@ -67,10 +67,7 @@ export const SCOPE_PRESETS_BY_SOLUTION_TYPE: Record<string, ScopePreset> = {
       'Frontend UI/UX Implementation',
       'Backend API Development & Integration',
     ],
-    optional: [
-      'Mobile App Companion',
-      'Automated E2E Test Suite',
-    ],
+    optional: ['Mobile App Companion', 'Automated E2E Test Suite'],
   },
   'Mobile Application': {
     mandatory: [
@@ -78,10 +75,7 @@ export const SCOPE_PRESETS_BY_SOLUTION_TYPE: Record<string, ScopePreset> = {
       'Backend REST API & Database Integration',
       'Push Notification Integration',
     ],
-    optional: [
-      'Offline Mode & Local Storage Cache',
-      'In-App Analytics & Crashlytics Integration',
-    ],
+    optional: ['Offline Mode & Local Storage Cache', 'In-App Analytics & Crashlytics Integration'],
   },
   'Enterprise SaaS': {
     mandatory: [
@@ -90,10 +84,7 @@ export const SCOPE_PRESETS_BY_SOLUTION_TYPE: Record<string, ScopePreset> = {
       'Audit Logging & Security Compliance Module',
       'Admin Master Dashboard & Reporting',
     ],
-    optional: [
-      'Single Sign-On (SSO / SAML / OAuth)',
-      'Custom Webhook & Developer API Gateway',
-    ],
+    optional: ['Single Sign-On (SSO / SAML / OAuth)', 'Custom Webhook & Developer API Gateway'],
   },
   'Custom Software Solution': {
     mandatory: [
@@ -101,10 +92,7 @@ export const SCOPE_PRESETS_BY_SOLUTION_TYPE: Record<string, ScopePreset> = {
       'Data Modeling & Scalable Database Architecture',
       'User Management & Departmental Access Control',
     ],
-    optional: [
-      'Legacy System Data Migration & ETL',
-      'Executive Analytics & KPI Dashboard',
-    ],
+    optional: ['Legacy System Data Migration & ETL', 'Executive Analytics & KPI Dashboard'],
   },
   'Cloud Infrastructure & API': {
     mandatory: [

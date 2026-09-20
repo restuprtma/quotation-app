@@ -31,11 +31,9 @@ export function RateCardItemRow({ item, currency = 'IDR' }: Props) {
   const [open, setOpen] = useState(false);
 
   const dailyRate =
-    item.daily_rate ||
-    (item.amount_per_month ? Math.round(item.amount_per_month / 22) : 0);
+    item.daily_rate || (item.amount_per_month ? Math.round(item.amount_per_month / 22) : 0);
   const hourlyRate =
-    item.hourly_rate ||
-    (item.amount_per_month ? Math.round(item.amount_per_month / 173) : 0);
+    item.hourly_rate || (item.amount_per_month ? Math.round(item.amount_per_month / 173) : 0);
 
   return (
     <>
@@ -84,14 +82,22 @@ export function RateCardItemRow({ item, currency = 'IDR' }: Props) {
 
         {/* Discipline */}
         <TableCell>
-          <Label color={getDisciplineColor(item.discipline)} variant="soft" sx={{ textTransform: 'uppercase' }}>
+          <Label
+            color={getDisciplineColor(item.discipline)}
+            variant="soft"
+            sx={{ textTransform: 'uppercase' }}
+          >
             {item.discipline}
           </Label>
         </TableCell>
 
         {/* Seniority */}
         <TableCell>
-          <Label color={getSeniorityColor(item.seniority)} variant="soft" sx={{ textTransform: 'capitalize' }}>
+          <Label
+            color={getSeniorityColor(item.seniority)}
+            variant="soft"
+            sx={{ textTransform: 'capitalize' }}
+          >
             {item.seniority}
           </Label>
         </TableCell>
@@ -127,7 +133,10 @@ export function RateCardItemRow({ item, currency = 'IDR' }: Props) {
 
       {/* Expanded Breakdown Row */}
       <TableRow>
-        <TableCell sx={{ py: 0, px: 2, borderBottom: open ? 1 : 0, borderColor: 'divider' }} colSpan={8}>
+        <TableCell
+          sx={{ py: 0, px: 2, borderBottom: open ? 1 : 0, borderColor: 'divider' }}
+          colSpan={8}
+        >
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ py: 2 }}>
               <CostBreakdownCard item={item} currency={currency} />

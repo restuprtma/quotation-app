@@ -62,9 +62,7 @@ export function TalentOutsourcingGenerationForm({
   const [pendingMode, setPendingMode] = useState<TalentEngagementMode | null>(null);
   const payload = useMemo(
     () =>
-      formState.isValid
-        ? toTalentOutsourcingPayload(values, selectedSkill, activeSkills)
-        : null,
+      formState.isValid ? toTalentOutsourcingPayload(values, selectedSkill, activeSkills) : null,
     [activeSkills, formState.isValid, selectedSkill, values]
   );
   const preview = useTalentOutsourcingPreview(payload, Boolean(payload) && !isSubmitting);

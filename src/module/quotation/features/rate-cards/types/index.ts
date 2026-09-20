@@ -1,10 +1,4 @@
-export type Discipline =
-  | 'ENGINEERING'
-  | 'QA'
-  | 'PRODUCT'
-  | 'DATA'
-  | 'INFRASTRUCTURE'
-  | 'SUPPORT';
+export type Discipline = 'ENGINEERING' | 'QA' | 'PRODUCT' | 'DATA' | 'INFRASTRUCTURE' | 'SUPPORT';
 
 export type Seniority = 'associate' | 'intermediate' | 'senior';
 

@@ -12,8 +12,18 @@ describe('standaloneMaintenanceSchema & form validation', () => {
     mode: 'retainer' as const,
     tax_treatment: 'exclusive_ppn' as const,
     retainer_items: [
-      { name: 'Senior Web Programmer', monthly_rate: 16_050_000, fte_quarters: 4, period_months: 1 },
-      { name: 'Senior Quality Assurance', monthly_rate: 14_070_000, fte_quarters: 2, period_months: 1 },
+      {
+        name: 'Senior Web Programmer',
+        monthly_rate: 16_050_000,
+        fte_quarters: 4,
+        period_months: 1,
+      },
+      {
+        name: 'Senior Quality Assurance',
+        monthly_rate: 14_070_000,
+        fte_quarters: 2,
+        period_months: 1,
+      },
     ],
     defect_groups: [
       {
@@ -55,8 +65,20 @@ describe('standaloneMaintenanceSchema & form validation', () => {
     retainer_items: [],
     defect_groups: [],
     hourly_cost_items: [
-      { name: 'Senior Mobile Programmer', display_monthly_rate: 16_050_000, headcount: 1, hours_half_units: 16, quoted_line_total: 730_000 },
-      { name: 'Senior QA', display_monthly_rate: 12_500_000, headcount: 1, hours_half_units: 4, quoted_line_total: 140_000 },
+      {
+        name: 'Senior Mobile Programmer',
+        display_monthly_rate: 16_050_000,
+        headcount: 1,
+        hours_half_units: 16,
+        quoted_line_total: 730_000,
+      },
+      {
+        name: 'Senior QA',
+        display_monthly_rate: 12_500_000,
+        headcount: 1,
+        hours_half_units: 4,
+        quoted_line_total: 140_000,
+      },
     ],
     hourly_tasks: [
       { description: 'Perbaikan crash login', platform: 'Android', hours_half_units: 16 },
@@ -126,7 +148,13 @@ describe('standaloneMaintenanceSchema & form validation', () => {
       const input = {
         ...validNexRetainerInput,
         hourly_cost_items: [
-          { name: 'Extra', display_monthly_rate: 10_000_000, headcount: 1, hours_half_units: 2, quoted_line_total: 100_000 },
+          {
+            name: 'Extra',
+            display_monthly_rate: 10_000_000,
+            headcount: 1,
+            hours_half_units: 2,
+            quoted_line_total: 100_000,
+          },
         ],
       };
       const result = standaloneMaintenanceSchema.safeParse(input);
@@ -139,9 +167,7 @@ describe('standaloneMaintenanceSchema & form validation', () => {
     it('rejects hourly_tasks when in retainer mode', () => {
       const input = {
         ...validNexRetainerInput,
-        hourly_tasks: [
-          { description: 'Extra task', platform: 'Web', hours_half_units: 2 },
-        ],
+        hourly_tasks: [{ description: 'Extra task', platform: 'Web', hours_half_units: 2 }],
       };
       const result = standaloneMaintenanceSchema.safeParse(input);
       expect(result.success).toBe(false);
@@ -167,9 +193,7 @@ describe('standaloneMaintenanceSchema & form validation', () => {
     it('rejects defect_groups when in hourly_task mode', () => {
       const input = {
         ...validLiputan6HourlyInput,
-        defect_groups: [
-          { title: 'Extra group', items: [] },
-        ],
+        defect_groups: [{ title: 'Extra group', items: [] }],
       };
       const result = standaloneMaintenanceSchema.safeParse(input);
       expect(result.success).toBe(false);
@@ -252,8 +276,8 @@ describe('standaloneMaintenanceSchema & form validation', () => {
       const result = standaloneMaintenanceSchema.safeParse(input);
       expect(result.success).toBe(false);
       if (!result.success) {
-        const duplicateIssue = result.error.issues.find(
-          (i) => i.message.includes('Duplicate item number')
+        const duplicateIssue = result.error.issues.find((i) =>
+          i.message.includes('Duplicate item number')
         );
         expect(duplicateIssue).toBeDefined();
         expect(duplicateIssue?.path).toEqual(['defect_groups', 1, 'items', 0, 'item_number']);
@@ -267,15 +291,21 @@ describe('standaloneMaintenanceSchema & form validation', () => {
           { name: 'Dev', monthly_rate: 15, fte_quarters: 1, period_months: 1 }, // 15 * 1 * 1 = 15 % 4 !== 0
         ],
         payment_schedule: [
-          { work_period: 'P', terms: 'T', invoice_date_label: 'I', due_date_label: 'D', nominal: 3 },
+          {
+            work_period: 'P',
+            terms: 'T',
+            invoice_date_label: 'I',
+            due_date_label: 'D',
+            nominal: 3,
+          },
         ],
       };
 
       const result = standaloneMaintenanceSchema.safeParse(input);
       expect(result.success).toBe(false);
       if (!result.success) {
-        const wholeRupiahIssue = result.error.issues.find(
-          (i) => i.message.includes('whole rupiah')
+        const wholeRupiahIssue = result.error.issues.find((i) =>
+          i.message.includes('whole rupiah')
         );
         expect(wholeRupiahIssue).toBeDefined();
         expect(wholeRupiahIssue?.path).toEqual(['retainer_items', 0]);
@@ -291,9 +321,7 @@ describe('standaloneMaintenanceSchema & form validation', () => {
       const result = standaloneMaintenanceSchema.safeParse(input);
       expect(result.success).toBe(false);
       if (!result.success) {
-        const discountIssue = result.error.issues.find(
-          (i) => i.path.includes('discount_amount')
-        );
+        const discountIssue = result.error.issues.find((i) => i.path.includes('discount_amount'));
         expect(discountIssue).toBeDefined();
       }
     });
@@ -304,16 +332,20 @@ describe('standaloneMaintenanceSchema & form validation', () => {
         discount_amount: 1_000_000,
         show_discount_row: false,
         payment_schedule: [
-          { work_period: 'P', terms: 'T', invoice_date_label: 'I', due_date_label: 'D', nominal: 22_085_000 },
+          {
+            work_period: 'P',
+            terms: 'T',
+            invoice_date_label: 'I',
+            due_date_label: 'D',
+            nominal: 22_085_000,
+          },
         ],
       };
 
       const result = standaloneMaintenanceSchema.safeParse(input);
       expect(result.success).toBe(false);
       if (!result.success) {
-        const discountIssue = result.error.issues.find(
-          (i) => i.path.includes('discount_amount')
-        );
+        const discountIssue = result.error.issues.find((i) => i.path.includes('discount_amount'));
         expect(discountIssue).toBeDefined();
       }
     });
@@ -336,7 +368,8 @@ describe('standaloneMaintenanceSchema & form validation', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         const paymentIssue = result.error.issues.find(
-          (i) => i.path.includes('payment_schedule') && i.message.includes('must equal total investment')
+          (i) =>
+            i.path.includes('payment_schedule') && i.message.includes('must equal total investment')
         );
         expect(paymentIssue).toBeDefined();
         expect(paymentIssue?.path).toEqual(['payment_schedule']);

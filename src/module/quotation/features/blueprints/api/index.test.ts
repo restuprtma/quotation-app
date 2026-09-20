@@ -4,6 +4,7 @@ import type {
   BlueprintDetail,
   CreateBlueprintInput,
   BlueprintListResponse,
+  SaveBlueprintSectionDraftRequest,
 } from '../types';
 
 import { it, vi, expect, describe, beforeEach } from 'vitest';
@@ -18,6 +19,7 @@ import {
   getBlueprintStatus,
   retryBlueprintSection,
   completeBlueprintSection,
+  saveBlueprintDraftSection,
 } from './index';
 
 describe('Blueprint API client', () => {
@@ -82,6 +84,9 @@ describe('Blueprint API client', () => {
       );
       expect(bpEndpoints.manualComplete('bp-123', 'journey')).toBe(
         '/quotation/v1/blueprints/bp-123/sections/journey/manual'
+      );
+      expect(bpEndpoints.draftSection('bp-123', 'journey')).toBe(
+        '/quotation/v1/blueprints/bp-123/sections/journey/draft'
       );
     });
   });
@@ -200,6 +205,100 @@ describe('Blueprint API client', () => {
         expect.objectContaining({ timeout: 200000 })
       );
       expect(result).toEqual(mockStatus);
+    });
+  });
+
+  describe('saveBlueprintDraftSection', () => {
+    it('calls PUT /quotation/v1/blueprints/:id/sections/:section/draft with payload and timeout 200000 and unwraps data.data', async () => {
+      const payload: SaveBlueprintSectionDraftRequest<{ journey: any }> = {
+        revision_id: 'rev-456',
+        content_version: 3,
+        content: {
+          journey: {
+            phases: [{ id: 'phase-1', label: 'Discovery', order: 1 }],
+            actors: [{ id: 'actor-1', label: 'Customer', order: 1 }],
+            activities: [],
+          },
+        },
+      };
+
+      const spy = vi.spyOn(axios, 'put').mockResolvedValueOnce({
+        data: {
+          data: {
+            ...mockDetail,
+            status: {
+              ...mockStatus,
+              content_version: 4,
+              sections: [
+                {
+                  type: 'journey',
+                  status: 'manual_edit',
+                  attempts: 1,
+                  updated_at: '2026-09-18T14:00:00Z',
+                },
+              ],
+            },
+          },
+          message: 'Draft saved',
+        },
+      } as any);
+
+      const result = await saveBlueprintDraftSection('bp-123', 'journey', payload);
+
+      expect(spy).toHaveBeenCalledWith(
+        '/quotation/v1/blueprints/bp-123/sections/journey/draft',
+        payload,
+        expect.objectContaining({ timeout: 200000 })
+      );
+      expect(result.status.content_version).toBe(4);
+      expect(result.status.sections[0].status).toBe('manual_edit');
+    });
+
+    it('propagates 409 conflict error with status and response intact', async () => {
+      const conflictError: any = new Error('execution_conflict');
+      conflictError.status = 409;
+      conflictError.response = {
+        status: 409,
+        data: { errors: 'execution_conflict', message: 'Stale version' },
+      };
+
+      vi.spyOn(axios, 'put').mockRejectedValueOnce(conflictError);
+
+      try {
+        await saveBlueprintDraftSection('bp-123', 'journey', {
+          revision_id: 'rev-456',
+          content_version: 1,
+          content: { journey: { phases: [], actors: [], activities: [] } },
+        });
+        expect.unreachable('Should have thrown 409 conflict');
+      } catch (err: any) {
+        expect(err.message).toBe('execution_conflict');
+        expect(err.status).toBe(409);
+        expect(err.response?.status).toBe(409);
+      }
+    });
+
+    it('propagates 422 invalid_schema error with status and response intact', async () => {
+      const validationError: any = new Error('invalid_schema');
+      validationError.status = 422;
+      validationError.response = {
+        status: 422,
+        data: { errors: 'invalid_schema', message: 'Schema validation failed' },
+      };
+
+      vi.spyOn(axios, 'put').mockRejectedValueOnce(validationError);
+
+      try {
+        await saveBlueprintDraftSection('bp-123', 'journey', {
+          revision_id: 'rev-456',
+          content_version: 1,
+          content: { journey: null as any },
+        });
+        expect.unreachable('Should have thrown 422 validation');
+      } catch (err: any) {
+        expect(err.message).toBe('invalid_schema');
+        expect(err.status).toBe(422);
+      }
     });
   });
 

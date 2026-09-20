@@ -6,6 +6,7 @@ import type {
   CreateBlueprintInput,
   BlueprintListResponse,
   QuotationRevisionOption,
+  SaveBlueprintSectionDraftRequest,
 } from '../types';
 
 import axios, { endpoints } from 'src/shared/lib/axios';
@@ -78,6 +79,18 @@ export function completeBlueprintSection<T>(
 ): Promise<BlueprintStatus> {
   return unwrap<BlueprintStatus>(
     axios.put(endpoints.quotation.blueprints.manualComplete(id, section), input, {
+      timeout: MUTATION_TIMEOUT_MS,
+    })
+  );
+}
+
+export function saveBlueprintDraftSection<T>(
+  id: string,
+  section: ProviderSection,
+  input: SaveBlueprintSectionDraftRequest<T>
+): Promise<BlueprintDetail> {
+  return unwrap<BlueprintDetail>(
+    axios.put(endpoints.quotation.blueprints.draftSection(id, section), input, {
       timeout: MUTATION_TIMEOUT_MS,
     })
   );

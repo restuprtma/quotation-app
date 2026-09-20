@@ -190,6 +190,8 @@ export const endpoints = {
         `/quotation/v1/blueprints/${id}/sections/${section}/retry`,
       manualComplete: (id: string, section: string) =>
         `/quotation/v1/blueprints/${id}/sections/${section}/manual`,
+      draftSection: (id: string, section: string) =>
+        `/quotation/v1/blueprints/${id}/sections/${section}/draft`,
     },
   },
 } as const;

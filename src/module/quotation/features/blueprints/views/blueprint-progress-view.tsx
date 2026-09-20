@@ -305,6 +305,20 @@ export function BlueprintProgressView({
             spacing={1.5}
             sx={{ display: { xs: 'none', md: 'flex' } }}
           >
+            {/* Visual Editor button */}
+            {blueprintId && !isRunning && (
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<Iconify icon="solar:pen-new-square-bold" />}
+                onClick={() => navigate(paths.dashboard.blueprint.edit(blueprintId))}
+                sx={{ minHeight: 44 }}
+                aria-label="Buka Visual Editor"
+              >
+                Editor Visual
+              </Button>
+            )}
+
             {/* Refresh button */}
             <Tooltip title="Segarkan Data dari Server">
               <span>
@@ -412,6 +426,11 @@ export function BlueprintProgressView({
           sections={status?.sections}
           onRetry={isCompact ? undefined : handleRetrySection}
           onOpenManual={isCompact ? undefined : handleOpenManual}
+          onOpenEditor={
+            isCompact || !blueprintId
+              ? undefined
+              : () => navigate(paths.dashboard.blueprint.edit(blueprintId))
+          }
           isRetrying={isFetching}
           disabled={isRunning || isCompact}
         />

@@ -165,10 +165,7 @@ export function calculateCustomDevelopmentDraftTotals(
   }
 
   const totalInvestment = Math.max(0, developmentSubtotal - discountAmount);
-  if (
-    !Number.isSafeInteger(totalInvestment) ||
-    totalInvestment > MAX_CUSTOM_DEVELOPMENT_MONEY
-  ) {
+  if (!Number.isSafeInteger(totalInvestment) || totalInvestment > MAX_CUSTOM_DEVELOPMENT_MONEY) {
     hasOverflow = true;
   }
 
@@ -199,8 +196,7 @@ export function calculateCustomDevelopmentDraftTotals(
   const monthlyPaymentRows: CustomDevelopmentPaymentRowInput[] = [];
 
   for (const row of input.payment_schedule || []) {
-    const nominal =
-      Number.isSafeInteger(row.nominal) && row.nominal >= 0 ? row.nominal : 0;
+    const nominal = Number.isSafeInteger(row.nominal) && row.nominal >= 0 ? row.nominal : 0;
     if (
       !Number.isSafeInteger(row.nominal) ||
       row.nominal < 0 ||
@@ -229,8 +225,7 @@ export function calculateCustomDevelopmentDraftTotals(
     monthlyRowsValid = monthlyPaymentRows.length === 0;
   } else {
     monthlyRowsValid =
-      monthlyPaymentRows.length > 0 &&
-      monthlyPaymentRows.every((r) => r.nominal === monthlyTotal);
+      monthlyPaymentRows.length > 0 && monthlyPaymentRows.every((r) => r.nominal === monthlyTotal);
   }
 
   const isBalanced =
@@ -252,9 +247,7 @@ export function calculateCustomDevelopmentDraftTotals(
   };
 }
 
-export function normalizeCustomDevelopment(
-  input: CustomDevelopmentInput
-): CustomDevelopmentInput {
+export function normalizeCustomDevelopment(input: CustomDevelopmentInput): CustomDevelopmentInput {
   return {
     system_name: input.system_name.trim(),
     quotation_date: input.quotation_date.trim(),
@@ -265,9 +258,7 @@ export function normalizeCustomDevelopment(
       items: (group.items || []).map((item) => ({
         name: item.name.trim(),
         display_rate:
-          item.display_rate !== null && item.display_rate !== undefined
-            ? item.display_rate
-            : null,
+          item.display_rate !== null && item.display_rate !== undefined ? item.display_rate : null,
         headcount: item.headcount,
         period_label: item.period_label.trim(),
         quoted_line_total:

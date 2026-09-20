@@ -64,16 +64,14 @@ export function SubscriptionFeatureEditor({ disabled = false }: Props) {
         <Stack spacing={2.5}>
           {groupFields.length === 0 && (
             <Alert severity="warning">
-              Layout <strong>Development & Maintenance</strong> membutuhkan minimal 1 grup fitur. Klik tombol <strong>{t('subscriptionSaaSForm.features.addGroup')}</strong> di atas untuk menambahkan modul.
+              Layout <strong>Development & Maintenance</strong> membutuhkan minimal 1 grup fitur.
+              Klik tombol <strong>{t('subscriptionSaaSForm.features.addGroup')}</strong> di atas
+              untuk menambahkan modul.
             </Alert>
           )}
 
           {groupFields.map((field, groupIndex) => (
-            <Card
-              key={field.id}
-              variant="outlined"
-              sx={{ p: 2.5, bgcolor: 'background.neutral' }}
-            >
+            <Card key={field.id} variant="outlined" sx={{ p: 2.5, bgcolor: 'background.neutral' }}>
               <Stack spacing={2}>
                 <Stack direction="row" spacing={2} alignItems="center">
                   <RHFTextField
@@ -128,21 +126,14 @@ export function SubscriptionFeatureEditor({ disabled = false }: Props) {
                         )}
 
                         {features.map((feature, featureIndex) => (
-                          <Stack
-                            key={featureIndex}
-                            direction="row"
-                            spacing={1}
-                            alignItems="center"
-                          >
+                          <Stack key={featureIndex} direction="row" spacing={1} alignItems="center">
                             <TextField
                               fullWidth
                               size="small"
                               value={feature}
                               placeholder={t('subscriptionSaaSForm.features.featurePlaceholder')}
                               disabled={disabled}
-                              onChange={(e) =>
-                                handleUpdateFeature(featureIndex, e.target.value)
-                              }
+                              onChange={(e) => handleUpdateFeature(featureIndex, e.target.value)}
                             />
                             <IconButton
                               size="small"

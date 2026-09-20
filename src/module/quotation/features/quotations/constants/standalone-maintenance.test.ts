@@ -150,8 +150,18 @@ describe('standalone maintenance pure helpers', () => {
         mode: 'retainer',
         tax_treatment: 'exclusive_ppn',
         retainer_items: [
-          { name: 'Senior Web Programmer', monthly_rate: 16_050_000, fte_quarters: 4, period_months: 1 },
-          { name: 'Senior Quality Assurance', monthly_rate: 14_070_000, fte_quarters: 2, period_months: 1 },
+          {
+            name: 'Senior Web Programmer',
+            monthly_rate: 16_050_000,
+            fte_quarters: 4,
+            period_months: 1,
+          },
+          {
+            name: 'Senior Quality Assurance',
+            monthly_rate: 14_070_000,
+            fte_quarters: 2,
+            period_months: 1,
+          },
         ],
         defect_groups: [
           {
@@ -199,8 +209,20 @@ describe('standalone maintenance pure helpers', () => {
         mode: 'hourly_task',
         tax_treatment: 'not_stated',
         hourly_cost_items: [
-          { name: 'Senior Mobile Programmer', display_monthly_rate: 16_050_000, headcount: 1, hours_half_units: 16, quoted_line_total: 730_000 },
-          { name: 'Senior QA', display_monthly_rate: 12_500_000, headcount: 1, hours_half_units: 4, quoted_line_total: 140_000 },
+          {
+            name: 'Senior Mobile Programmer',
+            display_monthly_rate: 16_050_000,
+            headcount: 1,
+            hours_half_units: 16,
+            quoted_line_total: 730_000,
+          },
+          {
+            name: 'Senior QA',
+            display_monthly_rate: 12_500_000,
+            headcount: 1,
+            hours_half_units: 4,
+            quoted_line_total: 140_000,
+          },
         ],
         hourly_tasks: [
           { description: 'Perbaikan crash login', platform: 'Android', hours_half_units: 16 },
@@ -289,7 +311,13 @@ describe('standalone maintenance pure helpers', () => {
           },
         ],
         hourly_cost_items: [
-          { name: ' Should be cleared ', display_monthly_rate: 5_000_000, headcount: 1, hours_half_units: 2, quoted_line_total: 100_000 },
+          {
+            name: ' Should be cleared ',
+            display_monthly_rate: 5_000_000,
+            headcount: 1,
+            hours_half_units: 2,
+            quoted_line_total: 100_000,
+          },
         ],
         hourly_tasks: [
           { description: ' Should be cleared ', platform: ' Web ', hours_half_units: 2 },
@@ -328,17 +356,24 @@ describe('standalone maintenance pure helpers', () => {
         mode: 'hourly_task',
         tax_treatment: 'not_stated',
         retainer_items: [
-          { name: ' Should be cleared ', monthly_rate: 10_000_000, fte_quarters: 4, period_months: 1 },
+          {
+            name: ' Should be cleared ',
+            monthly_rate: 10_000_000,
+            fte_quarters: 4,
+            period_months: 1,
+          },
         ],
-        defect_groups: [
-          { title: ' Should be cleared ', items: [] },
-        ],
+        defect_groups: [{ title: ' Should be cleared ', items: [] }],
         hourly_cost_items: [
-          { name: ' Cost Item 1 ', display_monthly_rate: 5_000_000, headcount: 1, hours_half_units: 2, quoted_line_total: 100_000 },
+          {
+            name: ' Cost Item 1 ',
+            display_monthly_rate: 5_000_000,
+            headcount: 1,
+            hours_half_units: 2,
+            quoted_line_total: 100_000,
+          },
         ],
-        hourly_tasks: [
-          { description: ' Task 1 ', platform: ' Mobile ', hours_half_units: 2 },
-        ],
+        hourly_tasks: [{ description: ' Task 1 ', platform: ' Mobile ', hours_half_units: 2 }],
         discount_amount: 0,
         show_discount_row: false,
         payment_schedule: [
@@ -365,7 +400,13 @@ describe('standalone maintenance pure helpers', () => {
         { name: 'Dev 1', monthly_rate: 10_000_000, fte_quarters: 4, period_months: 1 },
       ];
       const originalPayment = [
-        { work_period: 'P1', terms: 'T1', invoice_date_label: 'I1', due_date_label: 'D1', nominal: 10_000_000 },
+        {
+          work_period: 'P1',
+          terms: 'T1',
+          invoice_date_label: 'I1',
+          due_date_label: 'D1',
+          nominal: 10_000_000,
+        },
       ];
       const originalRights = ['Right 1'];
 
@@ -388,7 +429,12 @@ describe('standalone maintenance pure helpers', () => {
       expect(normalized.rights_statements).not.toBe(originalRights);
 
       // Mutate original array afterwards
-      originalRetainer.push({ name: 'Dev 2', monthly_rate: 5_000_000, fte_quarters: 2, period_months: 1 });
+      originalRetainer.push({
+        name: 'Dev 2',
+        monthly_rate: 5_000_000,
+        fte_quarters: 2,
+        period_months: 1,
+      });
       expect(normalized.retainer_items?.length).toBe(1);
     });
 

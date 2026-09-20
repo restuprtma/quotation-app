@@ -27,13 +27,18 @@ export interface ValidationIssue {
   code?: string;
   message: string;
   field?: string;
+  path?: string;
+  target_id?: string;
   severity: 'error' | 'warning';
+  blocking?: boolean;
+  remediation?: string;
 }
 
 export interface ValidationPanelProps {
   validationResult?: Record<string, any> | null;
   crossValidationResult?: Record<string, any> | null;
   onOpenManual?: (section: ProviderSection) => void;
+  onFocusIssue?: (issue: ValidationIssue) => void;
 }
 
 const PROVIDER_SECTIONS: ProviderSection[] = [
@@ -56,65 +61,94 @@ export function mapToProviderSection(secName: string): ProviderSection | null {
   return null;
 }
 
+function parseSingleIssue(
+  raw: any,
+  defaultSec: string = 'General',
+  defaultSeverity: 'error' | 'warning' = 'error'
+): ValidationIssue {
+  if (typeof raw === 'string') {
+    return {
+      section: defaultSec,
+      message: raw,
+      severity: defaultSeverity,
+    };
+  }
+  const section = raw.section || raw.target_section || raw.source_section || defaultSec;
+  const severity: 'error' | 'warning' =
+    raw.severity === 'warning' && !raw.blocking
+      ? 'warning'
+      : raw.severity === 'error' || raw.blocking
+        ? 'error'
+        : defaultSeverity;
+
+  return {
+    section,
+    code: raw.code || raw.rule_name || raw.error_code || raw.warning_code,
+    message: raw.message || raw.detail || raw.description || raw.suggestion || JSON.stringify(raw),
+    field: raw.field,
+    path: raw.path,
+    target_id: raw.target_id,
+    severity,
+    blocking: Boolean(raw.blocking),
+    remediation: raw.remediation,
+  };
+}
+
 export function ValidationPanel({
   validationResult,
   crossValidationResult,
   onOpenManual,
+  onFocusIssue,
 }: ValidationPanelProps) {
   // Extract issues from validation_result
   const errors: ValidationIssue[] = [];
   const warnings: ValidationIssue[] = [];
 
-  const parseIssues = (resultObj: any, defaultSeverity: 'error' | 'warning' = 'error') => {
-    if (!resultObj || typeof resultObj !== 'object') return;
+  const processObject = (obj: any, sectionName?: string) => {
+    if (!obj || typeof obj !== 'object') return;
 
-    // Errors extraction
-    const rawErrors = resultObj.errors || resultObj.error_list || resultObj.inconsistencies || [];
-    if (Array.isArray(rawErrors)) {
-      rawErrors.forEach((err: any) => {
-        if (typeof err === 'string') {
-          errors.push({
-            section: 'General',
-            message: err,
-            severity: 'error',
-          });
-        } else if (typeof err === 'object' && err !== null) {
-          errors.push({
-            section: err.section || err.target_section || err.source_section || 'General',
-            code: err.code || err.rule_name || err.error_code,
-            message: err.message || err.detail || err.description || JSON.stringify(err),
-            field: err.field,
-            severity: 'error',
-          });
+    // 1. Direct canonical `issues` array
+    if (Array.isArray(obj.issues)) {
+      obj.issues.forEach((raw: any) => {
+        const parsed = parseSingleIssue(raw, sectionName || 'General', 'error');
+        if (parsed.severity === 'error') {
+          errors.push(parsed);
+        } else {
+          warnings.push(parsed);
         }
       });
     }
 
-    // Warnings extraction
-    const rawWarnings = resultObj.warnings || resultObj.warning_list || [];
-    if (Array.isArray(rawWarnings)) {
-      rawWarnings.forEach((warn: any) => {
-        if (typeof warn === 'string') {
-          warnings.push({
-            section: 'General',
-            message: warn,
-            severity: 'warning',
-          });
-        } else if (typeof warn === 'object' && warn !== null) {
-          warnings.push({
-            section: warn.section || warn.target_section || warn.source_section || 'General',
-            code: warn.code || warn.rule_name || warn.warning_code,
-            message: warn.message || warn.suggestion || warn.detail || JSON.stringify(warn),
-            field: warn.field,
-            severity: 'warning',
-          });
-        }
+    // 2. Legacy `errors`, `error_list`, `inconsistencies`
+    const rawErrors = obj.errors || obj.error_list || obj.inconsistencies || [];
+    if (Array.isArray(rawErrors)) {
+      rawErrors.forEach((raw: any) => {
+        const parsed = parseSingleIssue(raw, sectionName || 'General', 'error');
+        errors.push(parsed);
       });
+    }
+
+    // 3. Legacy `warnings`, `warning_list`
+    const rawWarnings = obj.warnings || obj.warning_list || [];
+    if (Array.isArray(rawWarnings)) {
+      rawWarnings.forEach((raw: any) => {
+        const parsed = parseSingleIssue(raw, sectionName || 'General', 'warning');
+        warnings.push(parsed);
+      });
+    }
+
+    // 4. Per-section children if at top-level
+    if (!sectionName) {
+      for (const sec of PROVIDER_SECTIONS) {
+        if (obj[sec] && typeof obj[sec] === 'object') {
+          processObject(obj[sec], sec);
+        }
+      }
     }
   };
 
-  parseIssues(validationResult);
-  parseIssues(crossValidationResult);
+  processObject(validationResult);
+  processObject(crossValidationResult);
 
   // Coverage score parsing
   const rawScore =
@@ -180,6 +214,8 @@ export function ValidationPanel({
       </Card>
     );
   }
+
+  const hasActionColumn = Boolean(onOpenManual || onFocusIssue);
 
   return (
     <Card>
@@ -306,8 +342,8 @@ export function ValidationPanel({
                     <TableCell sx={{ width: 140 }}>Target Section</TableCell>
                     <TableCell sx={{ width: 160 }}>Kode / Rule</TableCell>
                     <TableCell>Pesan Error</TableCell>
-                    {onOpenManual && (
-                      <TableCell sx={{ width: 110, textAlign: 'right' }}>Aksi</TableCell>
+                    {hasActionColumn && (
+                      <TableCell sx={{ width: 160, textAlign: 'right' }}>Aksi</TableCell>
                     )}
                   </TableRow>
                 </TableHead>
@@ -332,24 +368,55 @@ export function ValidationPanel({
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2">{String(err.message)}</Typography>
+                          {err.remediation && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ display: 'block', mt: 0.5 }}
+                            >
+                              Saran: {err.remediation}
+                            </Typography>
+                          )}
                         </TableCell>
-                        {onOpenManual && (
+                        {hasActionColumn && (
                           <TableCell sx={{ textAlign: 'right' }}>
-                            {targetSec ? (
-                              <Button
-                                size="small"
-                                variant="text"
-                                color="error"
-                                startIcon={<Iconify icon="solar:pen-new-square-bold" width={14} />}
-                                onClick={() => onOpenManual(targetSec)}
-                              >
-                                Koreksi
-                              </Button>
-                            ) : (
-                              <Typography variant="caption" color="text.disabled">
-                                -
-                              </Typography>
-                            )}
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              justifyContent="flex-end"
+                              alignItems="center"
+                            >
+                              {onFocusIssue && (
+                                <Button
+                                  size="small"
+                                  variant="text"
+                                  color="error"
+                                  startIcon={<Iconify icon="solar:magnifier-bold" width={14} />}
+                                  onClick={() => onFocusIssue(err)}
+                                  aria-label={`Fokus pada isu ${err.code || err.section}`}
+                                >
+                                  Fokus
+                                </Button>
+                              )}
+                              {onOpenManual &&
+                                (targetSec ? (
+                                  <Button
+                                    size="small"
+                                    variant="text"
+                                    color="error"
+                                    startIcon={
+                                      <Iconify icon="solar:pen-new-square-bold" width={14} />
+                                    }
+                                    onClick={() => onOpenManual(targetSec)}
+                                  >
+                                    Koreksi
+                                  </Button>
+                                ) : !onFocusIssue ? (
+                                  <Typography variant="caption" color="text.disabled">
+                                    -
+                                  </Typography>
+                                ) : null)}
+                            </Stack>
                           </TableCell>
                         )}
                       </TableRow>
@@ -379,8 +446,8 @@ export function ValidationPanel({
                     <TableCell sx={{ width: 140 }}>Target Section</TableCell>
                     <TableCell sx={{ width: 160 }}>Kode / Rule</TableCell>
                     <TableCell>Saran Perbaikan / Peringatan</TableCell>
-                    {onOpenManual && (
-                      <TableCell sx={{ width: 110, textAlign: 'right' }}>Aksi</TableCell>
+                    {hasActionColumn && (
+                      <TableCell sx={{ width: 160, textAlign: 'right' }}>Aksi</TableCell>
                     )}
                   </TableRow>
                 </TableHead>
@@ -405,24 +472,55 @@ export function ValidationPanel({
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2">{String(warn.message)}</Typography>
+                          {warn.remediation && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ display: 'block', mt: 0.5 }}
+                            >
+                              Saran: {warn.remediation}
+                            </Typography>
+                          )}
                         </TableCell>
-                        {onOpenManual && (
+                        {hasActionColumn && (
                           <TableCell sx={{ textAlign: 'right' }}>
-                            {targetSec ? (
-                              <Button
-                                size="small"
-                                variant="text"
-                                color="warning"
-                                startIcon={<Iconify icon="solar:pen-new-square-bold" width={14} />}
-                                onClick={() => onOpenManual(targetSec)}
-                              >
-                                Koreksi
-                              </Button>
-                            ) : (
-                              <Typography variant="caption" color="text.disabled">
-                                -
-                              </Typography>
-                            )}
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              justifyContent="flex-end"
+                              alignItems="center"
+                            >
+                              {onFocusIssue && (
+                                <Button
+                                  size="small"
+                                  variant="text"
+                                  color="warning"
+                                  startIcon={<Iconify icon="solar:magnifier-bold" width={14} />}
+                                  onClick={() => onFocusIssue(warn)}
+                                  aria-label={`Fokus pada isu ${warn.code || warn.section}`}
+                                >
+                                  Fokus
+                                </Button>
+                              )}
+                              {onOpenManual &&
+                                (targetSec ? (
+                                  <Button
+                                    size="small"
+                                    variant="text"
+                                    color="warning"
+                                    startIcon={
+                                      <Iconify icon="solar:pen-new-square-bold" width={14} />
+                                    }
+                                    onClick={() => onOpenManual(targetSec)}
+                                  >
+                                    Koreksi
+                                  </Button>
+                                ) : !onFocusIssue ? (
+                                  <Typography variant="caption" color="text.disabled">
+                                    -
+                                  </Typography>
+                                ) : null)}
+                            </Stack>
                           </TableCell>
                         )}
                       </TableRow>

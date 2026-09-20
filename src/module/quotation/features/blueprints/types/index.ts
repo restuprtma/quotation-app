@@ -1,3 +1,5 @@
+import type { BundlePartial } from './bundle';
+
 export type ProviderSection = 'journey' | 'architecture' | 'state_machine' | 'workflow' | 'wbs';
 
 export type SectionType = 'context' | ProviderSection | 'cross_validation';
@@ -9,7 +11,14 @@ export type GenerationStatus =
   | 'completed'
   | 'failed';
 
-export type SectionStatus = 'pending' | 'in_progress' | 'completed' | 'failed' | 'skipped';
+export type SectionStatus =
+  | 'pending'
+  | 'in_progress'
+  | 'completed'
+  | 'failed'
+  | 'skipped'
+  | 'manual_edit'
+  | 'validated';
 
 export type PublicationStatus = 'draft' | 'published' | 'superseded' | string;
 
@@ -56,11 +65,11 @@ export type BlueprintStatus = {
   updated_at: string;
 };
 
-export type BlueprintDetail = {
+export type BlueprintDetail<TContent = BundlePartial> = {
   status: BlueprintStatus;
   quotation_id: string;
   source_quotation_revision_id?: string | null;
-  content_json: Record<string, any>;
+  content_json: TContent;
   validation_result: Record<string, any>;
   cross_validation_result: Record<string, any>;
 };
@@ -83,6 +92,12 @@ export type ManualRequest<T = unknown> = {
   content: T;
 };
 
+export type SaveBlueprintSectionDraftRequest<T = unknown> = {
+  revision_id: string;
+  content_version: number;
+  content: T;
+};
+
 export type QuotationOption = {
   id: string;
   quotation_number: string;
@@ -97,6 +112,39 @@ export type QuotationRevisionOption = {
   status: string;
   blueprint_eligible?: boolean;
   blueprint_ineligible_reason?: string | null;
+};
+
+export function parseBundlePartial(content: unknown): BundlePartial {
+  if (!content || typeof content !== 'object') {
+    return {};
+  }
+  const obj = content as Record<string, any>;
+  return {
+    schema_version: typeof obj.schema_version === 'string' ? obj.schema_version : undefined,
+    title: typeof obj.title === 'string' ? obj.title : undefined,
+    summary: typeof obj.summary === 'string' ? obj.summary : undefined,
+    journey: obj.journey && typeof obj.journey === 'object' ? obj.journey : undefined,
+    architecture:
+      obj.architecture && typeof obj.architecture === 'object' ? obj.architecture : undefined,
+    state_machine:
+      obj.state_machine && typeof obj.state_machine === 'object' ? obj.state_machine : undefined,
+    workflows: Array.isArray(obj.workflows) ? obj.workflows : undefined,
+    wbs: obj.wbs && typeof obj.wbs === 'object' ? obj.wbs : undefined,
+    assumptions: Array.isArray(obj.assumptions) ? obj.assumptions : undefined,
+    open_questions: Array.isArray(obj.open_questions) ? obj.open_questions : undefined,
+  };
+}
+
+export type CanonicalIssue = {
+  section: string;
+  code?: string;
+  message: string;
+  field?: string;
+  path?: string;
+  target_id?: string;
+  severity: 'error' | 'warning';
+  blocking?: boolean;
+  remediation?: string;
 };
 
 export * from './bundle';

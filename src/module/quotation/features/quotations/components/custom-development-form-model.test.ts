@@ -299,9 +299,7 @@ describe('customDevelopmentFormSchema & customDevelopmentSchema', () => {
       const result = customDevelopmentSchema.safeParse(data);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(
-          result.error.issues.some((i) => i.message.includes('priced'))
-        ).toBe(true);
+        expect(result.error.issues.some((i) => i.message.includes('priced'))).toBe(true);
       }
     });
 
@@ -339,9 +337,7 @@ describe('customDevelopmentFormSchema & customDevelopmentSchema', () => {
       const result = customDevelopmentSchema.safeParse(data);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(
-          result.error.issues.some((i) => i.path.includes('discount_amount'))
-        ).toBe(true);
+        expect(result.error.issues.some((i) => i.path.includes('discount_amount'))).toBe(true);
       }
     });
 
@@ -354,9 +350,7 @@ describe('customDevelopmentFormSchema & customDevelopmentSchema', () => {
       const result = customDevelopmentSchema.safeParse(data);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(
-          result.error.issues.some((i) => i.path.includes('show_discount_row'))
-        ).toBe(true);
+        expect(result.error.issues.some((i) => i.path.includes('show_discount_row'))).toBe(true);
       }
     });
   });
@@ -371,9 +365,7 @@ describe('customDevelopmentFormSchema & customDevelopmentSchema', () => {
       const result = customDevelopmentSchema.safeParse(data);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(
-          result.error.issues.some((i) => i.path.includes('monthly_notes'))
-        ).toBe(true);
+        expect(result.error.issues.some((i) => i.path.includes('monthly_notes'))).toBe(true);
       }
     });
   });
@@ -390,18 +382,14 @@ describe('customDevelopmentFormSchema & customDevelopmentSchema', () => {
       const result = customDevelopmentSchema.safeParse(data);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(
-          result.error.issues.some((i) => i.path.includes('module_groups'))
-        ).toBe(true);
+        expect(result.error.issues.some((i) => i.path.includes('module_groups'))).toBe(true);
       }
     });
 
     it('rejects empty feature string within module group', () => {
       const data = {
         ...validKopiStudio24Values.custom_development,
-        module_groups: [
-          { name: 'Modul 1', features: ['   '] },
-        ],
+        module_groups: [{ name: 'Modul 1', features: ['   '] }],
       };
       const result = customDevelopmentSchema.safeParse(data);
       expect(result.success).toBe(false);
@@ -434,9 +422,7 @@ describe('customDevelopmentFormSchema & customDevelopmentSchema', () => {
       const result = customDevelopmentSchema.safeParse(data);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(
-          result.error.issues.some((i) => i.path.includes('payment_schedule'))
-        ).toBe(true);
+        expect(result.error.issues.some((i) => i.path.includes('payment_schedule'))).toBe(true);
       }
     });
 
@@ -458,9 +444,7 @@ describe('customDevelopmentFormSchema & customDevelopmentSchema', () => {
       const result = customDevelopmentSchema.safeParse(data);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(
-          result.error.issues.some((i) => i.path.includes('payment_schedule'))
-        ).toBe(true);
+        expect(result.error.issues.some((i) => i.path.includes('payment_schedule'))).toBe(true);
       }
     });
 
@@ -482,9 +466,7 @@ describe('customDevelopmentFormSchema & customDevelopmentSchema', () => {
       const result = customDevelopmentSchema.safeParse(data);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(
-          result.error.issues.some((i) => i.path.includes('payment_schedule'))
-        ).toBe(true);
+        expect(result.error.issues.some((i) => i.path.includes('payment_schedule'))).toBe(true);
       }
     });
   });
@@ -502,10 +484,7 @@ describe('customDevelopmentFormSchema & customDevelopmentSchema', () => {
     it('rejects duplicate additional limitations (case-insensitive after trim)', () => {
       const data = {
         ...validKopiStudio24Values.custom_development,
-        additional_limitations: [
-          'Tidak termasuk domain.',
-          '  tidak termasuk domain.  ',
-        ],
+        additional_limitations: ['Tidak termasuk domain.', '  tidak termasuk domain.  '],
       };
       const result = customDevelopmentSchema.safeParse(data);
       expect(result.success).toBe(false);

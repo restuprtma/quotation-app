@@ -18,12 +18,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
-import {
-  Form,
-  RHFSelect,
-  RHFSwitch,
-  RHFTextField,
-} from 'src/shared/ui/hook-form';
+import { Form, RHFSelect, RHFSwitch, RHFTextField } from 'src/shared/ui/hook-form';
 
 import { SquadPicker } from './squad-picker';
 import { useClients } from '../hooks/use-clients';
@@ -34,7 +29,8 @@ import { QuotationProfilePanel } from './quotation-profile-panel';
 import { useActiveRateCards } from '../hooks/use-active-rate-cards';
 import { useDedicatedSquadPreview } from '../hooks/use-quotation-generation';
 import { QuotationCalculationPreview } from './quotation-calculation-preview';
-import { DEDICATED_SQUAD_MODELS ,
+import {
+  DEDICATED_SQUAD_MODELS,
   getDefaultPaymentCount,
   getDefaultTimelineMode,
   isGeneratorRateCardCode,
@@ -87,27 +83,51 @@ const commonDedicatedFields = {
   payment_anchor_date: z.string().regex(ISO_DATE_PATTERN),
 };
 
-const quotationProfileSchema = z.object({
-  preparation_mode: z.enum(['', 'none', 'hiring', 'engineering_kickoff']).optional(),
-  preparation_discount_bps: z.number().int().min(0).max(10_000).optional(),
-  maintenance_mode: z.enum(['', 'none', 'separate_section', 'within_development']).optional(),
-  scope_timeline_mode: z.enum(['', 'none', 'relative', 'calendar', 'sprint']).optional(),
-  included_phases: z.array(z.enum(['requirement', 'development', 'sit', 'uat', 'go_live', 'maintenance', 'k6', 'pentest'])).optional(),
-  payment_mode: z.enum(['', 'preset', 'explicit_rows']).optional(),
-  payment_rows: z.array(z.object({
-    work_period: z.string().trim().min(1).max(120),
-    terms: z.string().trim().min(1).max(120),
-    allocation_kind: z.enum(['investment_bps', 'net_preparation', 'remaining_bps']),
-    allocation_bps: z.number().int().min(0).max(10_000).optional(),
-    invoice_month_offset: z.number().int().min(0).max(59).optional(),
-    invoice_at_sprint_end: z.boolean().optional(),
-  })).max(60).optional(),
-  document_options: z.object({
-    letter_prefix: z.enum(['CTH', 'VEN', 'LANDA', 'VENTURO']).optional(),
-    tax_treatment: z.enum(['', 'exclusive_ppn', 'inclusive_ppn']).optional(),
-    clause_codes: z.array(z.enum(['out_of_pocket', 'overtime', 'onsite', 'third_party'])).optional(),
-  }).optional(),
-}).optional();
+const quotationProfileSchema = z
+  .object({
+    preparation_mode: z.enum(['', 'none', 'hiring', 'engineering_kickoff']).optional(),
+    preparation_discount_bps: z.number().int().min(0).max(10_000).optional(),
+    maintenance_mode: z.enum(['', 'none', 'separate_section', 'within_development']).optional(),
+    scope_timeline_mode: z.enum(['', 'none', 'relative', 'calendar', 'sprint']).optional(),
+    included_phases: z
+      .array(
+        z.enum([
+          'requirement',
+          'development',
+          'sit',
+          'uat',
+          'go_live',
+          'maintenance',
+          'k6',
+          'pentest',
+        ])
+      )
+      .optional(),
+    payment_mode: z.enum(['', 'preset', 'explicit_rows']).optional(),
+    payment_rows: z
+      .array(
+        z.object({
+          work_period: z.string().trim().min(1).max(120),
+          terms: z.string().trim().min(1).max(120),
+          allocation_kind: z.enum(['investment_bps', 'net_preparation', 'remaining_bps']),
+          allocation_bps: z.number().int().min(0).max(10_000).optional(),
+          invoice_month_offset: z.number().int().min(0).max(59).optional(),
+          invoice_at_sprint_end: z.boolean().optional(),
+        })
+      )
+      .max(60)
+      .optional(),
+    document_options: z
+      .object({
+        letter_prefix: z.enum(['CTH', 'VEN', 'LANDA', 'VENTURO']).optional(),
+        tax_treatment: z.enum(['', 'exclusive_ppn', 'inclusive_ppn']).optional(),
+        clause_codes: z
+          .array(z.enum(['out_of_pocket', 'overtime', 'onsite', 'third_party']))
+          .optional(),
+      })
+      .optional(),
+  })
+  .optional();
 
 /**
  * Keep the form contract discriminated by model. The API has the same matrix;
@@ -156,28 +176,30 @@ export const dedicatedSquadSchema = z.discriminatedUnion('model', [
   }),
 ]);
 
-export const quotationGenerationSchema = z.object({
-  client_id: z.string().optional(),
-  client_name: z.string().trim().min(1).max(200),
-  client_company_name: z.string().trim().optional(),
-  subject: z.string().trim().min(1).max(200),
-  solution_type: z.string().min(1),
-  commercial_scheme: z.literal('dedicated_squad'),
-  rate_card_id: z.string().min(1),
-  dedicated_squad: dedicatedSquadSchema,
-}).superRefine((data, context) => {
-  if (
-    data.dedicated_squad.model === '1A' &&
-    data.dedicated_squad.maintenance_enabled &&
-    data.dedicated_squad.maintenance_squad.length === 0
-  ) {
-    context.addIssue({
-      code: 'custom',
-      path: ['dedicated_squad', 'maintenance_squad'],
-      message: 'Maintenance squad is required when enabled',
-    });
-  }
-});
+export const quotationGenerationSchema = z
+  .object({
+    client_id: z.string().optional(),
+    client_name: z.string().trim().min(1).max(200),
+    client_company_name: z.string().trim().optional(),
+    subject: z.string().trim().min(1).max(200),
+    solution_type: z.string().min(1),
+    commercial_scheme: z.literal('dedicated_squad'),
+    rate_card_id: z.string().min(1),
+    dedicated_squad: dedicatedSquadSchema,
+  })
+  .superRefine((data, context) => {
+    if (
+      data.dedicated_squad.model === '1A' &&
+      data.dedicated_squad.maintenance_enabled &&
+      data.dedicated_squad.maintenance_squad.length === 0
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['dedicated_squad', 'maintenance_squad'],
+        message: 'Maintenance squad is required when enabled',
+      });
+    }
+  });
 
 export type QuotationGenerationFormValues = z.infer<typeof quotationGenerationSchema>;
 
@@ -327,7 +349,11 @@ export function QuotationGenerationForm({
   }, [rateCards, setValue, values.rate_card_id]);
 
   useEffect(() => {
-    if (model !== '1A' || !maintenanceEnabled || values.dedicated_squad?.maintenance_squad?.length) {
+    if (
+      model !== '1A' ||
+      !maintenanceEnabled ||
+      values.dedicated_squad?.maintenance_squad?.length
+    ) {
       return;
     }
     setValue('dedicated_squad.maintenance_squad', [getDefaultLine('1A')], {
@@ -404,8 +430,9 @@ export function QuotationGenerationForm({
           sx={{ borderRadius: 1.5 }}
         >
           <Typography variant="subtitle2">
-            {t('dedicatedSquadForm.activeSkillBanner')} <strong>{selectedSkill?.command || '/quotation'}</strong>{' '}
-            ({selectedSkill?.name || t('dedicatedSquadForm.defaultSkill')})
+            {t('dedicatedSquadForm.activeSkillBanner')}{' '}
+            <strong>{selectedSkill?.command || '/quotation'}</strong> (
+            {selectedSkill?.name || t('dedicatedSquadForm.defaultSkill')})
           </Typography>
           <Typography variant="caption" color="text.secondary">
             {t('dedicatedSquadForm.compact.aiHint')}
@@ -428,9 +455,15 @@ export function QuotationGenerationForm({
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
-                <RHFSelect name="solution_type" label={t('dedicatedSquadForm.solutionType')} disabled={isSubmitting}>
+                <RHFSelect
+                  name="solution_type"
+                  label={t('dedicatedSquadForm.solutionType')}
+                  disabled={isSubmitting}
+                >
                   {SOLUTION_TYPES.map((item) => (
-                    <MenuItem key={item.value} value={item.value}>{item.label}</MenuItem>
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.label}
+                    </MenuItem>
                   ))}
                 </RHFSelect>
               </Grid>
@@ -488,7 +521,9 @@ export function QuotationGenerationForm({
                       </MenuItem>
                     ))}
                     {rateCards.length === 0 && (
-                      <MenuItem value="" disabled>{t('dedicatedSquadForm.compact.noRateCards')}</MenuItem>
+                      <MenuItem value="" disabled>
+                        {t('dedicatedSquadForm.compact.noRateCards')}
+                      </MenuItem>
                     )}
                   </RHFSelect>
                 </Grid>
@@ -504,7 +539,11 @@ export function QuotationGenerationForm({
                 helperText={t('dedicatedSquadForm.compact.requirementHint')}
               />
 
-              <SquadPicker name="dedicated_squad.development_squad" model={model} disabled={isSubmitting} />
+              <SquadPicker
+                name="dedicated_squad.development_squad"
+                model={model}
+                disabled={isSubmitting}
+              />
 
               <QuotationProfilePanel disabled={isSubmitting} />
 
@@ -555,11 +594,13 @@ export function QuotationGenerationForm({
                       label={t('dedicatedSquadForm.compact.timelineMode')}
                       disabled={isSubmitting}
                     >
-                      {DEDICATED_TIMELINE_MODES.filter((item) => item.value !== 'sprint').map((item) => (
-                        <MenuItem key={item.value} value={item.value}>
-                          {t(`dedicatedSquadForm.${item.labelKey}`)}
-                        </MenuItem>
-                      ))}
+                      {DEDICATED_TIMELINE_MODES.filter((item) => item.value !== 'sprint').map(
+                        (item) => (
+                          <MenuItem key={item.value} value={item.value}>
+                            {t(`dedicatedSquadForm.${item.labelKey}`)}
+                          </MenuItem>
+                        )
+                      )}
                     </RHFSelect>
                   </Grid>
                 )}
@@ -654,7 +695,9 @@ export function QuotationGenerationForm({
               )
             }
           >
-            {isSubmitting ? t('dedicatedSquadForm.submitting') : t('dedicatedSquadForm.compact.submit')}
+            {isSubmitting
+              ? t('dedicatedSquadForm.submitting')
+              : t('dedicatedSquadForm.compact.submit')}
           </Button>
         </Stack>
       </Stack>

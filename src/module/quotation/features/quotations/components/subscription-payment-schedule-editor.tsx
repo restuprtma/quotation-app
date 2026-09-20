@@ -39,50 +39,47 @@ export function SubscriptionPaymentScheduleEditor({ disabled = false }: Props) {
 
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const {
-    fields,
-    append,
-    remove,
-    replace,
-  } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: 'subscription_saas.payment_schedule',
   });
 
-  const initialTermMonths = useWatch({
-    control,
-    name: 'subscription_saas.initial_term_months',
-  }) || 12;
+  const initialTermMonths =
+    useWatch({
+      control,
+      name: 'subscription_saas.initial_term_months',
+    }) || 12;
 
-  const billingCycle = useWatch({
-    control,
-    name: 'subscription_saas.billing_cycle',
-  }) || 'monthly';
+  const billingCycle =
+    useWatch({
+      control,
+      name: 'subscription_saas.billing_cycle',
+    }) || 'monthly';
 
-  const pricePeriods = useWatch({
-    control,
-    name: 'subscription_saas.price_periods',
-  }) || [];
+  const pricePeriods =
+    useWatch({
+      control,
+      name: 'subscription_saas.price_periods',
+    }) || [];
 
-  const oneTimeItems = useWatch({
-    control,
-    name: 'subscription_saas.one_time_items',
-  }) || [];
+  const oneTimeItems =
+    useWatch({
+      control,
+      name: 'subscription_saas.one_time_items',
+    }) || [];
 
-  const paymentSchedule = useWatch({
-    control,
-    name: 'subscription_saas.payment_schedule',
-  }) || [];
+  const paymentSchedule =
+    useWatch({
+      control,
+      name: 'subscription_saas.payment_schedule',
+    }) || [];
 
   // Contract total calculation
   const recurringTotal = pricePeriods.reduce(
     (sum, p) => sum + (Number(p?.duration_months) || 0) * (Number(p?.monthly_rate) || 0),
     0
   );
-  const oneTimeTotal = oneTimeItems.reduce(
-    (sum, item) => sum + (Number(item?.amount) || 0),
-    0
-  );
+  const oneTimeTotal = oneTimeItems.reduce((sum, item) => sum + (Number(item?.amount) || 0), 0);
   const totalContract = recurringTotal + oneTimeTotal;
 
   // Schedule totals calculation
@@ -90,10 +87,7 @@ export function SubscriptionPaymentScheduleEditor({ disabled = false }: Props) {
     (sum, row) => sum + (Number(row?.covered_months) || 0),
     0
   );
-  const scheduleTotal = paymentSchedule.reduce(
-    (sum, row) => sum + (Number(row?.nominal) || 0),
-    0
-  );
+  const scheduleTotal = paymentSchedule.reduce((sum, row) => sum + (Number(row?.nominal) || 0), 0);
   const difference = scheduleTotal - totalContract;
 
   const isCoverageValid = coveredMonths === initialTermMonths;
@@ -163,7 +157,9 @@ export function SubscriptionPaymentScheduleEditor({ disabled = false }: Props) {
         <Stack spacing={3}>
           {fields.length === 0 ? (
             <Alert severity="info">
-              Jadwal pembayaran belum dibuat. Klik <strong>{t('subscriptionSaaSForm.payment.generateFromCycle')}</strong> di atas untuk membuat baris otomatis sesuai siklus billing.
+              Jadwal pembayaran belum dibuat. Klik{' '}
+              <strong>{t('subscriptionSaaSForm.payment.generateFromCycle')}</strong> di atas untuk
+              membuat baris otomatis sesuai siklus billing.
             </Alert>
           ) : (
             <Stack spacing={2}>
@@ -352,7 +348,9 @@ export function SubscriptionPaymentScheduleEditor({ disabled = false }: Props) {
                   </Typography>
                   {!isCoverageValid && (
                     <Typography variant="caption" display="block">
-                      {t('subscriptionSaaSForm.payment.coverageMismatch')}: Cakupan pembayaran ({coveredMonths} bulan) tidak sama dengan durasi kontrak ({initialTermMonths} bulan).
+                      {t('subscriptionSaaSForm.payment.coverageMismatch')}: Cakupan pembayaran (
+                      {coveredMonths} bulan) tidak sama dengan durasi kontrak ({initialTermMonths}{' '}
+                      bulan).
                     </Typography>
                   )}
                 </Alert>

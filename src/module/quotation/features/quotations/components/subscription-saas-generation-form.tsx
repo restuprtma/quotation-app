@@ -19,12 +19,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
-import {
-  Form,
-  RHFSelect,
-  RHFSwitch,
-  RHFTextField,
-} from 'src/shared/ui/hook-form';
+import { Form, RHFSelect, RHFSwitch, RHFTextField } from 'src/shared/ui/hook-form';
 
 import { useClients } from '../hooks/use-clients';
 import { SOLUTION_TYPES } from '../constants/scope-presets';
@@ -108,8 +103,9 @@ export function SubscriptionSaaSGenerationForm({
   // Keep feature groups synced when section layout changes
   useEffect(() => {
     const rawGroups = values.subscription_saas?.feature_groups || [];
-    const currentGroups = rawGroups
-      .filter((g): g is { name: string; features: string[] } => Boolean(g?.name && Array.isArray(g?.features)));
+    const currentGroups = rawGroups.filter((g): g is { name: string; features: string[] } =>
+      Boolean(g?.name && Array.isArray(g?.features))
+    );
     const synced = syncFeatureGroupsForLayout(sectionLayout, currentGroups);
     if (synced.length !== currentGroups.length) {
       setValue('subscription_saas.feature_groups', synced, { shouldValidate: true });
@@ -305,7 +301,11 @@ export function SubscriptionSaaSGenerationForm({
                   label={t('subscriptionSaaSForm.autoRenewal')}
                   disabled={isSubmitting}
                 />
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', pl: 6 }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: 'block', pl: 6 }}
+                >
                   {t('subscriptionSaaSForm.autoRenewalHelper')}
                 </Typography>
               </Grid>
@@ -353,9 +353,7 @@ export function SubscriptionSaaSGenerationForm({
               )
             }
           >
-            {isSubmitting
-              ? t('subscriptionSaaSForm.submitting')
-              : t('subscriptionSaaSForm.submit')}
+            {isSubmitting ? t('subscriptionSaaSForm.submitting') : t('subscriptionSaaSForm.submit')}
           </Button>
         </Stack>
       </Stack>

@@ -14,11 +14,7 @@ import { useTranslate } from 'src/locales';
 import { Label } from 'src/shared/ui/label';
 import { Scrollbar } from 'src/shared/ui/scrollbar';
 
-import {
-  getTermTypeColor,
-  getSeniorityColor,
-  formatCurrencyValue,
-} from '../utils/format';
+import { getTermTypeColor, getSeniorityColor, formatCurrencyValue } from '../utils/format';
 
 interface Props {
   configs: OvertimeRateConfig[];
@@ -96,7 +92,8 @@ export function OvertimeConfigTable({ configs, currency = 'IDR' }: Props) {
                   <TableCell align="right">
                     <Typography variant="body2" fontWeight="700" color="primary.main">
                       {formatCurrencyValue(
-                        cfg.hourly_rate || Math.round(cfg.base_monthly_rate / (cfg.hourly_divisor || 173)),
+                        cfg.hourly_rate ||
+                          Math.round(cfg.base_monthly_rate / (cfg.hourly_divisor || 173)),
                         currency
                       )}
                     </Typography>

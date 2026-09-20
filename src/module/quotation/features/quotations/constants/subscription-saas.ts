@@ -148,9 +148,7 @@ export function buildPaymentRowSkeletons(
   return rows;
 }
 
-export function calculatePaymentScheduleTotal(
-  payments: Array<{ nominal: number }>
-): number {
+export function calculatePaymentScheduleTotal(payments: Array<{ nominal: number }>): number {
   let total = 0;
   for (const row of payments) {
     if (!Number.isSafeInteger(row.nominal) || row.nominal < 0) {
@@ -177,9 +175,7 @@ export function syncFeatureGroupsForLayout(
   }));
 }
 
-export function normalizeSubscriptionSaaS(
-  input: SubscriptionSaaSInput
-): SubscriptionSaaSInput {
+export function normalizeSubscriptionSaaS(input: SubscriptionSaaSInput): SubscriptionSaaSInput {
   return {
     product_name: input.product_name.trim(),
     quotation_date: input.quotation_date.trim(),

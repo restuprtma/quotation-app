@@ -165,10 +165,7 @@ describe('subscription-saas constants & pure helpers', () => {
 
     it('rejects total exceeding MAX_SUBSCRIPTION_SAFE_AMOUNT', () => {
       expect(() =>
-        calculatePaymentScheduleTotal([
-          { nominal: MAX_SUBSCRIPTION_SAFE_AMOUNT },
-          { nominal: 1 },
-        ])
+        calculatePaymentScheduleTotal([{ nominal: MAX_SUBSCRIPTION_SAFE_AMOUNT }, { nominal: 1 }])
       ).toThrow(/exceeds safe limit/);
     });
   });
@@ -206,7 +203,12 @@ describe('subscription-saas constants & pure helpers', () => {
         initial_term_months: 12,
         auto_renewal: false,
         price_periods: [
-          { label: ' Period 1 ', start_month_offset: 0, duration_months: 12, monthly_rate: 1_000_000 },
+          {
+            label: ' Period 1 ',
+            start_month_offset: 0,
+            duration_months: 12,
+            monthly_rate: 1_000_000,
+          },
         ],
         one_time_items: [{ name: ' Setup ', amount: 500_000 }],
         payment_schedule: [
@@ -249,7 +251,12 @@ describe('subscription-saas constants & pure helpers', () => {
 
       // Mutate original and assert normalized is unaffected
       original.price_periods[0].label = 'Mutated';
-      original.price_periods.push({ label: 'Period 2', start_month_offset: 12, duration_months: 12, monthly_rate: 2_000_000 });
+      original.price_periods.push({
+        label: 'Period 2',
+        start_month_offset: 12,
+        duration_months: 12,
+        monthly_rate: 2_000_000,
+      });
       expect(normalized.price_periods).toHaveLength(1);
       expect(normalized.price_periods[0].label).toBe('Period 1');
     });
@@ -263,9 +270,18 @@ describe('subscription-saas constants & pure helpers', () => {
         tax_treatment: 'not_stated' as const,
         initial_term_months: 12,
         auto_renewal: false,
-        price_periods: [{ label: 'P1', start_month_offset: 0, duration_months: 12, monthly_rate: 100_000 }],
+        price_periods: [
+          { label: 'P1', start_month_offset: 0, duration_months: 12, monthly_rate: 100_000 },
+        ],
         payment_schedule: [
-          { work_period: 'Bulan 1', start_month_offset: 0, covered_months: 12, invoice_date_label: '', due_date_label: '', nominal: 1_200_000 },
+          {
+            work_period: 'Bulan 1',
+            start_month_offset: 0,
+            covered_months: 12,
+            invoice_date_label: '',
+            due_date_label: '',
+            nominal: 1_200_000,
+          },
         ],
         is_partnership: false,
         income_sharing: {
