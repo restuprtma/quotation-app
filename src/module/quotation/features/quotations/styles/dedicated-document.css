@@ -6,6 +6,9 @@
  * inline styles into the document or its PDF output.
  */
 .quotation-document {
+  --quotation-table-highlight-bg: #45818e;
+  --quotation-table-highlight-fg: #ffffff;
+
   box-sizing: border-box;
   color: #202124;
   font-family: Roboto, 'Public Sans', Arial, sans-serif;
@@ -92,18 +95,59 @@
   table-layout: fixed;
 }
 
-.quotation-document th,
-.quotation-document td {
+.quotation-document table:not(.signature-table) th,
+.quotation-document table:not(.signature-table) td {
   border: 1px solid #cfd5dc;
-  padding: 0.45rem 0.55rem;
+  padding: 4px 8px;
+  line-height: 1.35;
   vertical-align: top;
   overflow-wrap: anywhere;
 }
 
-.quotation-document th {
-  background: #f3f5f7;
-  color: #111827;
+.quotation-document table:not(.signature-table) th,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='total']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='discount']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='total_investment']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='discount_amount']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='service_total']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='hardware_total']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='maintenance_total']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='payment_total']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='total_contract']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='total_license']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='maintenance_hosting_total']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='total_before_tax']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='dpp_amount']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='tax_amount']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field='grand_total']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field$='_subtotal']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field$='_discount_amount']) > *,
+.quotation-document table:not(.signature-table) tr:has(> [data-field$='_tax_amount']) > *,
+.quotation-document
+  table:not(.signature-table)
+  tr:has(> [data-quotation-field$='_subtotal'])
+  > *,
+.quotation-document
+  table:not(.signature-table)
+  tr:has(> [data-quotation-field='discount_amount'])
+  > *,
+.quotation-document
+  table:not(.signature-table)
+  tr:has(> [data-quotation-field='total_investment'])
+  > *,
+.quotation-document
+  table:not(.signature-table)
+  tr:has(> [data-quotation-field='monthly_total'])
+  > *,
+.quotation-document table:not(.signature-table) tr[data-cloud-total-row] > * {
+  background: var(--quotation-table-highlight-bg);
+  color: var(--quotation-table-highlight-fg);
   font-weight: 700;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.quotation-document table:not(.signature-table) th {
   text-align: left;
 }
 

@@ -72,11 +72,10 @@ export function DocumentCanvas({ children }: Props) {
               position: 'relative',
               border: 1,
               borderColor: 'divider',
-              p: { xs: 1, sm: 1.5 },
               verticalAlign: 'top',
               overflowWrap: 'anywhere',
             },
-            '& th': { bgcolor: 'action.hover', fontWeight: 700 },
+            '& th': { fontWeight: 700 },
             '& .column-resize-handle': {
               position: 'absolute',
               right: -2,
