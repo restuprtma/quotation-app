@@ -19,10 +19,26 @@ export type ConfigValue = {
   };
 };
 
+function getServerUrl(): string {
+  const envUrl = import.meta.env.VITE_SERVER_URL;
+  if (typeof window !== 'undefined' && window.location.hostname) {
+    if (
+      !envUrl ||
+      envUrl.includes('localhost') ||
+      envUrl.includes('127.0.0.1') ||
+      /^\d+\.\d+\.\d+\.\d+/.test(envUrl.replace(/^https?:\/\//, ''))
+    ) {
+      const port = envUrl ? new URL(envUrl).port || '8083' : '8083';
+      return `${window.location.protocol}//${window.location.hostname}:${port}`;
+    }
+  }
+  return envUrl ?? '';
+}
+
 export const CONFIG: ConfigValue = {
   appName: 'Tuai',
   appVersion: packageJson.version,
-  serverUrl: import.meta.env.VITE_SERVER_URL ?? '',
+  serverUrl: getServerUrl(),
   assetsDir: import.meta.env.VITE_ASSETS_DIR ?? '',
   auth: {
     method: 'jwt',

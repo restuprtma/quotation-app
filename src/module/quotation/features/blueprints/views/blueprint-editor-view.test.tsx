@@ -3,12 +3,43 @@ import type { ReactNode } from 'react';
 import type { BlueprintDetail, BlueprintStatus } from '../types';
 
 import React from 'react';
-import { it, vi, expect, describe, afterEach, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { it, vi, expect, describe, afterEach, beforeAll, beforeEach } from 'vitest';
 import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
 
 import * as api from '../api';
 import { BlueprintEditorView } from './blueprint-editor-view';
+
+beforeAll(() => {
+  global.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+
+  const origQuerySelectorAll = Element.prototype.querySelectorAll;
+  Element.prototype.querySelectorAll = function polyfillQuerySelectorAll(selectors: string) {
+    if (typeof selectors === 'string' && selectors.includes('[role="treeitem"]:not(')) {
+      const match = selectors.match(/\*\[id="([^"]+)"\]/);
+      const targetId = match ? match[1] : null;
+      const allTreeItems = Array.from(
+        origQuerySelectorAll.call(this, '[role="treeitem"]')
+      ) as HTMLElement[];
+
+      if (targetId) {
+        return allTreeItems.filter((el) => {
+          const parentItem = el.parentElement?.closest('[role="treeitem"]');
+          return parentItem != null && parentItem.id === targetId;
+        }) as any;
+      }
+      return allTreeItems.filter((el) => {
+        const parentItem = el.parentElement?.closest('[role="treeitem"]');
+        return parentItem == null;
+      }) as any;
+    }
+    return origQuerySelectorAll.call(this, selectors);
+  };
+});
 
 vi.mock('src/layouts/dashboard', () => ({
   DashboardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -22,6 +53,8 @@ vi.mock('src/module/core/features/auth/hooks', () => ({
 
 const mockNavigate = vi.fn();
 const mockParams = { id: 'bp-123' };
+let mockSearchParams = new URLSearchParams();
+const mockSetSearchParams = vi.fn();
 
 vi.mock('react-router', async () => {
   const actual = await vi.importActual('react-router');
@@ -29,6 +62,7 @@ vi.mock('react-router', async () => {
     ...actual,
     useNavigate: () => mockNavigate,
     useParams: () => mockParams,
+    useSearchParams: () => [mockSearchParams, mockSetSearchParams],
   };
 });
 
@@ -446,5 +480,526 @@ describe('BlueprintEditorView (Task 3.02 & 3.03 Tests)', () => {
         }),
       })
     );
+  });
+
+  it('switches to State Machine tab, renders State Machine editor, and saves State Machine draft', async () => {
+    const mockDetailWithSm: BlueprintDetail = {
+      ...mockDetail,
+      content_json: {
+        ...mockDetail.content_json,
+        state_machine: {
+          entity: 'Tiket Antrean',
+          initial_state: 'state-1',
+          states: [
+            {
+              id: 'state-1',
+              label: 'Menunggu',
+              type: 'normal',
+              layout: { x: 100, y: 100 },
+            },
+            {
+              id: 'state-2',
+              label: 'Selesai',
+              type: 'terminal',
+              layout: { x: 400, y: 100 },
+            },
+          ],
+          transitions: [
+            {
+              id: 'trans-1',
+              source: 'state-1',
+              target: 'state-2',
+              event: 'Selesaikan Antrean',
+              actor: 'Petugas',
+              guard: '',
+              actions: [],
+            },
+          ],
+        },
+      },
+    };
+
+    vi.spyOn(api, 'getBlueprint').mockResolvedValue(mockDetailWithSm);
+    vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(mockStatus);
+
+    const updatedDetail: BlueprintDetail = {
+      ...mockDetailWithSm,
+      status: {
+        ...mockStatus,
+        content_version: 2,
+        sections: [
+          {
+            type: 'state_machine',
+            status: 'manual_edit',
+            attempts: 1,
+            started_at: '',
+            completed_at: null,
+            updated_at: '',
+          },
+        ],
+      },
+      content_json: {
+        ...mockDetailWithSm.content_json,
+        state_machine: {
+          ...mockDetailWithSm.content_json!.state_machine!,
+          entity: 'Tiket Antrean Updated',
+        },
+      },
+    };
+
+    const draftSaveSpy = vi
+      .spyOn(api, 'saveBlueprintDraftSection')
+      .mockResolvedValue(updatedDetail);
+
+    render(<BlueprintEditorView blueprintId="bp-123" initialSection="state_machine" />, {
+      wrapper: createWrapper(),
+    });
+
+    expect(await screen.findByTestId('blueprint-flow-canvas')).toBeTruthy();
+    expect(screen.getAllByText('Menunggu').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Selesai').length).toBeGreaterThan(0);
+
+    // Edit entity name
+    const entityInput = screen.getByLabelText(/nama entity/i);
+    fireEvent.change(entityInput, { target: { value: 'Tiket Antrean Updated' } });
+
+    expect(screen.getByText('Belum Disimpan')).toBeTruthy();
+
+    // Click Save Draft
+    const saveDraftBtn = screen.getByRole('button', { name: /simpan draft/i });
+    fireEvent.click(saveDraftBtn);
+
+    await waitFor(() => {
+      expect(draftSaveSpy).toHaveBeenCalledTimes(1);
+    });
+
+    expect(draftSaveSpy).toHaveBeenCalledWith(
+      'bp-123',
+      'state_machine',
+      expect.objectContaining({
+        revision_id: 'rev-001',
+        content_version: 1,
+        content: expect.objectContaining({
+          state_machine: expect.objectContaining({
+            entity: 'Tiket Antrean Updated',
+            initial_state: 'state-1',
+          }),
+        }),
+      })
+    );
+  });
+
+  it('switches to Workflow tab, renders Workflow editor, and saves Workflow draft', async () => {
+    const mockDetailWithWf: BlueprintDetail = {
+      ...mockDetail,
+      content_json: {
+        ...mockDetail.content_json,
+        workflows: [
+          {
+            id: 'wf-1',
+            name: 'Alur Pelayanan Utama',
+            description: 'Deskripsi workflow utama',
+            lanes: [{ id: 'lane-1', label: 'Petugas Loket', order: 1 }],
+            nodes: [
+              {
+                id: 'wnode-1',
+                lane_id: 'lane-1',
+                type: 'start',
+                label: 'Mulai Pelayanan',
+                description: 'Start node',
+                layout: { x: 50, y: 50 },
+              },
+              {
+                id: 'wnode-2',
+                lane_id: 'lane-1',
+                type: 'end',
+                label: 'Pelayanan Selesai',
+                description: 'End node',
+                layout: { x: 300, y: 50 },
+              },
+            ],
+            edges: [
+              {
+                id: 'wedge-1',
+                source: 'wnode-1',
+                target: 'wnode-2',
+                label: 'Selesai',
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    vi.spyOn(api, 'getBlueprint').mockResolvedValue(mockDetailWithWf);
+    vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(mockStatus);
+
+    const updatedDetail: BlueprintDetail = {
+      ...mockDetailWithWf,
+      status: {
+        ...mockStatus,
+        content_version: 2,
+        sections: [
+          {
+            type: 'workflow',
+            status: 'manual_edit',
+            attempts: 1,
+            started_at: '',
+            completed_at: null,
+            updated_at: '',
+          },
+        ],
+      },
+      content_json: {
+        ...mockDetailWithWf.content_json,
+        workflows: [
+          {
+            ...mockDetailWithWf.content_json!.workflows![0],
+            name: 'Alur Pelayanan Utama (Updated)',
+          },
+        ],
+      },
+    };
+
+    const draftSaveSpy = vi
+      .spyOn(api, 'saveBlueprintDraftSection')
+      .mockResolvedValue(updatedDetail);
+
+    render(<BlueprintEditorView blueprintId="bp-123" initialSection="workflow" />, {
+      wrapper: createWrapper(),
+    });
+
+    expect(await screen.findByTestId('blueprint-flow-canvas')).toBeTruthy();
+    expect(screen.getAllByText('Alur Pelayanan Utama').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Mulai Pelayanan').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Pelayanan Selesai').length).toBeGreaterThan(0);
+
+    // Edit workflow metadata
+    const editWfBtn = screen.getByRole('button', { name: /edit info workflow/i });
+    fireEvent.click(editWfBtn);
+
+    const nameInput = screen.getByDisplayValue('Alur Pelayanan Utama');
+    fireEvent.change(nameInput, { target: { value: 'Alur Pelayanan Utama (Updated)' } });
+
+    const saveWfBtn = screen.getByRole('button', { name: /simpan workflow/i });
+    fireEvent.click(saveWfBtn);
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
+    expect(screen.getByText('Belum Disimpan')).toBeTruthy();
+
+    // Click Save Draft
+    const saveDraftBtn = screen.getByRole('button', { name: /simpan draft/i });
+    fireEvent.click(saveDraftBtn);
+
+    await waitFor(() => {
+      expect(draftSaveSpy).toHaveBeenCalledTimes(1);
+    });
+
+    expect(draftSaveSpy).toHaveBeenCalledWith(
+      'bp-123',
+      'workflow',
+      expect.objectContaining({
+        revision_id: 'rev-001',
+        content_version: 1,
+        content: expect.objectContaining({
+          workflows: expect.arrayContaining([
+            expect.objectContaining({
+              id: 'wf-1',
+              name: 'Alur Pelayanan Utama (Updated)',
+            }),
+          ]),
+        }),
+      })
+    );
+  });
+
+  it('switches to WBS tab, renders WBS editor, and saves WBS draft', async () => {
+    const mockDetailWithWbs: BlueprintDetail = {
+      ...mockDetail,
+      content_json: {
+        ...mockDetail.content_json,
+        wbs: {
+          modules: [
+            {
+              id: 'mod-1',
+              name: 'Modul Antrian Utama',
+              description: 'Deskripsi Modul Antrian',
+              priority: 'high',
+              dependencies: [],
+              references: [],
+              features: [
+                {
+                  id: 'feat-1',
+                  name: 'Alokasi Tiket',
+                  description: 'Alokasi nomor tiket',
+                  acceptance_criteria: ['Kriteria 1'],
+                },
+              ],
+            },
+          ],
+        },
+        cross_references: [
+          {
+            id: 'xref-1',
+            source_ref: 'wbs.module.mod-1',
+            target_ref: 'architecture.node.node-1',
+            relation_type: 'implements',
+            description: 'Relasi WBS',
+          },
+        ],
+      },
+    };
+
+    vi.spyOn(api, 'getBlueprint').mockResolvedValue(mockDetailWithWbs);
+    vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(mockStatus);
+
+    const updatedDetail: BlueprintDetail = {
+      ...mockDetailWithWbs,
+      status: {
+        ...mockStatus,
+        content_version: 2,
+        sections: [
+          {
+            type: 'wbs',
+            status: 'manual_edit',
+            attempts: 1,
+            started_at: '',
+            completed_at: null,
+            updated_at: '',
+          },
+        ],
+      },
+      content_json: {
+        ...mockDetailWithWbs.content_json,
+        wbs: {
+          modules: [
+            {
+              ...mockDetailWithWbs.content_json!.wbs!.modules[0],
+              name: 'Modul Antrian Utama (Updated)',
+            },
+          ],
+        },
+      },
+    };
+
+    const draftSaveSpy = vi
+      .spyOn(api, 'saveBlueprintDraftSection')
+      .mockResolvedValue(updatedDetail);
+
+    render(<BlueprintEditorView blueprintId="bp-123" initialSection="wbs" />, {
+      wrapper: createWrapper(),
+    });
+
+    expect(await screen.findByTestId('wbs-editor')).toBeTruthy();
+    expect(screen.getAllByText('Modul Antrian Utama').length).toBeGreaterThan(0);
+
+    // Edit module name
+    const editModBtn = screen.getByRole('button', { name: /edit module modul antrian utama/i });
+    fireEvent.click(editModBtn);
+
+    const nameInput = screen.getByDisplayValue('Modul Antrian Utama');
+    fireEvent.change(nameInput, { target: { value: 'Modul Antrian Utama (Updated)' } });
+
+    const saveModBtn = screen.getByRole('button', { name: /simpan module/i });
+    fireEvent.click(saveModBtn);
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
+    expect(screen.getByText('Belum Disimpan')).toBeTruthy();
+
+    // Click Save Draft
+    const saveDraftBtn = screen.getByRole('button', { name: /simpan draft/i });
+    fireEvent.click(saveDraftBtn);
+
+    await waitFor(() => {
+      expect(draftSaveSpy).toHaveBeenCalledTimes(1);
+    });
+
+    expect(draftSaveSpy).toHaveBeenCalledWith(
+      'bp-123',
+      'wbs',
+      expect.objectContaining({
+        revision_id: 'rev-001',
+        content_version: 1,
+        content: expect.objectContaining({
+          wbs: expect.objectContaining({
+            modules: expect.arrayContaining([
+              expect.objectContaining({
+                id: 'mod-1',
+                name: 'Modul Antrian Utama (Updated)',
+              }),
+            ]),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('renders per-section status badges on all five tabs and supports switching', async () => {
+    const multiStatus: BlueprintStatus = {
+      ...mockStatus,
+      sections: [
+        {
+          type: 'journey',
+          status: 'completed',
+          attempts: 1,
+          started_at: undefined,
+          completed_at: null,
+          updated_at: undefined,
+        },
+        {
+          type: 'architecture',
+          status: 'manual_edit',
+          attempts: 1,
+          started_at: undefined,
+          completed_at: null,
+          updated_at: undefined,
+        },
+        {
+          type: 'state_machine',
+          status: 'failed',
+          attempts: 1,
+          started_at: undefined,
+          completed_at: null,
+          updated_at: undefined,
+        },
+        {
+          type: 'workflow',
+          status: 'pending',
+          attempts: 0,
+          started_at: undefined,
+          completed_at: null,
+          updated_at: undefined,
+        },
+        {
+          type: 'wbs',
+          status: 'validated',
+          attempts: 1,
+          started_at: undefined,
+          completed_at: null,
+          updated_at: undefined,
+        },
+      ],
+    };
+
+    vi.spyOn(api, 'getBlueprint').mockResolvedValue({
+      ...mockDetail,
+      status: multiStatus,
+    });
+    vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(multiStatus);
+
+    render(<BlueprintEditorView blueprintId="bp-123" />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText('1. User Journey')).toBeTruthy();
+    expect(screen.getByText('2. Arsitektur Sistem')).toBeTruthy();
+    expect(screen.getByText('3. State Machine')).toBeTruthy();
+    expect(screen.getByText('4. Workflow Bisnis')).toBeTruthy();
+    expect(screen.getByText('5. WBS Deliverable')).toBeTruthy();
+
+    // Check presence of status badges across tabs
+    expect(screen.getAllByText('Selesai').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Draft').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Gagal').length).toBeGreaterThanOrEqual(1);
+
+    // Switch tab to State Machine
+    fireEvent.click(screen.getByText('3. State Machine'));
+    expect(mockSetSearchParams).toHaveBeenCalled();
+  });
+
+  it('resolves initialSection from query params (?section=workflow)', async () => {
+    mockSearchParams = new URLSearchParams('section=workflow');
+
+    const detailWithWf: BlueprintDetail = {
+      ...mockDetail,
+      content_json: {
+        workflows: [
+          {
+            id: 'wf-1',
+            name: 'Workflow dari URL Query',
+            description: 'Loaded via search param',
+            lanes: [{ id: 'lane-1', label: 'Petugas', order: 1 }],
+            nodes: [
+              {
+                id: 'wnode-1',
+                lane_id: 'lane-1',
+                type: 'start',
+                label: 'Mulai',
+                description: 'Start step',
+                layout: { x: 50, y: 50 },
+              },
+            ],
+            edges: [],
+          },
+        ],
+      },
+    };
+
+    vi.spyOn(api, 'getBlueprint').mockResolvedValue(detailWithWf);
+    vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(mockStatus);
+
+    render(<BlueprintEditorView blueprintId="bp-123" />, { wrapper: createWrapper() });
+
+    expect(await screen.findByTestId('workflow-editor')).toBeTruthy();
+    expect(screen.getByText('Workflow dari URL Query')).toBeTruthy();
+
+    mockSearchParams = new URLSearchParams();
+  });
+
+  it('deep-links from validation panel issue to target section and focuses target element', async () => {
+    const detailWithIssues: BlueprintDetail = {
+      ...mockDetail,
+      validation_result: {
+        issues: [
+          {
+            code: 'DANGLING_EDGE',
+            message: 'Edge references missing node',
+            section: 'architecture',
+            target_id: 'edge-99',
+            severity: 'error',
+            blocking: true,
+          },
+        ],
+      },
+    };
+
+    vi.spyOn(api, 'getBlueprint').mockResolvedValue(detailWithIssues);
+    vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(mockStatus);
+
+    render(<BlueprintEditorView blueprintId="bp-123" />, { wrapper: createWrapper() });
+
+    await screen.findByText('1. User Journey');
+
+    // Switch to validation tab
+    const validationTabBtn = screen.getByText('Panel Validasi Server');
+    fireEvent.click(validationTabBtn);
+
+    expect(await screen.findByText('Edge references missing node')).toBeTruthy();
+
+    // Click "Fokus" on the issue
+    const focusBtn = screen.getByRole('button', { name: /fokus pada isu/i });
+    fireEvent.click(focusBtn);
+
+    // Verifies it navigated to Architecture editor tab
+    expect(await screen.findByTestId('blueprint-flow-canvas')).toBeTruthy();
+    expect(mockSetSearchParams).toHaveBeenCalled();
+  });
+
+  it('ensures no raw unparsed JSON is displayed across editors', async () => {
+    vi.spyOn(api, 'getBlueprint').mockResolvedValue(mockDetail);
+    vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(mockStatus);
+
+    render(<BlueprintEditorView blueprintId="bp-123" />, { wrapper: createWrapper() });
+
+    await screen.findByText('1. User Journey');
+
+    // Ensure raw JSON syntax markers like `{"journey":` or `"activities":[` are not exposed in normal UI
+    expect(screen.queryByText(/\{"phases":/)).toBeNull();
+    expect(screen.queryByText(/\{"actors":/)).toBeNull();
+    expect(screen.queryByText(/\{"activities":/)).toBeNull();
   });
 });

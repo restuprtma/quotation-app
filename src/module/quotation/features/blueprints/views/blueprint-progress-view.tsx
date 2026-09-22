@@ -28,11 +28,11 @@ import { Iconify } from 'src/shared/ui/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { LoadingScreen } from 'src/shared/ui/loading-screen';
 
-import { ValidationPanel } from '../components/validation-panel';
 import { useBlueprintRunner } from '../hooks/use-blueprint-runner';
 import { SectionStatusList } from '../components/section-status-list';
 import { BlueprintResultPreview } from '../components/blueprint-result-preview';
 import { ManualCompletionDialog } from '../components/manual-completion-dialog';
+import { ValidationPanel, mapToProviderSection } from '../components/validation-panel';
 
 export interface BlueprintProgressViewProps {
   blueprintId?: string;
@@ -429,7 +429,10 @@ export function BlueprintProgressView({
           onOpenEditor={
             isCompact || !blueprintId
               ? undefined
-              : () => navigate(paths.dashboard.blueprint.edit(blueprintId))
+              : (sec) =>
+                  navigate(
+                    paths.dashboard.blueprint.edit(blueprintId) + (sec ? `?section=${sec}` : '')
+                  )
           }
           isRetrying={isFetching}
           disabled={isRunning || isCompact}
@@ -498,6 +501,16 @@ export function BlueprintProgressView({
                 validationResult={detail?.validation_result}
                 crossValidationResult={detail?.cross_validation_result}
                 onOpenManual={isCompact ? undefined : handleOpenManual}
+                onFocusIssue={
+                  isCompact || !blueprintId
+                    ? undefined
+                    : (issue) => {
+                        const sec = mapToProviderSection(issue.section);
+                        if (sec) {
+                          navigate(paths.dashboard.blueprint.edit(blueprintId) + `?section=${sec}`);
+                        }
+                      }
+                }
               />
             )}
           </CardContent>

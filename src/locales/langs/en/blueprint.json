@@ -114,5 +114,28 @@
   },
   "mobile_notice": {
     "desktop_authoring_hint": "Blueprint manual authoring and data entry forms are optimized for desktop screens. On mobile devices, data is displayed in a read-only summary mode."
+  },
+  "visual_editor": {
+    "title": "Visual Editor",
+    "back_to_overview": "Back to Blueprint Overview",
+    "unsaved_badge": "Unsaved Changes",
+    "mobile_warning_title": "Limited View (Mobile Device)",
+    "mobile_warning_desc": "Visual editor is optimized for desktop screens. Current mode is read-only review without direct modification capabilities.",
+    "recovery_title": "Section Needs Recovery",
+    "recovery_desc": "This section failed during automated generation. You can complete and structure it manually in the Visual Editor below, then click Mark Completed to proceed.",
+    "save_draft": "Save Draft",
+    "saving_draft": "Saving...",
+    "mark_completed": "Mark Completed",
+    "completing": "Validating...",
+    "tab_editor": "Visual Matrix Editor",
+    "tab_validation": "Server Validation Panel",
+    "conflict_title": "Version Conflict Detected (409)",
+    "conflict_desc": "Data on the server has been updated by another session or background job. Your local changes are preserved in the editor buffer.",
+    "keep_local": "Keep Local Changes",
+    "reload_server": "Load Server Version",
+    "unsaved_leave_title": "Unsaved Changes",
+    "unsaved_leave_desc": "You have unsaved draft changes. Are you sure you want to leave and discard local edits?",
+    "leave_page": "Leave Page",
+    "stay_page": "Cancel"
   }
 }

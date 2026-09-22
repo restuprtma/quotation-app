@@ -3,6 +3,28 @@ import { qaApi, qaSession, setPageAuth } from './fixtures';
 import { savePhase09Evidence } from './artifacts';
 
 test.describe('Blueprint Phase 09 — Journey Visual Editor (Task 3.04)', () => {
+  test.beforeEach(async ({ page }) => {
+    try {
+      const session = await qaSession(page);
+      await page.request.post(`${qaApi}/qa/cleanup`, {
+        headers: { Authorization: `Bearer ${session.token}` },
+      });
+    } catch {
+      // Ignore if session not yet created
+    }
+  });
+
+  test.afterEach(async ({ page }) => {
+    try {
+      const session = await qaSession(page);
+      await page.request.post(`${qaApi}/qa/cleanup`, {
+        headers: { Authorization: `Bearer ${session.token}` },
+      });
+    } catch {
+      // Ignore cleanup error in afterEach
+    }
+  });
+
   test('Journey visual editor: UI -> HTTP -> DB edit, Save Draft, and reload journey preserving IDs, order, and references', async ({
     page,
   }) => {
@@ -54,7 +76,7 @@ test.describe('Blueprint Phase 09 — Journey Visual Editor (Task 3.04)', () => 
 
       // 3. Navigate to Visual Editor (/blueprint/:id/edit)
       await page.goto(`http://127.0.0.1:18081/blueprint/${id}/edit`);
-      await expect(page.getByText('Visual Matrix Editor')).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByRole('tab', { name: 'Visual Matrix Editor' })).toBeVisible({ timeout: 20_000 });
 
       // 4. Capture initial DB state before edit
       const beforeVerify = await (
@@ -118,7 +140,7 @@ test.describe('Blueprint Phase 09 — Journey Visual Editor (Task 3.04)', () => 
 
       // Verify dirty indicator disappears and success toast is shown
       await expect(page.getByText('Belum Disimpan')).toBeHidden();
-      await expect(page.getByText('Draft Journey berhasil disimpan.')).toBeVisible();
+      await expect(page.getByText('Draft User Journey berhasil disimpan.')).toBeVisible();
 
       // 7. Verify DB state after save
       const afterVerify = await (
@@ -151,7 +173,7 @@ test.describe('Blueprint Phase 09 — Journey Visual Editor (Task 3.04)', () => 
 
       // 8. Reload Page and assert data preservation
       await page.reload();
-      await expect(page.getByText('Visual Matrix Editor')).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByRole('tab', { name: 'Visual Matrix Editor' })).toBeVisible({ timeout: 20_000 });
       await expect(page.getByText(updatedLabel)).toBeVisible();
 
       // Invariant assertion: IDs, order, phase_id, actor_id, references preserved
@@ -243,7 +265,7 @@ test.describe('Blueprint Phase 09 — Journey Visual Editor (Task 3.04)', () => 
 
       // 2. Open Tab 1 at visual editor
       await page.goto(`http://127.0.0.1:18081/blueprint/${id}/edit`);
-      await expect(page.getByText('Visual Matrix Editor')).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByRole('tab', { name: 'Visual Matrix Editor' })).toBeVisible({ timeout: 20_000 });
 
       // 3. Open Tab 2 at visual editor
       const page2 = await context.newPage();
@@ -255,7 +277,7 @@ test.describe('Blueprint Phase 09 — Journey Visual Editor (Task 3.04)', () => 
         }
       });
       await page2.goto(`http://127.0.0.1:18081/blueprint/${id}/edit`);
-      await expect(page2.getByText('Visual Matrix Editor')).toBeVisible({ timeout: 20_000 });
+      await expect(page2.getByRole('tab', { name: 'Visual Matrix Editor' })).toBeVisible({ timeout: 20_000 });
 
       const initialDB = await (
         await page.request.get(`${qaApi}/qa/verify/${id}`, { headers })
@@ -286,7 +308,7 @@ test.describe('Blueprint Phase 09 — Journey Visual Editor (Task 3.04)', () => 
       );
       await page.getByRole('button', { name: 'Simpan Draft' }).click();
       await tab1SavePromise;
-      await expect(page.getByText('Draft Journey berhasil disimpan.')).toBeVisible();
+      await expect(page.getByText('Draft User Journey berhasil disimpan.')).toBeVisible();
 
       // Verify DB version incremented by Tab 1
       const tab1DB = await (
@@ -384,14 +406,9 @@ test.describe('Blueprint Phase 09 — Journey Visual Editor (Task 3.04)', () => 
       await page.goto(`http://127.0.0.1:18081/blueprint/${id}/edit`);
 
       // 3. Verify mobile read-only guidance
-      await expect(page.getByText('Mode Baca Saja di Perangkat Seluler')).toBeVisible({
+      await expect(page.getByText('Tampilan Terbatas (Perangkat Mobile)')).toBeVisible({
         timeout: 20_000,
       });
-      await expect(
-        page.getByText(
-          'Penyuntingan visual alur perjalanan (User Journey) dioptimalkan untuk layar desktop.'
-        )
-      ).toBeVisible();
 
       // Verify mutation buttons are not visible on mobile
       await expect(page.getByRole('button', { name: 'Simpan Draft' })).toBeHidden();

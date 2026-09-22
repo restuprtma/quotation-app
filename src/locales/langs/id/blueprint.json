@@ -114,5 +114,28 @@
   },
   "mobile_notice": {
     "desktop_authoring_hint": "Formulir pengisian manual dan authoring blueprint dioptimalkan untuk layar desktop. Pada perangkat seluler, data ditampilkan dalam mode ringkasan read-only."
+  },
+  "visual_editor": {
+    "title": "Visual Editor",
+    "back_to_overview": "Kembali ke Overview Blueprint",
+    "unsaved_badge": "Belum Disimpan",
+    "mobile_warning_title": "Tampilan Terbatas (Perangkat Mobile)",
+    "mobile_warning_desc": "Visual editor hanya mendukung pengeditan penuh pada desktop. Mode saat ini adalah read-only / peninjauan tanpa kemampuan modifikasi langsung.",
+    "recovery_title": "Tahap Memerlukan Perbaikan",
+    "recovery_desc": "Tahap ini gagal pada proses pembuatan otomatis. Anda dapat melengkapi dan menyusun struktur secara manual melalui Visual Editor di bawah, lalu klik Selesaikan Section untuk melanjutkan pipeline ke tahap berikutnya.",
+    "save_draft": "Simpan Draft",
+    "saving_draft": "Menyimpan...",
+    "mark_completed": "Selesaikan Section",
+    "completing": "Memvalidasi...",
+    "tab_editor": "Visual Matrix Editor",
+    "tab_validation": "Panel Validasi Server",
+    "conflict_title": "Konflik Versi Terdeteksi (409)",
+    "conflict_desc": "Data di server telah diperbarui oleh sesi atau proses lain. Perubahan lokal Anda tetap tersimpan di buffer editor saat ini.",
+    "keep_local": "Pertahankan Perubahan Lokal",
+    "reload_server": "Muat Versi Server",
+    "unsaved_leave_title": "Perubahan Belum Disimpan",
+    "unsaved_leave_desc": "Anda memiliki perubahan pada draft yang belum disimpan. Yakin ingin keluar dan membuang perubahan lokal?",
+    "leave_page": "Tinggalkan Halaman",
+    "stay_page": "Batal"
   }
 }

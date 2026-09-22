@@ -1,8 +1,15 @@
 import type { SyntheticEvent } from 'react';
 import type { ProviderSection } from '../types';
-import type { Journey, Architecture } from '../types/bundle';
+import type {
+  WBS,
+  Journey,
+  Workflow,
+  Architecture,
+  StateMachine,
+  CrossReference,
+} from '../types/bundle';
 
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate, useSearchParams } from 'react-router';
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
@@ -31,8 +38,11 @@ import { Iconify } from 'src/shared/ui/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { LoadingScreen } from 'src/shared/ui/loading-screen';
 
+import { WbsEditor } from '../components/wbs-editor';
 import { JourneyEditor } from '../components/journey-editor';
+import { WorkflowEditor } from '../components/workflow-editor';
 import { ArchitectureEditor } from '../components/architecture-editor';
+import { StateMachineEditor } from '../components/state-machine-editor';
 import { useBlueprintDraftSave } from '../hooks/use-blueprint-draft-save';
 import {
   useBlueprintDetail,
@@ -45,9 +55,12 @@ import {
   type ValidationIssue,
 } from '../components/validation-panel';
 import {
+  wbsSectionSchema,
   journeySectionSchema,
+  workflowSectionSchema,
   buildReferenceOptions,
   architectureSectionSchema,
+  stateMachineSectionSchema,
 } from '../validation/manual-section';
 
 // ----------------------------------------------------------------------
@@ -57,18 +70,32 @@ export interface BlueprintEditorViewProps {
   initialSection?: ProviderSection;
 }
 
+const VALID_PROVIDER_SECTIONS: ProviderSection[] = [
+  'journey',
+  'architecture',
+  'state_machine',
+  'workflow',
+  'wbs',
+];
+
 export function BlueprintEditorView({
   blueprintId: propBlueprintId,
   initialSection = 'journey',
 }: BlueprintEditorViewProps) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const theme = useTheme();
   const isCompact = useMediaQuery(theme.breakpoints.down('md'));
   const params = useParams<{ id: string }>();
   const blueprintId = propBlueprintId || params.id;
 
+  // Derive initial section from search params if present
+  const querySection = searchParams.get('section') as ProviderSection | null;
+  const resolvedInitialSection =
+    querySection && VALID_PROVIDER_SECTIONS.includes(querySection) ? querySection : initialSection;
+
   // Active section tab
-  const [activeSection, setActiveSection] = useState<ProviderSection>(initialSection);
+  const [activeSection, setActiveSection] = useState<ProviderSection>(resolvedInitialSection);
   const [activeTab, setActiveTab] = useState<'editor' | 'validation'>('editor');
   const [focusTargetId, setFocusTargetId] = useState<string | null>(null);
 
@@ -90,6 +117,18 @@ export function BlueprintEditorView({
 
   const [localArchitecture, setLocalArchitecture] = useState<Architecture | null>(null);
   const [initialServerArchitectureJson, setInitialServerArchitectureJson] = useState<string>('');
+
+  const [localStateMachine, setLocalStateMachine] = useState<StateMachine | null>(null);
+  const [initialServerStateMachineJson, setInitialServerStateMachineJson] = useState<string>('');
+
+  const [localWorkflows, setLocalWorkflows] = useState<Workflow[] | null>(null);
+  const [initialServerWorkflowsJson, setInitialServerWorkflowsJson] = useState<string>('');
+
+  const [localWbs, setLocalWbs] = useState<WBS | null>(null);
+  const [initialServerWbsJson, setInitialServerWbsJson] = useState<string>('');
+
+  const [localCrossRefs, setLocalCrossRefs] = useState<CrossReference[] | null>(null);
+  const [initialServerCrossRefsJson, setInitialServerCrossRefsJson] = useState<string>('');
 
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const loadedVersionRef = useRef<number | null>(null);
@@ -124,6 +163,27 @@ export function BlueprintEditorView({
       setLocalArchitecture(archData);
       setInitialServerArchitectureJson(JSON.stringify(archData));
 
+      const smData = detail.content_json?.state_machine || {
+        entity: '',
+        initial_state: '',
+        states: [],
+        transitions: [],
+      };
+      setLocalStateMachine(smData);
+      setInitialServerStateMachineJson(JSON.stringify(smData));
+
+      const wfData = detail.content_json?.workflows || [];
+      setLocalWorkflows(wfData);
+      setInitialServerWorkflowsJson(JSON.stringify(wfData));
+
+      const wbsData = detail.content_json?.wbs || { modules: [] };
+      setLocalWbs(wbsData);
+      setInitialServerWbsJson(JSON.stringify(wbsData));
+
+      const crossRefsData = detail.content_json?.cross_references || [];
+      setLocalCrossRefs(crossRefsData);
+      setInitialServerCrossRefsJson(JSON.stringify(crossRefsData));
+
       setIsDirty(false);
     }
   }, [detail]);
@@ -146,6 +206,38 @@ export function BlueprintEditorView({
       setIsDirty(isChanged);
     },
     [initialServerArchitectureJson]
+  );
+
+  // Handle local change from StateMachineEditor
+  const handleStateMachineChange = useCallback(
+    (updatedSm: StateMachine) => {
+      setLocalStateMachine(updatedSm);
+      const isChanged = JSON.stringify(updatedSm) !== initialServerStateMachineJson;
+      setIsDirty(isChanged);
+    },
+    [initialServerStateMachineJson]
+  );
+
+  // Handle local change from WorkflowEditor
+  const handleWorkflowsChange = useCallback(
+    (updatedWorkflows: Workflow[]) => {
+      setLocalWorkflows(updatedWorkflows);
+      const isChanged = JSON.stringify(updatedWorkflows) !== initialServerWorkflowsJson;
+      setIsDirty(isChanged);
+    },
+    [initialServerWorkflowsJson]
+  );
+
+  // Handle local change from WbsEditor
+  const handleWbsChange = useCallback(
+    (updatedWbs: WBS, updatedCrossRefs: CrossReference[]) => {
+      setLocalWbs(updatedWbs);
+      setLocalCrossRefs(updatedCrossRefs);
+      const isWbsChanged = JSON.stringify(updatedWbs) !== initialServerWbsJson;
+      const isCrossRefsChanged = JSON.stringify(updatedCrossRefs) !== initialServerCrossRefsJson;
+      setIsDirty(isWbsChanged || isCrossRefsChanged);
+    },
+    [initialServerWbsJson, initialServerCrossRefsJson]
   );
 
   // Dirty navigation window warning
@@ -183,13 +275,20 @@ export function BlueprintEditorView({
     try {
       const revisionId = detail.status?.revision_id || status?.revision_id || '';
       const contentVersion =
-        loadedVersionRef.current ?? (detail.status?.content_version || status?.content_version || 1);
+        loadedVersionRef.current ??
+        (detail.status?.content_version || status?.content_version || 1);
 
       let draftContent: any = {};
       if (activeSection === 'journey' && localJourney) {
         draftContent = { journey: localJourney };
       } else if (activeSection === 'architecture' && localArchitecture) {
         draftContent = { architecture: localArchitecture };
+      } else if (activeSection === 'state_machine' && localStateMachine) {
+        draftContent = { state_machine: localStateMachine };
+      } else if (activeSection === 'workflow' && localWorkflows) {
+        draftContent = { workflows: localWorkflows };
+      } else if (activeSection === 'wbs' && localWbs) {
+        draftContent = { wbs: localWbs, cross_references: localCrossRefs || [] };
       }
 
       const updatedDetail = await draftSaveMutation.mutateAsync({
@@ -209,11 +308,31 @@ export function BlueprintEditorView({
       } else if (activeSection === 'architecture' && updatedDetail?.content_json?.architecture) {
         setLocalArchitecture(updatedDetail.content_json.architecture);
         setInitialServerArchitectureJson(JSON.stringify(updatedDetail.content_json.architecture));
+      } else if (activeSection === 'state_machine' && updatedDetail?.content_json?.state_machine) {
+        setLocalStateMachine(updatedDetail.content_json.state_machine);
+        setInitialServerStateMachineJson(JSON.stringify(updatedDetail.content_json.state_machine));
+      } else if (activeSection === 'workflow' && updatedDetail?.content_json?.workflows) {
+        setLocalWorkflows(updatedDetail.content_json.workflows);
+        setInitialServerWorkflowsJson(JSON.stringify(updatedDetail.content_json.workflows));
+      } else if (activeSection === 'wbs' && updatedDetail?.content_json?.wbs) {
+        setLocalWbs(updatedDetail.content_json.wbs);
+        setInitialServerWbsJson(JSON.stringify(updatedDetail.content_json.wbs));
+        if (updatedDetail?.content_json?.cross_references) {
+          setLocalCrossRefs(updatedDetail.content_json.cross_references);
+          setInitialServerCrossRefsJson(
+            JSON.stringify(updatedDetail.content_json.cross_references)
+          );
+        }
       }
       setIsDirty(false);
-      toast.success(
-        `Draft ${activeSection === 'journey' ? 'User Journey' : 'Arsitektur'} berhasil disimpan.`
-      );
+      const sectionNameMap: Record<string, string> = {
+        journey: 'User Journey',
+        architecture: 'Arsitektur',
+        state_machine: 'State Machine',
+        workflow: 'Workflow Bisnis',
+        wbs: 'WBS Deliverable',
+      };
+      toast.success(`Draft ${sectionNameMap[activeSection] || activeSection} berhasil disimpan.`);
     } catch (err: any) {
       const statusCode = err?.response?.status || err?.status;
       if (statusCode === 409) {
@@ -243,6 +362,19 @@ export function BlueprintEditorView({
       } else if (activeSection === 'architecture' && result.data.content_json?.architecture) {
         setLocalArchitecture(result.data.content_json.architecture);
         setInitialServerArchitectureJson(JSON.stringify(result.data.content_json.architecture));
+      } else if (activeSection === 'state_machine' && result.data.content_json?.state_machine) {
+        setLocalStateMachine(result.data.content_json.state_machine);
+        setInitialServerStateMachineJson(JSON.stringify(result.data.content_json.state_machine));
+      } else if (activeSection === 'workflow' && result.data.content_json?.workflows) {
+        setLocalWorkflows(result.data.content_json.workflows);
+        setInitialServerWorkflowsJson(JSON.stringify(result.data.content_json.workflows));
+      } else if (activeSection === 'wbs' && result.data.content_json?.wbs) {
+        setLocalWbs(result.data.content_json.wbs);
+        setInitialServerWbsJson(JSON.stringify(result.data.content_json.wbs));
+        if (result.data.content_json?.cross_references) {
+          setLocalCrossRefs(result.data.content_json.cross_references);
+          setInitialServerCrossRefsJson(JSON.stringify(result.data.content_json.cross_references));
+        }
       }
       setIsDirty(false);
       toast.success('Data versi server berhasil dimuat.');
@@ -263,6 +395,18 @@ export function BlueprintEditorView({
     } else if (activeSection === 'architecture' && localArchitecture) {
       validation = architectureSectionSchema.safeParse({ architecture: localArchitecture });
       completePayload = { architecture: localArchitecture };
+    } else if (activeSection === 'state_machine' && localStateMachine) {
+      validation = stateMachineSectionSchema.safeParse({ state_machine: localStateMachine });
+      completePayload = { state_machine: localStateMachine };
+    } else if (activeSection === 'workflow' && localWorkflows) {
+      validation = workflowSectionSchema.safeParse({ workflows: localWorkflows });
+      completePayload = { workflows: localWorkflows };
+    } else if (activeSection === 'wbs' && localWbs) {
+      validation = wbsSectionSchema.safeParse({
+        wbs: localWbs,
+        cross_references: localCrossRefs || [],
+      });
+      completePayload = { wbs: localWbs, cross_references: localCrossRefs || [] };
     }
 
     if (validation && !validation.success) {
@@ -278,7 +422,8 @@ export function BlueprintEditorView({
     try {
       const revisionId = detail.status?.revision_id || status?.revision_id || '';
       const contentVersion =
-        loadedVersionRef.current ?? (detail.status?.content_version || status?.content_version || 1);
+        loadedVersionRef.current ??
+        (detail.status?.content_version || status?.content_version || 1);
 
       await completeMutation.mutateAsync({
         id: blueprintId,
@@ -291,10 +436,15 @@ export function BlueprintEditorView({
       });
 
       setIsDirty(false);
+      const sectionNameMap: Record<string, string> = {
+        journey: 'User Journey',
+        architecture: 'Arsitektur Sistem',
+        state_machine: 'State Machine',
+        workflow: 'Workflow Bisnis',
+        wbs: 'WBS Deliverable',
+      };
       toast.success(
-        `Tahap ${
-          activeSection === 'journey' ? 'User Journey' : 'Arsitektur Sistem'
-        } berhasil diselesaikan dan divalidasi!`
+        `Tahap ${sectionNameMap[activeSection] || activeSection} berhasil diselesaikan dan divalidasi!`
       );
       await refetchDetail();
     } catch (err: any) {
@@ -308,6 +458,14 @@ export function BlueprintEditorView({
     if (sec) {
       setActiveSection(sec);
       setActiveTab('editor');
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.set('section', sec);
+          return next;
+        },
+        { replace: true }
+      );
       if (issue.target_id) {
         setFocusTargetId(issue.target_id);
       }
@@ -354,11 +512,51 @@ export function BlueprintEditorView({
   const contentVersion = detail?.status?.content_version || status?.content_version || 1;
   const sections = status?.sections || detail?.status?.sections || [];
   const currentSectionMeta = sections.find((s) => s.type === activeSection);
-  const isCompleted =
-    currentSectionMeta?.status === 'validated' || currentSectionMeta?.status === 'completed';
 
   const referenceOptions = buildReferenceOptions(detail?.content_json || {});
   const rawIssues = (detail?.validation_result?.issues || []) as any[];
+
+  const getSectionStatusBadge = (secType: ProviderSection) => {
+    const secMeta = sections.find((s) => s.type === secType);
+    const secStatus = secMeta?.status;
+    if (secStatus === 'completed' || secStatus === 'validated') {
+      return (
+        <Chip
+          size="small"
+          icon={<Iconify icon="solar:check-circle-bold" width={12} />}
+          label="Selesai"
+          color="success"
+          variant="soft"
+          sx={{ height: 20, fontSize: '0.65rem', ml: 0.5 }}
+        />
+      );
+    }
+    if (secStatus === 'manual_edit') {
+      return (
+        <Chip
+          size="small"
+          icon={<Iconify icon="solar:pen-bold" width={12} />}
+          label="Draft"
+          color="warning"
+          variant="soft"
+          sx={{ height: 20, fontSize: '0.65rem', ml: 0.5 }}
+        />
+      );
+    }
+    if (secStatus === 'failed') {
+      return (
+        <Chip
+          size="small"
+          icon={<Iconify icon="solar:danger-circle-bold" width={12} />}
+          label="Gagal"
+          color="error"
+          variant="soft"
+          sx={{ height: 20, fontSize: '0.65rem', ml: 0.5 }}
+        />
+      );
+    }
+    return null;
+  };
 
   return (
     <DashboardContent maxWidth="xl">
@@ -451,7 +649,7 @@ export function BlueprintEditorView({
                 <Button
                   variant="outlined"
                   color="warning"
-                  disabled={draftSaveMutation.isPending || isCompleted}
+                  disabled={draftSaveMutation.isPending}
                   startIcon={
                     draftSaveMutation.isPending ? (
                       <CircularProgress size={16} color="inherit" />
@@ -469,7 +667,7 @@ export function BlueprintEditorView({
                 <Button
                   variant="contained"
                   color="primary"
-                  disabled={completeMutation.isPending || isCompleted}
+                  disabled={completeMutation.isPending}
                   startIcon={
                     completeMutation.isPending ? (
                       <CircularProgress size={16} color="inherit" />
@@ -494,15 +692,63 @@ export function BlueprintEditorView({
             onChange={(_: SyntheticEvent, v: ProviderSection) => {
               setActiveSection(v);
               setFocusTargetId(null);
+              setSearchParams(
+                (prev) => {
+                  const next = new URLSearchParams(prev);
+                  next.set('section', v);
+                  return next;
+                },
+                { replace: true }
+              );
             }}
             variant="scrollable"
             scrollButtons="auto"
           >
-            <Tab value="journey" label="1. User Journey" />
-            <Tab value="architecture" label="2. Arsitektur Sistem" />
-            <Tab value="state_machine" label="3. State Machine" disabled />
-            <Tab value="workflow" label="4. Workflow Bisnis" disabled />
-            <Tab value="wbs" label="5. WBS Deliverable" disabled />
+            <Tab
+              value="journey"
+              label={
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <span>1. User Journey</span>
+                  {getSectionStatusBadge('journey')}
+                </Stack>
+              }
+            />
+            <Tab
+              value="architecture"
+              label={
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <span>2. Arsitektur Sistem</span>
+                  {getSectionStatusBadge('architecture')}
+                </Stack>
+              }
+            />
+            <Tab
+              value="state_machine"
+              label={
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <span>3. State Machine</span>
+                  {getSectionStatusBadge('state_machine')}
+                </Stack>
+              }
+            />
+            <Tab
+              value="workflow"
+              label={
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <span>4. Workflow Bisnis</span>
+                  {getSectionStatusBadge('workflow')}
+                </Stack>
+              }
+            />
+            <Tab
+              value="wbs"
+              label={
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <span>5. WBS Deliverable</span>
+                  {getSectionStatusBadge('wbs')}
+                </Stack>
+              }
+            />
           </Tabs>
         </Box>
 
@@ -543,6 +789,7 @@ export function BlueprintEditorView({
                     onChange={handleJourneyChange}
                     referenceOptions={referenceOptions}
                     issues={rawIssues}
+                    focusTargetId={focusTargetId}
                     readOnly={isCompact}
                   />
                 ) : (
@@ -553,6 +800,46 @@ export function BlueprintEditorView({
                   <ArchitectureEditor
                     architecture={localArchitecture}
                     onChange={handleArchitectureChange}
+                    referenceOptions={referenceOptions}
+                    issues={rawIssues}
+                    focusTargetId={focusTargetId}
+                    readOnly={isCompact}
+                  />
+                ) : (
+                  <LoadingScreen />
+                )
+              ) : activeSection === 'state_machine' ? (
+                localStateMachine ? (
+                  <StateMachineEditor
+                    stateMachine={localStateMachine}
+                    onChange={handleStateMachineChange}
+                    referenceOptions={referenceOptions}
+                    issues={rawIssues}
+                    focusTargetId={focusTargetId}
+                    readOnly={isCompact}
+                  />
+                ) : (
+                  <LoadingScreen />
+                )
+              ) : activeSection === 'workflow' ? (
+                localWorkflows ? (
+                  <WorkflowEditor
+                    workflows={localWorkflows}
+                    onChange={handleWorkflowsChange}
+                    referenceOptions={referenceOptions}
+                    issues={rawIssues}
+                    focusTargetId={focusTargetId}
+                    readOnly={isCompact}
+                  />
+                ) : (
+                  <LoadingScreen />
+                )
+              ) : activeSection === 'wbs' ? (
+                localWbs ? (
+                  <WbsEditor
+                    wbs={localWbs}
+                    crossReferences={localCrossRefs || []}
+                    onChange={handleWbsChange}
                     referenceOptions={referenceOptions}
                     issues={rawIssues}
                     focusTargetId={focusTargetId}

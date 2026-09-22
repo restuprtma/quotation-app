@@ -3,6 +3,28 @@ import { qaApi, qaSession, setPageAuth } from './fixtures';
 import { savePhase09Evidence } from './artifacts';
 
 test.describe('Blueprint Phase 09 — Architecture Visual Editor (Task 5.03)', () => {
+  test.beforeEach(async ({ page }) => {
+    try {
+      const session = await qaSession(page);
+      await page.request.post(`${qaApi}/qa/cleanup`, {
+        headers: { Authorization: `Bearer ${session.token}` },
+      });
+    } catch {
+      // Ignore if session not yet created
+    }
+  });
+
+  test.afterEach(async ({ page }) => {
+    try {
+      const session = await qaSession(page);
+      await page.request.post(`${qaApi}/qa/cleanup`, {
+        headers: { Authorization: `Bearer ${session.token}` },
+      });
+    } catch {
+      // Ignore cleanup error in afterEach
+    }
+  });
+
   test('Architecture visual editor: UI -> HTTP -> DB edit, Save Draft, and reload architecture preserving IDs, edges, groups, and positions', async ({
     page,
   }) => {
@@ -336,8 +358,10 @@ test.describe('Blueprint Phase 09 — Architecture Visual Editor (Task 5.03)', (
       // 5. In Tab 1: Make edit and successfully Save Draft
       const tab1NodeBtn = page.getByRole('button', { name: /edit node/i }).first();
       await tab1NodeBtn.click();
+      await expect(page.getByRole('heading', { name: 'Edit Node Arsitektur' })).toBeVisible();
       await page.getByLabel('Label Node').fill('Node Tab 1 (Committed to Server)');
       await page.getByRole('button', { name: 'Simpan Node' }).click();
+      await expect(page.getByRole('heading', { name: 'Edit Node Arsitektur' })).toBeHidden();
       await expect(page.getByText('Belum Disimpan')).toBeVisible();
 
       const tab1SavePromise = page.waitForResponse(
@@ -387,7 +411,7 @@ test.describe('Blueprint Phase 09 — Architecture Visual Editor (Task 5.03)', (
       ).toBeHidden();
 
       // Assert Tab 2's local buffer still contains the unsaved edit
-      await expect(page2.getByText(tab2LocalLabel)).toBeVisible();
+      await expect(page2.getByText(tab2LocalLabel).first()).toBeVisible();
       await expect(page2.getByText('Belum Disimpan')).toBeVisible();
 
       await page2.close();

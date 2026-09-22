@@ -36,6 +36,7 @@ export interface JourneyEditorProps {
   onChange: (updatedJourney: Journey) => void;
   referenceOptions?: ReferenceOption[];
   issues?: CanonicalIssue[];
+  focusTargetId?: string | null;
   readOnly?: boolean;
 }
 
@@ -50,9 +51,19 @@ export function JourneyEditor({
   onChange,
   referenceOptions = [],
   issues = [],
+  focusTargetId = null,
   readOnly = false,
 }: JourneyEditorProps) {
   const theme = useTheme();
+
+  // Scroll to focused target element when focusTargetId changes
+  React.useEffect(() => {
+    if (!focusTargetId) return;
+    const el = document.querySelector(`[data-target-id="${focusTargetId}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    }
+  }, [focusTargetId]);
 
   // Dialog states
   const [selectedActivity, setSelectedActivity] = useState<JourneyActivity | null>(null);
@@ -397,157 +408,80 @@ export function JourneyEditor({
           </Box>
 
           {/* Phase Column Headers */}
-          {sortedPhases.map((phase, pIndex) => (
-            <Box
-              key={phase.id}
-              sx={{
-                p: 2,
-                bgcolor: 'action.hover',
-                borderBottom: '2px solid',
-                borderRight: '1px solid',
-                borderColor: 'divider',
-                textAlign: 'center',
-              }}
-            >
-              <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.5}>
-                <Chip
-                  label={`Phase ${phase.order}`}
-                  size="small"
-                  color="primary"
-                  sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700, mb: 0.5 }}
-                />
-              </Stack>
-
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                {phase.label}
-              </Typography>
-
-              {!readOnly && (
-                <Stack direction="row" justifyContent="center" spacing={0.5} sx={{ mt: 1 }}>
-                  <Tooltip title="Geser Kiri">
-                    <span>
-                      <IconButton
-                        size="small"
-                        disabled={pIndex === 0}
-                        onClick={() => handleMovePhase(pIndex, 'left')}
-                        aria-label={`Geser Kiri Phase ${phase.label}`}
-                      >
-                        <Iconify icon="solar:arrow-left-bold" width={14} />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                  <Tooltip title="Edit Phase">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={() => setEditingPhase(phase)}
-                      aria-label={`Edit Phase ${phase.label}`}
-                    >
-                      <Iconify icon="solar:pen-bold" width={14} />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Geser Kanan">
-                    <span>
-                      <IconButton
-                        size="small"
-                        disabled={pIndex === sortedPhases.length - 1}
-                        onClick={() => handleMovePhase(pIndex, 'right')}
-                        aria-label={`Geser Kanan Phase ${phase.label}`}
-                      >
-                        <Iconify icon="solar:arrow-right-bold" width={14} />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                  <Tooltip title="Hapus Phase">
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => handleDeletePhasePrompt(phase)}
-                      aria-label={`Hapus Phase ${phase.label}`}
-                    >
-                      <Iconify icon="solar:trash-bin-trash-bold" width={14} />
-                    </IconButton>
-                  </Tooltip>
-                </Stack>
-              )}
-            </Box>
-          ))}
-
-          {/* Rows by Actor */}
-          {sortedActors.map((actor, aIndex) => (
-            <Box key={actor.id} sx={{ display: 'contents' }}>
-              {/* Actor Row Header */}
+          {sortedPhases.map((phase, pIndex) => {
+            const isPhaseFocused = focusTargetId === phase.id;
+            return (
               <Box
+                key={phase.id}
+                data-target-id={phase.id}
                 sx={{
                   p: 2,
-                  bgcolor: 'background.neutral',
-                  borderBottom: '1px solid',
-                  borderRight: '2px solid',
-                  borderColor: 'divider',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
+                  bgcolor: isPhaseFocused ? 'primary.lighter' : 'action.hover',
+                  borderBottom: '2px solid',
+                  borderRight: '1px solid',
+                  borderColor: isPhaseFocused ? 'primary.main' : 'divider',
+                  boxShadow: isPhaseFocused
+                    ? (t) => `inset 0 0 0 2px ${t.palette.primary.main}`
+                    : 'none',
+                  textAlign: 'center',
+                  transition: 'all 0.2s ease-in-out',
                 }}
               >
-                <Chip
-                  label={`Actor ${actor.order}`}
-                  size="small"
-                  color="info"
-                  variant="soft"
-                  sx={{
-                    height: 20,
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    mb: 0.5,
-                    width: 'fit-content',
-                  }}
-                />
+                <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.5}>
+                  <Chip
+                    label={`Phase ${phase.order}`}
+                    size="small"
+                    color="primary"
+                    sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700, mb: 0.5 }}
+                  />
+                </Stack>
+
                 <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                  {actor.label}
+                  {phase.label}
                 </Typography>
 
                 {!readOnly && (
-                  <Stack direction="row" spacing={0.5} sx={{ mt: 1 }}>
-                    <Tooltip title="Geser Atas">
+                  <Stack direction="row" justifyContent="center" spacing={0.5} sx={{ mt: 1 }}>
+                    <Tooltip title="Geser Kiri">
                       <span>
                         <IconButton
                           size="small"
-                          disabled={aIndex === 0}
-                          onClick={() => handleMoveActor(aIndex, 'up')}
-                          aria-label={`Geser Atas Actor ${actor.label}`}
+                          disabled={pIndex === 0}
+                          onClick={() => handleMovePhase(pIndex, 'left')}
+                          aria-label={`Geser Kiri Phase ${phase.label}`}
                         >
-                          <Iconify icon="solar:arrow-up-bold" width={14} />
+                          <Iconify icon="solar:arrow-left-bold" width={14} />
                         </IconButton>
                       </span>
                     </Tooltip>
-                    <Tooltip title="Edit Actor">
+                    <Tooltip title="Edit Phase">
                       <IconButton
                         size="small"
                         color="primary"
-                        onClick={() => setEditingActor(actor)}
-                        aria-label={`Edit Actor ${actor.label}`}
+                        onClick={() => setEditingPhase(phase)}
+                        aria-label={`Edit Phase ${phase.label}`}
                       >
                         <Iconify icon="solar:pen-bold" width={14} />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Geser Bawah">
+                    <Tooltip title="Geser Kanan">
                       <span>
                         <IconButton
                           size="small"
-                          disabled={aIndex === sortedActors.length - 1}
-                          onClick={() => handleMoveActor(aIndex, 'down')}
-                          aria-label={`Geser Bawah Actor ${actor.label}`}
+                          disabled={pIndex === sortedPhases.length - 1}
+                          onClick={() => handleMovePhase(pIndex, 'right')}
+                          aria-label={`Geser Kanan Phase ${phase.label}`}
                         >
-                          <Iconify icon="solar:arrow-down-bold" width={14} />
+                          <Iconify icon="solar:arrow-right-bold" width={14} />
                         </IconButton>
                       </span>
                     </Tooltip>
-                    <Tooltip title="Hapus Actor">
+                    <Tooltip title="Hapus Phase">
                       <IconButton
                         size="small"
                         color="error"
-                        onClick={() => handleDeleteActorPrompt(actor)}
-                        aria-label={`Hapus Actor ${actor.label}`}
+                        onClick={() => handleDeletePhasePrompt(phase)}
+                        aria-label={`Hapus Phase ${phase.label}`}
                       >
                         <Iconify icon="solar:trash-bin-trash-bold" width={14} />
                       </IconButton>
@@ -555,171 +489,274 @@ export function JourneyEditor({
                   </Stack>
                 )}
               </Box>
+            );
+          })}
 
-              {/* Matrix Cells */}
-              {sortedPhases.map((phase) => {
-                const cellActivities = activities.filter(
-                  (act) => act.phase_id === phase.id && act.actor_id === actor.id
-                );
-
-                return (
-                  <Box
-                    key={`${actor.id}-${phase.id}`}
+          {/* Rows by Actor */}
+          {sortedActors.map((actor, aIndex) => {
+            const isActorFocused = focusTargetId === actor.id;
+            return (
+              <Box key={actor.id} sx={{ display: 'contents' }}>
+                {/* Actor Row Header */}
+                <Box
+                  data-target-id={actor.id}
+                  sx={{
+                    p: 2,
+                    bgcolor: isActorFocused ? 'info.lighter' : 'background.neutral',
+                    borderBottom: '1px solid',
+                    borderRight: '2px solid',
+                    borderColor: isActorFocused ? 'info.main' : 'divider',
+                    boxShadow: isActorFocused
+                      ? (t) => `inset 0 0 0 2px ${t.palette.info.main}`
+                      : 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease-in-out',
+                  }}
+                >
+                  <Chip
+                    label={`Actor ${actor.order}`}
+                    size="small"
+                    color="info"
+                    variant="soft"
                     sx={{
-                      p: 1.5,
-                      borderBottom: '1px solid',
-                      borderRight: '1px solid',
-                      borderColor: 'divider',
-                      bgcolor: cellActivities.length > 0 ? 'transparent' : 'action.hover',
-                      minHeight: 140,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 1.5,
+                      height: 20,
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      mb: 0.5,
+                      width: 'fit-content',
                     }}
-                  >
-                    {cellActivities.map((activity) => {
-                      const activityIssues = journeyIssues.filter(
-                        (i) => i.target_id === activity.id || i.path?.includes(activity.id)
-                      );
+                  />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                    {actor.label}
+                  </Typography>
 
-                      return (
-                        <Card
-                          key={activity.id}
-                          variant="outlined"
-                          sx={{
-                            p: 1.5,
-                            borderRadius: 1.5,
-                            bgcolor: 'background.paper',
-                            borderColor: activityIssues.length > 0 ? 'error.main' : 'divider',
-                          }}
+                  {!readOnly && (
+                    <Stack direction="row" spacing={0.5} sx={{ mt: 1 }}>
+                      <Tooltip title="Geser Atas">
+                        <span>
+                          <IconButton
+                            size="small"
+                            disabled={aIndex === 0}
+                            onClick={() => handleMoveActor(aIndex, 'up')}
+                            aria-label={`Geser Atas Actor ${actor.label}`}
+                          >
+                            <Iconify icon="solar:arrow-up-bold" width={14} />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                      <Tooltip title="Edit Actor">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => setEditingActor(actor)}
+                          aria-label={`Edit Actor ${actor.label}`}
                         >
-                          <Box
+                          <Iconify icon="solar:pen-bold" width={14} />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Geser Bawah">
+                        <span>
+                          <IconButton
+                            size="small"
+                            disabled={aIndex === sortedActors.length - 1}
+                            onClick={() => handleMoveActor(aIndex, 'down')}
+                            aria-label={`Geser Bawah Actor ${actor.label}`}
+                          >
+                            <Iconify icon="solar:arrow-down-bold" width={14} />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                      <Tooltip title="Hapus Actor">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDeleteActorPrompt(actor)}
+                          aria-label={`Hapus Actor ${actor.label}`}
+                        >
+                          <Iconify icon="solar:trash-bin-trash-bold" width={14} />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                  )}
+                </Box>
+
+                {/* Matrix Cells */}
+                {sortedPhases.map((phase) => {
+                  const cellActivities = activities.filter(
+                    (act) => act.phase_id === phase.id && act.actor_id === actor.id
+                  );
+
+                  return (
+                    <Box
+                      key={`${actor.id}-${phase.id}`}
+                      sx={{
+                        p: 1.5,
+                        borderBottom: '1px solid',
+                        borderRight: '1px solid',
+                        borderColor: 'divider',
+                        bgcolor: cellActivities.length > 0 ? 'transparent' : 'action.hover',
+                        minHeight: 140,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 1.5,
+                      }}
+                    >
+                      {cellActivities.map((activity) => {
+                        const activityIssues = journeyIssues.filter(
+                          (i) => i.target_id === activity.id || i.path?.includes(activity.id)
+                        );
+                        const isActFocused = focusTargetId === activity.id;
+
+                        return (
+                          <Card
+                            key={activity.id}
+                            data-target-id={activity.id}
+                            variant="outlined"
                             sx={{
-                              display: 'flex',
-                              alignItems: 'flex-start',
-                              justifyContent: 'space-between',
-                              mb: 1,
+                              p: 1.5,
+                              borderRadius: 1.5,
+                              bgcolor: 'background.paper',
+                              borderColor: isActFocused
+                                ? 'primary.main'
+                                : activityIssues.length > 0
+                                  ? 'error.main'
+                                  : 'divider',
+                              boxShadow: isActFocused
+                                ? (t) => `0 0 0 2px ${t.palette.primary.main}`
+                                : 'none',
+                              transition: 'all 0.2s ease-in-out',
                             }}
                           >
-                            <Typography
-                              variant="subtitle2"
-                              sx={{ fontWeight: 700, lineHeight: 1.3 }}
-                            >
-                              {activity.label}
-                            </Typography>
-                            {!readOnly && (
-                              <Stack direction="row" spacing={0.5}>
-                                <Tooltip title="Edit Aktivitas">
-                                  <IconButton
-                                    size="small"
-                                    color="primary"
-                                    onClick={() => handleOpenEditActivity(activity)}
-                                    aria-label={`Edit Aktivitas ${activity.label}`}
-                                  >
-                                    <Iconify icon="solar:pen-bold" width={16} />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Hapus Aktivitas">
-                                  <IconButton
-                                    size="small"
-                                    color="error"
-                                    onClick={() => handleDeleteActivity(activity.id)}
-                                    aria-label={`Hapus Aktivitas ${activity.label}`}
-                                  >
-                                    <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                                  </IconButton>
-                                </Tooltip>
-                              </Stack>
-                            )}
-                          </Box>
-
-                          {activity.description && (
-                            <Typography
-                              variant="body2"
+                            <Box
                               sx={{
-                                color: 'text.secondary',
-                                fontSize: '0.775rem',
-                                mb: 1.25,
-                                lineHeight: 1.35,
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                justifyContent: 'space-between',
+                                mb: 1,
                               }}
                             >
-                              {activity.description}
-                            </Typography>
-                          )}
-
-                          {/* Touchpoints */}
-                          {activity.touchpoints && activity.touchpoints.length > 0 && (
-                            <Box sx={{ mb: 1 }}>
-                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                {activity.touchpoints.map((tp, tpIdx) => (
-                                  <Chip
-                                    key={tpIdx}
-                                    label={tp}
-                                    size="small"
-                                    color="info"
-                                    variant="soft"
-                                    sx={{ height: 18, fontSize: '0.675rem' }}
-                                  />
-                                ))}
-                              </Box>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ fontWeight: 700, lineHeight: 1.3 }}
+                              >
+                                {activity.label}
+                              </Typography>
+                              {!readOnly && (
+                                <Stack direction="row" spacing={0.5}>
+                                  <Tooltip title="Edit Aktivitas">
+                                    <IconButton
+                                      size="small"
+                                      color="primary"
+                                      onClick={() => handleOpenEditActivity(activity)}
+                                      aria-label={`Edit Aktivitas ${activity.label}`}
+                                    >
+                                      <Iconify icon="solar:pen-bold" width={16} />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title="Hapus Aktivitas">
+                                    <IconButton
+                                      size="small"
+                                      color="error"
+                                      onClick={() => handleDeleteActivity(activity.id)}
+                                      aria-label={`Hapus Aktivitas ${activity.label}`}
+                                    >
+                                      <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                                    </IconButton>
+                                  </Tooltip>
+                                </Stack>
+                              )}
                             </Box>
-                          )}
 
-                          {/* References */}
-                          {activity.references && activity.references.length > 0 && (
-                            <Box>
-                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                {activity.references.map((ref, rIdx) => (
-                                  <Chip
-                                    key={rIdx}
-                                    label={ref}
-                                    size="small"
-                                    color="secondary"
-                                    variant="soft"
-                                    sx={{
-                                      height: 18,
-                                      fontSize: '0.65rem',
-                                      fontFamily: 'monospace',
-                                    }}
-                                  />
-                                ))}
+                            {activity.description && (
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: 'text.secondary',
+                                  fontSize: '0.775rem',
+                                  mb: 1.25,
+                                  lineHeight: 1.35,
+                                }}
+                              >
+                                {activity.description}
+                              </Typography>
+                            )}
+
+                            {/* Touchpoints */}
+                            {activity.touchpoints && activity.touchpoints.length > 0 && (
+                              <Box sx={{ mb: 1 }}>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                  {activity.touchpoints.map((tp, tpIdx) => (
+                                    <Chip
+                                      key={tpIdx}
+                                      label={tp}
+                                      size="small"
+                                      color="info"
+                                      variant="soft"
+                                      sx={{ height: 18, fontSize: '0.675rem' }}
+                                    />
+                                  ))}
+                                </Box>
                               </Box>
-                            </Box>
-                          )}
-                        </Card>
-                      );
-                    })}
+                            )}
 
-                    {!readOnly && (
-                      <Button
-                        size="small"
-                        variant="text"
-                        color="inherit"
-                        onClick={() => handleOpenAddActivity(phase.id, actor.id)}
-                        startIcon={<Iconify icon="solar:add-circle-linear" width={16} />}
-                        aria-label={`Tambah Aktivitas di Phase ${phase.order} Actor ${actor.order}`}
-                        sx={{
-                          mt: 'auto',
-                          border: '1px dashed',
-                          borderColor: 'divider',
-                          borderRadius: 1,
-                          py: 0.75,
-                          fontSize: '0.725rem',
-                          color: 'text.secondary',
-                          '&:hover': {
-                            borderColor: 'primary.main',
-                            color: 'primary.main',
-                          },
-                        }}
-                      >
-                        + Tambah Aktivitas
-                      </Button>
-                    )}
-                  </Box>
-                );
-              })}
-            </Box>
-          ))}
+                            {/* References */}
+                            {activity.references && activity.references.length > 0 && (
+                              <Box>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                  {activity.references.map((ref, rIdx) => (
+                                    <Chip
+                                      key={rIdx}
+                                      label={ref}
+                                      size="small"
+                                      color="secondary"
+                                      variant="soft"
+                                      sx={{
+                                        height: 18,
+                                        fontSize: '0.65rem',
+                                        fontFamily: 'monospace',
+                                      }}
+                                    />
+                                  ))}
+                                </Box>
+                              </Box>
+                            )}
+                          </Card>
+                        );
+                      })}
+
+                      {!readOnly && (
+                        <Button
+                          size="small"
+                          variant="text"
+                          color="inherit"
+                          onClick={() => handleOpenAddActivity(phase.id, actor.id)}
+                          startIcon={<Iconify icon="solar:add-circle-linear" width={16} />}
+                          aria-label={`Tambah Aktivitas di Phase ${phase.order} Actor ${actor.order}`}
+                          sx={{
+                            mt: 'auto',
+                            border: '1px dashed',
+                            borderColor: 'divider',
+                            borderRadius: 1,
+                            py: 0.75,
+                            fontSize: '0.725rem',
+                            color: 'text.secondary',
+                            '&:hover': {
+                              borderColor: 'primary.main',
+                              color: 'primary.main',
+                            },
+                          }}
+                        >
+                          + Tambah Aktivitas
+                        </Button>
+                      )}
+                    </Box>
+                  );
+                })}
+              </Box>
+            );
+          })}
         </Box>
       </Box>
 
