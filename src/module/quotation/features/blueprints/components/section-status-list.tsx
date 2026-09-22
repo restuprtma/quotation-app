@@ -162,19 +162,22 @@ export function SectionStatusList({
         };
 
       case 'failed':
+      case 'interrupted':
         return {
           chip: (
             <Chip
               size="small"
               icon={<Iconify icon="solar:danger-circle-bold" width={16} />}
-              label="Gagal"
+              label={status === 'interrupted' ? 'Terputus' : 'Gagal'}
               color="error"
               variant="soft"
             />
           ),
           hint: section?.error_code
             ? `Error: ${section.error_code}`
-            : 'Terjadi kegagalan pada tahap ini',
+            : status === 'interrupted'
+              ? 'Proses terputus pada tahap ini'
+              : 'Terjadi kegagalan pada tahap ini',
         };
 
       case 'skipped':
@@ -265,7 +268,7 @@ export function SectionStatusList({
               const status: SectionStatus = sec?.status ?? 'pending';
               const { chip, hint } = getStatusDisplay(meta, index, sec);
               const attempts = sec?.attempts ?? 0;
-              const isFailed = status === 'failed';
+              const isFailed = status === 'failed' || (status as string) === 'interrupted';
               const canRetry = meta.isProvider && isFailed && attempts < 3;
               const canManual = meta.isProvider && isFailed;
 

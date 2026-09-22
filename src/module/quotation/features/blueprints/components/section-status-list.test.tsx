@@ -179,6 +179,27 @@ describe('SectionStatusList', () => {
     expect(screen.getByText('AI_PROVIDER_TIMEOUT')).toBeTruthy();
   });
 
+  it('renders interrupted section status with error chip and allows explicit Coba Lagi retry', () => {
+    const onRetry = vi.fn();
+    const interruptedSections: BlueprintSectionStatus[] = [
+      {
+        type: 'journey',
+        status: 'interrupted' as any,
+        attempts: 1,
+        started_at: '2026-09-17T10:00:00Z',
+        updated_at: '2026-09-17T10:05:00Z',
+      },
+    ];
+
+    render(<SectionStatusList sections={interruptedSections} onRetry={onRetry} />);
+
+    expect(screen.getByText('Terputus')).toBeTruthy();
+    const retryBtn = screen.getByRole('button', { name: /coba lagi/i });
+    expect(retryBtn).toBeTruthy();
+    fireEvent.click(retryBtn);
+    expect(onRetry).toHaveBeenCalledWith('journey');
+  });
+
   it('renders gracefully when sections prop is empty or undefined', () => {
     render(<SectionStatusList />);
     expect(screen.getByText(/0 dari 7 tahap selesai/i)).toBeTruthy();

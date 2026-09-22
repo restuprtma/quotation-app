@@ -702,4 +702,137 @@ describe('BlueprintProgressView', () => {
     expect(screen.getByText(/Gagal Menyusun Prompt Blueprint/i)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /buka pengaturan/i })).toBeNull();
   });
+
+  describe('Task 6: Separate Lease Recovery from Failed-Stage Recovery', () => {
+    it('when generation_status is partial_failed, Periksa & Pulihkan is NOT rendered and section Retry/Manual are available', () => {
+      const partialFailedStatus: BlueprintStatus = {
+        ...mockStatus,
+        generation_status: 'partial_failed',
+        sections: [
+          {
+            type: 'journey',
+            status: 'failed',
+            attempts: 1,
+            error_code: 'provider_timeout',
+            updated_at: '2026-09-17T10:02:00Z',
+          },
+        ],
+      };
+
+      vi.spyOn(runnerHook, 'useBlueprintRunner').mockReturnValue({
+        blueprintId: 'bp-123',
+        status: partialFailedStatus,
+        detail: mockDetail,
+        runnerState: 'idle',
+        isLoading: false,
+        isFetching: false,
+        isPolling: false,
+        isStaleLease: false,
+        needsLeaseRecovery: false,
+        hasFailedSection: true,
+        error: null,
+        start: vi.fn(),
+        stop: vi.fn(),
+        recover: vi.fn(),
+        retrySection: vi.fn(),
+        refresh: vi.fn(),
+      });
+
+      render(<BlueprintProgressView />, {
+        wrapper: createWrapper(),
+      });
+
+      // Assert Periksa & Pulihkan is NOT present
+      expect(screen.queryByRole('button', { name: /periksa & pulihkan/i })).toBeNull();
+      // Assert Lanjutkan Generasi is NOT present in header actions
+      expect(screen.queryByRole('button', { name: /lanjutkan generasi/i })).toBeNull();
+      // Assert section-level retry and manual buttons are available
+      expect(screen.getAllByRole('button', { name: /coba lagi/i }).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByRole('button', { name: /lengkapi manual/i })).toBeTruthy();
+    });
+
+    it('when active generating section is older than 5 minutes, Periksa & Pulihkan and Stale Lease banner ARE rendered', () => {
+      const staleGeneratingStatus: BlueprintStatus = {
+        ...mockStatus,
+        generation_status: 'in_progress',
+        sections: [
+          {
+            type: 'journey',
+            status: 'in_progress',
+            attempts: 1,
+            started_at: '2026-09-17T09:50:00Z',
+            updated_at: '2026-09-17T09:50:00Z',
+          },
+        ],
+      };
+
+      vi.spyOn(runnerHook, 'useBlueprintRunner').mockReturnValue({
+        blueprintId: 'bp-123',
+        status: staleGeneratingStatus,
+        detail: mockDetail,
+        runnerState: 'recovery',
+        isLoading: false,
+        isFetching: false,
+        isPolling: false,
+        isStaleLease: true,
+        needsLeaseRecovery: true,
+        hasFailedSection: false,
+        error: null,
+        start: vi.fn(),
+        stop: vi.fn(),
+        recover: vi.fn(),
+        retrySection: vi.fn(),
+        refresh: vi.fn(),
+      });
+
+      render(<BlueprintProgressView />, {
+        wrapper: createWrapper(),
+      });
+
+      expect(screen.getByText(/Stale Lease Terdeteksi/i)).toBeTruthy();
+      expect(screen.getByRole('button', { name: /periksa & pulihkan/i })).toBeTruthy();
+    });
+
+    it('after authoritative interrupted status, UI shows explicit section Retry and no second Continue', () => {
+      const interruptedStatus: BlueprintStatus = {
+        ...mockStatus,
+        generation_status: 'partial_failed',
+        sections: [
+          {
+            type: 'journey',
+            status: 'interrupted' as any,
+            attempts: 1,
+            updated_at: '2026-09-17T10:05:00Z',
+          },
+        ],
+      };
+
+      vi.spyOn(runnerHook, 'useBlueprintRunner').mockReturnValue({
+        blueprintId: 'bp-123',
+        status: interruptedStatus,
+        detail: mockDetail,
+        runnerState: 'idle',
+        isLoading: false,
+        isFetching: false,
+        isPolling: false,
+        isStaleLease: false,
+        needsLeaseRecovery: false,
+        hasFailedSection: true,
+        error: null,
+        start: vi.fn(),
+        stop: vi.fn(),
+        recover: vi.fn(),
+        retrySection: vi.fn(),
+        refresh: vi.fn(),
+      });
+
+      render(<BlueprintProgressView />, {
+        wrapper: createWrapper(),
+      });
+
+      expect(screen.queryByRole('button', { name: /periksa & pulihkan/i })).toBeNull();
+      expect(screen.queryByRole('button', { name: /lanjutkan generasi/i })).toBeNull();
+      expect(screen.getByRole('button', { name: /coba lagi/i })).toBeTruthy();
+    });
+  });
 });

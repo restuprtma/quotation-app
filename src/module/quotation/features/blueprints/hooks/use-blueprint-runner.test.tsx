@@ -80,8 +80,14 @@ describe('useBlueprintRunner', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     mockCompanyContext.company = { id: 'company-1', name: 'Company 1' };
-    mockStatus.created_at = new Date().toISOString();
-    mockStatus.updated_at = new Date().toISOString();
+    const nowIso = new Date().toISOString();
+    mockStatus.created_at = nowIso;
+    mockStatus.updated_at = nowIso;
+    mockStatus.sections = mockStatus.sections.map((s) => ({
+      ...s,
+      updated_at: nowIso,
+      started_at: s.status === 'in_progress' ? nowIso : s.started_at,
+    }));
     vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(mockStatus);
     vi.spyOn(api, 'getBlueprint').mockResolvedValue(mockDetail);
   });
@@ -612,6 +618,11 @@ describe('useBlueprintRunner', () => {
       const staleStatus: BlueprintStatus = {
         ...mockStatus,
         generation_status: 'in_progress',
+        sections: mockStatus.sections.map((s) =>
+          s.status === 'in_progress'
+            ? { ...s, started_at: sixMinutesAgo, updated_at: sixMinutesAgo }
+            : s
+        ),
         updated_at: sixMinutesAgo,
       };
 
@@ -635,6 +646,11 @@ describe('useBlueprintRunner', () => {
       const staleStatus: BlueprintStatus = {
         ...mockStatus,
         generation_status: 'in_progress',
+        sections: mockStatus.sections.map((s) =>
+          s.status === 'in_progress'
+            ? { ...s, started_at: sixMinutesAgo, updated_at: sixMinutesAgo }
+            : s
+        ),
         updated_at: sixMinutesAgo,
       };
 
@@ -666,6 +682,11 @@ describe('useBlueprintRunner', () => {
       const staleStatus: BlueprintStatus = {
         ...mockStatus,
         generation_status: 'in_progress',
+        sections: mockStatus.sections.map((s) =>
+          s.status === 'in_progress'
+            ? { ...s, started_at: sixMinutesAgo, updated_at: sixMinutesAgo }
+            : s
+        ),
         updated_at: sixMinutesAgo,
       };
 
@@ -943,6 +964,190 @@ describe('useBlueprintRunner', () => {
       rerender();
 
       expect(result.current.error).toBeNull();
+    });
+  });
+
+  describe('Task 6: Separate Lease Recovery from Failed-Stage Recovery', () => {
+    it('partial_failed alone does NOT trigger lease recovery (needsLeaseRecovery is false, hasFailedSection is true)', async () => {
+      const partialFailedStatus: BlueprintStatus = {
+        ...mockStatus,
+        generation_status: 'partial_failed',
+        sections: mockStatus.sections.map((s) =>
+          s.type === 'journey'
+            ? { ...s, status: 'failed', attempts: 1, error_code: 'provider_timeout' }
+            : s
+        ),
+      };
+
+      vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(partialFailedStatus);
+      vi.spyOn(api, 'getBlueprint').mockResolvedValue({
+        ...mockDetail,
+        status: partialFailedStatus,
+      });
+
+      const { wrapper } = createWrapper();
+      const { result } = renderHook(() => useBlueprintRunner('bp-123'), { wrapper });
+
+      await waitFor(() => expect(result.current.status).toBeDefined());
+
+      expect(result.current.isStaleLease).toBe(false);
+      expect(result.current.needsLeaseRecovery).toBe(false);
+      expect(result.current.hasFailedSection).toBe(true);
+      expect(result.current.runnerState).toBe('idle');
+    });
+
+    it('generating section older than 5 minutes DOES show needsLeaseRecovery=true and runnerState=recovery', async () => {
+      const sixMinutesAgo = new Date(Date.now() - 6 * 60 * 1000).toISOString();
+      const staleGeneratingStatus: BlueprintStatus = {
+        ...mockStatus,
+        generation_status: 'in_progress',
+        sections: mockStatus.sections.map((s) =>
+          s.type === 'journey'
+            ? {
+                ...s,
+                status: 'in_progress',
+                attempts: 1,
+                started_at: sixMinutesAgo,
+                updated_at: sixMinutesAgo,
+              }
+            : s
+        ),
+        updated_at: sixMinutesAgo,
+      };
+
+      vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(staleGeneratingStatus);
+      vi.spyOn(api, 'getBlueprint').mockResolvedValue({
+        ...mockDetail,
+        status: staleGeneratingStatus,
+      });
+
+      const { wrapper } = createWrapper();
+      const { result } = renderHook(() => useBlueprintRunner('bp-123'), { wrapper });
+
+      await waitFor(() => expect(result.current.status).toBeDefined());
+
+      expect(result.current.isStaleLease).toBe(true);
+      expect(result.current.needsLeaseRecovery).toBe(true);
+      expect(result.current.runnerState).toBe('recovery');
+      expect(result.current.hasFailedSection).toBe(false);
+    });
+
+    it('generating section younger than 5 minutes is NOT a stale lease even if status created_at is old', async () => {
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+      const oneMinuteAgo = new Date(Date.now() - 1 * 60 * 1000).toISOString();
+      const activeStatus: BlueprintStatus = {
+        ...mockStatus,
+        created_at: tenMinutesAgo,
+        updated_at: tenMinutesAgo,
+        generation_status: 'in_progress',
+        sections: mockStatus.sections.map((s) =>
+          s.type === 'journey'
+            ? {
+                ...s,
+                status: 'in_progress',
+                attempts: 1,
+                started_at: tenMinutesAgo,
+                updated_at: oneMinuteAgo,
+              }
+            : s
+        ),
+      };
+
+      vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(activeStatus);
+      vi.spyOn(api, 'getBlueprint').mockResolvedValue({
+        ...mockDetail,
+        status: activeStatus,
+      });
+
+      const { wrapper } = createWrapper();
+      const { result } = renderHook(() => useBlueprintRunner('bp-123'), { wrapper });
+
+      await waitFor(() => expect(result.current.status).toBeDefined());
+
+      expect(result.current.isStaleLease).toBe(false);
+      expect(result.current.needsLeaseRecovery).toBe(false);
+      expect(result.current.runnerState).toBe('idle');
+    });
+
+    it('recover() is single-shot: calls continueBlueprint once, updates status, and stops without continuous loop', async () => {
+      const sixMinutesAgo = new Date(Date.now() - 6 * 60 * 1000).toISOString();
+      const staleGeneratingStatus: BlueprintStatus = {
+        ...mockStatus,
+        generation_status: 'in_progress',
+        sections: mockStatus.sections.map((s) =>
+          s.type === 'journey'
+            ? { ...s, status: 'in_progress', started_at: sixMinutesAgo, updated_at: sixMinutesAgo }
+            : s
+        ),
+        updated_at: sixMinutesAgo,
+      };
+
+      vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(staleGeneratingStatus);
+      vi.spyOn(api, 'getBlueprint').mockResolvedValue({
+        ...mockDetail,
+        status: staleGeneratingStatus,
+      });
+
+      const reconciledStatus: BlueprintStatus = {
+        ...staleGeneratingStatus,
+        generation_status: 'partial_failed',
+        content_version: 2,
+        updated_at: new Date().toISOString(),
+        sections: staleGeneratingStatus.sections.map((s) =>
+          s.type === 'journey'
+            ? {
+                ...s,
+                status: 'failed',
+                attempts: 1,
+                error_code: 'interrupted',
+                updated_at: new Date().toISOString(),
+              }
+            : s
+        ),
+      };
+
+      const continueSpy = vi.spyOn(api, 'continueBlueprint').mockResolvedValueOnce(reconciledStatus);
+
+      const { wrapper } = createWrapper();
+      const { result } = renderHook(() => useBlueprintRunner('bp-123'), { wrapper });
+
+      await waitFor(() => expect(result.current.needsLeaseRecovery).toBe(true));
+
+      await act(async () => {
+        await result.current.recover();
+      });
+
+      expect(continueSpy).toHaveBeenCalledTimes(1);
+      expect(result.current.runnerState).toBe('idle');
+      expect(result.current.needsLeaseRecovery).toBe(false);
+      expect(result.current.hasFailedSection).toBe(true);
+      expect(result.current.status?.content_version).toBe(2);
+    });
+
+    it('after section failure, start() does NOT dispatch continueBlueprint mutations', async () => {
+      const failedStatus: BlueprintStatus = {
+        ...mockStatus,
+        generation_status: 'partial_failed',
+        sections: mockStatus.sections.map((s) =>
+          s.type === 'journey' ? { ...s, status: 'failed', attempts: 1 } : s
+        ),
+      };
+
+      vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(failedStatus);
+      vi.spyOn(api, 'getBlueprint').mockResolvedValue({ ...mockDetail, status: failedStatus });
+      const continueSpy = vi.spyOn(api, 'continueBlueprint');
+
+      const { wrapper } = createWrapper();
+      const { result } = renderHook(() => useBlueprintRunner('bp-123'), { wrapper });
+
+      await waitFor(() => expect(result.current.hasFailedSection).toBe(true));
+
+      await act(async () => {
+        await result.current.start();
+      });
+
+      expect(continueSpy).not.toHaveBeenCalled();
+      expect(result.current.runnerState).toBe('idle');
     });
   });
 });

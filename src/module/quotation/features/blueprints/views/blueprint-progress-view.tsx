@@ -62,6 +62,8 @@ export function BlueprintProgressView({
     isLoading,
     isFetching,
     isStaleLease,
+    needsLeaseRecovery: hookNeedsLeaseRecovery,
+    hasFailedSection: hookHasFailedSection,
     error,
     start,
     stop,
@@ -159,11 +161,21 @@ export function BlueprintProgressView({
   const isRunning = runnerState === 'running';
   const isStopping = runnerState === 'stopping';
   const isCompleted = status?.generation_status === 'completed';
-  const isFailed =
-    status?.generation_status === 'failed' || status?.generation_status === 'partial_failed';
-  const needsRecovery = isStaleLease || runnerState === 'recovery' || isFailed;
 
-  const failedSection = status?.sections?.find((s) => s.status === 'failed');
+  const failedSection = status?.sections?.find(
+    (s) => s.status === 'failed' || (s.status as string) === 'interrupted'
+  );
+  const hasFailedSection =
+    hookHasFailedSection ??
+    Boolean(
+      failedSection ||
+        status?.generation_status === 'failed' ||
+        status?.generation_status === 'partial_failed'
+    );
+
+  const needsLeaseRecovery =
+    hookNeedsLeaseRecovery ?? (isStaleLease || runnerState === 'recovery');
+
   const failedProviderSection: ProviderSection | null =
     failedSection &&
     (failedSection.type === 'journey' ||
@@ -216,12 +228,22 @@ export function BlueprintProgressView({
         />
       );
     }
-    if (needsRecovery) {
+    if (needsLeaseRecovery) {
       return (
         <Chip
           icon={<Iconify icon="solar:danger-triangle-bold" width={16} />}
           label="Perlu Pemulihan"
           color="warning"
+          variant="soft"
+        />
+      );
+    }
+    if (hasFailedSection) {
+      return (
+        <Chip
+          icon={<Iconify icon="solar:danger-circle-bold" width={16} />}
+          label={status?.generation_status === 'failed' ? 'Generasi Gagal' : 'Gagal Sebagian'}
+          color="error"
           variant="soft"
         />
       );
@@ -402,7 +424,7 @@ export function BlueprintProgressView({
             )}
 
             {/* Recover button */}
-            {needsRecovery && !isRunning && (
+            {needsLeaseRecovery && !isRunning && (
               <Button
                 variant="contained"
                 color="warning"
@@ -416,7 +438,7 @@ export function BlueprintProgressView({
             )}
 
             {/* Start / Continue button */}
-            {!isCompleted && !isRunning && !needsRecovery && (
+            {!isCompleted && !isRunning && !needsLeaseRecovery && !hasFailedSection && (
               <Button
                 variant="contained"
                 color="primary"

@@ -25,7 +25,8 @@ export type SectionStatus =
   | 'failed'
   | 'skipped'
   | 'manual_edit'
-  | 'validated';
+  | 'validated'
+  | 'interrupted';
 
 export type PublicationStatus = 'draft' | 'published' | 'superseded' | string;
 

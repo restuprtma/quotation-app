@@ -24,6 +24,8 @@ export interface UseBlueprintRunnerReturn {
   isFetching: boolean;
   isPolling: boolean;
   isStaleLease: boolean;
+  needsLeaseRecovery: boolean;
+  hasFailedSection: boolean;
   error: BlueprintRunnerError | null;
   start: () => Promise<void>;
   stop: () => void;
@@ -289,17 +291,50 @@ export function useBlueprintRunner(
     enabled && blueprintId && status?.generation_status === 'in_progress' && !isTerminal
   );
 
-  // Stale lease calculation (> 5 minutes on server updated_at timestamp)
+  // Stale lease calculation (> 5 minutes on active generating section timestamp or server updated_at timestamp)
   const isStaleLease = useMemo(() => {
     if (!status || status.generation_status !== 'in_progress') {
       return false;
     }
-    const updatedAtMs = new Date(status.updated_at).getTime();
-    if (Number.isNaN(updatedAtMs)) {
+    const activeGeneratingSection = status.sections?.find((s) => s.status === 'in_progress');
+    const timestampStr =
+      activeGeneratingSection?.updated_at ||
+      activeGeneratingSection?.started_at ||
+      status.updated_at;
+
+    if (!timestampStr) {
       return false;
     }
-    return Date.now() - updatedAtMs >= staleLeaseThresholdMs;
+    const timestampMs = new Date(timestampStr).getTime();
+    if (Number.isNaN(timestampMs)) {
+      return false;
+    }
+    return Date.now() - timestampMs >= staleLeaseThresholdMs;
   }, [status, staleLeaseThresholdMs]);
+
+  const hasFailedSection = useMemo(() => {
+    if (!status) return false;
+    const hasFailedSec = Boolean(
+      status.sections?.some(
+        (s) => s.status === 'failed' || (s.status as string) === 'interrupted'
+      )
+    );
+    return (
+      hasFailedSec ||
+      status.generation_status === 'failed' ||
+      status.generation_status === 'partial_failed'
+    );
+  }, [status]);
+
+  const needsLeaseRecovery = useMemo(() => {
+    if (internalState === 'recovery') {
+      return true;
+    }
+    if (error?.code === 'recovery_required' || error?.code === 'section_recovery_required') {
+      return true;
+    }
+    return isStaleLease;
+  }, [internalState, error?.code, isStaleLease]);
 
   // Derive active runnerState from authoritative status and internal lifecycle state
   const runnerState: BlueprintRunnerState = useMemo(() => {
@@ -312,11 +347,11 @@ export function useBlueprintRunner(
     if (internalState === 'stopping') {
       return 'stopping';
     }
-    if (internalState === 'recovery' || (isStaleLease && internalState === 'idle')) {
+    if (internalState === 'recovery' || (needsLeaseRecovery && internalState === 'idle')) {
       return 'recovery';
     }
     return 'idle';
-  }, [status?.generation_status, internalState, isStaleLease]);
+  }, [status?.generation_status, internalState, needsLeaseRecovery]);
 
   const start = useCallback(async () => {
     if (!blueprintId || isLoopRunningRef.current) {
@@ -326,6 +361,17 @@ export function useBlueprintRunner(
     const currentStatus = queryClient.getQueryData<BlueprintStatus>(statusQueryKey) ?? status;
     if (currentStatus?.generation_status === 'completed') {
       setInternalState('completed');
+      return;
+    }
+
+    if (
+      currentStatus?.generation_status === 'failed' ||
+      currentStatus?.generation_status === 'partial_failed' ||
+      currentStatus?.sections?.some(
+        (s) => s.status === 'failed' || (s.status as string) === 'interrupted'
+      )
+    ) {
+      setInternalState('idle');
       return;
     }
 
@@ -359,7 +405,13 @@ export function useBlueprintRunner(
           await queryClient.invalidateQueries({ queryKey: detailQueryKey });
           break;
         }
-        if (cur?.generation_status === 'failed' || cur?.generation_status === 'partial_failed') {
+        if (
+          cur?.generation_status === 'failed' ||
+          cur?.generation_status === 'partial_failed' ||
+          cur?.sections?.some(
+            (s) => s.status === 'failed' || (s.status as string) === 'interrupted'
+          )
+        ) {
           setInternalState('idle');
           break;
         }
@@ -392,7 +444,10 @@ export function useBlueprintRunner(
 
           if (
             updated.generation_status === 'failed' ||
-            updated.generation_status === 'partial_failed'
+            updated.generation_status === 'partial_failed' ||
+            updated.sections?.some(
+              (s) => s.status === 'failed' || (s.status as string) === 'interrupted'
+            )
           ) {
             setInternalState('idle');
             break;
@@ -430,7 +485,7 @@ export function useBlueprintRunner(
           }
 
           const failedSec = (latestStatus ?? queryClient.getQueryData<BlueprintStatus>(statusQueryKey))
-            ?.sections?.find((s) => s.status === 'failed');
+            ?.sections?.find((s) => s.status === 'failed' || (s.status as string) === 'interrupted');
           const section: ProviderSection | null =
             failedSec &&
             failedSec.type !== 'context' &&
@@ -477,9 +532,9 @@ export function useBlueprintRunner(
     try {
       const updated = await continueBlueprint(blueprintId);
       safeUpdateStatusCache(updated);
+      await queryClient.invalidateQueries({ queryKey: detailQueryKey });
       if (updated.generation_status === 'completed') {
         setInternalState('completed');
-        await queryClient.invalidateQueries({ queryKey: detailQueryKey });
       } else {
         setInternalState('idle');
       }
@@ -493,7 +548,12 @@ export function useBlueprintRunner(
       } catch {
         // ignore
       }
-      setInternalState('recovery');
+      const errorCode = err?.response?.data?.errors;
+      if (errorCode === 'recovery_required' || errorCode === 'section_recovery_required') {
+        setInternalState('recovery');
+      } else {
+        setInternalState('idle');
+      }
       setError(normalizeBlueprintRunnerError(err, null));
     } finally {
       inFlightRef.current = false;
@@ -581,6 +641,8 @@ export function useBlueprintRunner(
     isFetching: statusQuery.isFetching || detailQuery.isFetching,
     isPolling,
     isStaleLease,
+    needsLeaseRecovery,
+    hasFailedSection,
     error: activeError,
     start,
     stop,
