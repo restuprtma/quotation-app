@@ -32,6 +32,7 @@ import { useBlueprintRunner } from '../hooks/use-blueprint-runner';
 import { SectionStatusList } from '../components/section-status-list';
 import { BlueprintResultPreview } from '../components/blueprint-result-preview';
 import { ManualCompletionDialog } from '../components/manual-completion-dialog';
+import { presentBlueprintError } from '../utils/blueprint-error-presentation';
 import { ValidationPanel, mapToProviderSection } from '../components/validation-panel';
 
 export interface BlueprintProgressViewProps {
@@ -162,18 +163,27 @@ export function BlueprintProgressView({
     status?.generation_status === 'failed' || status?.generation_status === 'partial_failed';
   const needsRecovery = isStaleLease || runnerState === 'recovery' || isFailed;
 
-  const isProviderConfigError = Boolean(
-    error?.message?.toLowerCase().includes('provider') ||
-    error?.message?.toLowerCase().includes('api key') ||
-    status?.sections?.some(
-      (s) =>
-        s.status === 'failed' &&
-        (s.error_code === 'provider_config_missing' ||
-          s.error_code === 'unauthorized' ||
-          s.error_message?.toLowerCase().includes('provider') ||
-          s.error_message?.toLowerCase().includes('api key'))
-    )
-  );
+  const failedSection = status?.sections?.find((s) => s.status === 'failed');
+  const failedProviderSection: ProviderSection | null =
+    failedSection &&
+    (failedSection.type === 'journey' ||
+      failedSection.type === 'architecture' ||
+      failedSection.type === 'state_machine' ||
+      failedSection.type === 'workflow' ||
+      failedSection.type === 'wbs')
+      ? (failedSection.type as ProviderSection)
+      : null;
+
+  const errorCode =
+    (error as any)?.code ||
+    (error as any)?.response?.data?.error_code ||
+    (error as any)?.response?.data?.code ||
+    (error as any)?.response?.data?.errors ||
+    (failedSection as any)?.safe_error_code ||
+    failedSection?.error_code ||
+    (typeof error?.message === 'string' && !error.message.includes(' ') ? error.message : null);
+
+  const activeErrorPresentation = presentBlueprintError(errorCode);
 
   const getStatusChip = () => {
     if (isCompleted) {
@@ -234,24 +244,58 @@ export function BlueprintProgressView({
           desktop. Pada perangkat seluler, data disajikan dalam mode ringkasan read-only.
         </Alert>
 
-        {/* Provider Config Missing Banner */}
-        {isProviderConfigError && (
+        {/* Active Error Presentation Banner */}
+        {activeErrorPresentation && (
           <Alert
             severity="error"
             action={
-              <Button
-                color="inherit"
-                size="small"
-                variant="outlined"
-                onClick={() => navigate(paths.dashboard.quotation.aiSettings)}
-              >
-                Buka Pengaturan
-              </Button>
+              activeErrorPresentation.action === 'settings' ? (
+                <Button
+                  color="inherit"
+                  size="small"
+                  variant="outlined"
+                  onClick={() => navigate(paths.dashboard.quotation.aiSettings)}
+                >
+                  Buka Pengaturan
+                </Button>
+              ) : activeErrorPresentation.action === 'retry' && failedProviderSection ? (
+                !isCompact ? (
+                  <Button
+                    color="inherit"
+                    size="small"
+                    variant="outlined"
+                    onClick={() => handleRetrySection(failedProviderSection)}
+                  >
+                    Coba Lagi
+                  </Button>
+                ) : undefined
+              ) : activeErrorPresentation.action === 'manual' && failedProviderSection ? (
+                !isCompact ? (
+                  <Button
+                    color="inherit"
+                    size="small"
+                    variant="outlined"
+                    onClick={() => handleOpenManual(failedProviderSection)}
+                  >
+                    Lengkapi Manual
+                  </Button>
+                ) : undefined
+              ) : activeErrorPresentation.action === 'refresh' ? (
+                !isCompact ? (
+                  <Button
+                    color="inherit"
+                    size="small"
+                    variant="outlined"
+                    onClick={handleRefresh}
+                  >
+                    Segarkan
+                  </Button>
+                ) : undefined
+              ) : undefined
             }
           >
-            <AlertTitle>Konfigurasi AI Provider Belum Diatur</AlertTitle>
-            Kunci API atau kredensial AI Provider belum terpasang. Harap periksa pengaturan
-            konfigurasi AI untuk melanjutkan pembuatan blueprint.
+            <AlertTitle>{activeErrorPresentation.title}</AlertTitle>
+            {activeErrorPresentation.message}
           </Alert>
         )}
 
@@ -414,7 +458,7 @@ export function BlueprintProgressView({
         )}
 
         {/* Runtime Error Banner */}
-        {error && !isProviderConfigError && (
+        {error && !activeErrorPresentation && (
           <Alert severity="error">
             <AlertTitle>Terjadi Kesalahan</AlertTitle>
             {error.message || 'Gagal memproses tahapan blueprint.'}

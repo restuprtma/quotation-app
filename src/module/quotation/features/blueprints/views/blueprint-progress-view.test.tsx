@@ -457,4 +457,249 @@ describe('BlueprintProgressView', () => {
     // Manual completion dialog opens for workflow
     expect(screen.getByText(/Lengkapi Manual: Workflow Bisnis/i)).toBeTruthy();
   });
+
+  it('renders configuration banner and settings navigation on provider_configuration', () => {
+    const failedStatus: BlueprintStatus = {
+      ...mockStatus,
+      sections: [
+        {
+          type: 'journey',
+          status: 'failed',
+          attempts: 1,
+          error_code: 'provider_configuration',
+          updated_at: '2026-09-17T10:02:00Z',
+        },
+      ],
+    };
+
+    vi.spyOn(runnerHook, 'useBlueprintRunner').mockReturnValue({
+      blueprintId: 'bp-123',
+      status: failedStatus,
+      detail: mockDetail,
+      runnerState: 'idle',
+      isLoading: false,
+      isFetching: false,
+      isPolling: false,
+      isStaleLease: false,
+      error: null,
+      start: vi.fn(),
+      stop: vi.fn(),
+      recover: vi.fn(),
+      retrySection: vi.fn(),
+      refresh: vi.fn(),
+    });
+
+    render(<BlueprintProgressView />, {
+      wrapper: createWrapper(),
+    });
+
+    expect(screen.getByText(/Konfigurasi AI Provider Belum Diatur/i)).toBeTruthy();
+    const settingsBtn = screen.getByRole('button', { name: /buka pengaturan/i });
+    expect(settingsBtn).toBeTruthy();
+    fireEvent.click(settingsBtn);
+    expect(mockNavigate).toHaveBeenCalledWith('/quotation/ai-settings');
+  });
+
+  it('renders credential banner and settings navigation on provider_invalid_credential', () => {
+    const failedStatus: BlueprintStatus = {
+      ...mockStatus,
+      sections: [
+        {
+          type: 'architecture',
+          status: 'failed',
+          attempts: 1,
+          error_code: 'provider_invalid_credential',
+          updated_at: '2026-09-17T10:02:00Z',
+        },
+      ],
+    };
+
+    vi.spyOn(runnerHook, 'useBlueprintRunner').mockReturnValue({
+      blueprintId: 'bp-123',
+      status: failedStatus,
+      detail: mockDetail,
+      runnerState: 'idle',
+      isLoading: false,
+      isFetching: false,
+      isPolling: false,
+      isStaleLease: false,
+      error: null,
+      start: vi.fn(),
+      stop: vi.fn(),
+      recover: vi.fn(),
+      retrySection: vi.fn(),
+      refresh: vi.fn(),
+    });
+
+    render(<BlueprintProgressView />, {
+      wrapper: createWrapper(),
+    });
+
+    expect(screen.getByText(/Kredensial AI Provider Tidak Valid/i)).toBeTruthy();
+    const settingsBtn = screen.getByRole('button', { name: /buka pengaturan/i });
+    expect(settingsBtn).toBeTruthy();
+    fireEvent.click(settingsBtn);
+    expect(mockNavigate).toHaveBeenCalledWith('/quotation/ai-settings');
+  });
+
+  it('renders availability banner and retry button on provider_unavailable without configuration banner', () => {
+    const retrySectionMock = vi.fn();
+    const failedStatus: BlueprintStatus = {
+      ...mockStatus,
+      sections: [
+        {
+          type: 'journey',
+          status: 'failed',
+          attempts: 1,
+          error_code: 'provider_unavailable',
+          updated_at: '2026-09-17T10:02:00Z',
+        },
+      ],
+    };
+
+    vi.spyOn(runnerHook, 'useBlueprintRunner').mockReturnValue({
+      blueprintId: 'bp-123',
+      status: failedStatus,
+      detail: mockDetail,
+      runnerState: 'idle',
+      isLoading: false,
+      isFetching: false,
+      isPolling: false,
+      isStaleLease: false,
+      error: null,
+      start: vi.fn(),
+      stop: vi.fn(),
+      recover: vi.fn(),
+      retrySection: retrySectionMock,
+      refresh: vi.fn(),
+    });
+
+    render(<BlueprintProgressView />, {
+      wrapper: createWrapper(),
+    });
+
+    expect(screen.getByText(/Layanan AI Provider Tidak Tersedia/i)).toBeTruthy();
+    expect(screen.queryByText(/Konfigurasi AI Provider Belum Diatur/i)).toBeNull();
+    expect(screen.queryByRole('button', { name: /buka pengaturan/i })).toBeNull();
+
+    const retryButtons = screen.getAllByRole('button', { name: /coba lagi/i });
+    expect(retryButtons.length).toBeGreaterThanOrEqual(1);
+    fireEvent.click(retryButtons[0]);
+    expect(retrySectionMock).toHaveBeenCalledWith('journey');
+  });
+
+  it('renders distinct timeout banner on provider_timeout', () => {
+    const failedStatus: BlueprintStatus = {
+      ...mockStatus,
+      sections: [
+        {
+          type: 'wbs',
+          status: 'failed',
+          attempts: 1,
+          error_code: 'provider_timeout',
+          updated_at: '2026-09-17T10:02:00Z',
+        },
+      ],
+    };
+
+    vi.spyOn(runnerHook, 'useBlueprintRunner').mockReturnValue({
+      blueprintId: 'bp-123',
+      status: failedStatus,
+      detail: mockDetail,
+      runnerState: 'idle',
+      isLoading: false,
+      isFetching: false,
+      isPolling: false,
+      isStaleLease: false,
+      error: null,
+      start: vi.fn(),
+      stop: vi.fn(),
+      recover: vi.fn(),
+      retrySection: vi.fn(),
+      refresh: vi.fn(),
+    });
+
+    render(<BlueprintProgressView />, {
+      wrapper: createWrapper(),
+    });
+
+    expect(screen.getByText(/Batas Waktu Permintaan AI Habis/i)).toBeTruthy();
+  });
+
+  it('renders distinct rate limit banner on provider_rate_limited', () => {
+    const failedStatus: BlueprintStatus = {
+      ...mockStatus,
+      sections: [
+        {
+          type: 'workflow',
+          status: 'failed',
+          attempts: 1,
+          error_code: 'provider_rate_limited',
+          updated_at: '2026-09-17T10:02:00Z',
+        },
+      ],
+    };
+
+    vi.spyOn(runnerHook, 'useBlueprintRunner').mockReturnValue({
+      blueprintId: 'bp-123',
+      status: failedStatus,
+      detail: mockDetail,
+      runnerState: 'idle',
+      isLoading: false,
+      isFetching: false,
+      isPolling: false,
+      isStaleLease: false,
+      error: null,
+      start: vi.fn(),
+      stop: vi.fn(),
+      recover: vi.fn(),
+      retrySection: vi.fn(),
+      refresh: vi.fn(),
+    });
+
+    render(<BlueprintProgressView />, {
+      wrapper: createWrapper(),
+    });
+
+    expect(screen.getByText(/Batas Penggunaan AI Terlampaui/i)).toBeTruthy();
+  });
+
+  it('renders prompt error banner with manual completion guidance on prompt_construction_failed without settings link', () => {
+    const failedStatus: BlueprintStatus = {
+      ...mockStatus,
+      sections: [
+        {
+          type: 'state_machine',
+          status: 'failed',
+          attempts: 1,
+          error_code: 'prompt_construction_failed',
+          updated_at: '2026-09-17T10:02:00Z',
+        },
+      ],
+    };
+
+    vi.spyOn(runnerHook, 'useBlueprintRunner').mockReturnValue({
+      blueprintId: 'bp-123',
+      status: failedStatus,
+      detail: mockDetail,
+      runnerState: 'idle',
+      isLoading: false,
+      isFetching: false,
+      isPolling: false,
+      isStaleLease: false,
+      error: null,
+      start: vi.fn(),
+      stop: vi.fn(),
+      recover: vi.fn(),
+      retrySection: vi.fn(),
+      refresh: vi.fn(),
+    });
+
+    render(<BlueprintProgressView />, {
+      wrapper: createWrapper(),
+    });
+
+    expect(screen.getByText(/Gagal Menyusun Prompt Blueprint/i)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /buka pengaturan/i })).toBeNull();
+  });
 });

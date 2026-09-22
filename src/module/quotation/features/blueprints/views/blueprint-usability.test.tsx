@@ -166,8 +166,8 @@ describe('Blueprint Usability, Accessibility & Responsive Guards (6.03-6.05)', (
           type: 'journey',
           status: 'failed',
           attempts: 1,
-          error_code: 'provider_config_missing',
-          error_message: 'AI Provider API key missing',
+          error_code: 'provider_configuration',
+          error_message: 'AI Provider configuration missing',
         },
       ],
       created_at: '2026-09-17T10:00:00Z',
@@ -187,6 +187,86 @@ describe('Blueprint Usability, Accessibility & Responsive Guards (6.03-6.05)', (
     await waitFor(() => {
       expect(screen.getByText(/Konfigurasi AI Provider Belum Diatur/i)).toBeTruthy();
       expect(screen.getByRole('button', { name: /Buka Pengaturan/i })).toBeTruthy();
+    });
+  });
+
+  it('6.05: links provider invalid credential errors directly to settings without crashing', async () => {
+    const bpId = 'bp-provider-cred-err';
+    const mockStatus: BlueprintStatus = {
+      blueprint_id: bpId,
+      revision_id: 'rev-001',
+      title: 'Provider Credential Error Test',
+      generation_status: 'failed',
+      publication_status: 'draft',
+      completeness_status: 'partial',
+      content_version: 1,
+      sections: [
+        {
+          type: 'architecture',
+          status: 'failed',
+          attempts: 1,
+          error_code: 'provider_invalid_credential',
+          error_message: 'Invalid API key',
+        },
+      ],
+      created_at: '2026-09-17T10:00:00Z',
+      updated_at: '2026-09-17T10:01:00Z',
+    };
+
+    vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(mockStatus);
+    vi.spyOn(api, 'getBlueprint').mockResolvedValue({
+      status: mockStatus,
+      quotation_id: 'qtn-001',
+      source_quotation_revision_id: 'rev-001',
+      content_json: {},
+    } as any);
+
+    renderApp([`/blueprint/${bpId}`]);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Kredensial AI Provider Tidak Valid/i)).toBeTruthy();
+      expect(screen.getByRole('button', { name: /Buka Pengaturan/i })).toBeTruthy();
+    });
+  });
+
+  it('6.05: renders availability message and retry action on provider_unavailable without showing missing config banner', async () => {
+    const bpId = 'bp-provider-unavail-err';
+    const mockStatus: BlueprintStatus = {
+      blueprint_id: bpId,
+      revision_id: 'rev-001',
+      title: 'Provider Unavailable Error Test',
+      generation_status: 'failed',
+      publication_status: 'draft',
+      completeness_status: 'partial',
+      content_version: 1,
+      sections: [
+        {
+          type: 'journey',
+          status: 'failed',
+          attempts: 1,
+          error_code: 'provider_unavailable',
+          error_message: 'AI provider service is temporarily unavailable',
+        },
+      ],
+      created_at: '2026-09-17T10:00:00Z',
+      updated_at: '2026-09-17T10:01:00Z',
+    };
+
+    vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(mockStatus);
+    vi.spyOn(api, 'getBlueprint').mockResolvedValue({
+      status: mockStatus,
+      quotation_id: 'qtn-001',
+      source_quotation_revision_id: 'rev-001',
+      content_json: {},
+    } as any);
+
+    renderApp([`/blueprint/${bpId}`]);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Layanan AI Provider Tidak Tersedia/i)).toBeTruthy();
+      expect(screen.queryByText(/Konfigurasi AI Provider Belum Diatur/i)).toBeNull();
+      expect(screen.queryByRole('button', { name: /Buka Pengaturan/i })).toBeNull();
+      expect(screen.getAllByRole('button', { name: /Coba Lagi/i }).length).toBeGreaterThanOrEqual(1);
     });
   });
 
