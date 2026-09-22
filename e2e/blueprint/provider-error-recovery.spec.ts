@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
-import type { BlueprintStatus, QASession } from './fixtures';
+import type { BlueprintStatus } from '../../src/module/quotation/features/blueprints/types';
+import type { QASession } from './fixtures';
 
 import { test, expect } from '@playwright/test';
 
