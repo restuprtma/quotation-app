@@ -306,12 +306,12 @@ describe('Blueprint End-to-End Flow Integration', () => {
     // 7. Verify failure on journey section occurs and "Coba Lagi" button appears
     await waitFor(() => {
       expect(screen.getByText('RATE_LIMIT')).toBeTruthy();
-      expect(screen.getByRole('button', { name: /Coba Lagi/i })).toBeTruthy();
+      expect(screen.getAllByRole('button', { name: /Coba Lagi/i }).length).toBeGreaterThanOrEqual(1);
     });
 
     // 8. Click "Coba Lagi" (Retry)
-    const retryBtn = screen.getByRole('button', { name: /Coba Lagi/i });
-    fireEvent.click(retryBtn);
+    const retryBtns = screen.getAllByRole('button', { name: /Coba Lagi/i });
+    fireEvent.click(retryBtns[0]);
 
     // 9. Click "Lanjutkan Generasi" once available
     await waitFor(() => {

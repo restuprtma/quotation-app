@@ -1,4 +1,4 @@
-import type { BlueprintDetail, BlueprintStatus, ProviderSection } from '../types';
+import type { BlueprintDetail, BlueprintStatus, ProviderSection, BlueprintRunnerError } from '../types';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRef, useMemo, useState, useEffect, useCallback } from 'react';
@@ -24,12 +24,82 @@ export interface UseBlueprintRunnerReturn {
   isFetching: boolean;
   isPolling: boolean;
   isStaleLease: boolean;
-  error: Error | null;
+  error: BlueprintRunnerError | null;
   start: () => Promise<void>;
   stop: () => void;
   recover: () => Promise<void>;
   retrySection: (section: ProviderSection) => Promise<void>;
   refresh: () => Promise<void>;
+}
+
+export function normalizeBlueprintRunnerError(
+  err: unknown,
+  fallbackSection: ProviderSection | null = null
+): BlueprintRunnerError {
+  if (!err) {
+    return {
+      code: null,
+      httpStatus: null,
+      section: fallbackSection,
+      message: 'Unknown error occurred',
+    };
+  }
+
+  const anyErr = err as any;
+
+  if (
+    typeof anyErr === 'object' &&
+    'code' in anyErr &&
+    'httpStatus' in anyErr &&
+    'section' in anyErr &&
+    'message' in anyErr
+  ) {
+    return anyErr as BlueprintRunnerError;
+  }
+
+  const response = anyErr?.response;
+  const httpStatus = typeof response?.status === 'number' ? response.status : null;
+
+  let code: string | null = null;
+  const dataErrors = response?.data?.errors;
+  const dataErrorCode = response?.data?.error_code;
+  const dataCode = response?.data?.code;
+
+  if (typeof dataErrors === 'string' && dataErrors.trim().length > 0) {
+    code = dataErrors.trim();
+  } else if (typeof dataErrorCode === 'string' && dataErrorCode.trim().length > 0) {
+    code = dataErrorCode.trim();
+  } else if (typeof dataCode === 'string' && dataCode.trim().length > 0) {
+    code = dataCode.trim();
+  } else if (typeof anyErr?.code === 'string' && anyErr.code && !anyErr.code.startsWith('ERR_')) {
+    code = anyErr.code;
+  }
+
+  let section: ProviderSection | null = fallbackSection;
+  const dataSection = response?.data?.section || anyErr?.section;
+  if (
+    dataSection === 'journey' ||
+    dataSection === 'architecture' ||
+    dataSection === 'state_machine' ||
+    dataSection === 'workflow' ||
+    dataSection === 'wbs'
+  ) {
+    section = dataSection;
+  }
+
+  let message = 'Terjadi kesalahan saat memproses blueprint.';
+  if (typeof response?.data?.message === 'string' && response.data.message.trim().length > 0) {
+    message = response.data.message.trim();
+  } else if (typeof anyErr?.message === 'string' && anyErr.message.trim().length > 0) {
+    message = anyErr.message.trim();
+  }
+
+  return {
+    code,
+    httpStatus,
+    section,
+    message,
+  };
 }
 
 const DEFAULT_POLLING_INTERVAL = 2000;
@@ -50,7 +120,7 @@ export function useBlueprintRunner(
   const queryClient = useQueryClient();
 
   const [internalState, setInternalState] = useState<BlueprintRunnerState>('idle');
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<BlueprintRunnerError | null>(null);
 
   const isLoopRunningRef = useRef<boolean>(false);
   const inFlightRef = useRef<boolean>(false);
@@ -60,6 +130,23 @@ export function useBlueprintRunner(
   const companyRef = useRef<string>(companyId);
 
   companyRef.current = companyId;
+
+  // Reset errors and internal lifecycle state on tenant/blueprint identity change
+  const prevIdentityRef = useRef<{ companyId: string; blueprintId?: string | null }>({
+    companyId,
+    blueprintId,
+  });
+
+  useEffect(() => {
+    if (
+      prevIdentityRef.current.companyId !== companyId ||
+      prevIdentityRef.current.blueprintId !== blueprintId
+    ) {
+      prevIdentityRef.current = { companyId, blueprintId };
+      setError(null);
+      setInternalState('idle');
+    }
+  }, [companyId, blueprintId]);
 
   useEffect(() => {
     isUnmountedRef.current = false;
@@ -139,6 +226,59 @@ export function useBlueprintRunner(
 
   const status = statusQuery.data;
   const detail = detailQuery.data;
+
+  // Stale error clearance when incoming authoritative state proves resolution
+  const prevStatusRef = useRef<BlueprintStatus | undefined>(status);
+
+  useEffect(() => {
+    if (!status) return;
+    const prev = prevStatusRef.current;
+    prevStatusRef.current = status;
+
+    if (!error) return;
+
+    // Revision changed -> clear error
+    if (prev && prev.revision_id !== status.revision_id) {
+      setError(null);
+      return;
+    }
+
+    // Specific failed section is now validated or completed -> clear error
+    if (error.section) {
+      const sec = status.sections?.find((s) => s.type === error.section);
+      if (sec && (sec.status === 'validated' || sec.status === 'completed')) {
+        setError(null);
+        return;
+      }
+    }
+
+    // Pipeline reached completed state -> clear error
+    if (status.generation_status === 'completed') {
+      setError(null);
+      return;
+    }
+
+    // Content version increased
+    if (prev && status.content_version > prev.content_version) {
+      if (error.section) {
+        const sec = status.sections?.find((s) => s.type === error.section);
+        if (sec && sec.status !== 'failed') {
+          setError(null);
+          return;
+        }
+      } else {
+        const hasFailedSection = status.sections?.some((s) => s.status === 'failed');
+        if (
+          !hasFailedSection &&
+          status.generation_status !== 'failed' &&
+          status.generation_status !== 'partial_failed'
+        ) {
+          setError(null);
+          return;
+        }
+      }
+    }
+  }, [status, error]);
 
   const isTerminal =
     status?.generation_status === 'completed' ||
@@ -267,10 +407,11 @@ export function useBlueprintRunner(
             break;
           }
 
+          let latestStatus: BlueprintStatus | undefined;
           // After error or timeout: GET status first, DO NOT retry mutation automatically
           try {
-            const fetched = await getBlueprintStatus(blueprintId);
-            safeUpdateStatusCache(fetched);
+            latestStatus = await getBlueprintStatus(blueprintId);
+            safeUpdateStatusCache(latestStatus);
           } catch {
             // ignore status query failure
           }
@@ -288,7 +429,16 @@ export function useBlueprintRunner(
             break;
           }
 
-          setError(err instanceof Error ? err : new Error(String(err)));
+          const failedSec = (latestStatus ?? queryClient.getQueryData<BlueprintStatus>(statusQueryKey))
+            ?.sections?.find((s) => s.status === 'failed');
+          const section: ProviderSection | null =
+            failedSec &&
+            failedSec.type !== 'context' &&
+            failedSec.type !== 'cross_validation'
+              ? (failedSec.type as ProviderSection)
+              : null;
+
+          setError(normalizeBlueprintRunnerError(err, section));
           setInternalState('idle');
           break;
         }
@@ -333,6 +483,7 @@ export function useBlueprintRunner(
       } else {
         setInternalState('idle');
       }
+      setError(null);
     } catch (err: any) {
       // After error / recovery_required: refetch status & detail
       try {
@@ -343,7 +494,7 @@ export function useBlueprintRunner(
         // ignore
       }
       setInternalState('recovery');
-      setError(err instanceof Error ? err : new Error(String(err)));
+      setError(normalizeBlueprintRunnerError(err, null));
     } finally {
       inFlightRef.current = false;
     }
@@ -360,6 +511,7 @@ export function useBlueprintRunner(
         setInternalState('idle');
         safeUpdateStatusCache(updated);
         await queryClient.invalidateQueries({ queryKey: detailQueryKey });
+        setError(null);
       } catch (err: any) {
         try {
           const latestStatus = await getBlueprintStatus(blueprintId);
@@ -367,7 +519,7 @@ export function useBlueprintRunner(
         } catch {
           // ignore
         }
-        setError(err instanceof Error ? err : new Error(String(err)));
+        setError(normalizeBlueprintRunnerError(err, section));
       } finally {
         inFlightRef.current = false;
       }
@@ -377,8 +529,48 @@ export function useBlueprintRunner(
 
   const refresh = useCallback(async () => {
     if (!blueprintId) return;
-    await Promise.all([statusQuery.refetch(), detailQuery.refetch()]);
+    try {
+      const [statusRes, detailRes] = await Promise.all([
+        statusQuery.refetch(),
+        detailQuery.refetch(),
+      ]);
+      if (statusRes.isSuccess && detailRes.isSuccess) {
+        setError(null);
+      }
+    } catch {
+      // Keep existing error if refresh fails
+    }
   }, [blueprintId, statusQuery, detailQuery]);
+
+  const activeError = useMemo(() => {
+    if (!error) {
+      const queryError = statusQuery.error || detailQuery.error;
+      return queryError ? normalizeBlueprintRunnerError(queryError, null) : null;
+    }
+
+    // Check if current status proves error is resolved
+    if (status) {
+      if (error.section) {
+        const sec = status.sections?.find((s) => s.type === error.section);
+        if (sec && (sec.status === 'validated' || sec.status === 'completed')) {
+          return null;
+        }
+      }
+      if (status.generation_status === 'completed') {
+        return null;
+      }
+      if (prevStatusRef.current && status.content_version > prevStatusRef.current.content_version) {
+        if (error.section) {
+          const sec = status.sections?.find((s) => s.type === error.section);
+          if (sec && sec.status !== 'failed') {
+            return null;
+          }
+        }
+      }
+    }
+
+    return error;
+  }, [error, status, statusQuery.error, detailQuery.error]);
 
   return {
     blueprintId,
@@ -389,7 +581,7 @@ export function useBlueprintRunner(
     isFetching: statusQuery.isFetching || detailQuery.isFetching,
     isPolling,
     isStaleLease,
-    error: error || statusQuery.error || detailQuery.error || null,
+    error: activeError,
     start,
     stop,
     recover,

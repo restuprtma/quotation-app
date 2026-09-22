@@ -738,4 +738,211 @@ describe('useBlueprintRunner', () => {
       expect(detailSpy).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('Task 5: Structured Runner Errors and Stale State Clearance', () => {
+    it('preserves code=provider_unavailable and httpStatus=503 from response errors without guessing', async () => {
+      const error503 = {
+        response: {
+          status: 503,
+          data: {
+            errors: 'provider_unavailable',
+            message: 'Layanan AI Provider sedang mengalami gangguan',
+          },
+        },
+      };
+
+      vi.spyOn(api, 'continueBlueprint').mockRejectedValueOnce(error503);
+      vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(mockStatus);
+
+      const { wrapper } = createWrapper();
+      const { result } = renderHook(() => useBlueprintRunner('bp-123'), { wrapper });
+
+      await waitFor(() => expect(result.current.status).toBeDefined());
+
+      await act(async () => {
+        await result.current.start();
+      });
+
+      expect(result.current.error).toEqual({
+        code: 'provider_unavailable',
+        httpStatus: 503,
+        section: null,
+        message: 'Layanan AI Provider sedang mengalami gangguan',
+      });
+    });
+
+    it('successful refresh clears a prior local mutation error', async () => {
+      const error500 = {
+        response: {
+          status: 500,
+          data: {
+            errors: 'internal_error',
+            message: 'Internal server error',
+          },
+        },
+      };
+
+      vi.spyOn(api, 'continueBlueprint').mockRejectedValueOnce(error500);
+      vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(mockStatus);
+      vi.spyOn(api, 'getBlueprint').mockResolvedValue(mockDetail);
+
+      const { wrapper } = createWrapper();
+      const { result } = renderHook(() => useBlueprintRunner('bp-123'), { wrapper });
+
+      await waitFor(() => expect(result.current.status).toBeDefined());
+
+      await act(async () => {
+        await result.current.start();
+      });
+
+      expect(result.current.error).not.toBeNull();
+      expect(result.current.error?.code).toBe('internal_error');
+
+      // Trigger successful refresh
+      await act(async () => {
+        await result.current.refresh();
+      });
+
+      expect(result.current.error).toBeNull();
+    });
+
+    it('a higher content_version with the previously failed section now validated clears the obsolete error', async () => {
+      const errorSection = {
+        response: {
+          status: 500,
+          data: {
+            errors: 'provider_timeout',
+            message: 'Timeout processing section',
+          },
+        },
+      };
+
+      vi.spyOn(api, 'retryBlueprintSection').mockRejectedValueOnce(errorSection);
+
+      const { wrapper, queryClient } = createWrapper();
+      const { result } = renderHook(() => useBlueprintRunner('bp-123'), { wrapper });
+
+      await waitFor(() => expect(result.current.status).toBeDefined());
+
+      // Retry journey section fails
+      await act(async () => {
+        await result.current.retrySection('journey');
+      });
+
+      expect(result.current.error).toEqual({
+        code: 'provider_timeout',
+        httpStatus: 500,
+        section: 'journey',
+        message: 'Timeout processing section',
+      });
+
+      // Routine poll with SAME content_version and still in failed status does NOT clear error
+      act(() => {
+        queryClient.setQueryData(['blueprints', 'company-1', 'status', 'bp-123'], {
+          ...mockStatus,
+          content_version: 1,
+          sections: mockStatus.sections.map((s) =>
+            s.type === 'journey' ? { ...s, status: 'failed' } : s
+          ),
+        });
+      });
+
+      expect(result.current.error).not.toBeNull();
+      expect(result.current.error?.code).toBe('provider_timeout');
+
+      // Authoritative update arrives with higher content_version and journey is now validated
+      act(() => {
+        queryClient.setQueryData(['blueprints', 'company-1', 'status', 'bp-123'], {
+          ...mockStatus,
+          content_version: 2,
+          sections: mockStatus.sections.map((s) =>
+            s.type === 'journey' ? { ...s, status: 'validated' } : s
+          ),
+        });
+      });
+
+      await waitFor(() => expect(result.current.error).toBeNull());
+    });
+
+    it('a failed refresh does not hide the active error', async () => {
+      const error500 = {
+        response: {
+          status: 500,
+          data: {
+            errors: 'provider_unavailable',
+            message: 'Provider down',
+          },
+        },
+      };
+
+      vi.spyOn(api, 'continueBlueprint').mockRejectedValueOnce(error500);
+      vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(mockStatus);
+
+      const { wrapper } = createWrapper();
+      const { result } = renderHook(() => useBlueprintRunner('bp-123'), { wrapper });
+
+      await waitFor(() => expect(result.current.status).toBeDefined());
+
+      await act(async () => {
+        await result.current.start();
+      });
+
+      expect(result.current.error?.code).toBe('provider_unavailable');
+
+      // Now mock getBlueprintStatus to fail on refresh
+      vi.spyOn(api, 'getBlueprintStatus').mockRejectedValueOnce(new Error('Network drop'));
+
+      await act(async () => {
+        await result.current.refresh().catch(() => {});
+      });
+
+      // Active error must not be hidden (must not become null)
+      expect(result.current.error).not.toBeNull();
+    });
+
+    it('company or revision change resets error from previous identity', async () => {
+      const error500 = {
+        response: {
+          status: 500,
+          data: {
+            errors: 'provider_unavailable',
+            message: 'Error for tenant 1',
+          },
+        },
+      };
+
+      vi.spyOn(api, 'continueBlueprint').mockRejectedValueOnce(error500);
+      vi.spyOn(api, 'getBlueprintStatus').mockResolvedValue(mockStatus);
+
+      const { wrapper } = createWrapper();
+      let bpId = 'bp-123';
+      const { result, rerender } = renderHook(() => useBlueprintRunner(bpId), { wrapper });
+
+      await waitFor(() => expect(result.current.status).toBeDefined());
+
+      await act(async () => {
+        await result.current.start();
+      });
+
+      expect(result.current.error).not.toBeNull();
+
+      // Change company tenant
+      mockCompanyContext.company = { id: 'company-2', name: 'Company 2' };
+      rerender();
+
+      expect(result.current.error).toBeNull();
+
+      // Now induce error on company-2, then switch blueprintId
+      vi.spyOn(api, 'continueBlueprint').mockRejectedValueOnce(error500);
+      await act(async () => {
+        await result.current.start();
+      });
+      expect(result.current.error).not.toBeNull();
+
+      bpId = 'bp-456';
+      rerender();
+
+      expect(result.current.error).toBeNull();
+    });
+  });
 });

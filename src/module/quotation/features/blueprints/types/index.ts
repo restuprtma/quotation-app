@@ -4,6 +4,13 @@ export type ProviderSection = 'journey' | 'architecture' | 'state_machine' | 'wo
 
 export type SectionType = 'context' | ProviderSection | 'cross_validation';
 
+export type BlueprintRunnerError = {
+  code: string | null;
+  httpStatus: number | null;
+  section: ProviderSection | null;
+  message: string;
+};
+
 export type GenerationStatus =
   | 'pending'
   | 'in_progress'

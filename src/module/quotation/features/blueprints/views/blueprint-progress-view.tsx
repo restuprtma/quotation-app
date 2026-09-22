@@ -174,11 +174,11 @@ export function BlueprintProgressView({
       ? (failedSection.type as ProviderSection)
       : null;
 
+  const canRetryFailedSection = failedProviderSection && (failedSection?.attempts ?? 0) < 3;
+  const canManualFailedSection = Boolean(failedProviderSection);
+
   const errorCode =
-    (error as any)?.code ||
-    (error as any)?.response?.data?.error_code ||
-    (error as any)?.response?.data?.code ||
-    (error as any)?.response?.data?.errors ||
+    error?.code ||
     (failedSection as any)?.safe_error_code ||
     failedSection?.error_code ||
     (typeof error?.message === 'string' && !error.message.includes(' ') ? error.message : null);
@@ -258,24 +258,24 @@ export function BlueprintProgressView({
                 >
                   Buka Pengaturan
                 </Button>
-              ) : activeErrorPresentation.action === 'retry' && failedProviderSection ? (
+              ) : activeErrorPresentation.action === 'retry' && canRetryFailedSection ? (
                 !isCompact ? (
                   <Button
                     color="inherit"
                     size="small"
                     variant="outlined"
-                    onClick={() => handleRetrySection(failedProviderSection)}
+                    onClick={() => handleRetrySection(failedProviderSection!)}
                   >
                     Coba Lagi
                   </Button>
                 ) : undefined
-              ) : activeErrorPresentation.action === 'manual' && failedProviderSection ? (
+              ) : activeErrorPresentation.action === 'manual' && canManualFailedSection ? (
                 !isCompact ? (
                   <Button
                     color="inherit"
                     size="small"
                     variant="outlined"
-                    onClick={() => handleOpenManual(failedProviderSection)}
+                    onClick={() => handleOpenManual(failedProviderSection!)}
                   >
                     Lengkapi Manual
                   </Button>
