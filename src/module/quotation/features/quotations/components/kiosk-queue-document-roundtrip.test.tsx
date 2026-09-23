@@ -8,10 +8,7 @@ import { it, expect, describe } from 'vitest';
 
 import { wrapOfficialDocument } from './quotation-editor';
 import { QuotationHeaderExtensions } from './quotation-header-extension';
-import {
-  buildCanonicalHeaderHTML,
-  normalizeQuotationHeaderHTML,
-} from './quotation-header-normalizer';
+import { normalizeQuotationHeaderHTML } from './quotation-header-normalizer';
 import {
   QuotationFieldMark,
   LegalBlockExtension,
