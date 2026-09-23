@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
-import { describe, it, expect } from 'vitest';
+import { it, expect, describe } from 'vitest';
+
 import { normalizeQuotationHeaderHTML } from './quotation-header-normalizer';
 
 const CANONICAL_HEADER_HTML = `<section data-block-type="metadata">

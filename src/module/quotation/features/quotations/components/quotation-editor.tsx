@@ -3,9 +3,9 @@ import type { JSONContent } from '@tiptap/core';
 import Link from '@tiptap/extension-link';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
-import { useRef, useState, useEffect, useMemo } from 'react';
 import TextAlign from '@tiptap/extension-text-align';
 import { useEditor, EditorContent } from '@tiptap/react';
+import { useRef, useMemo, useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 
@@ -14,6 +14,8 @@ import { EditorToolbar } from './editor-toolbar';
 import { DocumentCanvas } from './document-canvas';
 import { TableGripOverlay } from './table-grip-overlay';
 import { EditorContextMenu } from './editor-context-menu';
+import { QuotationHeaderExtensions } from './quotation-header-extension';
+import { normalizeQuotationHeaderHTML } from './quotation-header-normalizer';
 import {
   QuotationFieldMark,
   LegalBlockExtension,
@@ -25,8 +27,6 @@ import {
   QuotationTableHeaderExtension,
   QuotationFieldAttributesExtension,
 } from './legal-block-extension';
-import { QuotationHeaderExtensions } from './quotation-header-extension';
-import { normalizeQuotationHeaderHTML } from './quotation-header-normalizer';
 
 type Props = {
   content: string;

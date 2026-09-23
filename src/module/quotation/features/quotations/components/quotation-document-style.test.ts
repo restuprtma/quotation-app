@@ -7,6 +7,7 @@ const stylesheet = readFileSync(
 ).replace(/\s+/g, ' ');
 
 const canvasSource = readFileSync(new URL('./document-canvas.tsx', import.meta.url), 'utf8');
+const editorSource = readFileSync(new URL('./quotation-editor.tsx', import.meta.url), 'utf8');
 const standaloneStyles = readFileSync(
   new URL('../styles/standalone-maintenance-document.css', import.meta.url),
   'utf8'
@@ -89,5 +90,11 @@ describe('quotation document table style contract', () => {
     expect(headerStyles).not.toContain("content: 'Kepada'");
     expect(headerStyles).not.toContain("content: 'Yth. '");
     expect(headerStyles).not.toContain('0 1 0 1');
+  });
+
+  it('keeps persisted metadata as the only rendered header', () => {
+    expect(editorSource).not.toContain('QuotationDocumentHeader');
+    expect(editorSource).not.toContain('parseQuotationDocumentHeader');
+    expect(headerStyles).not.toContain('display: none');
   });
 });
