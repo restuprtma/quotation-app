@@ -7,6 +7,11 @@ import StarterKit from '@tiptap/starter-kit';
 import { it, expect, describe } from 'vitest';
 
 import { wrapOfficialDocument } from './quotation-editor';
+import { QuotationHeaderExtensions } from './quotation-header-extension';
+import {
+  buildCanonicalHeaderHTML,
+  normalizeQuotationHeaderHTML,
+} from './quotation-header-normalizer';
 import {
   QuotationFieldMark,
   LegalBlockExtension,
@@ -139,6 +144,7 @@ function makeEditor(content: string | JSONContent, options = { unlocked: false }
       QuotationTableHeaderExtension,
       QuotationTableCellExtension,
       LegalBlockExtension.configure({ unlocked: options.unlocked }),
+      ...QuotationHeaderExtensions,
     ],
     content,
   });
@@ -224,5 +230,66 @@ describe('kiosk queue document round-trip', () => {
     expect(wrapped).toBe(
       '<article class="quotation-document"><section data-block-type="commercial"><p>Draft</p></section></article>'
     );
+  });
+
+  it('preserves all non-metadata sections identically before and after header edits on normalized legacy html', () => {
+    // Legacy HTML normalized to canonical
+    const normalizedHtml = normalizeQuotationHeaderHTML(kioskQueueGovernmentHtml);
+    const editor = makeEditor(normalizedHtml);
+
+    const getNonMetadataSnapshot = (ed: Editor) => {
+      const json = ed.getJSON();
+      const sections = (json.content ?? []).filter((node) =>
+        ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
+        node.attrs?.['data-block-type'] !== 'metadata'
+      );
+      return JSON.stringify(sections);
+    };
+
+    const nonMetadataBefore = getNonMetadataSnapshot(editor);
+
+    // Edit header fields
+    let numPos = -1;
+    let numSize = 0;
+    let sysPos = -1;
+    let sysSize = 0;
+
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'quotationMetadataRow' && node.attrs.field === 'quotation_number') {
+        numPos = pos + 1;
+        numSize = node.nodeSize - 2;
+      }
+      if (node.type.name === 'quotationMetadataRow' && node.attrs.field === 'system_name') {
+        sysPos = pos + 1;
+        sysSize = node.nodeSize - 2;
+      }
+    });
+
+    expect(numPos).toBeGreaterThan(0);
+    expect(sysPos).toBeGreaterThan(0);
+
+    editor.commands.insertContentAt({ from: numPos, to: numPos + numSize }, 'LANDA/MPP-Antrian/0726/003-REV');
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'quotationMetadataRow' && node.attrs.field === 'system_name') {
+        sysPos = pos + 1;
+        sysSize = node.nodeSize - 2;
+      }
+    });
+    editor.commands.insertContentAt({ from: sysPos, to: sysPos + sysSize }, 'Sistem Antrian MPP V2');
+
+    const nonMetadataAfter = getNonMetadataSnapshot(editor);
+    expect(nonMetadataAfter).toBe(nonMetadataBefore);
+
+    const serialized = editor.getHTML();
+    expect(serialized).toContain('LANDA/MPP-Antrian/0726/003-REV');
+    expect(serialized).toContain('Sistem Antrian MPP V2');
+    expect(serialized).toContain('data-role="hardware_cost_table"');
+    expect(serialized).toContain('data-role="service_cost_table"');
+    expect(serialized).toContain('Rp 51.615.000');
+    expect(serialized).toContain('Rp 48.385.000');
+    expect(serialized).toContain('Rp 100.000.000');
+    expect(serialized).toContain('Pekerjaan fisik dan sipil bukan tanggung jawab Venturo.');
+
+    editor.destroy();
   });
 });

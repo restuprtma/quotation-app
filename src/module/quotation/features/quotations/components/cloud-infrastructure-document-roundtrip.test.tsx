@@ -5,6 +5,11 @@ import StarterKit from '@tiptap/starter-kit';
 import { it, expect, describe } from 'vitest';
 
 import { wrapOfficialDocument } from './quotation-editor';
+import { QuotationHeaderExtensions } from './quotation-header-extension';
+import {
+  buildCanonicalHeaderHTML,
+  normalizeQuotationHeaderHTML,
+} from './quotation-header-normalizer';
 import {
   QuotationFieldMark,
   LegalBlockExtension,
@@ -41,6 +46,7 @@ function makeEditor(content: string) {
       QuotationTableHeaderExtension,
       QuotationTableCellExtension,
       LegalBlockExtension.configure({ unlocked: false }),
+      ...QuotationHeaderExtensions,
     ],
     content,
   });
@@ -71,5 +77,83 @@ describe('cloud infrastructure document round-trip', () => {
     expect(saved).toContain('production-ready staging environment');
     expect(saved).toContain('data-limitation-code="scope_change"');
     expect(saved).toContain('data-section-code="limitations"');
+  });
+
+  it('preserves all non-metadata sections identically before and after header edits on cloud document', () => {
+    const canonicalHeader = buildCanonicalHeaderHTML({
+      title: 'PENAWARAN LAYANAN CLOUD INFRASTRUCTURE',
+      quotationNumber: 'CLOUD/2026/001',
+      subject: 'Layanan Managed Kubernetes Cloud',
+      issueDate: '23 September 2026',
+      clientPic: 'Bpk. Ridwan',
+      clientCompany: 'PT Cloud Solutions Indo',
+    });
+
+    const docHTML = `<article class="quotation-document quotation-document--cloud-infrastructure" data-service="cloud_infrastructure">
+      ${canonicalHeader}
+      <section data-block-type="commercial" data-section-code="cloud_cost" data-section-number="1"><h2>1. Biaya Venturo Cloud</h2><table><tbody>
+        <tr data-cloud-package-row="0"><td data-cloud-package-field="name">Virtual Machine Small - Kube Master</td><td data-cloud-package-field="unit_rate">Rp 900.000</td><td data-cloud-package-field="line_total">Rp 900.000</td></tr>
+        <tr data-cloud-total-row="monthly"><th colspan="2">Subtotal Bulanan</th><td data-cloud-field="monthly_subtotal">Rp 900.000</td></tr>
+      </tbody></table></section>
+      <section data-block-type="narrative" data-section-code="scope_timeline" data-section-number="2"><h2>2. Lingkup Pekerjaan &amp; Timeline</h2><table><tbody><tr data-cloud-scope-row="0"><td><h3>Performance Test</h3></td><td data-cloud-scope-field="timeline">2 Minggu</td></tr></tbody></table></section>
+      <section data-block-type="commercial" data-section-code="payment" data-section-number="3"><h2>3. Pembayaran</h2><table><tbody><tr data-cloud-payment-row="0" data-cloud-payment-component="monthly_service"><td>Bulan 1</td><td data-cloud-field="payment_nominal_0">Rp 900.000</td></tr></tbody></table></section>
+      <section data-block-type="legal" data-section-code="limitations" data-section-number="4"><h2>4. Batasan dan Pengecualian</h2><ol><li data-limitation-code="scope_change">Perubahan scope memerlukan persetujuan.</li></ol></section>
+    </article>`;
+
+    const editor = makeEditor(docHTML);
+
+    const getNonMetadataSnapshot = (ed: Editor) => {
+      const json = ed.getJSON();
+      const sections = (json.content ?? []).filter((node) =>
+        ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
+        node.attrs?.['data-block-type'] !== 'metadata'
+      );
+      return JSON.stringify(sections);
+    };
+
+    const nonMetadataBefore = getNonMetadataSnapshot(editor);
+
+    // Edit header fields
+    let numPos = -1;
+    let numSize = 0;
+    let subPos = -1;
+    let subSize = 0;
+
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'quotationMetadataRow' && node.attrs.field === 'quotation_number') {
+        numPos = pos + 1;
+        numSize = node.nodeSize - 2;
+      }
+      if (node.type.name === 'quotationMetadataRow' && node.attrs.field === 'subject') {
+        subPos = pos + 1;
+        subSize = node.nodeSize - 2;
+      }
+    });
+
+    expect(numPos).toBeGreaterThan(0);
+    expect(subPos).toBeGreaterThan(0);
+
+    editor.commands.insertContentAt({ from: numPos, to: numPos + numSize }, 'CLOUD/2026/REVISED/999');
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'quotationMetadataRow' && node.attrs.field === 'subject') {
+        subPos = pos + 1;
+        subSize = node.nodeSize - 2;
+      }
+    });
+    editor.commands.insertContentAt({ from: subPos, to: subPos + subSize }, 'Layanan Cloud Kubernetes Enterprise HA');
+
+    const nonMetadataAfter = getNonMetadataSnapshot(editor);
+    expect(nonMetadataAfter).toBe(nonMetadataBefore);
+
+    const serialized = wrapOfficialDocument(editor.getHTML());
+    expect(serialized).toContain('CLOUD/2026/REVISED/999');
+    expect(serialized).toContain('Layanan Cloud Kubernetes Enterprise HA');
+    expect(serialized).toContain('data-cloud-package-row="0"');
+    expect(serialized).toContain('data-cloud-field="monthly_subtotal"');
+    expect(serialized).toContain('data-cloud-scope-field="timeline"');
+    expect(serialized).toContain('data-cloud-payment-component="monthly_service"');
+    expect(serialized).toContain('data-limitation-code="scope_change"');
+
+    editor.destroy();
   });
 });

@@ -1,3 +1,5 @@
+// @vitest-environment happy-dom
+
 import type { JSONContent } from '@tiptap/core';
 
 import { Editor } from '@tiptap/core';
@@ -5,6 +7,11 @@ import StarterKit from '@tiptap/starter-kit';
 import { it, expect, describe } from 'vitest';
 
 import { wrapOfficialDocument } from './quotation-editor';
+import { QuotationHeaderExtensions } from './quotation-header-extension';
+import {
+  buildCanonicalHeaderHTML,
+  normalizeQuotationHeaderHTML,
+} from './quotation-header-normalizer';
 import {
   QuotationFieldMark,
   LegalBlockExtension,
@@ -394,7 +401,7 @@ const representativeWhiteLabelDocument: JSONContent = {
 };
 
 function createEditor(
-  content: JSONContent = representativeWhiteLabelDocument,
+  content: any = representativeWhiteLabelDocument,
   options = { unlocked: false }
 ) {
   const editor = new Editor({
@@ -408,6 +415,7 @@ function createEditor(
       QuotationTableHeaderExtension,
       QuotationTableCellExtension,
       LegalBlockExtension.configure({ unlocked: options.unlocked }),
+      ...QuotationHeaderExtensions,
     ],
     content,
   });
@@ -628,6 +636,111 @@ describe('white label quotation document round-trip', () => {
     const trLegal = editor.state.tr.insertText('UNLOCKED_LEGAL_EDIT ', legalPosition);
     editor.view.dispatch(trLegal);
     expect(JSON.stringify(editor.getJSON())).toContain('UNLOCKED_LEGAL_EDIT');
+
+    editor.destroy();
+  });
+
+  it('preserves all non-metadata sections identically before and after header edits', () => {
+    const canonicalHeader = buildCanonicalHeaderHTML({
+      title: 'PENAWARAN LAYANAN WHITE LABEL PRODUCT',
+      quotationNumber: 'WL/2026/001',
+      subject: 'Penawaran Lisensi Software POS Minimarket Ponpes',
+      issueDate: '23 September 2026',
+      clientPic: 'Pimpinan Pondok Pesantren',
+      clientCompany: 'Ponpes Modern',
+    });
+
+    const docHTML = `<article class="quotation-document">
+      ${canonicalHeader}
+      <section data-block-type="opening"><p>Melalui penawaran ini, kami menegaskan kesiapan tim IT Profesional kami.</p></section>
+      <section data-block-type="commercial" data-section-number="1">
+        <h2>1. Biaya Lisensi White Label</h2>
+        <table><thead><tr><th>Deskripsi</th><th>Total</th></tr></thead><tbody>
+          <tr data-role="license_core"><td>Lisensi Source Code POS</td><td data-field="license_total">Rp 35.000.000</td></tr>
+        </tbody></table>
+      </section>
+      <section data-block-type="commercial-maintenance-hosting" data-section-number="2">
+        <h2>2. Biaya Maintenance &amp; Server Hosting</h2>
+        <table><thead><tr><th>Layanan</th><th>Total</th></tr></thead><tbody>
+          <tr data-role="maintenance_standard"><td>Maintenance Support 3 Bulan</td><td>Rp 16.170.000</td></tr>
+        </tbody></table>
+      </section>
+      <section data-block-type="scope" data-section-number="3">
+        <h2>3. Ruang Lingkup Fitur</h2>
+        <p>Modul Kasir &amp; POS Minimarket.</p>
+      </section>
+      <section data-block-type="payment" data-section-number="4">
+        <h2>4. Skema Pembayaran</h2>
+        <table><thead><tr><th>Termin</th><th>Nominal</th></tr></thead><tbody>
+          <tr><td>Termin 1 (DP 50%)</td><td>Rp 30.152.500</td></tr>
+        </tbody></table>
+      </section>
+      <section data-block-type="rights" data-section-number="5" data-template-code="quotation-rights-v1">
+        <h2>5. Hak Cipta dan Lisensi</h2>
+        <p>Hak cipta dan kepemilikan kode sumber dialihkan kepada Klien setelah pelunasan.</p>
+      </section>
+      <section data-block-type="legal" data-template-code="quotation-legal-v1">
+        <p>Official legal terms.</p>
+      </section>
+      <section data-block-type="signature">
+        <table class="signature-table"><tbody><tr><td>Yulianto Frandi</td><td>Pimpinan Ponpes</td></tr></tbody></table>
+      </section>
+    </article>`;
+
+    const editor = createEditor(docHTML);
+
+    const getNonMetadataSnapshot = (ed: Editor) => {
+      const json = ed.getJSON();
+      const sections = (json.content ?? []).filter((node) =>
+        ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
+        node.attrs?.['data-block-type'] !== 'metadata'
+      );
+      return JSON.stringify(sections);
+    };
+
+    const nonMetadataBefore = getNonMetadataSnapshot(editor);
+
+    // Edit header fields
+    let numPos = -1;
+    let numSize = 0;
+    let compPos = -1;
+    let compSize = 0;
+
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'quotationMetadataRow' && node.attrs.field === 'quotation_number') {
+        numPos = pos + 1;
+        numSize = node.nodeSize - 2;
+      }
+      if (node.type.name === 'quotationRecipientLine' && node.attrs.field === 'client_company') {
+        compPos = pos + 1;
+        compSize = node.nodeSize - 2;
+      }
+    });
+
+    expect(numPos).toBeGreaterThan(0);
+    expect(compPos).toBeGreaterThan(0);
+
+    editor.commands.insertContentAt({ from: numPos, to: numPos + numSize }, 'WL/2026/REVISED/777');
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'quotationRecipientLine' && node.attrs.field === 'client_company') {
+        compPos = pos + 1;
+        compSize = node.nodeSize - 2;
+      }
+    });
+    editor.commands.insertContentAt({ from: compPos, to: compPos + compSize }, 'Ponpes Modern Al-Hikmah');
+
+    const nonMetadataAfter = getNonMetadataSnapshot(editor);
+    expect(nonMetadataAfter).toBe(nonMetadataBefore);
+
+    const serialized = editor.getHTML();
+    expect(serialized).toContain('WL/2026/REVISED/777');
+    expect(serialized).toContain('Ponpes Modern Al-Hikmah');
+    expect(serialized).toContain('Rp 35.000.000');
+    expect(serialized).toContain('Rp 16.170.000');
+    expect(serialized).toContain('Modul Kasir &amp; POS Minimarket.');
+    expect(serialized).toContain('Rp 30.152.500');
+    expect(serialized).toContain('Hak cipta dan kepemilikan kode sumber');
+    expect(serialized).toContain('Official legal terms.');
 
     editor.destroy();
   });

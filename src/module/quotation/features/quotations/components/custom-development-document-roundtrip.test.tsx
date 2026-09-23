@@ -1,3 +1,5 @@
+// @vitest-environment happy-dom
+
 import type { JSONContent } from '@tiptap/core';
 
 import { Editor } from '@tiptap/core';
@@ -5,6 +7,11 @@ import StarterKit from '@tiptap/starter-kit';
 import { it, expect, describe } from 'vitest';
 
 import { wrapOfficialDocument } from './quotation-editor';
+import { QuotationHeaderExtensions } from './quotation-header-extension';
+import {
+  buildCanonicalHeaderHTML,
+  normalizeQuotationHeaderHTML,
+} from './quotation-header-normalizer';
 import {
   QuotationFieldMark,
   LegalBlockExtension,
@@ -530,7 +537,7 @@ const representativeCustomDevelopmentDocument: JSONContent = {
 };
 
 function createCustomDevEditor(
-  content: JSONContent = representativeCustomDevelopmentDocument,
+  content: any = representativeCustomDevelopmentDocument,
   options = { unlocked: false }
 ) {
   const editor = new Editor({
@@ -544,6 +551,7 @@ function createCustomDevEditor(
       QuotationTableHeaderExtension,
       QuotationTableCellExtension,
       LegalBlockExtension.configure({ unlocked: options.unlocked }),
+      ...QuotationHeaderExtensions,
     ],
     content,
   });
@@ -819,6 +827,119 @@ describe('custom development quotation document round-trip', () => {
 
     editor.view.dispatch(editor.state.tr.insertText('UNLOCKED_LEGAL_EDIT ', legalPos));
     expect(JSON.stringify(editor.getJSON())).toContain('UNLOCKED_LEGAL_EDIT');
+
+    editor.destroy();
+  });
+
+  it('preserves all non-metadata sections identically before and after header edits', () => {
+    const canonicalHeader = buildCanonicalHeaderHTML({
+      title: 'PENAWARAN LAYANAN CUSTOM SOFTWARE DEVELOPMENT',
+      quotationNumber: 'BENCH-KOPI-STUDIO24',
+      subject: 'Penawaran Sistem Kopi Studio24',
+      issueDate: '23 September 2026',
+      clientPic: 'Bpk. Hendra',
+      clientCompany: 'Kopi Studio24',
+    });
+
+    const docHTML = `<article class="quotation-document">
+      ${canonicalHeader}
+      <section data-block-type="opening"><p>Melalui penawaran ini, kami menegaskan kesiapan tim IT Profesional kami.</p></section>
+      <section data-quotation-section="commercial-development" data-quotation-section-number="1">
+        <h2>1. Biaya Development</h2>
+        <table><thead><tr><th>Deskripsi</th><th>Rate (Monthly)</th><th>SDM</th><th>Period (Month)</th><th>Total</th></tr></thead><tbody>
+          <tr data-role="development_line_0_0"><td>Senior Backend Developer</td><td>Rp 15.000.000</td><td>1</td><td>1</td><td data-quotation-field="development_line_0_0">Rp 15.000.000</td></tr>
+          <tr><td colspan="4">TOTAL INVESTMENT</td><td data-quotation-field="total_investment">Rp 18.000.000</td></tr>
+        </tbody></table>
+      </section>
+      <section data-quotation-section="commercial-monthly" data-quotation-section-number="2">
+        <h2>2. Biaya Monthly</h2>
+        <table><thead><tr><th>Deskripsi</th><th>Total</th></tr></thead><tbody>
+          <tr data-role="monthly_0"><td>Venturo Cloud Mini</td><td data-quotation-field="monthly_line_0">Rp 800.000</td></tr>
+        </tbody></table>
+      </section>
+      <section data-quotation-section="scope" data-quotation-section-number="3">
+        <h2>3. Lingkup Pekerjaan &amp; Timeline</h2>
+        <table><thead><tr><th>Tahap</th><th>Durasi</th></tr></thead><tbody>
+          <tr><td>Design &amp; Architecture</td><td>4 Minggu</td></tr>
+        </tbody></table>
+      </section>
+      <section data-quotation-section="payment" data-quotation-section-number="4">
+        <h2>4. Tahapan Pembayaran</h2>
+        <table><thead><tr><th>Tahap</th><th>Nominal</th></tr></thead><tbody>
+          <tr><td>Termin 1 (DP 50%)</td><td>Rp 9.000.000</td></tr>
+        </tbody></table>
+      </section>
+      <section data-quotation-section="rights" data-quotation-section-number="5" data-template-code="quotation-rights-v1">
+        <h2>5. Hak Cipta dan Lisensi</h2>
+        <p>Hak cipta source code dialihkan setelah pelunasan.</p>
+      </section>
+      <section data-quotation-section="limitations" data-quotation-section-number="6" data-template-code="quotation-limitations-v1">
+        <h2>6. Batasan dan Pengecualian</h2>
+        <p>Pekerjaan di luar lingkup dikenakan biaya terpisah.</p>
+      </section>
+      <section data-quotation-section="legal" data-template-code="quotation-legal-v1">
+        <p>Official legal terms.</p>
+      </section>
+      <section data-quotation-section="signature">
+        <table class="signature-table"><tbody><tr><td>Yulianto Frandi</td><td>Bpk. Hendra</td></tr></tbody></table>
+      </section>
+    </article>`;
+
+    const editor = createCustomDevEditor(docHTML);
+
+    const getNonMetadataSnapshot = (ed: Editor) => {
+      const json = ed.getJSON();
+      const sections = (json.content ?? []).filter((node) =>
+        ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
+        node.attrs?.['data-block-type'] !== 'metadata'
+      );
+      return JSON.stringify(sections);
+    };
+
+    const nonMetadataBefore = getNonMetadataSnapshot(editor);
+
+    // Edit header fields
+    let numPos = -1;
+    let numSize = 0;
+    let compPos = -1;
+    let compSize = 0;
+
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'quotationMetadataRow' && node.attrs.field === 'quotation_number') {
+        numPos = pos + 1;
+        numSize = node.nodeSize - 2;
+      }
+      if (node.type.name === 'quotationRecipientLine' && node.attrs.field === 'client_company') {
+        compPos = pos + 1;
+        compSize = node.nodeSize - 2;
+      }
+    });
+
+    expect(numPos).toBeGreaterThan(0);
+    expect(compPos).toBeGreaterThan(0);
+
+    editor.commands.insertContentAt({ from: numPos, to: numPos + numSize }, 'BENCH-KOPI-REVISED-2026');
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'quotationRecipientLine' && node.attrs.field === 'client_company') {
+        compPos = pos + 1;
+        compSize = node.nodeSize - 2;
+      }
+    });
+    editor.commands.insertContentAt({ from: compPos, to: compPos + compSize }, 'PT Kopi Studio Global');
+
+    const nonMetadataAfter = getNonMetadataSnapshot(editor);
+    expect(nonMetadataAfter).toBe(nonMetadataBefore);
+
+    const serialized = editor.getHTML();
+    expect(serialized).toContain('BENCH-KOPI-REVISED-2026');
+    expect(serialized).toContain('PT Kopi Studio Global');
+    expect(serialized).toContain('Rp 15.000.000');
+    expect(serialized).toContain('Rp 18.000.000');
+    expect(serialized).toContain('Rp 800.000');
+    expect(serialized).toContain('Design &amp; Architecture');
+    expect(serialized).toContain('Rp 9.000.000');
+    expect(serialized).toContain('Hak cipta source code dialihkan setelah pelunasan.');
+    expect(serialized).toContain('Official legal terms.');
 
     editor.destroy();
   });
