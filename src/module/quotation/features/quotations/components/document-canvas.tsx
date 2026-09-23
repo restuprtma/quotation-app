@@ -6,6 +6,7 @@ import '../styles/custom-development-document.css';
 import '../styles/kiosk-queue-document.css';
 import '../styles/talent-outsourcing-document.css';
 import '../styles/cloud-infrastructure-document.css';
+import '../styles/quotation-document-header.css';
 
 import type { ReactNode } from 'react';
 

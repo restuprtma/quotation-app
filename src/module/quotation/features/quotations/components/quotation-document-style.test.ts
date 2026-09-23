@@ -11,6 +11,10 @@ const standaloneStyles = readFileSync(
   new URL('../styles/standalone-maintenance-document.css', import.meta.url),
   'utf8'
 );
+const headerStyles = readFileSync(
+  new URL('../styles/quotation-document-header.css', import.meta.url),
+  'utf8'
+);
 
 describe('quotation document table style contract', () => {
   it('defines the approved teal and white document tokens', () => {
@@ -65,5 +69,25 @@ describe('quotation document table style contract', () => {
   it('removes MUI declarations that would override canonical CSS', () => {
     expect(canvasSource).not.toContain("bgcolor: 'action.hover'");
     expect(canvasSource).not.toContain('p: { xs: 1, sm: 1.5 }');
+  });
+
+  it('loads the header stylesheet and lays out persisted metadata with semantic roles', () => {
+    expect(canvasSource).toContain("import '../styles/quotation-document-header.css';");
+    expect(headerStyles).toContain(
+      ".quotation-document__editor .ProseMirror > [data-block-type='metadata']"
+    );
+    expect(headerStyles).toContain("[data-role='metadata-layout']");
+    expect(headerStyles).toContain("[data-role='metadata-facts']");
+    expect(headerStyles).toContain("[data-role='metadata-row']");
+    expect(headerStyles).toContain("[data-role='metadata-recipient']");
+    expect(headerStyles).toContain('@media print');
+
+    expect(headerStyles).not.toContain(':has(');
+    expect(headerStyles).not.toContain("content: 'No'");
+    expect(headerStyles).not.toContain("content: 'Perihal'");
+    expect(headerStyles).not.toContain("content: 'Tanggal'");
+    expect(headerStyles).not.toContain("content: 'Kepada'");
+    expect(headerStyles).not.toContain("content: 'Yth. '");
+    expect(headerStyles).not.toContain('0 1 0 1');
   });
 });
