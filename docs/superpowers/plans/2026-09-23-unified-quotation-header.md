@@ -1,5 +1,9 @@
 # Unified Quotation Header Implementation Plan
 
+> Superseded on 2026-09-23 by
+> `D:/venturo/Quotation-generator/docs/superpowers/specs/2026-09-23-editable-quotation-header-design.md`.
+> Do not implement the separate React header or binary decoration described below.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Render the Venturo masthead, centered service title, and exact two-column `No`/`Perihal`/`Tanggal`/`Kepada` layout from `docs/snapshots/quotation.png` once at the top of every quotation type.
@@ -62,7 +66,7 @@ Backend modifications:
 - Consumes: existing `QuotationMetadata`.
 - Produces: `renderOfficialQuotationHeader(title string, metadata QuotationMetadata) string`.
 
-- [ ] **Step 1: Write the failing helper test**
+- [x] **Step 1: Write the failing helper test**
 
 ```go
 func TestRenderOfficialQuotationHeader(t *testing.T) {
@@ -79,13 +83,13 @@ func TestRenderOfficialQuotationHeader(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run the test and confirm the missing function**
+- [x] **Step 2: Run the test and confirm the missing function**
 
 Run: `go test ./internal/modules/quotation/service -run TestRenderOfficialQuotationHeader -count=1`
 
 Expected: FAIL with `undefined: renderOfficialQuotationHeader`.
 
-- [ ] **Step 3: Implement the escaped helper**
+- [x] **Step 3: Implement the escaped helper**
 
 ```go
 func renderOfficialQuotationHeader(title string, m QuotationMetadata) string {
@@ -104,7 +108,7 @@ func renderOfficialQuotationHeader(title string, m QuotationMetadata) string {
 
 Import standard-library `html` and `strings`. Empty optional spans are intentional; the frontend omits blank presentation lines.
 
-- [ ] **Step 4: Route all eight renderers through the helper**
+- [x] **Step 4: Route all eight renderers through the helper**
 
 Replace hand-built headers with calls such as:
 
@@ -114,7 +118,7 @@ b.WriteString(renderOfficialQuotationHeader("PENAWARAN LAYANAN DEDICATED PROGRAM
 
 Use the existing official titles for Custom Software Development, Standalone Maintenance & Support, Software Subscription / SaaS, White Label Product, Kiosk & Sistem Antrian, Talent Outsourcing, and Cloud Infrastructure. Preserve dedicated-squad letter-prefix handling before the call. Talent and cloud document inputs already carry `QuotationMetadata`; pass that field to the helper instead of retaining their anonymous or reduced metadata paragraphs.
 
-- [ ] **Step 5: Add shared renderer assertions**
+- [x] **Step 5: Add shared renderer assertions**
 
 ```go
 func assertOfficialHeader(t *testing.T, doc, title string) {
@@ -129,7 +133,7 @@ func assertOfficialHeader(t *testing.T, doc, title string) {
 
 Call it from each renderer's canonical success test.
 
-- [ ] **Step 6: Verify backend service tests**
+- [x] **Step 6: Verify backend service tests**
 
 Run: `go test ./internal/modules/quotation/service -count=1`
 
@@ -152,7 +156,7 @@ git commit -m "feat: normalize quotation document headers"
 - Consumes: quotation `content: string`.
 - Produces: `QuotationDocumentHeaderModel` and `parseQuotationDocumentHeader(content: string)`.
 
-- [ ] **Step 1: Write canonical and legacy parser tests**
+- [x] **Step 1: Write canonical and legacy parser tests**
 
 ```ts
 // @vitest-environment happy-dom
@@ -172,13 +176,13 @@ describe('parseQuotationDocumentHeader', () => {
 });
 ```
 
-- [ ] **Step 2: Run the parser test and confirm it fails**
+- [x] **Step 2: Run the parser test and confirm it fails**
 
 Run: `yarn vitest run src/module/quotation/features/quotations/components/quotation-document-header-model.test.ts`
 
 Expected: FAIL because the module is missing.
 
-- [ ] **Step 3: Implement parser normalization**
+- [x] **Step 3: Implement parser normalization**
 
 ```ts
 export type QuotationDocumentHeaderModel = {
@@ -204,7 +208,7 @@ export function parseQuotationDocumentHeader(content: string): QuotationDocument
 }
 ```
 
-- [ ] **Step 4: Cover all eight titles, missing header, escaping, and long values**
+- [x] **Step 4: Cover all eight titles, missing header, escaping, and long values**
 
 Use `it.each` for the eight titles and explicit empty-string assertions. Do not insert placeholder glyphs into the model.
 
@@ -230,7 +234,7 @@ git commit -m "feat: parse quotation header metadata"
 - Consumes: `{ model: QuotationDocumentHeaderModel }`.
 - Produces: `QuotationDocumentHeader`, a non-interactive React component.
 
-- [ ] **Step 1: Write the failing markup contract test**
+- [x] **Step 1: Write the failing markup contract test**
 
 ```tsx
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -250,17 +254,17 @@ it('renders the official accessible header', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test and confirm the missing component**
+- [x] **Step 2: Run the test and confirm the missing component**
 
 Run: `yarn vitest run src/module/quotation/features/quotations/components/quotation-document-header.test.tsx`
 
 Expected: FAIL because the component is missing.
 
-- [ ] **Step 3: Implement the component**
+- [x] **Step 3: Implement the component**
 
 Use two fixed binary text rows inside an `aria-hidden` element, `<img src="/logo/venturo-logo.png" alt="Venturo — Expert Programmers" />`, a centered `<h1>`, a `<dl>` for left metadata, and `<address>` for `Kepada`. Give each colon its own `.quotation-official-header__colon` span. Render `Yth.` only when `clientPic` exists and omit an empty company line.
 
-- [ ] **Step 4: Implement reference dimensions and theme rules**
+- [x] **Step 4: Implement reference dimensions and theme rules**
 
 ```css
 .quotation-official-header { color: var(--qtr-document-ink); margin: -16px 0 32px; }
@@ -313,7 +317,7 @@ Run: `yarn vitest run src/module/quotation/features/quotations/components/quotat
 
 Expected: FAIL only on missing shared-header integration.
 
-- [ ] **Step 3: Mount the native header before `EditorContent`**
+- [x] **Step 3: Mount the native header before `EditorContent`**
 
 ```tsx
 const headerModel = useMemo(() => parseQuotationDocumentHeader(content), [content]);
@@ -327,7 +331,7 @@ const headerModel = useMemo(() => parseQuotationDocumentHeader(content), [conten
 
 Import `useMemo`, the parser, and component. Never pass the React header into Tiptap.
 
-- [ ] **Step 4: Hide only the editor's persisted duplicate**
+- [x] **Step 4: Hide only the editor's persisted duplicate**
 
 Import `quotation-document-header.css` from `document-canvas.tsx` and add:
 
@@ -340,7 +344,7 @@ Import `quotation-document-header.css` from `document-canvas.tsx` and add:
 
 The legacy selector supports old Talent Outsourcing HTML. Do not hide metadata in non-editor renderers.
 
-- [ ] **Step 5: Run all quotation component tests**
+- [x] **Step 5: Run all quotation component tests**
 
 Run: `yarn vitest run src/module/quotation/features/quotations/components`
 
@@ -363,7 +367,7 @@ git commit -m "feat: render official header above quotation editor"
 - Consumes: completed semantic contract and frontend masthead.
 - Produces: regression coverage and removal of the opaque screenshot.
 
-- [ ] **Step 1: Add browser assertions**
+- [x] **Step 1: Add browser assertions**
 
 ```ts
 const header = page.locator('.quotation-official-header');
@@ -375,6 +379,8 @@ for (const label of ['No', 'Perihal', 'Tanggal', 'Kepada', 'Yth.']) await expect
 
 - [ ] **Step 2: Run the focused E2E scenario**
 
+  Execution note (2026-09-23): the exact `--grep "golden flow"` command found no matching title. Running the spec without the grep reported its four existing scenarios as skipped because the harness remains guarded by `test.describe.skip`; the new header assertions are present in that scaffold.
+
 Run: `yarn playwright test e2e/dedicated-squad-quotation.spec.ts --grep "golden flow"`
 
 Expected: PASS when its existing API/database harness is available. If the suite remains intentionally skipped, record the skip and perform the same assertions manually.
@@ -383,13 +389,13 @@ Expected: PASS when its existing API/database harness is available. If the suite
 
 Run `yarn dev`, open one document per service type at 100% zoom, and compare with `D:/venturo/Quotation-generator/docs/snapshots/quotation.png`. Confirm one header; 240px uncropped logo; centered title of at most two lines; aligned labels/colons; correctly positioned recipient; wrapping without overlap; stacked mobile metadata; subtle dark-theme decoration; and white two-column A4 print output. Adjust only shared CSS measurements and rerun component/style tests after changes.
 
-- [ ] **Step 4: Remove the screenshot asset safely**
+- [x] **Step 4: Remove the screenshot asset safely**
 
 Run: `rg -n -F "QuotationHeader.png" . -g '!node_modules' -g '!.git'`
 
 Expected: no runtime reference. Delete `public/assets/images/QuotationHeader.png`; keep `docs/snapshots/quotation.png` as the acceptance reference.
 
-- [ ] **Step 5: Run complete verification**
+- [x] **Step 5: Run complete verification**
 
 Frontend:
 

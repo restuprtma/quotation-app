@@ -1,5 +1,9 @@
 # Unified Quotation Header Design
 
+> Superseded on 2026-09-23 by
+> `D:/venturo/Quotation-generator/docs/superpowers/specs/2026-09-23-editable-quotation-header-design.md`.
+> Do not implement the separate React header or binary decoration described below.
+
 **Date:** 2026-09-23  
 **Applications:** `quotation-app`, `quotation-api`
 
