@@ -3,7 +3,7 @@ import type { JSONContent } from '@tiptap/core';
 import Link from '@tiptap/extension-link';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import TextAlign from '@tiptap/extension-text-align';
 import { useEditor, EditorContent } from '@tiptap/react';
 
@@ -26,6 +26,7 @@ import {
   QuotationFieldAttributesExtension,
 } from './legal-block-extension';
 import { QuotationHeaderExtensions } from './quotation-header-extension';
+import { normalizeQuotationHeaderHTML } from './quotation-header-normalizer';
 
 type Props = {
   content: string;
@@ -91,7 +92,8 @@ export function QuotationEditor({
   onRestoreOfficial,
   onChange,
 }: Props) {
-  const lastContent = useRef(content);
+  const normalizedContent = useMemo(() => normalizeQuotationHeaderHTML(content), [content]);
+  const lastContent = useRef(normalizedContent);
   const containerRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<{ top: number; left: number } | null>(null);
 
@@ -121,7 +123,7 @@ export function QuotationEditor({
         },
       },
     },
-    content,
+    content: normalizedContent,
     immediatelyRender: false,
     editable: !disabled,
     onUpdate: ({ editor: currentEditor }) =>
@@ -142,10 +144,10 @@ export function QuotationEditor({
   }, [disabled, editor]);
 
   useEffect(() => {
-    if (!editor || content === lastContent.current || content === editor.getHTML()) return;
-    lastContent.current = content;
-    editor.commands.setContent(content, { emitUpdate: false });
-  }, [content, editor]);
+    if (!editor || normalizedContent === lastContent.current || normalizedContent === editor.getHTML()) return;
+    lastContent.current = normalizedContent;
+    editor.commands.setContent(normalizedContent, { emitUpdate: false });
+  }, [normalizedContent, editor]);
 
   if (!editor) return null;
 
