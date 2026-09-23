@@ -126,11 +126,14 @@ export function QuotationEditor({
     content: normalizedContent,
     immediatelyRender: false,
     editable: !disabled,
-    onUpdate: ({ editor: currentEditor }) =>
+    onUpdate: ({ editor: currentEditor }) => {
+      const wrapped = wrapOfficialDocument(currentEditor.getHTML());
+      lastContent.current = wrapped;
       onChange?.({
-        html: wrapOfficialDocument(currentEditor.getHTML()),
+        html: wrapped,
         json: currentEditor.getJSON(),
-      }),
+      });
+    },
   });
 
   useEffect(() => {
@@ -144,7 +147,13 @@ export function QuotationEditor({
   }, [disabled, editor]);
 
   useEffect(() => {
-    if (!editor || normalizedContent === lastContent.current || normalizedContent === editor.getHTML()) return;
+    if (
+      !editor ||
+      normalizedContent === lastContent.current ||
+      normalizedContent === wrapOfficialDocument(editor.getHTML()) ||
+      normalizedContent === editor.getHTML()
+    )
+      return;
     lastContent.current = normalizedContent;
     editor.commands.setContent(normalizedContent, { emitUpdate: false });
   }, [normalizedContent, editor]);

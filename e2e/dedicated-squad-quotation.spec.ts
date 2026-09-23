@@ -236,11 +236,26 @@ async function assertGeneratedQuotation(
   expectedSections: number
 ) {
   const document = page.locator('.quotation-document .ProseMirror');
+  const metadataBlock = document.locator('> [data-block-type="metadata"]');
+  const obsoleteHeader = page.locator('.quotation-official-header');
   await expect(document).toBeVisible();
-  await expect(document.locator('[data-block-type]')).toHaveCount(expectedBlocks.length);
-  await expect(document.locator('[data-block-type="metadata"] h1')).toHaveText(
+  await expect(obsoleteHeader).toHaveCount(0);
+  await expect(metadataBlock).toHaveCount(1);
+  await expect(metadataBlock.locator('[data-role="quotation-brand"] img')).toHaveAttribute(
+    'src',
+    '/logo/venturo-logo.png'
+  );
+  await expect(metadataBlock.locator('h1')).toHaveText(
     'PENAWARAN LAYANAN DEDICATED PROGRAMMER SQUAD'
   );
+  await expect(metadataBlock.locator('[data-role="metadata-layout"]')).toHaveCount(1);
+  for (const label of ['No', 'Perihal', 'Tanggal', 'Kepada', 'Yth.']) {
+    await expect(metadataBlock).toContainText(label);
+  }
+  await expect(document.locator('[data-block-type]')).toHaveCount(expectedBlocks.length);
+
+
+
 
   const blockTypes = await document
     .locator('[data-block-type]')
