@@ -2,8 +2,8 @@ import type { JSONContent } from '@tiptap/core';
 
 import Link from '@tiptap/extension-link';
 import StarterKit from '@tiptap/starter-kit';
-import { useRef, useState, useEffect } from 'react';
 import Underline from '@tiptap/extension-underline';
+import { useRef, useState, useEffect } from 'react';
 import TextAlign from '@tiptap/extension-text-align';
 import { useEditor, EditorContent } from '@tiptap/react';
 
@@ -25,6 +25,7 @@ import {
   QuotationTableHeaderExtension,
   QuotationFieldAttributesExtension,
 } from './legal-block-extension';
+import { QuotationHeaderExtensions } from './quotation-header-extension';
 
 type Props = {
   content: string;
@@ -109,6 +110,7 @@ export function QuotationEditor({
       QuotationTableHeaderExtension,
       QuotationTableCellExtension,
       LegalBlockExtension.configure({ unlocked: isUnlocked }),
+      ...QuotationHeaderExtensions,
     ],
     editorProps: {
       handleDOMEvents: {
