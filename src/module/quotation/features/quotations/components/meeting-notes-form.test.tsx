@@ -3,11 +3,11 @@
 import type { ClientSummary } from '../types';
 import type { QuotationEntryState } from '../types/quotation-entry';
 
+import i18n from 'i18next';
+import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { it, vi, expect, describe, afterEach, beforeEach } from 'vitest';
 import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
 
-import i18n from 'i18next';
-import { initReactI18next, I18nextProvider } from 'react-i18next';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import idQuotation from 'src/locales/langs/id/quotation.json';
@@ -281,5 +281,17 @@ describe('MeetingNotesForm', () => {
     expect(screen.getByText(/Klien belum valid/)).toBeTruthy();
     expect(screen.getByText('budget_missing')).toBeTruthy();
     expect(screen.getByText(/Budget belum diisi/)).toBeTruthy();
+  });
+
+  it('renders backend issues alerts without leading colon when code is empty', () => {
+    renderForm({
+      issues: [
+        { code: '', field: 'notes', message: 'Catatan belum dapat diproses', severity: 'blocking' },
+      ],
+    });
+
+    const alert = screen.getByRole('alert');
+    expect(alert.textContent).toBe('Catatan belum dapat diproses');
+    expect(alert.textContent).not.toContain(':');
   });
 });

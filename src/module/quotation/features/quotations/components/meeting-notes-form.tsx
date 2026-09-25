@@ -3,9 +3,9 @@ import type { DraftIssue } from '../types/prompt-first';
 import type { QuotationEntryState } from '../types/quotation-entry';
 
 import { z } from 'zod';
-import { useRef, useState, useEffect, useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, Controller, useWatch } from 'react-hook-form';
+import { useRef, useMemo, useState, useEffect } from 'react';
+import { useForm, useWatch, Controller } from 'react-hook-form';
 
 import Card from '@mui/material/Card';
 import Alert from '@mui/material/Alert';
@@ -282,7 +282,7 @@ export function MeetingNotesForm({
                 key={`${issue.code}-${issue.field}`}
                 severity={issue.severity === 'blocking' ? 'error' : 'warning'}
               >
-                <strong>{issue.code}</strong>: {issue.message}
+                {issue.code ? <><strong>{issue.code}</strong>: </> : null}{issue.message}
               </Alert>
             ))}
           </Stack>
