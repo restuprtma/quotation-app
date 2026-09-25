@@ -3,7 +3,7 @@ import type { DraftIssue } from '../types/prompt-first';
 import type { QuotationEntryState } from '../types/quotation-entry';
 
 import { z } from 'zod';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 
@@ -88,6 +88,7 @@ export function MeetingNotesForm({
   });
 
   const lastExternalValueRef = useRef<QuotationEntryState | undefined>(value);
+  const isExternalSyncRef = useRef(false);
 
   useEffect(() => {
     if (value && value !== lastExternalValueRef.current) {
@@ -100,6 +101,7 @@ export function MeetingNotesForm({
         current.pic_name !== value.pic_name ||
         current.meeting_notes !== value.meeting_notes
       ) {
+        isExternalSyncRef.current = true;
         reset({
           project_name: value.project_name ?? '',
           client_id: value.client_id ?? '',
@@ -114,6 +116,10 @@ export function MeetingNotesForm({
   const watchedValues = useWatch({ control });
 
   useEffect(() => {
+    if (isExternalSyncRef.current) {
+      isExternalSyncRef.current = false;
+      return;
+    }
     if (!onChange) return;
     const current: QuotationEntryState = {
       version: 1,
@@ -170,13 +176,17 @@ export function MeetingNotesForm({
 
   const submitting = isSubmitting || isLocallySubmitting;
 
-  const selectedClient: ClientSummary | null =
-    watchedValues.client_id || watchedValues.client_company_name
-      ? {
-          id: watchedValues.client_id ?? '',
-          name: watchedValues.client_company_name ?? '',
-        }
-      : null;
+  const selectedClient: ClientSummary | null = useMemo(() => {
+    const id = watchedValues.client_id;
+    const company = watchedValues.client_company_name;
+    if (!id && !company) return null;
+    const found = clients.find((c) => (id && c.id === id) || (company && c.name === company));
+    if (found) return found;
+    return {
+      id: id ?? '',
+      name: company ?? '',
+    };
+  }, [watchedValues.client_id, watchedValues.client_company_name, clients]);
 
   const handleClientChange = (selected: ClientSummary | null) => {
     setValue('client_id', selected?.id ?? '', { shouldValidate: true, shouldDirty: true });

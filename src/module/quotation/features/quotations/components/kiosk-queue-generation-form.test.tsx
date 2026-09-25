@@ -181,8 +181,6 @@ describe('kiosk-queue-generation-form RTL interaction and contract', () => {
   it('selects Sistem & Integrasi Perangkat Keras with keyboard', async () => {
     renderWithProviders(<QuotationPromptView />);
     await userEvent.click(screen.getByRole('button', { name: /advanced/i }));
-    const quotationChip = screen.getByRole('button', { name: /\/quotation/i });
-    await userEvent.click(quotationChip);
 
     const card = await screen.findByRole('button', { name: /sistem.*integrasi perangkat keras/i });
     card.focus();

@@ -1,28 +1,29 @@
-import type { ActiveSkill, GenerateQuotationPayload } from '../types';
+import type { MeetingQuotationPayload } from '../types/prompt-first';
+import type { GenerateQuotationPayload } from '../types';
 
-import { useNavigate } from 'react-router';
-import { useRef, useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
 
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import InputAdornment from '@mui/material/InputAdornment';
 
 import { paths } from 'src/routes/paths';
-
 import { useTranslate } from 'src/locales';
 import { toast } from 'src/shared/ui/snackbar';
 import { Iconify } from 'src/shared/ui/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import { useActiveSkills } from '../hooks/use-active-skills';
-import { SlashCommandMenu } from '../components/slash-command-menu';
+import { MeetingNotesForm } from '../components/meeting-notes-form';
+import { useQuotationEntryState } from '../hooks/use-quotation-entry-state';
 import { useGenerateQuotation } from '../hooks/use-quotation-generation';
 import { QuotationGenerationForm } from '../components/quotation-generation-form';
+import {
+  usePromptClients,
+  usePromptQuotation,
+  useCreatePromptClient,
+} from '../hooks/use-prompt-quotation';
 import { WhiteLabelGenerationForm } from '../components/white-label-generation-form';
 import { KioskQueueGenerationForm } from '../components/kiosk-queue-generation-form';
 import { SubscriptionSaaSGenerationForm } from '../components/subscription-saas-generation-form';
@@ -38,23 +39,30 @@ import {
 
 // ----------------------------------------------------------------------
 
+const VALID_SCHEMES: CommercialSchemeType[] = [
+  'dedicated_squad',
+  'subscription_saas',
+  'white_label',
+  'standalone_maintenance',
+  'custom_development',
+  'kiosk_queue_system',
+  'talent_outsourcing',
+  'cloud_infrastructure',
+];
+
 export function QuotationPromptView() {
   const { t } = useTranslate('quotation');
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  const { data: activeSkills = [], isLoading: isLoadingSkills } = useActiveSkills();
+  const { entry, setEntry, patchIdentity, clear } = useQuotationEntryState();
+  const clientsQuery = usePromptClients();
+  const createClientMutation = useCreatePromptClient();
+  const promptMutation = usePromptQuotation();
   const generateMutation = useGenerateQuotation();
 
-  // Prompt state
-  const [promptText, setPromptText] = useState('');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [selectedMenuIndex, setSelectedMenuIndex] = useState(0);
-
-  // Form view state
-  const [activeSkill, setActiveSkill] = useState<ActiveSkill | null>(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [commercialScheme, setCommercialScheme] = useState<CommercialSchemeType | null>(null);
+  const view = searchParams.get('view');
+  const schemeParam = searchParams.get('scheme') as CommercialSchemeType | null;
 
   // Generation state machine
   const [isProgressOpen, setIsProgressOpen] = useState(false);
@@ -68,95 +76,14 @@ export function QuotationPromptView() {
     null
   );
 
-  // Check input change to trigger menu
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setPromptText(value);
-
-    if (value.startsWith('/')) {
-      setIsMenuOpen(true);
-    } else {
-      setIsMenuOpen(false);
+  // URL cleanup when scheme is invalid
+  useEffect(() => {
+    if (view === 'advanced' && schemeParam && !VALID_SCHEMES.includes(schemeParam)) {
+      navigate(paths.dashboard.quotation.advanced, { replace: true });
     }
-  };
+  }, [view, schemeParam, navigate]);
 
-  const resolveQuotationSkill = useCallback(
-    (command = '/quotation'): ActiveSkill => {
-      const match = activeSkills.find(
-        (s) =>
-          s.command === command ||
-          s.command === command.replace(/^\//, '') ||
-          `/${s.command}` === command
-      );
-      if (match && match.id && !match.id.startsWith('cmd-')) {
-        return match;
-      }
-      return (
-        activeSkills[0] || {
-          id: '',
-          name: 'Quotation AI (Dedicated Squad)',
-          command: '/quotation',
-          is_active: true,
-        }
-      );
-    },
-    [activeSkills]
-  );
-
-  // Keyboard navigation for prompt input
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!isMenuOpen) {
-      if (event.key === '/' && promptText === '') {
-        setIsMenuOpen(true);
-      }
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        const trimmed = promptText.trim().toLowerCase();
-        if (trimmed === '/quotation') {
-          handleExecuteSkill(resolveQuotationSkill('/quotation'));
-        } else if (trimmed === '/blueprint') {
-          navigate(paths.dashboard.blueprint.root);
-        } else if (trimmed) {
-          toast.warning('Unrecognized slash command. Type / to see available AI skills.');
-        }
-      }
-      return;
-    }
-
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      setSelectedMenuIndex((prev) => prev + 1);
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      setSelectedMenuIndex((prev) => (prev > 0 ? prev - 1 : 0));
-    } else if (event.key === 'Escape') {
-      event.preventDefault();
-      setIsMenuOpen(false);
-    } else if (event.key === 'Enter') {
-      event.preventDefault();
-      // Let menu item execution handle this via menu index
-    }
-  };
-
-  const handleExecuteSkill = useCallback(
-    (skill: ActiveSkill) => {
-      setIsMenuOpen(false);
-      setPromptText(skill.command);
-
-      if (skill.command === '/blueprint') {
-        navigate(paths.dashboard.blueprint.root);
-        return;
-      }
-
-      const resolved = resolveQuotationSkill(skill.command);
-      setActiveSkill(resolved.id ? resolved : skill);
-      setCommercialScheme(null);
-      setIsFormOpen(true);
-    },
-    [navigate, resolveQuotationSkill]
-  );
-
-  // Submit Handler
+  // Submit Handler for Advanced Scheme Forms
   const handleFormSubmit = async (payload: GenerateQuotationPayload) => {
     setLastSubmittedPayload(payload);
     setIsProgressOpen(true);
@@ -181,6 +108,7 @@ export function QuotationPromptView() {
 
       setActiveStageIndex(GENERATION_STAGES.length - 1); // Completed
       setGeneratedQuotationId(response.quotation_id);
+      clear();
 
       toast.success('Quotation draft generated successfully!');
 
@@ -243,184 +171,18 @@ export function QuotationPromptView() {
     }
   };
 
-  return (
-    <DashboardContent maxWidth="lg">
-      <Stack spacing={4} sx={{ py: { xs: 2, md: 4 } }}>
-        {/* If Form is NOT open -> Show Prompt-First Search Hero */}
-        {!isFormOpen ? (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: 500,
-              textAlign: 'center',
-              px: 2,
-            }}
-          >
-            {/* AI Icon Header */}
-            <Box
-              sx={{
-                mb: 3,
-                p: 2,
-                borderRadius: '50%',
-                bgcolor: (theme) =>
-                  theme.palette.mode === 'light' ? 'primary.lighter' : 'primary.dark',
-                color: 'primary.main',
-                display: 'inline-flex',
-                boxShadow: (theme) => `0 0 32px 4px ${theme.palette.primary.main}22`,
-              }}
-            >
-              <Iconify icon="solar:atom-bold-duotone" width={48} />
-            </Box>
+  const handleMeetingSubmit = async (
+    payload: Omit<MeetingQuotationPayload, 'idempotency_key'>
+  ) => {
+    const response = await promptMutation.mutateAsync(payload);
+    clear();
+    navigate(paths.dashboard.quotation.edit(response.quotation_id));
+  };
 
-            <Typography variant="h3" fontWeight={800} sx={{ mb: 1.5 }}>
-              {t('prompt.heroTitle')}
-            </Typography>
-
-            <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 540, mb: 4 }}>
-              {t('prompt.heroSubtitle')}
-            </Typography>
-
-            {/* Prompt Input Box Container */}
-            <Box sx={{ position: 'relative', width: '100%', maxWidth: 680 }}>
-              <SlashCommandMenu
-                open={isMenuOpen}
-                filterText={promptText}
-                selectedIndex={selectedMenuIndex}
-                onSelectIndex={setSelectedMenuIndex}
-                onExecute={handleExecuteSkill}
-                onClose={() => setIsMenuOpen(false)}
-                skills={activeSkills}
-                isLoading={isLoadingSkills}
-              />
-
-              <Card
-                elevation={3}
-                sx={{
-                  p: 0.75,
-                  borderRadius: 2.5,
-                  border: (theme) => `1.5px solid ${theme.palette.divider}`,
-                  transition: (theme) => theme.transitions.create(['border-color', 'box-shadow']),
-                  '&:focus-within': {
-                    borderColor: 'primary.main',
-                    boxShadow: (theme) => `0 0 0 4px ${theme.palette.primary.main}18`,
-                  },
-                }}
-              >
-                <TextField
-                  inputRef={inputRef}
-                  fullWidth
-                  value={promptText}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  placeholder={t('prompt.placeholder')}
-                  variant="standard"
-                  slotProps={{
-                    input: {
-                      disableUnderline: true,
-                      sx: {
-                        px: 2,
-                        py: 1.5,
-                        fontSize: '1.0625rem',
-                      },
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Iconify
-                            icon="solar:atom-bold-duotone"
-                            width={24}
-                            sx={{ color: promptText ? 'primary.main' : 'text.disabled' }}
-                          />
-                        </InputAdornment>
-                      ),
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={() => {
-                              if (promptText.trim().toLowerCase() === '/quotation') {
-                                handleExecuteSkill(resolveQuotationSkill('/quotation'));
-                              } else {
-                                setIsMenuOpen(true);
-                              }
-                            }}
-                            sx={{ borderRadius: 1.5, px: 2 }}
-                          >
-                            {t('prompt.start')}
-                          </Button>
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-              </Card>
-            </Box>
-
-            {/* Quick Chips Suggestions */}
-            <Stack
-              direction="row"
-              spacing={1.5}
-              flexWrap="wrap"
-              justifyContent="center"
-              sx={{ mt: 3 }}
-            >
-              <Typography variant="caption" color="text.disabled" sx={{ alignSelf: 'center' }}>
-                {t('prompt.quickSkills')}
-              </Typography>
-              <Chip
-                icon={<Iconify icon="solar:atom-bold-duotone" width={16} />}
-                label="/quotation — Quotation Generator"
-                clickable
-                color="primary"
-                variant="outlined"
-                onClick={() => handleExecuteSkill(resolveQuotationSkill('/quotation'))}
-                sx={{ fontWeight: 600 }}
-              />
-              <Chip
-                icon={<Iconify icon="solar:file-bold-duotone" width={16} />}
-                label="/blueprint — System Blueprint"
-                clickable
-                color="primary"
-                variant="outlined"
-                onClick={() => navigate(paths.dashboard.blueprint.root)}
-                sx={{ fontWeight: 600 }}
-              />
-            </Stack>
-
-            {/* Link to Historical List or Settings */}
-            <Stack direction="row" spacing={2} sx={{ mt: 6 }}>
-              <Button
-                variant="text"
-                color="inherit"
-                size="small"
-                startIcon={<Iconify icon="solar:file-text-bold" />}
-                onClick={() => navigate('/quotation/list')}
-              >
-                {t('prompt.archiveLink')}
-              </Button>
-              <Button
-                variant="text"
-                color="inherit"
-                size="small"
-                startIcon={<Iconify icon="solar:settings-bold-duotone" />}
-                onClick={() => navigate(paths.dashboard.quotation.aiSettings)}
-              >
-                {t('prompt.settingsLink')}
-              </Button>
-            </Stack>
-          </Box>
-        ) : commercialScheme === null ? (
-          <CommercialSchemeSelector
-            onSelectScheme={(scheme) => setCommercialScheme(scheme)}
-            onBack={() => {
-              setIsFormOpen(false);
-              setPromptText('');
-            }}
-          />
-        ) : commercialScheme === 'dedicated_squad' ? (
+  const renderSchemeForm = (scheme: CommercialSchemeType) => {
+    switch (scheme) {
+      case 'dedicated_squad':
+        return (
           <Box>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
               <Button
@@ -428,7 +190,7 @@ export function QuotationPromptView() {
                 variant="outlined"
                 color="inherit"
                 startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-                onClick={() => setCommercialScheme(null)}
+                onClick={() => navigate(paths.dashboard.quotation.advanced)}
               >
                 {t('prompt.backToSchemes')}
               </Button>
@@ -438,13 +200,17 @@ export function QuotationPromptView() {
             </Stack>
 
             <QuotationGenerationForm
-              selectedSkill={activeSkill}
+              entryIdentity={entry}
+              onEntryIdentityChange={patchIdentity}
               isSubmitting={generateMutation.isPending}
               onSubmit={handleFormSubmit}
-              onCancel={() => setCommercialScheme(null)}
+              onCancel={() => navigate(paths.dashboard.quotation.advanced)}
             />
           </Box>
-        ) : commercialScheme === 'subscription_saas' ? (
+        );
+
+      case 'subscription_saas':
+        return (
           <Box>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
               <Button
@@ -452,7 +218,7 @@ export function QuotationPromptView() {
                 variant="outlined"
                 color="inherit"
                 startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-                onClick={() => setCommercialScheme(null)}
+                onClick={() => navigate(paths.dashboard.quotation.advanced)}
               >
                 {t('prompt.backToSchemes')}
               </Button>
@@ -462,13 +228,17 @@ export function QuotationPromptView() {
             </Stack>
 
             <SubscriptionSaaSGenerationForm
-              selectedSkill={activeSkill}
+              entryIdentity={entry}
+              onEntryIdentityChange={patchIdentity}
               isSubmitting={generateMutation.isPending}
               onSubmit={handleFormSubmit}
-              onCancel={() => setCommercialScheme(null)}
+              onCancel={() => navigate(paths.dashboard.quotation.advanced)}
             />
           </Box>
-        ) : commercialScheme === 'white_label' ? (
+        );
+
+      case 'white_label':
+        return (
           <Box>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
               <Button
@@ -476,7 +246,7 @@ export function QuotationPromptView() {
                 variant="outlined"
                 color="inherit"
                 startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-                onClick={() => setCommercialScheme(null)}
+                onClick={() => navigate(paths.dashboard.quotation.advanced)}
               >
                 {t('prompt.backToSchemes')}
               </Button>
@@ -486,13 +256,17 @@ export function QuotationPromptView() {
             </Stack>
 
             <WhiteLabelGenerationForm
-              selectedSkill={activeSkill}
+              entryIdentity={entry}
+              onEntryIdentityChange={patchIdentity}
               isSubmitting={generateMutation.isPending}
               onSubmit={handleFormSubmit}
-              onCancel={() => setCommercialScheme(null)}
+              onCancel={() => navigate(paths.dashboard.quotation.advanced)}
             />
           </Box>
-        ) : commercialScheme === 'standalone_maintenance' ? (
+        );
+
+      case 'standalone_maintenance':
+        return (
           <Box>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
               <Button
@@ -500,7 +274,7 @@ export function QuotationPromptView() {
                 variant="outlined"
                 color="inherit"
                 startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-                onClick={() => setCommercialScheme(null)}
+                onClick={() => navigate(paths.dashboard.quotation.advanced)}
               >
                 {t('prompt.backToSchemes')}
               </Button>
@@ -510,13 +284,17 @@ export function QuotationPromptView() {
             </Stack>
 
             <StandaloneMaintenanceGenerationForm
-              selectedSkill={activeSkill}
+              entryIdentity={entry}
+              onEntryIdentityChange={patchIdentity}
               isSubmitting={generateMutation.isPending}
               onSubmit={handleFormSubmit}
-              onCancel={() => setCommercialScheme(null)}
+              onCancel={() => navigate(paths.dashboard.quotation.advanced)}
             />
           </Box>
-        ) : commercialScheme === 'custom_development' ? (
+        );
+
+      case 'custom_development':
+        return (
           <Box>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
               <Button
@@ -524,7 +302,7 @@ export function QuotationPromptView() {
                 variant="outlined"
                 color="inherit"
                 startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-                onClick={() => setCommercialScheme(null)}
+                onClick={() => navigate(paths.dashboard.quotation.advanced)}
               >
                 {t('prompt.backToSchemes')}
               </Button>
@@ -534,13 +312,17 @@ export function QuotationPromptView() {
             </Stack>
 
             <CustomDevelopmentGenerationForm
-              selectedSkill={activeSkill}
+              entryIdentity={entry}
+              onEntryIdentityChange={patchIdentity}
               isSubmitting={generateMutation.isPending}
               onSubmit={handleFormSubmit}
-              onCancel={() => setCommercialScheme(null)}
+              onCancel={() => navigate(paths.dashboard.quotation.advanced)}
             />
           </Box>
-        ) : commercialScheme === 'kiosk_queue_system' ? (
+        );
+
+      case 'kiosk_queue_system':
+        return (
           <Box>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
               <Button
@@ -548,7 +330,7 @@ export function QuotationPromptView() {
                 variant="outlined"
                 color="inherit"
                 startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-                onClick={() => setCommercialScheme(null)}
+                onClick={() => navigate(paths.dashboard.quotation.advanced)}
               >
                 {t('prompt.backToSchemes')}
               </Button>
@@ -558,13 +340,17 @@ export function QuotationPromptView() {
             </Stack>
 
             <KioskQueueGenerationForm
-              selectedSkill={activeSkill}
+              entryIdentity={entry}
+              onEntryIdentityChange={patchIdentity}
               isSubmitting={generateMutation.isPending}
               onSubmit={handleFormSubmit}
-              onCancel={() => setCommercialScheme(null)}
+              onCancel={() => navigate(paths.dashboard.quotation.advanced)}
             />
           </Box>
-        ) : commercialScheme === 'talent_outsourcing' ? (
+        );
+
+      case 'talent_outsourcing':
+        return (
           <Box>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
               <Button
@@ -572,7 +358,7 @@ export function QuotationPromptView() {
                 variant="outlined"
                 color="inherit"
                 startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-                onClick={() => setCommercialScheme(null)}
+                onClick={() => navigate(paths.dashboard.quotation.advanced)}
               >
                 {t('prompt.backToSchemes')}
               </Button>
@@ -580,14 +366,19 @@ export function QuotationPromptView() {
                 {t('talentOutsourcingForm.title')}
               </Typography>
             </Stack>
+
             <TalentOutsourcingGenerationForm
-              selectedSkill={activeSkill}
+              entryIdentity={entry}
+              onEntryIdentityChange={patchIdentity}
               isSubmitting={generateMutation.isPending}
               onSubmit={handleFormSubmit}
-              onCancel={() => setCommercialScheme(null)}
+              onCancel={() => navigate(paths.dashboard.quotation.advanced)}
             />
           </Box>
-        ) : commercialScheme === 'cloud_infrastructure' ? (
+        );
+
+      case 'cloud_infrastructure':
+        return (
           <Box>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
               <Button
@@ -595,7 +386,7 @@ export function QuotationPromptView() {
                 variant="outlined"
                 color="inherit"
                 startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-                onClick={() => setCommercialScheme(null)}
+                onClick={() => navigate(paths.dashboard.quotation.advanced)}
               >
                 {t('prompt.backToSchemes')}
               </Button>
@@ -603,13 +394,55 @@ export function QuotationPromptView() {
                 {t('cloudInfrastructure.title')}
               </Typography>
             </Stack>
+
             <CloudInfrastructureGenerationForm
+              entryIdentity={entry}
+              onEntryIdentityChange={patchIdentity}
               isSubmitting={generateMutation.isPending}
               onSubmit={handleFormSubmit}
-              onCancel={() => setCommercialScheme(null)}
+              onCancel={() => navigate(paths.dashboard.quotation.advanced)}
             />
           </Box>
-        ) : null}
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  const isAdvancedView = view === 'advanced';
+  const isSchemeSelected = Boolean(schemeParam && VALID_SCHEMES.includes(schemeParam));
+
+  return (
+    <DashboardContent maxWidth="lg">
+      <Stack spacing={4} sx={{ py: { xs: 2, md: 4 } }}>
+        {isAdvancedView ? (
+          isSchemeSelected && schemeParam ? (
+            renderSchemeForm(schemeParam)
+          ) : (
+            <CommercialSchemeSelector
+              onSelectScheme={(scheme) =>
+                navigate(paths.dashboard.quotation.advancedScheme(scheme))
+              }
+              onBack={() => navigate(paths.dashboard.quotation.prompt)}
+            />
+          )
+        ) : (
+          <MeetingNotesForm
+            value={entry}
+            onChange={setEntry}
+            clients={clientsQuery.data ?? []}
+            isLoadingClients={clientsQuery.isLoading}
+            loadClientsError={clientsQuery.error}
+            onCreateClient={(name) => createClientMutation.mutateAsync(name)}
+            isCreatingClient={createClientMutation.isPending}
+            createClientError={createClientMutation.error}
+            issues={promptMutation.issues}
+            isSubmitting={promptMutation.isPending}
+            onSubmit={handleMeetingSubmit}
+            onOpenAdvanced={() => navigate(paths.dashboard.quotation.advanced)}
+          />
+        )}
       </Stack>
 
       {/* Generation Progress State UI Modal */}
