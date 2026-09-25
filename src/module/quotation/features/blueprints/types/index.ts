@@ -92,7 +92,18 @@ export type BlueprintListItem = {
 
 export type BlueprintListResponse = {
   items: BlueprintListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
 };
+
+export const PROCESS_BLUEPRINT_STATUSES: GenerationStatus[] = [
+  'pending',
+  'in_progress',
+  'partial_failed',
+  'failed',
+];
 
 export type ManualRequest<T = unknown> = {
   revision_id: string;

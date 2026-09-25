@@ -3,6 +3,7 @@ import type {
   BlueprintStatus,
   BlueprintDetail,
   ProviderSection,
+  GenerationStatus,
   CreateBlueprintInput,
   BlueprintListResponse,
   QuotationRevisionOption,
@@ -96,13 +97,39 @@ export function saveBlueprintDraftSection<T>(
   );
 }
 
+export type ListBlueprintsParams = {
+  quotationId?: string;
+  statuses?: GenerationStatus[];
+  page?: number;
+  limit?: number;
+};
+
 export function listBlueprints(
-  quotationID?: string,
+  params?: ListBlueprintsParams | string,
   signal?: AbortSignal
 ): Promise<BlueprintListResponse> {
+  const queryParams: Record<string, any> = {};
+
+  if (typeof params === 'string') {
+    queryParams.quotation_id = params;
+  } else if (params) {
+    if (params.quotationId !== undefined) {
+      queryParams.quotation_id = params.quotationId;
+    }
+    if (params.statuses && params.statuses.length > 0) {
+      queryParams.generation_status = params.statuses.join(',');
+    }
+    if (params.page !== undefined) {
+      queryParams.page = params.page;
+    }
+    if (params.limit !== undefined) {
+      queryParams.limit = params.limit;
+    }
+  }
+
   return unwrap<BlueprintListResponse>(
     axios.get(endpoints.quotation.blueprints.root, {
-      params: { quotation_id: quotationID },
+      params: queryParams,
       signal,
     })
   );

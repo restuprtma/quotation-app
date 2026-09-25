@@ -74,6 +74,10 @@ describe('use-blueprint hooks', () => {
         updated_at: '2026-09-17T10:00:00Z',
       },
     ],
+    total: 1,
+    page: 1,
+    limit: 20,
+    total_pages: 1,
   };
 
   describe('useBlueprintDetail', () => {
@@ -114,7 +118,7 @@ describe('use-blueprint hooks', () => {
   });
 
   describe('useBlueprintList', () => {
-    it('fetches blueprint list with quotation filter', async () => {
+    it('fetches blueprint list with string quotation filter', async () => {
       vi.spyOn(api, 'listBlueprints').mockResolvedValueOnce(mockList);
 
       const { result } = renderHook(() => useBlueprintList('q-123'), {
@@ -123,6 +127,44 @@ describe('use-blueprint hooks', () => {
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.data).toEqual(mockList);
+      expect(api.listBlueprints).toHaveBeenCalledWith(
+        {
+          quotationId: 'q-123',
+          statuses: undefined,
+          page: 1,
+          limit: 20,
+        },
+        expect.any(AbortSignal)
+      );
+    });
+
+    it('fetches blueprint list with object params including statuses, page, and limit', async () => {
+      vi.spyOn(api, 'listBlueprints').mockResolvedValueOnce(mockList);
+
+      const { result } = renderHook(
+        () =>
+          useBlueprintList({
+            quotationId: 'q-456',
+            statuses: ['in_progress', 'pending'],
+            page: 2,
+            limit: 10,
+          }),
+        {
+          wrapper: createWrapper(),
+        }
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(result.current.data).toEqual(mockList);
+      expect(api.listBlueprints).toHaveBeenCalledWith(
+        {
+          quotationId: 'q-456',
+          statuses: ['in_progress', 'pending'],
+          page: 2,
+          limit: 10,
+        },
+        expect.any(AbortSignal)
+      );
     });
   });
 

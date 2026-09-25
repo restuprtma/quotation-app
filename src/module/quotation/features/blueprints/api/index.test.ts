@@ -66,6 +66,10 @@ describe('Blueprint API client', () => {
         updated_at: '2026-09-17T10:00:00Z',
       },
     ],
+    total: 1,
+    page: 1,
+    limit: 20,
+    total_pages: 1,
   };
 
   describe('Endpoints config', () => {
@@ -303,7 +307,35 @@ describe('Blueprint API client', () => {
   });
 
   describe('listBlueprints', () => {
-    it('calls GET /quotation/v1/blueprints with optional quotation_id filter', async () => {
+    it('calls GET /quotation/v1/blueprints with all query params (quotationId, statuses, page, limit)', async () => {
+      const controller = new AbortController();
+      const spy = vi.spyOn(axios, 'get').mockResolvedValueOnce({
+        data: { data: mockList, message: 'Success' },
+      } as any);
+
+      const result = await listBlueprints(
+        {
+          quotationId: 'q-123',
+          statuses: ['pending', 'in_progress'],
+          page: 2,
+          limit: 10,
+        },
+        controller.signal
+      );
+
+      expect(spy).toHaveBeenCalledWith('/quotation/v1/blueprints', {
+        params: {
+          quotation_id: 'q-123',
+          generation_status: 'pending,in_progress',
+          page: 2,
+          limit: 10,
+        },
+        signal: controller.signal,
+      });
+      expect(result).toEqual(mockList);
+    });
+
+    it('supports string quotationId for backward compatibility', async () => {
       const spy = vi.spyOn(axios, 'get').mockResolvedValueOnce({
         data: { data: mockList, message: 'Success' },
       } as any);
@@ -317,7 +349,7 @@ describe('Blueprint API client', () => {
       expect(result).toEqual(mockList);
     });
 
-    it('calls GET /quotation/v1/blueprints with empty params when quotation_id is not provided', async () => {
+    it('calls GET /quotation/v1/blueprints with empty params when no args provided', async () => {
       const spy = vi.spyOn(axios, 'get').mockResolvedValueOnce({
         data: { data: mockList, message: 'Success' },
       } as any);
@@ -325,7 +357,7 @@ describe('Blueprint API client', () => {
       const result = await listBlueprints();
 
       expect(spy).toHaveBeenCalledWith('/quotation/v1/blueprints', {
-        params: { quotation_id: undefined },
+        params: {},
         signal: undefined,
       });
       expect(result).toEqual(mockList);

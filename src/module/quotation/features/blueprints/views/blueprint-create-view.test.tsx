@@ -87,10 +87,6 @@ describe('BlueprintCreateView', () => {
     cleanup();
   });
 
-  const mockBlueprintListEmpty: BlueprintListResponse = {
-    items: [],
-  };
-
   const mockBlueprintListPopulated: BlueprintListResponse = {
     items: [
       {
@@ -101,6 +97,10 @@ describe('BlueprintCreateView', () => {
         updated_at: '2026-09-17T09:00:00Z',
       },
     ],
+    total: 1,
+    page: 1,
+    limit: 1,
+    total_pages: 1,
   };
 
   const mockRevisionsQ1: QuotationRevisionOption[] = [
@@ -113,36 +113,19 @@ describe('BlueprintCreateView', () => {
     },
   ];
 
-  it('renders header, form and empty tenant blueprint list', async () => {
-    vi.spyOn(api, 'listBlueprints').mockResolvedValue(mockBlueprintListEmpty);
-
+  it('renders header and create form', async () => {
     render(<BlueprintCreateView />, { wrapper: createWrapper() });
 
     expect(screen.getByText('Blueprint Generator')).toBeDefined();
-    expect(screen.getByText('Daftar Blueprint Tenant')).toBeDefined();
-    await waitFor(() => {
-      expect(screen.getByText('Belum ada blueprint yang dibuat untuk tenant ini.')).toBeDefined();
-    });
-  });
-
-  it('renders tenant blueprint list with items and navigates on Buka click', async () => {
-    vi.spyOn(api, 'listBlueprints').mockResolvedValue(mockBlueprintListPopulated);
-
-    render(<BlueprintCreateView />, { wrapper: createWrapper() });
-
-    await waitFor(() => {
-      expect(screen.getByText('Hospital Core Blueprint')).toBeDefined();
-      expect(screen.getByText('Selesai')).toBeDefined();
-    });
-
-    const openBtn = screen.getByRole('button', { name: /Buka/i });
-    fireEvent.click(openBtn);
-
-    expect(mockNavigate).toHaveBeenCalledWith('/blueprint/bp-100');
+    expect(
+      screen.getByText(
+        'Buat dan kelola blueprint arsitektur sistem dari quotation yang telah disetujui.'
+      )
+    ).toBeDefined();
+    expect(screen.getByLabelText(/Pilih Quotation/i)).toBeDefined();
   });
 
   it('passes initial query parameters from search params to form', async () => {
-    vi.spyOn(api, 'listBlueprints').mockResolvedValue(mockBlueprintListEmpty);
     vi.spyOn(api, 'listQuotationRevisions').mockResolvedValue(mockRevisionsQ1);
 
     render(<BlueprintCreateView />, {
@@ -155,70 +138,10 @@ describe('BlueprintCreateView', () => {
     });
   });
 
-  it('handles duplicate 409 by navigating to existing blueprint from loaded tenant list', async () => {
-    vi.spyOn(api, 'listBlueprints').mockResolvedValue(mockBlueprintListPopulated);
-    vi.spyOn(api, 'listQuotationRevisions').mockImplementation(async (qid) => {
-      if (qid === 'q-1') return mockRevisionsQ1;
-      return [];
-    });
-
-    const conflictError: any = new Error('blueprint_already_exists');
-    conflictError.status = 409;
-    conflictError.response = {
-      status: 409,
-      data: { errors: 'blueprint_already_exists' },
-    };
-    vi.spyOn(api, 'createBlueprint').mockRejectedValue(conflictError);
-
-    render(<BlueprintCreateView />, {
-      wrapper: createWrapper(['/blueprint?quotation_id=q-1&revision_id=rev-1']),
-    });
-
-    await waitFor(() => {
-      const qSelect = screen.getByLabelText(/Pilih Quotation/i);
-      expect((qSelect as HTMLSelectElement).value).toBe('q-1');
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(/v1 \(published\)/i)).toBeTruthy();
-    });
-
-    const revSelect = screen.getByLabelText(/Pilih Revisi/i);
-    fireEvent.change(revSelect, { target: { value: 'rev-1' } });
-
-    fireEvent.change(screen.getByLabelText(/Judul Blueprint/i), {
-      target: { value: 'Hospital Blueprint' },
-    });
-    fireEvent.change(screen.getByLabelText(/Tujuan Bisnis 1/i), {
-      target: { value: 'Improve care' },
-    });
-    fireEvent.change(screen.getByLabelText(/Aktor 1/i), {
-      target: { value: 'Doctor' },
-    });
-    fireEvent.change(screen.getByLabelText(/Fase Bisnis 1/i), {
-      target: { value: 'Registration' },
-    });
-
-    const submitBtn = screen.getByRole('button', { name: /Buat Blueprint/i });
-    fireEvent.click(submitBtn);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Blueprint untuk quotation ini sudah ada/i)).toBeDefined();
-    });
-
-    const openExistingBtn = screen.getByRole('button', { name: /Buka Blueprint yang Ada/i });
-    fireEvent.click(openExistingBtn);
-
-    expect(mockNavigate).toHaveBeenCalledWith('/blueprint/bp-100');
-  });
-
-  it('handles duplicate 409 by fetching filtered listBlueprints when not in preloaded list', async () => {
-    vi.spyOn(api, 'listBlueprints').mockImplementation(async (quotationId?: string) => {
-      if (quotationId === 'q-1') {
-        return mockBlueprintListPopulated;
-      }
-      return mockBlueprintListEmpty;
-    });
+  it('handles duplicate 409 by calling listBlueprints and navigating to existing blueprint', async () => {
+    const listSpy = vi
+      .spyOn(api, 'listBlueprints')
+      .mockResolvedValue(mockBlueprintListPopulated);
 
     vi.spyOn(api, 'listQuotationRevisions').mockImplementation(async (qid) => {
       if (qid === 'q-1') return mockRevisionsQ1;
@@ -273,12 +196,18 @@ describe('BlueprintCreateView', () => {
     fireEvent.click(openExistingBtn);
 
     await waitFor(() => {
+      expect(listSpy).toHaveBeenCalledWith(
+        {
+          quotationId: 'q-1',
+          page: 1,
+          limit: 1,
+        }
+      );
       expect(mockNavigate).toHaveBeenCalledWith('/blueprint/bp-100');
     });
   });
 
   it('navigates to /blueprint/:id on successful blueprint creation', async () => {
-    vi.spyOn(api, 'listBlueprints').mockResolvedValue(mockBlueprintListEmpty);
     vi.spyOn(api, 'listQuotationRevisions').mockImplementation(async (qid) => {
       if (qid === 'q-1') return mockRevisionsQ1;
       return [];

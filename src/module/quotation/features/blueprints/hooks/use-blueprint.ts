@@ -3,6 +3,7 @@ import type {
   BlueprintStatus,
   BlueprintDetail,
   ProviderSection,
+  GenerationStatus,
   CreateBlueprintInput,
   BlueprintListResponse,
   QuotationRevisionOption,
@@ -47,13 +48,54 @@ export function useBlueprintStatus(id?: string | null, enabled: boolean = true) 
   });
 }
 
-export function useBlueprintList(quotationId?: string | null, enabled: boolean = true) {
+export type UseBlueprintListParams = {
+  quotationId?: string | null;
+  statuses?: GenerationStatus[];
+  page?: number;
+  limit?: number;
+};
+
+export function useBlueprintList(
+  params?: UseBlueprintListParams | string | null,
+  enabled: boolean = true
+) {
   const { company } = useAuthContext();
   const companyId = company?.id ?? 'anonymous';
 
+  const normalizedParams: UseBlueprintListParams =
+    typeof params === 'string' ? { quotationId: params } : (params ?? {});
+
+  const quotationId = normalizedParams.quotationId ?? null;
+  const statuses = normalizedParams.statuses;
+  const sortedStatusesKey =
+    statuses && statuses.length > 0 ? [...statuses].sort().join(',') : null;
+  const page = normalizedParams.page ?? 1;
+  const limit = normalizedParams.limit ?? 20;
+
+  const queryKey = [
+    'blueprints',
+    companyId,
+    'list',
+    {
+      quotationId,
+      statuses: sortedStatusesKey,
+      page,
+      limit,
+    },
+  ];
+
   return useQuery<BlueprintListResponse, Error>({
-    queryKey: ['blueprints', companyId, 'list', quotationId ?? 'all'],
-    queryFn: ({ signal }) => listBlueprints(quotationId ?? undefined, signal),
+    queryKey,
+    queryFn: ({ signal }) =>
+      listBlueprints(
+        {
+          quotationId: quotationId ?? undefined,
+          statuses,
+          page,
+          limit,
+        },
+        signal
+      ),
     enabled,
     staleTime: 30 * 1000,
   });
