@@ -1,19 +1,20 @@
 // @vitest-environment happy-dom
 
-import { vi, it, expect, describe, afterEach, beforeEach } from 'vitest';
-import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Routes, Route, useLocation } from 'react-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import i18n from 'i18next';
-import { initReactI18next, I18nextProvider } from 'react-i18next';
+import userEvent from '@testing-library/user-event';
+import { I18nextProvider, initReactI18next } from 'react-i18next';
+import { Route, Routes, useLocation, MemoryRouter } from 'react-router';
+import { vi, it, expect, describe, afterEach, beforeEach } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
+
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-import idQuotation from 'src/locales/langs/id/quotation.json';
 import { paths } from 'src/routes/paths';
+
+import idQuotation from 'src/locales/langs/id/quotation.json';
+
 import { QuotationPromptView } from './quotation-prompt-view';
-import * as promptFirstApi from '../api/prompt-first';
-import * as generationApi from '../api/generation';
 import { QUOTATION_ENTRY_STORAGE_KEY } from '../types/quotation-entry';
 
 // ----------------------------------------------------------------------
@@ -299,7 +300,9 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
   it('navigates back to /quotation?view=advanced when cancelling or clicking back in scheme form', async () => {
     renderView(['/quotation?view=advanced&scheme=dedicated_squad']);
 
-    expect(screen.getByRole('heading', { name: /Inisiasi Proposal Dedicated Squad/i })).toBeDefined();
+    expect(
+      screen.getByRole('heading', { name: /Inisiasi Proposal Dedicated Squad/i })
+    ).toBeDefined();
 
     const backBtn = screen.getByRole('button', { name: /Ganti Skema Layanan/i });
     await userEvent.click(backBtn);
@@ -348,14 +351,17 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
           project_name: 'Aplikasi ERP Logistik',
           client_id: 'client-1',
           client_company_name: 'PT Alpha Digital',
-          meeting_notes: 'Meeting kick-off mengenai modul inventori dan tracking armada pengiriman.',
+          meeting_notes:
+            'Meeting kick-off mengenai modul inventori dan tracking armada pengiriman.',
         }),
         expect.anything()
       );
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('location-display').textContent).toBe('/quotation/quotation-uuid-101/edit');
+      expect(screen.getByTestId('location-display').textContent).toBe(
+        '/quotation/quotation-uuid-101/edit'
+      );
     });
 
     // Session storage should be cleared
@@ -365,6 +371,33 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
       expect(parsed.project_name).toBe('');
       expect(parsed.meeting_notes).toBe('');
     }
+  });
+
+  it('shows an actionable message when meeting extraction is invalid', async () => {
+    mockCreateQuotationFromMeeting.mockRejectedValue({
+      message: 'invalid_extraction',
+      response: { data: { errors: { detail: ['invalid_extraction'] } } },
+    });
+    sessionStorage.setItem(
+      QUOTATION_ENTRY_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        project_name: 'Inventory',
+        client_id: 'client-1',
+        client_company_name: 'PT Alpha',
+        pic_name: 'Andi',
+        meeting_notes: 'Catatan meeting inventori yang cukup panjang untuk diuji.',
+      })
+    );
+
+    renderView(['/quotation']);
+    await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
+
+    expect(await screen.findByText(/Catatan belum dapat diproses/i)).toBeDefined();
+    expect(screen.queryByText('invalid_extraction')).toBeNull();
+    expect(
+      (screen.getByRole('textbox', { name: /Catatan Meeting/i }) as HTMLTextAreaElement).disabled
+    ).toBe(false);
   });
 
   it('submits advanced scheme generation form, navigates to quotation edit page, and clears entry session', async () => {
@@ -390,11 +423,15 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
 
     renderView(['/quotation?view=advanced&scheme=dedicated_squad']);
 
-    expect(screen.getByRole('heading', { name: /Inisiasi Proposal Dedicated Squad/i })).toBeDefined();
+    expect(
+      screen.getByRole('heading', { name: /Inisiasi Proposal Dedicated Squad/i })
+    ).toBeDefined();
 
     // Fill requirement text
     const reqInput = screen.getByPlaceholderText(/Jelaskan kebutuhan, tujuan bisnis/i);
-    fireEvent.change(reqInput, { target: { value: 'Kebutuhan squad programmer dedicated frontend dan backend.' } });
+    fireEvent.change(reqInput, {
+      target: { value: 'Kebutuhan squad programmer dedicated frontend dan backend.' },
+    });
 
     const form = document.querySelector('form')!;
     fireEvent.submit(form);
@@ -410,7 +447,9 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
 
     await waitFor(
       () => {
-        expect(screen.getByTestId('location-display').textContent).toBe('/quotation/gen-uuid-202/edit');
+        expect(screen.getByTestId('location-display').textContent).toBe(
+          '/quotation/gen-uuid-202/edit'
+        );
       },
       { timeout: 5000 }
     );

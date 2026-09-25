@@ -1,5 +1,5 @@
-import type { MeetingQuotationPayload } from '../types/prompt-first';
 import type { GenerateQuotationPayload } from '../types';
+import type { MeetingQuotationPayload } from '../types/prompt-first';
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
@@ -10,20 +10,16 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
 import { paths } from 'src/routes/paths';
+
 import { useTranslate } from 'src/locales';
 import { toast } from 'src/shared/ui/snackbar';
 import { Iconify } from 'src/shared/ui/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { MeetingNotesForm } from '../components/meeting-notes-form';
-import { useQuotationEntryState } from '../hooks/use-quotation-entry-state';
 import { useGenerateQuotation } from '../hooks/use-quotation-generation';
+import { useQuotationEntryState } from '../hooks/use-quotation-entry-state';
 import { QuotationGenerationForm } from '../components/quotation-generation-form';
-import {
-  usePromptClients,
-  usePromptQuotation,
-  useCreatePromptClient,
-} from '../hooks/use-prompt-quotation';
 import { WhiteLabelGenerationForm } from '../components/white-label-generation-form';
 import { KioskQueueGenerationForm } from '../components/kiosk-queue-generation-form';
 import { SubscriptionSaaSGenerationForm } from '../components/subscription-saas-generation-form';
@@ -32,6 +28,11 @@ import { CustomDevelopmentGenerationForm } from '../components/custom-developmen
 import { TalentOutsourcingGenerationForm } from '../components/talent-outsourcing-generation-form';
 import { CloudInfrastructureGenerationForm } from '../components/cloud-infrastructure-generation-form';
 import { StandaloneMaintenanceGenerationForm } from '../components/standalone-maintenance-generation-form';
+import {
+  usePromptClients,
+  usePromptQuotation,
+  useCreatePromptClient,
+} from '../hooks/use-prompt-quotation';
 import {
   CommercialSchemeSelector,
   type CommercialSchemeType,
@@ -49,6 +50,9 @@ const VALID_SCHEMES: CommercialSchemeType[] = [
   'talent_outsourcing',
   'cloud_infrastructure',
 ];
+
+const INVALID_EXTRACTION_MESSAGE =
+  'Catatan belum dapat diproses menjadi draf. Lengkapi kebutuhan, durasi, tim, dan skema layanan; lalu coba lagi.';
 
 export function QuotationPromptView() {
   const { t } = useTranslate('quotation');
@@ -143,6 +147,7 @@ export function QuotationPromptView() {
       }
 
       const errorMap: Record<string, string> = {
+        invalid_extraction: INVALID_EXTRACTION_MESSAGE,
         invalid_rate_card:
           'Rate card tidak valid atau belum memiliki role (kosong). Silakan periksa Rate Card di AI Settings.',
         rate_item_missing:
@@ -171,12 +176,14 @@ export function QuotationPromptView() {
     }
   };
 
-  const handleMeetingSubmit = async (
-    payload: Omit<MeetingQuotationPayload, 'idempotency_key'>
-  ) => {
-    const response = await promptMutation.mutateAsync(payload);
-    clear();
-    navigate(paths.dashboard.quotation.edit(response.quotation_id));
+  const handleMeetingSubmit = async (payload: Omit<MeetingQuotationPayload, 'idempotency_key'>) => {
+    try {
+      const response = await promptMutation.mutateAsync(payload);
+      clear();
+      navigate(paths.dashboard.quotation.edit(response.quotation_id));
+    } catch {
+      // The mutation exposes a safe, mapped issue through promptMutation.issues.
+    }
   };
 
   const renderSchemeForm = (scheme: CommercialSchemeType) => {
@@ -437,7 +444,11 @@ export function QuotationPromptView() {
             onCreateClient={(name) => createClientMutation.mutateAsync(name)}
             isCreatingClient={createClientMutation.isPending}
             createClientError={createClientMutation.error}
-            issues={promptMutation.issues}
+            issues={promptMutation.issues.map((issue) =>
+              issue.code === 'invalid_extraction'
+                ? { ...issue, code: '', message: INVALID_EXTRACTION_MESSAGE }
+                : issue
+            )}
             isSubmitting={promptMutation.isPending}
             onSubmit={handleMeetingSubmit}
             onOpenAdvanced={() => navigate(paths.dashboard.quotation.advanced)}
