@@ -10,7 +10,9 @@ import {
   MAX_STANDALONE_MAINTENANCE_MONEY,
   DEFAULT_STANDALONE_MAINTENANCE_FORM,
   calculateStandaloneMaintenanceDraftTotals,
+  createDefaultStandaloneMaintenanceValues,
 } from './standalone-maintenance';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 describe('standalone maintenance pure helpers', () => {
   describe('formatHalfHours', () => {
@@ -470,6 +472,23 @@ describe('standalone maintenance pure helpers', () => {
       expect(DEFAULT_STANDALONE_MAINTENANCE_FORM.defect_groups?.[0].items[0].item_number).toBe('');
       expect(DEFAULT_STANDALONE_MAINTENANCE_FORM.payment_schedule.length).toBe(1);
       expect(DEFAULT_STANDALONE_MAINTENANCE_FORM.payment_schedule[0].work_period).toBe('');
+    });
+  });
+
+  describe('createDefaultStandaloneMaintenanceValues', () => {
+    it('merges entry identity into default standalone maintenance values', () => {
+      const base = createDefaultStandaloneMaintenanceValues('2026-09-08');
+      const withEntry = applyEntryIdentityToSchemeDefaults(base, {
+        project_name: 'Maintenance Support Portal',
+        client_id: 'client-sm-1',
+        client_company_name: 'PT Mitra Utama',
+        pic_name: 'Hendra Gunawan',
+      });
+
+      expect(withEntry.subject).toBe('Maintenance Support Portal');
+      expect(withEntry.client_id).toBe('client-sm-1');
+      expect(withEntry.client_company_name).toBe('PT Mitra Utama');
+      expect(withEntry.client_name).toBe('Hendra Gunawan');
     });
   });
 });

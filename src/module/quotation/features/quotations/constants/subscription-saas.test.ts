@@ -13,6 +13,7 @@ import {
   createDefaultSubscriptionSaaSValues,
   RIGHTS_CLAUSE_VENTURO_SOFTWARE_OWNERSHIP_V1,
 } from './subscription-saas';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 describe('subscription-saas constants & pure helpers', () => {
   const today = '2026-09-07';
@@ -53,15 +54,19 @@ describe('subscription-saas constants & pure helpers', () => {
       expect(saas.feature_groups).toEqual([]);
     });
 
-    it('creates Hubung preset with venturo ownership clause and auto-renewal', () => {
-      const values = createDefaultHubungValues(today, mockClient);
-      expect(values.subscription_saas.rights_clause_code).toBe(
-        RIGHTS_CLAUSE_VENTURO_SOFTWARE_OWNERSHIP_V1
-      );
-      expect(values.subscription_saas.auto_renewal).toBe(true);
-      expect(values.subscription_saas.is_partnership).toBe(false);
-      expect(values.subscription_saas.initial_term_months).toBe(12);
-      expect(values.subscription_saas.billing_cycle).toBe('monthly');
+    it('merges entry identity into default subscription saas values', () => {
+      const base = createDefaultSubscriptionSaaSValues(today);
+      const withEntry = applyEntryIdentityToSchemeDefaults(base, {
+        project_name: 'SaaS HRIS Perusahaan',
+        client_id: 'client-saas-1',
+        client_company_name: 'PT Digital Solusi',
+        pic_name: 'Siti Aminah',
+      });
+
+      expect(withEntry.subject).toBe('SaaS HRIS Perusahaan');
+      expect(withEntry.client_id).toBe('client-saas-1');
+      expect(withEntry.client_company_name).toBe('PT Digital Solusi');
+      expect(withEntry.client_name).toBe('Siti Aminah');
     });
   });
 

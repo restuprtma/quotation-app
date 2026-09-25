@@ -5,6 +5,7 @@ import {
   quotationGenerationSchema,
   createDefaultDedicatedSquadValues,
 } from './quotation-generation-form';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 describe('dedicated squad generation form contract', () => {
   it('creates a 1D form with sprint dates and workday units', () => {
@@ -38,5 +39,20 @@ describe('dedicated squad generation form contract', () => {
     expect(payload.dedicated_squad.payment_anchor_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(payload.dedicated_squad.development_squad[0].workday_count).toBeGreaterThan(0);
     expect(payload.dedicated_squad.development_squad[0].period_quarters).toBe(0);
+  });
+
+  it('applies entry identity to dedicated squad default values', () => {
+    const base = createDefaultDedicatedSquadValues('1A', 'rate-card-1');
+    const withEntry = applyEntryIdentityToSchemeDefaults(base, {
+      project_name: 'Dedicated Development App',
+      client_id: 'client-uuid-1',
+      client_company_name: 'PT Sinergi Digital',
+      pic_name: 'Budi Santoso',
+    });
+
+    expect(withEntry.subject).toBe('Dedicated Development App');
+    expect(withEntry.client_id).toBe('client-uuid-1');
+    expect(withEntry.client_company_name).toBe('PT Sinergi Digital');
+    expect(withEntry.client_name).toBe('Budi Santoso');
   });
 });

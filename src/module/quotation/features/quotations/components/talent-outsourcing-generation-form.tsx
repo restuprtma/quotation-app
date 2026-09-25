@@ -1,8 +1,11 @@
 import type { ActiveSkill, TalentEngagementMode, GenerateQuotationPayload } from '../types';
+import type { QuotationEntryIdentity } from '../types/quotation-entry';
 
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch, FormProvider } from 'react-hook-form';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
@@ -37,26 +40,42 @@ import {
 
 const hash = (payload: GenerateQuotationPayload | null) =>
   JSON.stringify(normalizeTalentOutsourcingPreviewPayload(payload));
+
+type Props = {
+  selectedSkill?: ActiveSkill | null;
+  isSubmitting?: boolean;
+  onSubmit: (payload: GenerateQuotationPayload) => void;
+  onCancel: () => void;
+  entryIdentity?: QuotationEntryIdentity;
+  onEntryIdentityChange?: (identity: QuotationEntryIdentity) => void;
+};
+
 export function TalentOutsourcingGenerationForm({
   selectedSkill,
   isSubmitting = false,
   onSubmit,
   onCancel,
-}: {
-  selectedSkill?: ActiveSkill | null;
-  isSubmitting?: boolean;
-  onSubmit: (payload: GenerateQuotationPayload) => void;
-  onCancel: () => void;
-}) {
+  entryIdentity,
+  onEntryIdentityChange,
+}: Props) {
   const { data: activeSkills = [] } = useActiveSkills();
   const schema = useMemo(() => makeTalentOutsourcingFormSchema(), []);
+  const defaultValues = useMemo(
+    () =>
+      applyEntryIdentityToSchemeDefaults(
+        createDefaultTalentOutsourcingValues(new Date().toISOString().slice(0, 10)),
+        entryIdentity ?? ({} as any)
+      ),
+    [entryIdentity]
+  );
   const methods = useForm<any>({
     resolver: zodResolver(schema) as any,
-    defaultValues: createDefaultTalentOutsourcingValues(new Date().toISOString().slice(0, 10)),
+    defaultValues,
     mode: 'onBlur',
     reValidateMode: 'onChange',
   });
   const { formState, getValues, setValue, handleSubmit, control } = methods;
+  useEntryIdentityBridge({ control, onChange: onEntryIdentityChange });
   const values = useWatch({ control });
   const [submitted, setSubmitted] = useState(false);
   const [pendingMode, setPendingMode] = useState<TalentEngagementMode | null>(null);

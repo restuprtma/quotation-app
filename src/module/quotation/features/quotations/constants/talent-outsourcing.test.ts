@@ -6,7 +6,9 @@ import {
   talentCostLineTotal,
   calculateTalentDraftTotals,
   normalizeTalentOutsourcing,
+  createDefaultTalentOutsourcingValues,
 } from './talent-outsourcing';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 const bpjs: TalentOutsourcingInput = {
   engagement_mode: 'manpower_supply',
@@ -102,5 +104,20 @@ describe('talent outsourcing pure rules', () => {
       squad_items: [{ role: 'Developer', monthly_rate: 1, headcount: 1, period_months: 1 }],
     });
     expect(normalized.cost_groups).toEqual([]);
+  });
+
+  it('merges entry identity into default talent outsourcing values', () => {
+    const base = createDefaultTalentOutsourcingValues('2026-09-09');
+    const withEntry = applyEntryIdentityToSchemeDefaults(base, {
+      project_name: 'Talent Resource Supply',
+      client_id: 'client-to-1',
+      client_company_name: 'PT Mitra Sukses',
+      pic_name: 'Maya Indah',
+    });
+
+    expect(withEntry.subject).toBe('Talent Resource Supply');
+    expect(withEntry.client_id).toBe('client-to-1');
+    expect(withEntry.client_company_name).toBe('PT Mitra Sukses');
+    expect(withEntry.client_name).toBe('Maya Indah');
   });
 });

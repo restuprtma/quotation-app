@@ -1,10 +1,13 @@
 import type { Resolver, FieldPath } from 'react-hook-form';
 import type { ActiveSkill, GenerateQuotationPayload } from '../types';
+import type { QuotationEntryIdentity } from '../types/quotation-entry';
 import type { CloudInfrastructureFormValues } from './cloud-infrastructure-form-model';
 
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRef, useMemo, useState, useEffect } from 'react';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -41,6 +44,8 @@ type Props = {
   isSubmitting?: boolean;
   onSubmit: (payload: GenerateQuotationPayload) => void;
   onCancel: () => void;
+  entryIdentity?: QuotationEntryIdentity;
+  onEntryIdentityChange?: (identity: QuotationEntryIdentity) => void;
 };
 
 export function CloudInfrastructureGenerationForm({
@@ -48,6 +53,8 @@ export function CloudInfrastructureGenerationForm({
   isSubmitting = false,
   onSubmit,
   onCancel,
+  entryIdentity,
+  onEntryIdentityChange,
 }: Props) {
   const { t } = useTranslate('quotation');
   const { data: activeSkills = [] } = useActiveSkills();
@@ -59,7 +66,7 @@ export function CloudInfrastructureGenerationForm({
   const [showErrors, setShowErrors] = useState(false);
   const defaultValues = useMemo<CloudInfrastructureFormValues>(() => {
     const initial = makeDefaultCloudInfrastructureValues();
-    return {
+    const base: CloudInfrastructureFormValues = {
       client_id: '',
       client_name: '',
       client_company_name: '',
@@ -86,7 +93,8 @@ export function CloudInfrastructureGenerationForm({
         additional_limitations: [],
       },
     };
-  }, []);
+    return applyEntryIdentityToSchemeDefaults(base, entryIdentity ?? ({} as any));
+  }, [entryIdentity]);
   const methods = useForm<CloudInfrastructureFormValues>({
     resolver: zodResolver(cloudInfrastructureFormSchema) as Resolver<CloudInfrastructureFormValues>,
     defaultValues,
@@ -94,14 +102,8 @@ export function CloudInfrastructureGenerationForm({
     reValidateMode: 'onChange',
   });
   const { control, register, handleSubmit, setFocus, setValue, formState } = methods;
+  useEntryIdentityBridge({ control, onChange: onEntryIdentityChange });
   const values = useWatch({ control });
-
-  useEffect(() => {
-    if (clients.length > 0 && !values.client_id && !values.client_company_name) {
-      setValue('client_id', clients[0].id, { shouldValidate: true });
-      setValue('client_company_name', clients[0].name, { shouldValidate: true });
-    }
-  }, [clients, setValue, values.client_company_name, values.client_id]);
 
   const parsed = useMemo(() => cloudInfrastructureFormSchema.safeParse(values), [values]);
   const payload = useMemo<GenerateQuotationPayload | null>(() => {

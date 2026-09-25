@@ -1,11 +1,11 @@
 import { it, expect, describe } from 'vitest';
-
 import {
   projectCloudCalculation,
   copyInfrastructurePackage,
   normalizeCloudInfrastructure,
   makeDefaultCloudInfrastructureValues,
 } from './cloud-infrastructure';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 const authen = {
   document_number: ' CTH/Authen ',
@@ -85,5 +85,25 @@ describe('cloud infrastructure pure rules', () => {
     expect(normalized.document_number).toBe('CTH/Authen');
     expect(normalized.package_items.map((item) => item.name)).toEqual(['VM Small', 'VM Small']);
     expect(authen.package_items[0].name).toBe(' VM Small ');
+  });
+
+  it('merges entry identity into default cloud infrastructure values', () => {
+    const base = {
+      ...makeDefaultCloudInfrastructureValues(),
+      client_id: '',
+      client_company_name: '',
+      client_name: '',
+    };
+    const withEntry = applyEntryIdentityToSchemeDefaults(base, {
+      project_name: 'Cloud Infrastructure Server',
+      client_id: 'client-ci-1',
+      client_company_name: 'PT Awan Nusantara',
+      pic_name: 'Rian Pratama',
+    });
+
+    expect(withEntry.subject).toBe('Cloud Infrastructure Server');
+    expect(withEntry.client_id).toBe('client-ci-1');
+    expect(withEntry.client_company_name).toBe('PT Awan Nusantara');
+    expect(withEntry.client_name).toBe('Rian Pratama');
   });
 });

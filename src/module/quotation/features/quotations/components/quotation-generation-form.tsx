@@ -1,9 +1,12 @@
 import type { SquadModel, ActiveSkill, SquadLineInput, GenerateQuotationPayload } from '../types';
+import type { QuotationEntryIdentity } from '../types/quotation-entry';
 
 import { z } from 'zod';
 import { useMemo, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -208,6 +211,8 @@ type Props = {
   isSubmitting?: boolean;
   onSubmit: (payload: GenerateQuotationPayload) => void;
   onCancel: () => void;
+  entryIdentity?: QuotationEntryIdentity;
+  onEntryIdentityChange?: (identity: QuotationEntryIdentity) => void;
 };
 
 function toISODate(date: Date) {
@@ -309,6 +314,8 @@ export function QuotationGenerationForm({
   isSubmitting = false,
   onSubmit,
   onCancel,
+  entryIdentity,
+  onEntryIdentityChange,
 }: Props) {
   const { t } = useTranslate('quotation');
   const { data: activeSkills = [] } = useActiveSkills();
@@ -320,8 +327,12 @@ export function QuotationGenerationForm({
   );
 
   const defaultValues = useMemo(
-    () => createDefaultDedicatedSquadValues('1A', rateCards[0]?.id, clients[0]),
-    [clients, rateCards]
+    () =>
+      applyEntryIdentityToSchemeDefaults(
+        createDefaultDedicatedSquadValues('1A', rateCards[0]?.id),
+        entryIdentity ?? ({} as any)
+      ),
+    [rateCards, entryIdentity]
   );
   const methods = useForm<QuotationGenerationFormValues>({
     resolver: zodResolver(quotationGenerationSchema),
@@ -329,18 +340,12 @@ export function QuotationGenerationForm({
     mode: 'onChange',
   });
   const { control, handleSubmit, setValue, formState } = methods;
+  useEntryIdentityBridge({ control, onChange: onEntryIdentityChange });
   const values = useWatch({ control });
   const model = (values.dedicated_squad?.model || '1A') as SquadModel;
   const visibility = getDedicatedSquadVisibility(model);
   const timelineMode = values.dedicated_squad?.timeline?.mode;
   const maintenanceEnabled = Boolean(values.dedicated_squad?.maintenance_enabled);
-
-  useEffect(() => {
-    if (clients.length > 0 && !values.client_id && !values.client_company_name) {
-      setValue('client_id', clients[0].id, { shouldValidate: true });
-      setValue('client_company_name', clients[0].name, { shouldValidate: true });
-    }
-  }, [clients, setValue, values.client_company_name, values.client_id]);
 
   useEffect(() => {
     if (rateCards.length > 0 && !values.rate_card_id) {

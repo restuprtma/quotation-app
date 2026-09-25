@@ -8,6 +8,7 @@ import {
   KIOSK_QUEUE_DEFAULT_VALUES,
   createDefaultKioskQueueValues,
 } from './kiosk-queue-system';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 export const governmentHardwareValues: KioskQueueSystemInput = {
   variant: 'government_mpp',
@@ -322,5 +323,20 @@ describe('kiosk-queue-system constants & pure helpers', () => {
 
     const priv = createDefaultKioskQueueValues('2026-09-14', undefined, 'private_food_court');
     expect(priv.solution_type).toBe('Kiosk Application');
+  });
+
+  it('merges entry identity into default kiosk queue values', () => {
+    const gov = createDefaultKioskQueueValues('2026-09-14', undefined, 'government_mpp');
+    const withEntry = applyEntryIdentityToSchemeDefaults(gov, {
+      project_name: 'Antrian MPP Kabupaten',
+      client_id: 'client-mpp-1',
+      client_company_name: 'Dinas Penanaman Modal',
+      pic_name: 'Budi Santoso PPK',
+    });
+
+    expect(withEntry.subject).toBe('Antrian MPP Kabupaten');
+    expect(withEntry.client_id).toBe('client-mpp-1');
+    expect(withEntry.client_company_name).toBe('Dinas Penanaman Modal');
+    expect(withEntry.client_name).toBe('Budi Santoso PPK');
   });
 });

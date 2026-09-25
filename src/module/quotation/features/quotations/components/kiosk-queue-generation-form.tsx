@@ -1,9 +1,12 @@
 import type { KioskQueueFormValues } from './kiosk-queue-form-model';
 import type { ActiveSkill, KioskQueueVariant, GenerateQuotationPayload } from '../types';
+import type { QuotationEntryIdentity } from '../types/quotation-entry';
 
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRef, useMemo, useState, useEffect } from 'react';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -282,6 +285,8 @@ type Props = {
   onSubmit: (payload: GenerateQuotationPayload) => void;
   onCancel: () => void;
   initialValues?: KioskQueueFormValues;
+  entryIdentity?: QuotationEntryIdentity;
+  onEntryIdentityChange?: (identity: QuotationEntryIdentity) => void;
 };
 
 export function KioskQueueGenerationForm({
@@ -290,6 +295,8 @@ export function KioskQueueGenerationForm({
   onSubmit,
   onCancel,
   initialValues,
+  entryIdentity,
+  onEntryIdentityChange,
 }: Props) {
   const { t } = useTranslate('quotation');
   const { data: activeSkills = [] } = useActiveSkills();
@@ -300,16 +307,16 @@ export function KioskQueueGenerationForm({
   const [variantDialogOpen, setVariantDialogOpen] = useState(false);
   const [pendingVariant, setPendingVariant] = useState<KioskQueueVariant | null>(null);
 
-  const defaultValues = useMemo(
-    () =>
+  const defaultValues = useMemo(() => {
+    const base =
       initialValues ||
       createDefaultKioskQueueValues(
         new Date().toISOString().slice(0, 10),
-        clients[0],
+        undefined,
         'government_mpp'
-      ),
-    [clients, initialValues]
-  );
+      );
+    return applyEntryIdentityToSchemeDefaults(base, entryIdentity ?? ({} as any));
+  }, [entryIdentity, initialValues]);
 
   const methods = useForm<KioskQueueFormValues>({
     mode: 'onBlur',
@@ -319,6 +326,7 @@ export function KioskQueueGenerationForm({
   });
 
   const { control, handleSubmit, reset, setValue, setFocus, formState } = methods;
+  useEntryIdentityBridge({ control, onChange: onEntryIdentityChange });
   const values = useWatch({ control });
 
   const prevSubmitCountRef = useRef(formState.submitCount);
@@ -330,14 +338,6 @@ export function KioskQueueGenerationForm({
     }
     prevSubmitCountRef.current = formState.submitCount;
   }, [formState.isValid, formState.submitCount]);
-
-  // Auto-populate initial client details if empty
-  useEffect(() => {
-    if (clients.length > 0 && !values.client_id && !values.client_company_name) {
-      setValue('client_id', clients[0].id, { shouldValidate: true });
-      setValue('client_company_name', clients[0].name, { shouldValidate: true });
-    }
-  }, [clients, setValue, values.client_company_name, values.client_id]);
 
   const currentVariant = values.kiosk_queue_system?.variant || 'government_mpp';
 

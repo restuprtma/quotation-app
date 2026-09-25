@@ -4,7 +4,7 @@ import type { KioskQueuePreviewResponse } from '../types';
 import { MemoryRouter } from 'react-router';
 import userEvent from '@testing-library/user-event';
 import { vi, it, expect, describe, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 vi.mock('@mui/x-data-grid', () => ({
@@ -180,6 +180,7 @@ describe('kiosk-queue-generation-form RTL interaction and contract', () => {
 
   it('selects Sistem & Integrasi Perangkat Keras with keyboard', async () => {
     renderWithProviders(<QuotationPromptView />);
+    await userEvent.click(screen.getByRole('button', { name: /advanced/i }));
     const quotationChip = screen.getByRole('button', { name: /\/quotation/i });
     await userEvent.click(quotationChip);
 
@@ -188,6 +189,35 @@ describe('kiosk-queue-generation-form RTL interaction and contract', () => {
     await userEvent.keyboard('{Enter}');
     expect(await screen.findByRole('heading', { name: /buat quotation kiosk/i })).toBeDefined();
   }, 15_000);
+
+  it('pre-fills entryIdentity and triggers onEntryIdentityChange on input', async () => {
+    const onEntryIdentityChange = vi.fn();
+    renderWithProviders(
+      <KioskQueueGenerationForm
+        onSubmit={() => {}}
+        onCancel={() => {}}
+        entryIdentity={{
+          project_name: 'Antrian MPP Kabupaten',
+          client_id: 'client-uuid-mpp',
+          client_company_name: 'Dinas Penanaman Modal',
+          pic_name: 'Budi PPK',
+        }}
+        onEntryIdentityChange={onEntryIdentityChange}
+      />
+    );
+
+    const subjectInput = screen.getByDisplayValue('Antrian MPP Kabupaten');
+    expect(subjectInput).toBeDefined();
+
+    fireEvent.change(subjectInput, { target: { value: 'Antrian MPP Terpadu 2026' } });
+    await waitFor(() => {
+      expect(onEntryIdentityChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          project_name: 'Antrian MPP Terpadu 2026',
+        })
+      );
+    });
+  });
 
   it('shows only government fields for government_mpp', () => {
     renderKioskForm({ variant: 'government_mpp' });

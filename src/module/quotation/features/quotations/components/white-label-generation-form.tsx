@@ -1,9 +1,12 @@
 import type { WhiteLabelFormValues } from './white-label-form-model';
 import type { ActiveSkill, GenerateQuotationPayload } from '../types';
+import type { QuotationEntryIdentity } from '../types/quotation-entry';
 
 import { useRef, useMemo, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -44,6 +47,8 @@ type Props = {
   isSubmitting?: boolean;
   onSubmit: (payload: GenerateQuotationPayload) => void;
   onCancel: () => void;
+  entryIdentity?: QuotationEntryIdentity;
+  onEntryIdentityChange?: (identity: QuotationEntryIdentity) => void;
 };
 
 function toISODate(date: Date) {
@@ -55,6 +60,8 @@ export function WhiteLabelGenerationForm({
   isSubmitting = false,
   onSubmit,
   onCancel,
+  entryIdentity,
+  onEntryIdentityChange,
 }: Props) {
   const { t } = useTranslate('quotation');
   const { data: activeSkills = [] } = useActiveSkills();
@@ -63,8 +70,12 @@ export function WhiteLabelGenerationForm({
   const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   const defaultValues = useMemo(
-    () => createDefaultWhiteLabelValues(toISODate(new Date()), clients[0]),
-    [clients]
+    () =>
+      applyEntryIdentityToSchemeDefaults(
+        createDefaultWhiteLabelValues(toISODate(new Date())),
+        entryIdentity ?? ({} as any)
+      ),
+    [entryIdentity]
   );
 
   const methods = useForm<WhiteLabelFormValues>({
@@ -75,6 +86,7 @@ export function WhiteLabelGenerationForm({
   });
 
   const { control, handleSubmit, setValue, formState } = methods;
+  useEntryIdentityBridge({ control, onChange: onEntryIdentityChange });
   const values = useWatch({ control });
 
   const prevSubmitCountRef = useRef(formState.submitCount);
@@ -86,14 +98,6 @@ export function WhiteLabelGenerationForm({
     }
     prevSubmitCountRef.current = formState.submitCount;
   }, [formState.submitCount, formState.isValid]);
-
-  // Auto-populate initial client details if empty
-  useEffect(() => {
-    if (clients.length > 0 && !values.client_id && !values.client_company_name) {
-      setValue('client_id', clients[0].id, { shouldValidate: true });
-      setValue('client_company_name', clients[0].name, { shouldValidate: true });
-    }
-  }, [clients, setValue, values.client_company_name, values.client_id]);
 
   // Preview payload derivation
   const previewPayload = useMemo(() => {

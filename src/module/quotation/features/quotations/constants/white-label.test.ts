@@ -17,6 +17,7 @@ import {
   createDefaultWhiteLabelValues,
   calculateWhiteLabelDraftTotals,
 } from './white-label';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 describe('white-label constants & pure helpers', () => {
   const today = '2026-09-08';
@@ -175,6 +176,21 @@ describe('white-label constants & pure helpers', () => {
       const values = createDefaultWhiteLabelValues(today);
       expect(values.client_id).toBe('');
       expect(values.client_company_name).toBe('');
+    });
+
+    it('merges entry identity into default white label values', () => {
+      const base = createDefaultWhiteLabelValues(today);
+      const withEntry = applyEntryIdentityToSchemeDefaults(base, {
+        project_name: 'White Label POS System',
+        client_id: 'client-wl-1',
+        client_company_name: 'PT Ritel Modern',
+        pic_name: 'Dewi Sartika',
+      });
+
+      expect(withEntry.subject).toBe('White Label POS System');
+      expect(withEntry.client_id).toBe('client-wl-1');
+      expect(withEntry.client_company_name).toBe('PT Ritel Modern');
+      expect(withEntry.client_name).toBe('Dewi Sartika');
     });
   });
 

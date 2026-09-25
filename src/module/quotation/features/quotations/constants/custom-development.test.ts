@@ -15,6 +15,7 @@ import {
   DEFAULT_CUSTOM_DEVELOPMENT_LIMITATION_CODES,
   CUSTOM_DEVELOPMENT_PAYMENT_COMPONENT_OPTIONS,
 } from './custom-development';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 describe('custom-development constants & pure helpers', () => {
   const sampleKopiStudio24Input: CustomDevelopmentInput = {
@@ -581,6 +582,21 @@ describe('custom-development constants & pure helpers', () => {
         'third_party',
         'scope_change',
       ]);
+    });
+
+    it('merges entry identity into default custom development values', () => {
+      const base = createDefaultCustomDevelopmentValues('2026-09-09');
+      const withEntry = applyEntryIdentityToSchemeDefaults(base, {
+        project_name: 'Custom ERP Enterprise',
+        client_id: 'client-cd-1',
+        client_company_name: 'PT Kreasi Unggul',
+        pic_name: 'Bambang Sudibyo',
+      });
+
+      expect(withEntry.subject).toBe('Custom ERP Enterprise');
+      expect(withEntry.client_id).toBe('client-cd-1');
+      expect(withEntry.client_company_name).toBe('PT Kreasi Unggul');
+      expect(withEntry.client_name).toBe('Bambang Sudibyo');
     });
   });
 });

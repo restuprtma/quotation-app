@@ -115,4 +115,36 @@ describe('cloud infrastructure generation form', () => {
       )
     );
   }, 15_000);
+
+  it('pre-fills entryIdentity and notifies onEntryIdentityChange', async () => {
+    const onEntryIdentityChange = vi.fn();
+    render(
+      <CloudInfrastructureGenerationForm
+        onSubmit={state.submitted}
+        onCancel={vi.fn()}
+        entryIdentity={{
+          project_name: 'Cloud VPS Proposal',
+          client_id: 'client-ci-1',
+          client_company_name: 'PT Cloud Nusantara',
+          pic_name: 'Budi Santoso',
+        }}
+        onEntryIdentityChange={onEntryIdentityChange}
+      />
+    );
+
+    const subjectInput = document.querySelector('[name="subject"]') as HTMLInputElement;
+    expect(subjectInput.value).toBe('Cloud VPS Proposal');
+
+    const clientNameInput = document.querySelector('[name="client_name"]') as HTMLInputElement;
+    expect(clientNameInput.value).toBe('Budi Santoso');
+
+    fill('subject', 'Cloud VPS Premium 2026');
+    await waitFor(() => {
+      expect(onEntryIdentityChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          project_name: 'Cloud VPS Premium 2026',
+        })
+      );
+    });
+  });
 });

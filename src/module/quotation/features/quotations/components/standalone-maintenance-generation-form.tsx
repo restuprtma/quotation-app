@@ -1,4 +1,5 @@
 import type { StandaloneMaintenanceFormValues } from './standalone-maintenance-form-model';
+import type { QuotationEntryIdentity } from '../types/quotation-entry';
 import type {
   ActiveSkill,
   GenerateQuotationPayload,
@@ -9,6 +10,8 @@ import type {
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRef, useMemo, useState, useEffect } from 'react';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -152,6 +155,8 @@ type Props = {
   isSubmitting?: boolean;
   onSubmit: (payload: GenerateQuotationPayload) => void;
   onCancel: () => void;
+  entryIdentity?: QuotationEntryIdentity;
+  onEntryIdentityChange?: (identity: QuotationEntryIdentity) => void;
 };
 
 export function StandaloneMaintenanceGenerationForm({
@@ -159,6 +164,8 @@ export function StandaloneMaintenanceGenerationForm({
   isSubmitting = false,
   onSubmit,
   onCancel,
+  entryIdentity,
+  onEntryIdentityChange,
 }: Props) {
   const { t } = useTranslate('quotation');
   const { data: activeSkills = [] } = useActiveSkills();
@@ -170,8 +177,12 @@ export function StandaloneMaintenanceGenerationForm({
   const [pendingMode, setPendingMode] = useState<StandaloneMaintenanceMode | null>(null);
 
   const defaultValues = useMemo(
-    () => createDefaultStandaloneMaintenanceValues(toISODate(new Date()), clients[0]),
-    [clients]
+    () =>
+      applyEntryIdentityToSchemeDefaults(
+        createDefaultStandaloneMaintenanceValues(toISODate(new Date())),
+        entryIdentity ?? ({} as any)
+      ),
+    [entryIdentity]
   );
 
   const methods = useForm<StandaloneMaintenanceFormValues>({
@@ -182,6 +193,7 @@ export function StandaloneMaintenanceGenerationForm({
   });
 
   const { control, handleSubmit, setValue, setFocus, formState } = methods;
+  useEntryIdentityBridge({ control, onChange: onEntryIdentityChange });
   const values = useWatch({ control });
 
   const prevSubmitCountRef = useRef(formState.submitCount);
@@ -193,14 +205,6 @@ export function StandaloneMaintenanceGenerationForm({
     }
     prevSubmitCountRef.current = formState.submitCount;
   }, [formState.submitCount, formState.isValid]);
-
-  // Auto-populate initial client details if empty
-  useEffect(() => {
-    if (clients.length > 0 && !values.client_id && !values.client_company_name) {
-      setValue('client_id', clients[0].id, { shouldValidate: true });
-      setValue('client_company_name', clients[0].name, { shouldValidate: true });
-    }
-  }, [clients, setValue, values.client_company_name, values.client_id]);
 
   const currentMode = values.standalone_maintenance?.mode || 'retainer';
 
