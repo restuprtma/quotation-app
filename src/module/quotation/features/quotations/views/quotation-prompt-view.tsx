@@ -1,5 +1,5 @@
 import type { GenerateQuotationPayload } from '../types';
-import type { MeetingQuotationPayload } from '../types/prompt-first';
+import type { DraftIssue, MeetingQuotationPayload } from '../types/prompt-first';
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
@@ -53,6 +53,33 @@ const VALID_SCHEMES: CommercialSchemeType[] = [
 
 const INVALID_EXTRACTION_MESSAGE =
   'Catatan belum dapat diproses menjadi draf. Lengkapi kebutuhan, durasi, tim, dan skema layanan; lalu coba lagi.';
+
+const INVALID_EXTRACTION_PREFIX = 'invalid_extraction.';
+
+const INVALID_EXTRACTION_REASON_MESSAGES: Record<string, string> = {
+  malformed_json: 'Respons AI belum dapat dibaca dalam format yang diperlukan. Coba buat draf lagi.',
+  trailing_content: 'Respons AI belum dapat dibaca dalam format yang diperlukan. Coba buat draf lagi.',
+  missing_required_field:
+    'Informasi penting dari catatan meeting belum lengkap untuk membuat draf. Lengkapi catatan lalu coba lagi.',
+  unknown_field: 'Respons AI memuat format yang belum didukung. Coba buat draf lagi.',
+  schema_version: 'Versi format ekstraksi belum sesuai. Coba buat draf lagi.',
+  unsupported_evidence:
+    'Sebagian informasi hasil AI tidak dapat dicocokkan dengan catatan meeting. Periksa penulisan nama, durasi, tim, dan skema layanan; lalu coba lagi.',
+  state_validation:
+    'Hasil ekstraksi tidak memenuhi validasi struktur draf. Periksa catatan meeting lalu coba lagi.',
+};
+
+function mapDraftIssue(issue: DraftIssue): DraftIssue {
+  if (issue.code === 'invalid_extraction') {
+    return { ...issue, code: '', message: INVALID_EXTRACTION_MESSAGE };
+  }
+  if (issue.code.startsWith(INVALID_EXTRACTION_PREFIX)) {
+    const reason = issue.code.slice(INVALID_EXTRACTION_PREFIX.length);
+    const message = INVALID_EXTRACTION_REASON_MESSAGES[reason] ?? INVALID_EXTRACTION_MESSAGE;
+    return { ...issue, code: '', message };
+  }
+  return issue;
+}
 
 export function QuotationPromptView() {
   const { t } = useTranslate('quotation');
@@ -444,11 +471,7 @@ export function QuotationPromptView() {
             onCreateClient={(name) => createClientMutation.mutateAsync(name)}
             isCreatingClient={createClientMutation.isPending}
             createClientError={createClientMutation.error}
-            issues={promptMutation.issues.map((issue) =>
-              issue.code === 'invalid_extraction'
-                ? { ...issue, code: '', message: INVALID_EXTRACTION_MESSAGE }
-                : issue
-            )}
+            issues={promptMutation.issues.map(mapDraftIssue)}
             isSubmitting={promptMutation.isPending}
             onSubmit={handleMeetingSubmit}
             onOpenAdvanced={() => navigate(paths.dashboard.quotation.advanced)}

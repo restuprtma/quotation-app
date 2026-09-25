@@ -400,6 +400,62 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     ).toBe(false);
   });
 
+  it('shows targeted guidance without rendering technical code when meeting extraction has qualified reason', async () => {
+    mockCreateQuotationFromMeeting.mockRejectedValue({
+      message: 'invalid_extraction.unsupported_evidence',
+      response: { data: { errors: { detail: ['invalid_extraction.unsupported_evidence'] } } },
+    });
+    sessionStorage.setItem(
+      QUOTATION_ENTRY_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        project_name: 'Inventory',
+        client_id: 'client-1',
+        client_company_name: 'PT Alpha',
+        pic_name: 'Andi',
+        meeting_notes: 'Catatan meeting inventori yang cukup panjang untuk diuji.',
+      })
+    );
+
+    renderView(['/quotation']);
+    await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
+
+    expect(
+      await screen.findByText(/tidak dapat dicocokkan dengan catatan meeting/i)
+    ).toBeDefined();
+    expect(screen.queryByText('invalid_extraction.unsupported_evidence')).toBeNull();
+    expect(
+      (screen.getByRole('textbox', { name: /Catatan Meeting/i }) as HTMLTextAreaElement).disabled
+    ).toBe(false);
+  });
+
+  it('falls back to generic message and clears technical code when meeting extraction has unknown qualified suffix', async () => {
+    mockCreateQuotationFromMeeting.mockRejectedValue({
+      message: 'invalid_extraction.future_unknown_reason',
+      response: { data: { errors: { detail: ['invalid_extraction.future_unknown_reason'] } } },
+    });
+    sessionStorage.setItem(
+      QUOTATION_ENTRY_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        project_name: 'Inventory',
+        client_id: 'client-1',
+        client_company_name: 'PT Alpha',
+        pic_name: 'Andi',
+        meeting_notes: 'Catatan meeting inventori yang cukup panjang untuk diuji.',
+      })
+    );
+
+    renderView(['/quotation']);
+    await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
+
+    expect(await screen.findByText(/Catatan belum dapat diproses/i)).toBeDefined();
+    expect(screen.queryByText('invalid_extraction.future_unknown_reason')).toBeNull();
+    expect(
+      (screen.getByRole('textbox', { name: /Catatan Meeting/i }) as HTMLTextAreaElement).disabled
+    ).toBe(false);
+  });
+
   it('submits advanced scheme generation form, navigates to quotation edit page, and clears entry session', async () => {
     const mockGenerateResponse = {
       quotation_id: 'gen-uuid-202',
