@@ -159,7 +159,7 @@ export function getActiveRateCards() {
 
 export async function getClients(): Promise<ClientSummary[]> {
   const res = await unwrap<ClientSummary[] | { items: ClientSummary[]; total: number }>(
-    axios.get(endpoints.core.clients)
+    axios.get(endpoints.quotation.clientOrganizations.root)
   );
   if (Array.isArray(res)) {
     return res;
@@ -168,4 +168,12 @@ export async function getClients(): Promise<ClientSummary[]> {
     return (res as any).items;
   }
   return [];
+}
+
+export function createClientOrganization(name: string): Promise<ClientSummary> {
+  return unwrap<ClientSummary>(
+    axios.post(endpoints.quotation.clientOrganizations.root, {
+      name: name.trim(),
+    })
+  );
 }

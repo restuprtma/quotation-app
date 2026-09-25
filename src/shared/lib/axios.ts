@@ -150,12 +150,18 @@ export const endpoints = {
     clients: '/core/v1/admin/clients',
   },
   quotation: {
+    clientOrganizations: {
+      root: '/quotation/v1/client-organizations',
+    },
     quotations: {
       list: '/quotation/v1/quotations',
       byId: (id: string) => `/quotation/v1/quotations/${id}`,
       create: '/quotation/v1/quotations',
       update: (id: string) => `/quotation/v1/quotations/${id}`,
       generate: '/quotation/v1/quotations/generate',
+      fromMeeting: '/quotation/v1/quotations/from-meeting',
+      promptState: (id: string) => `/quotation/v1/quotations/${id}/prompt-state`,
+      reviseSection: (id: string) => `/quotation/v1/quotations/${id}/revise-section`,
       preview: '/quotation/v1/quotations/preview',
       subscriptionPreview: '/quotation/v1/quotations/preview/subscription-saas',
       whiteLabelPreview: '/quotation/v1/quotations/preview/white-label',

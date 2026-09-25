@@ -1,3 +1,5 @@
+import type { DraftIssue, PromptQuotationState } from './prompt-first';
+
 export type PaymentTermItem = {
   milestone_name: string;
   percentage: number;
@@ -1030,6 +1032,11 @@ export type QuotationGenerationDetail = {
   content_version: number;
   content_html: string;
   legal_template_snapshot?: LegalTemplateSnapshot | string;
+  /** Present only for prompt-first revisions; omitted for legacy quotations. */
+  prompt_state?: PromptQuotationState;
+  prompt_state_version?: number;
+  issues?: DraftIssue[];
+  readiness?: string;
   legal_content_modified?: boolean;
   commercial_content_modified?: boolean;
   generated_at?: string;
