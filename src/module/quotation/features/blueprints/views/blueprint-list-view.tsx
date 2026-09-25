@@ -10,7 +10,7 @@ import { paths } from 'src/routes/paths';
 import { Iconify } from 'src/shared/ui/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import { PROCESS_BLUEPRINT_STATUSES } from '../types';
+import { PROCESS_BLUEPRINT_STATUSES, type GenerationStatus } from '../types';
 import { useBlueprintList } from '../hooks/use-blueprint';
 import { BlueprintListTable } from '../components/blueprint-list-table';
 
@@ -32,7 +32,7 @@ export function BlueprintListView({ mode }: BlueprintListViewProps) {
     return isNaN(raw) || raw < 1 ? 20 : raw;
   }, [searchParams]);
 
-  const statuses = useMemo(
+  const statuses: GenerationStatus[] = useMemo(
     () => (mode === 'process' ? PROCESS_BLUEPRINT_STATUSES : ['completed']),
     [mode]
   );

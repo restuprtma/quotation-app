@@ -16,6 +16,7 @@ const icon = (name: string) => (
 
 const ICONS = {
   quotation: icon('ic-file'),
+  blueprint: icon('ic-subpaths'),
   contract: icon('ic-folder'),
 };
 
@@ -32,6 +33,35 @@ export function useNavData(): NavSectionProps['data'] {
             title: t('quotation'),
             path: paths.dashboard.quotation.root,
             icon: ICONS.quotation,
+            children: [
+              {
+                title: t('quotation_create', { defaultValue: 'Buat Quotation' }),
+                path: paths.dashboard.quotation.prompt,
+              },
+              {
+                title: t('quotation_list', { defaultValue: 'Daftar Quotation' }),
+                path: paths.dashboard.quotation.list,
+              },
+            ],
+          },
+          {
+            title: t('blueprint'),
+            path: paths.dashboard.blueprint.root,
+            icon: ICONS.blueprint,
+            children: [
+              {
+                title: t('blueprint_create', { defaultValue: 'Buat Blueprint' }),
+                path: paths.dashboard.blueprint.create,
+              },
+              {
+                title: t('blueprint_process', { defaultValue: 'Proses Blueprint' }),
+                path: paths.dashboard.blueprint.process,
+              },
+              {
+                title: t('blueprint_list', { defaultValue: 'Daftar Blueprint' }),
+                path: paths.dashboard.blueprint.list,
+              },
+            ],
           },
           {
             title: t('rate_cards', { defaultValue: 'Rate Cards' }),

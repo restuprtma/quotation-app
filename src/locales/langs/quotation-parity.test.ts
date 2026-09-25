@@ -4,6 +4,8 @@ import enBlueprint from './en/blueprint.json';
 import idBlueprint from './id/blueprint.json';
 import enQuotation from './en/quotation.json';
 import idQuotation from './id/quotation.json';
+import enNavigation from './en/navigation.json';
+import idNavigation from './id/navigation.json';
 
 const flattenKeys = (value: unknown, prefix = ''): string[] => {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return [prefix];
@@ -20,5 +22,9 @@ describe('locale parity', () => {
 
   it('keeps Indonesian and English blueprint keys identical', () => {
     expect(flattenKeys(idBlueprint).sort()).toEqual(flattenKeys(enBlueprint).sort());
+  });
+
+  it('keeps Indonesian and English navigation keys identical', () => {
+    expect(flattenKeys(idNavigation).sort()).toEqual(flattenKeys(enNavigation).sort());
   });
 });

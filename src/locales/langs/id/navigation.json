@@ -1,5 +1,11 @@
 {
   "quotation": "Quotation",
+  "quotation_create": "Buat Quotation",
+  "quotation_list": "Daftar Quotation",
+  "blueprint": "Blueprint",
+  "blueprint_create": "Buat Blueprint",
+  "blueprint_process": "Proses Blueprint",
+  "blueprint_list": "Daftar Blueprint",
   "contract": "Contract Generator",
   "ai_settings": "Pengaturan AI",
   "rate_cards": "Rate Card",

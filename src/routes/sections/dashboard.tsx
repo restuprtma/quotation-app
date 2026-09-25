@@ -31,6 +31,12 @@ const RateCardDetailPage = lazy(
 const BlueprintCreatePage = lazy(
   () => import('src/module/quotation/features/blueprints/pages/create')
 );
+const BlueprintProcessPage = lazy(
+  () => import('src/module/quotation/features/blueprints/pages/process')
+);
+const BlueprintListPage = lazy(
+  () => import('src/module/quotation/features/blueprints/pages/list')
+);
 const BlueprintProgressPage = lazy(
   () => import('src/module/quotation/features/blueprints/pages/progress')
 );
@@ -65,8 +71,8 @@ export const dashboardRoutes: RouteObject[] = [
         path: 'quotation',
         children: [
           { index: true, element: <QuotationPromptPage /> },
-          { path: ':id/edit', element: <QuotationEditorPage /> },
           { path: 'list', element: <QuotationListPage /> },
+          { path: ':id/edit', element: <QuotationEditorPage /> },
           { path: 'ai-settings', element: <AISettingsPage /> },
           { path: 'rate-cards', element: <RateCardListPage /> },
           { path: 'rate-cards/:id', element: <RateCardDetailPage /> },
@@ -76,8 +82,10 @@ export const dashboardRoutes: RouteObject[] = [
         path: 'blueprint',
         children: [
           { index: true, element: <BlueprintCreatePage /> },
-          { path: ':id', element: <BlueprintProgressPage /> },
+          { path: 'process', element: <BlueprintProcessPage /> },
+          { path: 'list', element: <BlueprintListPage /> },
           { path: ':id/edit', element: <BlueprintEditorPage /> },
+          { path: ':id', element: <BlueprintProgressPage /> },
         ],
       },
       {

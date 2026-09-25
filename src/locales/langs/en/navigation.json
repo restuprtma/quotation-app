@@ -1,5 +1,11 @@
 {
   "quotation": "Quotation",
+  "quotation_create": "Create Quotation",
+  "quotation_list": "Quotation List",
+  "blueprint": "Blueprint",
+  "blueprint_create": "Create Blueprint",
+  "blueprint_process": "Blueprint Process",
+  "blueprint_list": "Blueprint List",
   "contract": "Contract Generator",
   "ai_settings": "AI Settings",
   "rate_cards": "Rate Cards",
