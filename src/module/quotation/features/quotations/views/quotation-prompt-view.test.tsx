@@ -218,6 +218,17 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     sessionStorage.clear();
     vi.restoreAllMocks();
     mockGetClients.mockResolvedValue(mockClients);
+    sessionStorage.setItem(
+      QUOTATION_ENTRY_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        project_name: 'Inventory',
+        client_id: 'client-1',
+        client_company_name: 'PT Alpha',
+        pic_name: 'Andi',
+        meeting_notes: 'Catatan meeting inventori yang cukup panjang untuk diuji.',
+      })
+    );
   });
 
   afterEach(() => {
@@ -448,6 +459,17 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     expect(await screen.findByText(/Catatan belum dapat diproses/i)).toBeDefined();
     expect(screen.queryByText('invalid_extraction.future_unknown_reason')).toBeNull();
     expect(screen.getByRole('button', { name: 'Retry Generation' })).toBeDefined();
+  });
+
+  it.each([
+    ['invalid_extraction.unsupported_evidence', /tidak dapat dicocokkan dengan catatan meeting/i],
+    ['invalid_extraction.malformed_json', /belum dapat dibaca dalam format yang diperlukan/i],
+  ])('shows safe extraction reason for %s', async (code, message) => {
+    mockCreateQuotationFromMeeting.mockRejectedValue({ response: { data: { errors: { detail: [code] } } } });
+    renderView(['/quotation']);
+    await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
+    expect(await screen.findByText(message)).toBeDefined();
+    expect(screen.queryByText(code)).toBeNull();
   });
 
   it('submits advanced scheme generation form, navigates to quotation edit page, and clears entry session', async () => {

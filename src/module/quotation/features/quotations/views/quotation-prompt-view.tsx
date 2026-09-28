@@ -63,9 +63,6 @@ const INVALID_EXTRACTION_PREFIX = 'invalid_extraction.';
 const NO_BUSINESS_SIGNAL_MESSAGE =
   'Catatan belum memuat informasi kebutuhan yang dapat dikenali. Tambahkan scope, durasi, tim, skema layanan, atau pola pembayaran.';
 
-const EXTRACTION_RETRY_EXHAUSTED_MESSAGE =
-  'Respons AI belum dapat diproses setelah dicoba ulang. Silakan coba kembali atau periksa konfigurasi provider AI.';
-
 const INVALID_EXTRACTION_REASON_MESSAGES: Record<string, string> = {
   malformed_json: 'Respons AI belum dapat dibaca dalam format yang diperlukan. Coba buat draf lagi.',
   trailing_content: 'Respons AI belum dapat dibaca dalam format yang diperlukan. Coba buat draf lagi.',
@@ -110,6 +107,13 @@ function getGenerationError(err: any) {
   }
 
   return { code, message };
+}
+
+function meetingExtractionErrorMessage(code: string, fallback: string) {
+  if (code === 'invalid_extraction') return INVALID_EXTRACTION_MESSAGE;
+  if (!code.startsWith(INVALID_EXTRACTION_PREFIX)) return fallback;
+  const reason = code.slice(INVALID_EXTRACTION_PREFIX.length);
+  return INVALID_EXTRACTION_REASON_MESSAGES[reason] ?? INVALID_EXTRACTION_MESSAGE;
 }
 
 export function QuotationPromptView() {
@@ -249,9 +253,7 @@ export function QuotationPromptView() {
       const message =
         code === 'meeting_notes_no_business_signal'
           ? NO_BUSINESS_SIGNAL_MESSAGE
-          : code === 'invalid_extraction' || code.startsWith(INVALID_EXTRACTION_PREFIX)
-            ? EXTRACTION_RETRY_EXHAUSTED_MESSAGE
-            : defaultMessage;
+          : meetingExtractionErrorMessage(code, defaultMessage);
       setActiveStageIndex(2);
       setGenerationError({ code, message });
     }
@@ -521,7 +523,7 @@ export function QuotationPromptView() {
             onCreateClient={(name) => createClientMutation.mutateAsync(name)}
             isCreatingClient={createClientMutation.isPending}
             createClientError={createClientMutation.error}
-            issues={promptMutation.issues.map(mapDraftIssue)}
+            issues={isProgressOpen ? [] : promptMutation.issues.map(mapDraftIssue)}
             isSubmitting={promptMutation.isPending}
             onSubmit={handleMeetingSubmit}
             onOpenAdvanced={() => navigate(paths.dashboard.quotation.advanced)}
