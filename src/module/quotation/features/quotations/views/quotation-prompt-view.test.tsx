@@ -362,7 +362,7 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
       expect(screen.getByTestId('location-display').textContent).toBe(
         '/quotation/quotation-uuid-101/edit'
       );
-    });
+    }, { timeout: 2_000 });
 
     // Session storage should be cleared
     const stored = sessionStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY);
@@ -395,9 +395,7 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
 
     expect(await screen.findByText(/Catatan belum dapat diproses/i)).toBeDefined();
     expect(screen.queryByText('invalid_extraction')).toBeNull();
-    expect(
-      (screen.getByRole('textbox', { name: /Catatan Meeting/i }) as HTMLTextAreaElement).disabled
-    ).toBe(false);
+    expect(screen.getByRole('button', { name: 'Retry Generation' })).toBeDefined();
   });
 
   it('shows targeted guidance without rendering technical code when meeting extraction has qualified reason', async () => {
@@ -424,9 +422,7 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
       await screen.findByText(/tidak dapat dicocokkan dengan catatan meeting/i)
     ).toBeDefined();
     expect(screen.queryByText('invalid_extraction.unsupported_evidence')).toBeNull();
-    expect(
-      (screen.getByRole('textbox', { name: /Catatan Meeting/i }) as HTMLTextAreaElement).disabled
-    ).toBe(false);
+    expect(screen.getByRole('button', { name: 'Retry Generation' })).toBeDefined();
   });
 
   it('falls back to generic message and clears technical code when meeting extraction has unknown qualified suffix', async () => {
@@ -451,9 +447,7 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
 
     expect(await screen.findByText(/Catatan belum dapat diproses/i)).toBeDefined();
     expect(screen.queryByText('invalid_extraction.future_unknown_reason')).toBeNull();
-    expect(
-      (screen.getByRole('textbox', { name: /Catatan Meeting/i }) as HTMLTextAreaElement).disabled
-    ).toBe(false);
+    expect(screen.getByRole('button', { name: 'Retry Generation' })).toBeDefined();
   });
 
   it('submits advanced scheme generation form, navigates to quotation edit page, and clears entry session', async () => {

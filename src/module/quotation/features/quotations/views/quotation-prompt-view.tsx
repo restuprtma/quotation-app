@@ -1,7 +1,7 @@
 import type { GenerateQuotationPayload } from '../types';
 import type { DraftIssue, MeetingQuotationPayload } from '../types/prompt-first';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 
 import Box from '@mui/material/Box';
@@ -23,7 +23,11 @@ import { QuotationGenerationForm } from '../components/quotation-generation-form
 import { WhiteLabelGenerationForm } from '../components/white-label-generation-form';
 import { KioskQueueGenerationForm } from '../components/kiosk-queue-generation-form';
 import { SubscriptionSaaSGenerationForm } from '../components/subscription-saas-generation-form';
-import { GENERATION_STAGES, GenerationProgressCard } from '../components/generation-progress-card';
+import {
+  GENERATION_STAGES,
+  MEETING_GENERATION_STAGES,
+  GenerationProgressCard,
+} from '../components/generation-progress-card';
 import { CustomDevelopmentGenerationForm } from '../components/custom-development-generation-form';
 import { TalentOutsourcingGenerationForm } from '../components/talent-outsourcing-generation-form';
 import { CloudInfrastructureGenerationForm } from '../components/cloud-infrastructure-generation-form';
@@ -56,6 +60,12 @@ const INVALID_EXTRACTION_MESSAGE =
 
 const INVALID_EXTRACTION_PREFIX = 'invalid_extraction.';
 
+const NO_BUSINESS_SIGNAL_MESSAGE =
+  'Catatan belum memuat informasi kebutuhan yang dapat dikenali. Tambahkan scope, durasi, tim, skema layanan, atau pola pembayaran.';
+
+const EXTRACTION_RETRY_EXHAUSTED_MESSAGE =
+  'Respons AI belum dapat diproses setelah dicoba ulang. Silakan coba kembali atau periksa konfigurasi provider AI.';
+
 const INVALID_EXTRACTION_REASON_MESSAGES: Record<string, string> = {
   malformed_json: 'Respons AI belum dapat dibaca dalam format yang diperlukan. Coba buat draf lagi.',
   trailing_content: 'Respons AI belum dapat dibaca dalam format yang diperlukan. Coba buat draf lagi.',
@@ -81,6 +91,27 @@ function mapDraftIssue(issue: DraftIssue): DraftIssue {
   return issue;
 }
 
+type ProgressMode = 'advanced' | 'meeting';
+
+function getGenerationError(err: any) {
+  const responseData = err.response?.data;
+  let code = 'generation_failed';
+  let message = err?.message || 'Failed to generate quotation draft';
+
+  if (Array.isArray(responseData?.errors?.detail) && responseData.errors.detail.length > 0) {
+    [code] = responseData.errors.detail;
+  } else if (typeof responseData?.errors === 'string') {
+    code = responseData.errors;
+  } else if (responseData?.message) {
+    message = responseData.message;
+  } else {
+    const extractedCode = err?.message?.includes(':') ? err.message.split(':')[0].trim() : null;
+    if (extractedCode) code = extractedCode;
+  }
+
+  return { code, message };
+}
+
 export function QuotationPromptView() {
   const { t } = useTranslate('quotation');
   const [searchParams] = useSearchParams();
@@ -103,9 +134,26 @@ export function QuotationPromptView() {
     message?: string;
   } | null>(null);
   const [generatedQuotationId, setGeneratedQuotationId] = useState<string | null>(null);
+  const [progressMode, setProgressMode] = useState<ProgressMode>('advanced');
   const [lastSubmittedPayload, setLastSubmittedPayload] = useState<GenerateQuotationPayload | null>(
     null
   );
+  const [lastMeetingPayload, setLastMeetingPayload] = useState<
+    Omit<MeetingQuotationPayload, 'idempotency_key'> | null
+  >(null);
+  const progressTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearProgressTimers = () => {
+    progressTimersRef.current.forEach(clearTimeout);
+    progressTimersRef.current = [];
+  };
+
+  const scheduleProgress = (indexes: number[]) => {
+    clearProgressTimers();
+    progressTimersRef.current = indexes.map((index, offset) =>
+      setTimeout(() => setActiveStageIndex(index), 400 + offset * 800)
+    );
+  };
 
   // URL cleanup when scheme is invalid
   useEffect(() => {
@@ -114,28 +162,22 @@ export function QuotationPromptView() {
     }
   }, [view, schemeParam, navigate]);
 
+  useEffect(() => clearProgressTimers, []);
+
   // Submit Handler for Advanced Scheme Forms
   const handleFormSubmit = async (payload: GenerateQuotationPayload) => {
+    setProgressMode('advanced');
     setLastSubmittedPayload(payload);
     setIsProgressOpen(true);
     setActiveStageIndex(0);
     setGenerationError(null);
     setGeneratedQuotationId(null);
 
-    // Step progression animation ticker
-    const timer1 = setTimeout(() => setActiveStageIndex(1), 400);
-    const timer2 = setTimeout(() => setActiveStageIndex(2), 1200);
-    const timer3 = setTimeout(() => setActiveStageIndex(3), 2200);
-    const timer4 = setTimeout(() => setActiveStageIndex(4), 3200);
-    const timer5 = setTimeout(() => setActiveStageIndex(5), 4200);
+    scheduleProgress([1, 2, 3, 4, 5]);
 
     try {
       const response = await generateMutation.mutateAsync(payload);
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      clearTimeout(timer4);
-      clearTimeout(timer5);
+      clearProgressTimers();
 
       setActiveStageIndex(GENERATION_STAGES.length - 1); // Completed
       setGeneratedQuotationId(response.quotation_id);
@@ -144,34 +186,13 @@ export function QuotationPromptView() {
       toast.success('Quotation draft generated successfully!');
 
       // Auto-navigate to editor after short delay
-      setTimeout(() => {
+      progressTimersRef.current = [setTimeout(() => {
         navigate(paths.dashboard.quotation.edit(response.quotation_id));
-      }, 1200);
+      }, 1200)];
     } catch (err: any) {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      clearTimeout(timer4);
-      clearTimeout(timer5);
-
-      const responseData = err.response?.data;
-      let errCode = 'generation_failed';
-      let errMessage = err?.message || 'Failed to generate quotation draft';
-
-      if (
-        responseData?.errors?.detail &&
-        Array.isArray(responseData.errors.detail) &&
-        responseData.errors.detail.length > 0
-      ) {
-        errCode = responseData.errors.detail[0];
-      } else if (typeof responseData?.errors === 'string') {
-        errCode = responseData.errors;
-      } else if (responseData?.message) {
-        errMessage = responseData.message;
-      } else {
-        const extractedCode = err?.message?.includes(':') ? err.message.split(':')[0].trim() : null;
-        if (extractedCode) errCode = extractedCode;
-      }
+      clearProgressTimers();
+      const { code: errCode, message: defaultMessage } = getGenerationError(err);
+      let errMessage = defaultMessage;
 
       const errorMap: Record<string, string> = {
         invalid_extraction: INVALID_EXTRACTION_MESSAGE,
@@ -204,12 +225,41 @@ export function QuotationPromptView() {
   };
 
   const handleMeetingSubmit = async (payload: Omit<MeetingQuotationPayload, 'idempotency_key'>) => {
+    setProgressMode('meeting');
+    setLastMeetingPayload(payload);
+    setIsProgressOpen(true);
+    setActiveStageIndex(0);
+    setGenerationError(null);
+    setGeneratedQuotationId(null);
+    scheduleProgress([1, 2, 3, 4, 5]);
+
     try {
       const response = await promptMutation.mutateAsync(payload);
+      clearProgressTimers();
+      setActiveStageIndex(MEETING_GENERATION_STAGES.length - 1);
+      setGeneratedQuotationId(response.quotation_id);
       clear();
-      navigate(paths.dashboard.quotation.edit(response.quotation_id));
-    } catch {
-      // The mutation exposes a safe, mapped issue through promptMutation.issues.
+      toast.success('Quotation draft generated successfully!');
+      progressTimersRef.current = [setTimeout(() => {
+        navigate(paths.dashboard.quotation.edit(response.quotation_id));
+      }, 1200)];
+    } catch (err: any) {
+      clearProgressTimers();
+      const { code, message: defaultMessage } = getGenerationError(err);
+      const message =
+        code === 'meeting_notes_no_business_signal'
+          ? NO_BUSINESS_SIGNAL_MESSAGE
+          : code === 'invalid_extraction' || code.startsWith(INVALID_EXTRACTION_PREFIX)
+            ? EXTRACTION_RETRY_EXHAUSTED_MESSAGE
+            : defaultMessage;
+      setActiveStageIndex(2);
+      setGenerationError({ code, message });
+    }
+  };
+
+  const handleMeetingRetry = () => {
+    if (lastMeetingPayload) {
+      handleMeetingSubmit(lastMeetingPayload);
     }
   };
 
@@ -487,7 +537,9 @@ export function QuotationPromptView() {
         errorCode={generationError?.code}
         errorMessage={generationError?.message}
         quotationId={generatedQuotationId}
-        onRetry={handleRetry}
+        stages={progressMode === 'meeting' ? MEETING_GENERATION_STAGES : GENERATION_STAGES}
+        showRetry={generationError?.code !== 'meeting_notes_no_business_signal'}
+        onRetry={progressMode === 'meeting' ? handleMeetingRetry : handleRetry}
         onClose={() => setIsProgressOpen(false)}
         onOpenEditor={(id) => navigate(paths.dashboard.quotation.edit(id))}
       />
