@@ -1,7 +1,7 @@
 import type { GenerateQuotationPayload } from '../types';
 import type { DraftIssue, MeetingQuotationPayload } from '../types/prompt-first';
 
-import { useState, useEffect, useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 
 import Box from '@mui/material/Box';
@@ -23,11 +23,6 @@ import { QuotationGenerationForm } from '../components/quotation-generation-form
 import { WhiteLabelGenerationForm } from '../components/white-label-generation-form';
 import { KioskQueueGenerationForm } from '../components/kiosk-queue-generation-form';
 import { SubscriptionSaaSGenerationForm } from '../components/subscription-saas-generation-form';
-import {
-  GENERATION_STAGES,
-  MEETING_GENERATION_STAGES,
-  GenerationProgressCard,
-} from '../components/generation-progress-card';
 import { CustomDevelopmentGenerationForm } from '../components/custom-development-generation-form';
 import { TalentOutsourcingGenerationForm } from '../components/talent-outsourcing-generation-form';
 import { CloudInfrastructureGenerationForm } from '../components/cloud-infrastructure-generation-form';
@@ -41,6 +36,11 @@ import {
   CommercialSchemeSelector,
   type CommercialSchemeType,
 } from '../components/commercial-scheme-selector';
+import {
+  GENERATION_STAGES,
+  GenerationProgressCard,
+  MEETING_GENERATION_STAGES,
+} from '../components/generation-progress-card';
 
 // ----------------------------------------------------------------------
 

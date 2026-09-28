@@ -1,12 +1,13 @@
 // @vitest-environment happy-dom
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { it, vi, expect, describe, afterEach } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
+
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import {
-  MEETING_GENERATION_STAGES,
   GenerationProgressCard,
+  MEETING_GENERATION_STAGES,
 } from './generation-progress-card';
 
 vi.mock('src/shared/ui/iconify', () => ({
