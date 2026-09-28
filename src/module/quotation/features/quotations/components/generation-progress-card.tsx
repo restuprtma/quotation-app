@@ -15,11 +15,13 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { Iconify } from 'src/shared/ui/iconify';
 
-export const GENERATION_STAGES: {
+export type GenerationProgressStep = {
   id: GenerationProgressStage;
   label: string;
   description: string;
-}[] = [
+};
+
+export const GENERATION_STAGES: GenerationProgressStep[] = [
   {
     id: 'validating_input',
     label: 'Validating input',
@@ -57,6 +59,44 @@ export const GENERATION_STAGES: {
   },
 ];
 
+export const MEETING_GENERATION_STAGES: GenerationProgressStep[] = [
+  {
+    id: 'validating_input',
+    label: 'Memvalidasi catatan meeting',
+    description: 'Memeriksa identitas proyek dan batas catatan meeting',
+  },
+  {
+    id: 'extracting_meeting',
+    label: 'Mengekstrak kebutuhan dengan AI',
+    description: 'Membaca scope, tim, durasi, skema layanan, dan pembayaran',
+  },
+  {
+    id: 'validating_extraction',
+    label: 'Memvalidasi hasil ekstraksi',
+    description: 'Memeriksa JSON, struktur data, dan evidence dari catatan',
+  },
+  {
+    id: 'matching_catalog',
+    label: 'Mencocokkan skema dan katalog',
+    description: 'Mencocokkan layanan dan role tanpa mengarang harga',
+  },
+  {
+    id: 'composing_quotation',
+    label: 'Menyusun draf quotation',
+    description: 'Menyiapkan struktur dokumen, readiness, dan issue',
+  },
+  {
+    id: 'saving_draft',
+    label: 'Menyimpan draf',
+    description: 'Menyimpan quotation setelah validasi kebutuhan berhasil',
+  },
+  {
+    id: 'completed',
+    label: 'Selesai',
+    description: 'Draf quotation siap dibuka dan ditinjau',
+  },
+];
+
 type Props = {
   open: boolean;
   activeStageIndex: number;
@@ -64,6 +104,8 @@ type Props = {
   errorCode?: string | null;
   errorMessage?: string | null;
   quotationId?: string | null;
+  stages?: GenerationProgressStep[];
+  showRetry?: boolean;
   onRetry?: () => void;
   onClose?: () => void;
   onOpenEditor?: (id: string) => void;
@@ -76,13 +118,15 @@ export function GenerationProgressCard({
   errorCode,
   errorMessage,
   quotationId,
+  stages = GENERATION_STAGES,
+  showRetry = true,
   onRetry,
   onClose,
   onOpenEditor,
 }: Props) {
-  const isCompleted = activeStageIndex >= GENERATION_STAGES.length - 1 && !isError;
+  const isCompleted = activeStageIndex >= stages.length - 1 && !isError;
   const progressPercent = Math.min(
-    Math.round(((activeStageIndex + 1) / GENERATION_STAGES.length) * 100),
+    Math.round(((activeStageIndex + 1) / stages.length) * 100),
     100
   );
 
@@ -174,8 +218,7 @@ export function GenerationProgressCard({
             <Box sx={{ width: '100%' }}>
               <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.75 }}>
                 <Typography variant="caption" fontWeight={600} color="text.secondary">
-                  Step {Math.min(activeStageIndex + 1, GENERATION_STAGES.length)} of{' '}
-                  {GENERATION_STAGES.length}
+                  Step {Math.min(activeStageIndex + 1, stages.length)} of {stages.length}
                 </Typography>
                 <Typography variant="caption" fontWeight={700} color="primary.main">
                   {progressPercent}%
@@ -201,7 +244,7 @@ export function GenerationProgressCard({
           {isError && (
             <Alert severity="error" variant="outlined" sx={{ borderRadius: 1.5 }}>
               <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
-                {errorCode ? `Error: ${errorCode}` : 'Generation Error'}
+                Generation Error
               </Typography>
               <Typography variant="body2">
                 {getSafeErrorMessage(errorCode, errorMessage)}
@@ -212,7 +255,7 @@ export function GenerationProgressCard({
           {/* Stages List */}
           <Card variant="outlined" sx={{ p: 2, bgcolor: 'background.neutral', borderRadius: 1.5 }}>
             <Stack spacing={1.5}>
-              {GENERATION_STAGES.map((stage, idx) => {
+              {stages.map((stage, idx) => {
                 const isPast = idx < activeStageIndex;
                 const isCurrent = idx === activeStageIndex;
                 const isPending = idx > activeStageIndex;
@@ -290,7 +333,7 @@ export function GenerationProgressCard({
             <Button variant="outlined" color="inherit" onClick={onClose}>
               Back to Form
             </Button>
-            {onRetry && (
+            {showRetry && onRetry && (
               <Button
                 variant="contained"
                 color="primary"

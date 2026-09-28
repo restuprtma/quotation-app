@@ -999,6 +999,10 @@ export type GenerationProgressStage =
   | 'checking_rate_card'
   | 'composing_quotation'
   | 'sanitizing_document'
+  | 'extracting_meeting'
+  | 'validating_extraction'
+  | 'matching_catalog'
+  | 'saving_draft'
   | 'completed'
   | 'failed';
 
