@@ -1,12 +1,10 @@
-import type { SquadModel, ActiveSkill, SquadLineInput, GenerateQuotationPayload } from '../types';
 import type { QuotationEntryIdentity } from '../types/quotation-entry';
+import type { SquadModel, ActiveSkill, SquadLineInput, GenerateQuotationPayload } from '../types';
 
 import { z } from 'zod';
 import { useMemo, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
-import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -30,8 +28,10 @@ import { useActiveSkills } from '../hooks/use-active-skills';
 import { resolveQuotationSkillId } from '../utils/generation';
 import { QuotationProfilePanel } from './quotation-profile-panel';
 import { useActiveRateCards } from '../hooks/use-active-rate-cards';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 import { useDedicatedSquadPreview } from '../hooks/use-quotation-generation';
 import { QuotationCalculationPreview } from './quotation-calculation-preview';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import {
   DEDICATED_SQUAD_MODELS,
   getDefaultPaymentCount,

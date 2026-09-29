@@ -1,7 +1,8 @@
 import type { Control, FieldValues } from 'react-hook-form';
-import { useRef, useMemo, useEffect } from 'react';
-import { useWatch } from 'react-hook-form';
 import type { QuotationEntryIdentity } from '../types/quotation-entry';
+
+import { useWatch } from 'react-hook-form';
+import { useRef, useMemo, useEffect } from 'react';
 
 export type EntryIdentityBridgeOptions<T extends FieldValues = any> = {
   control: Control<T>;

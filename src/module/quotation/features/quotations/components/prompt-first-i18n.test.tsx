@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
 
-import { it, vi, expect, describe, afterEach, beforeEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
-
 import i18n from 'i18next';
-import { initReactI18next, I18nextProvider } from 'react-i18next';
+import { render, screen, cleanup } from '@testing-library/react';
+import { I18nextProvider, initReactI18next } from 'react-i18next';
+import { it, vi, expect, describe, afterEach, beforeEach } from 'vitest';
+
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import idQuotation from 'src/locales/langs/id/quotation.json';
@@ -28,7 +28,10 @@ function createTestI18n(lng: 'id' | 'en') {
   return instance;
 }
 
-function renderWithLocale(lng: 'id' | 'en', props: Partial<React.ComponentProps<typeof MeetingNotesForm>> = {}) {
+function renderWithLocale(
+  lng: 'id' | 'en',
+  props: Partial<React.ComponentProps<typeof MeetingNotesForm>> = {}
+) {
   const i18nInstance = createTestI18n(lng);
   return render(
     <I18nextProvider i18n={i18nInstance}>
@@ -79,7 +82,9 @@ describe('Prompt First i18n Integration', () => {
       )
     ).toBeTruthy();
 
-    expect(screen.getByRole('textbox', { name: /Project Title \/ Proposal Subject/i })).toBeTruthy();
+    expect(
+      screen.getByRole('textbox', { name: /Project Title \/ Proposal Subject/i })
+    ).toBeTruthy();
     expect(screen.getByRole('combobox', { name: /Client Company \/ Organization/i })).toBeTruthy();
     expect(screen.getByRole('textbox', { name: /Attention \/ Client PIC/i })).toBeTruthy();
     expect(screen.getByRole('textbox', { name: /Meeting Notes/i })).toBeTruthy();

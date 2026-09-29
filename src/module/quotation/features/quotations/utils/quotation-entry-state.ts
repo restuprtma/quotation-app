@@ -1,7 +1,7 @@
 import {
   EMPTY_QUOTATION_ENTRY,
-  QUOTATION_ENTRY_STORAGE_KEY,
   type QuotationEntryState,
+  QUOTATION_ENTRY_STORAGE_KEY,
   type QuotationEntryIdentity,
 } from '../types/quotation-entry';
 
@@ -30,7 +30,8 @@ export function loadQuotationEntryState(storage?: Storage): QuotationEntryState 
       version: 1,
       project_name: typeof parsed.project_name === 'string' ? parsed.project_name : '',
       client_id: typeof parsed.client_id === 'string' ? parsed.client_id : '',
-      client_company_name: typeof parsed.client_company_name === 'string' ? parsed.client_company_name : '',
+      client_company_name:
+        typeof parsed.client_company_name === 'string' ? parsed.client_company_name : '',
       pic_name: typeof parsed.pic_name === 'string' ? parsed.pic_name : '',
       meeting_notes: typeof parsed.meeting_notes === 'string' ? parsed.meeting_notes : '',
     };

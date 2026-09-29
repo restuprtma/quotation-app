@@ -1,8 +1,13 @@
 import type { JSONContent } from '@tiptap/core';
+import type {
+  CatalogRoleOption,
+  PromptPatchResponse,
+  PromptQuotationState,
+} from '../types/prompt-first';
 
 import { toast } from 'sonner';
-import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useBeforeUnload } from 'react-router';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -26,14 +31,28 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { QuotationEditor } from '../components/quotation-editor';
 import { useQuotationDraft } from '../hooks/use-quotation-draft';
 import { RegenerateDialog } from '../components/regenerate-dialog';
+import { usePromptWorkspace } from '../hooks/use-prompt-workspace';
 import { LegalUnlockDialog } from '../components/legal-unlock-dialog';
+import { QuotationReadiness } from '../components/quotation-readiness';
+import { PromptCommercialLock } from '../components/prompt-commercial-lock';
 import { useSaveDraft, useRegenerateQuotation } from '../hooks/use-draft-save';
+import { PromptRevisionBox, type PromptRevisionBoxCopy } from '../components/prompt-revision-box';
+import {
+  PromptWorkspacePanel,
+  type PromptWorkspaceCopy,
+} from '../components/prompt-workspace-panel';
+import {
+  type PromptEditorSession,
+  createPromptEditorSession,
+  promptEditorSessionReducer,
+} from '../utils/prompt-editor-session';
 
 type Props = {
   id?: string;
 };
 
 type SessionState = {
+  quotationId: string;
   contentHtml: string;
   canonicalVersion: number;
   revisionId: string;
@@ -42,7 +61,129 @@ type SessionState = {
   isConflict: boolean;
   legalModified: boolean;
   commercialModified: boolean;
+  promptState?: PromptQuotationState;
+  promptStateVersion: number;
+  promptCalculation?: PromptPatchResponse['calculation'];
+  catalogRoles: CatalogRoleOption[];
 };
+
+function coreSession(session: SessionState | null): PromptEditorSession {
+  if (!session) return createPromptEditorSession();
+  return {
+    quotationId: session.quotationId,
+    revisionId: session.revisionId,
+    contentHtml: session.contentHtml,
+    contentVersion: session.canonicalVersion,
+    isDirty: session.isDirty,
+    isConflict: session.isConflict,
+  };
+}
+
+function withCore(session: SessionState, core: PromptEditorSession): SessionState {
+  return {
+    ...session,
+    quotationId: core.quotationId,
+    revisionId: core.revisionId,
+    contentHtml: core.contentHtml,
+    canonicalVersion: core.contentVersion,
+    isDirty: core.isDirty,
+    isConflict: core.isConflict,
+  };
+}
+
+function PromptEditorWorkspace({
+  session,
+  onServerUpdate,
+  onConflict,
+}: {
+  session: SessionState;
+  onServerUpdate: (response: PromptPatchResponse) => void;
+  onConflict: () => void;
+}) {
+  const { t } = useTranslate('quotation');
+  const { patch, revise, isPending } = usePromptWorkspace({
+    quotationId: session.quotationId,
+    revisionId: session.revisionId,
+    contentVersion: session.canonicalVersion,
+    stateVersion: session.promptStateVersion,
+    onResponse: onServerUpdate,
+    onConflict,
+  });
+  const copy: PromptWorkspaceCopy = {
+    title: t('editor.workspace.title'),
+    open: t('editor.workspace.open'),
+    close: t('editor.workspace.close'),
+    facts: t('editor.workspace.facts'),
+    issues: t('editor.workspace.issues'),
+    blocking: t('editor.workspace.blocking'),
+    warning: t('editor.workspace.warning'),
+    duration: t('editor.workspace.duration'),
+    team: t('editor.workspace.team'),
+    role: t('editor.workspace.role'),
+    seniority: t('editor.workspace.seniority'),
+    headcount: t('editor.workspace.headcount'),
+    payment: t('editor.workspace.payment'),
+    discount: t('editor.workspace.discount'),
+    initialTotal: t('editor.workspace.initialTotal'),
+    discountedTotal: t('editor.workspace.discountedTotal'),
+    priceUnavailable: t('editor.workspace.priceUnavailable'),
+    subscriptionDetails: t('editor.workspace.subscriptionDetails'),
+    subscriptionProduct: t('editor.workspace.subscriptionProduct'),
+    subscriptionTerm: t('editor.workspace.subscriptionTerm'),
+    subscriptionBilling: t('editor.workspace.subscriptionBilling'),
+    subscriptionFeatures: t('editor.workspace.subscriptionFeatures'),
+    totalContract: t('editor.workspace.totalContract'),
+    whiteLabelDetails: t('editor.workspace.whiteLabelDetails'),
+    whiteLabelProduct: t('editor.workspace.whiteLabelProduct'),
+    whiteLabelLicenses: t('editor.workspace.whiteLabelLicenses'),
+    whiteLabelMaintenance: t('editor.workspace.whiteLabelMaintenance'),
+    whiteLabelHosting: t('editor.workspace.whiteLabelHosting'),
+    whiteLabelRights: t('editor.workspace.whiteLabelRights'),
+    maintenanceDetails: t('editor.workspace.maintenanceDetails'),
+    maintenanceSystem: t('editor.workspace.maintenanceSystem'),
+    maintenanceMode: t('editor.workspace.maintenanceMode'),
+    maintenanceRetainerItems: t('editor.workspace.maintenanceRetainerItems'),
+    maintenanceHourlyItems: t('editor.workspace.maintenanceHourlyItems'),
+    maintenanceDefects: t('editor.workspace.maintenanceDefects'),
+    maintenanceTasks: t('editor.workspace.maintenanceTasks'),
+    maintenanceRights: t('editor.workspace.maintenanceRights'),
+    totalInvestment: t('editor.workspace.totalInvestment'),
+    reload: t('editor.workspace.reload'),
+    compare: t('editor.workspace.compare'),
+  };
+  const revisionCopy: PromptRevisionBoxCopy = {
+    title: t('editor.revision.title'),
+    instruction: t('editor.revision.instruction'),
+    target: t('editor.revision.target'),
+    scope: t('editor.revision.scope'),
+    timeline: t('editor.revision.timeline'),
+    narrative: t('editor.revision.narrative'),
+    preview: t('editor.revision.preview'),
+    commercialPreview: t('editor.revision.commercialPreview'),
+    submit: t('editor.revision.submit'),
+    submitting: t('editor.revision.submitting'),
+    required: t('editor.revision.required'),
+  };
+
+  return (
+    <Stack spacing={2} sx={{ width: { xs: '100%', lg: 360 }, flexShrink: 0 }}>
+      <PromptRevisionBox copy={revisionCopy} pending={isPending} onSubmit={revise} />
+      <PromptWorkspacePanel
+        state={session.promptState!}
+        calculation={session.promptCalculation}
+        catalogRoles={session.catalogRoles}
+        pending={isPending}
+        copy={copy}
+        onPatch={(operations) => {
+          void patch(operations).catch(() => undefined);
+        }}
+        conflict={session.isConflict}
+        onCompare={() => document.querySelector<HTMLElement>('[contenteditable="true"]')?.focus()}
+        onReload={() => window.location.reload()}
+      />
+    </Stack>
+  );
+}
 
 export function QuotationEditorView({ id = '' }: Props) {
   const navigate = useNavigate();
@@ -53,28 +194,52 @@ export function QuotationEditorView({ id = '' }: Props) {
   const regenerateMutation = useRegenerateQuotation(id);
 
   const [session, setSession] = useState<SessionState | null>(null);
+  const sessionRef = useRef<SessionState | null>(null);
   const [currentHtml, setCurrentHtml] = useState<string>('');
   const [isUnlockDialogOpen, setIsUnlockDialogOpen] = useState(false);
   const [isRegenerateDialogOpen, setIsRegenerateDialogOpen] = useState(false);
   const [isUnsavedDialogOpen, setIsUnsavedDialogOpen] = useState(false);
   const [isBlueprintWarningOpen, setIsBlueprintWarningOpen] = useState(false);
 
+  sessionRef.current = session;
+
   // Initialize session state once data is loaded
   useEffect(() => {
     if (data) {
-      setSession({
-        contentHtml: data.content_html || '',
-        canonicalVersion: data.content_version || 1,
+      const loaded = {
+        type: 'serverLoaded' as const,
+        quotationId: id,
         revisionId: data.revision_id || '',
-        isUnlocked: false,
-        isDirty: false,
-        isConflict: false,
-        legalModified: data.legal_content_modified ?? false,
-        commercialModified: data.commercial_content_modified ?? false,
+        contentHtml: data.content_html || '',
+        contentVersion: data.content_version || 1,
+      };
+      const nextCore = promptEditorSessionReducer(coreSession(sessionRef.current), loaded);
+      setSession((previous) => {
+        if (previous) {
+          return {
+            ...withCore(previous, promptEditorSessionReducer(coreSession(previous), loaded)),
+            catalogRoles: data.catalog_roles ?? [],
+          };
+        }
+        return {
+          quotationId: id,
+          contentHtml: nextCore.contentHtml,
+          canonicalVersion: nextCore.contentVersion,
+          revisionId: nextCore.revisionId,
+          isUnlocked: false,
+          isDirty: nextCore.isDirty,
+          isConflict: nextCore.isConflict,
+          legalModified: data.legal_content_modified ?? false,
+          commercialModified: data.commercial_content_modified ?? false,
+          promptState: data.prompt_state,
+          promptStateVersion: data.prompt_state_version ?? 0,
+          promptCalculation: undefined,
+          catalogRoles: data.catalog_roles ?? [],
+        };
       });
-      setCurrentHtml(data.content_html || '');
+      setCurrentHtml(nextCore.contentHtml);
     }
-  }, [data]);
+  }, [data, id]);
 
   // Browser beforeunload guard when dirty
   useBeforeUnload(
@@ -92,10 +257,46 @@ export function QuotationEditorView({ id = '' }: Props) {
     setCurrentHtml(html);
     setSession((prev) => {
       if (!prev) return prev;
-      const dirty = html !== prev.contentHtml;
-      return { ...prev, isDirty: dirty };
+      return withCore(
+        prev,
+        promptEditorSessionReducer(coreSession(prev), { type: 'localChanged', contentHtml: html })
+      );
     });
   }, []);
+
+  const handlePromptServerUpdate = useCallback((response: PromptPatchResponse) => {
+    setCurrentHtml(response.content_html);
+    setSession((previous) => {
+      if (!previous) return previous;
+      const next = promptEditorSessionReducer(coreSession(previous), {
+        type: 'saveSucceeded',
+        contentHtml: response.content_html,
+        contentVersion: response.content_version,
+      });
+      return {
+        ...withCore(previous, next),
+        revisionId: response.revision_id,
+        promptState: response.prompt_state,
+        promptStateVersion: response.state_version,
+        promptCalculation: response.calculation,
+        catalogRoles: response.catalog_roles ?? previous.catalogRoles,
+      };
+    });
+  }, []);
+
+  const handlePromptConflict = useCallback(() => {
+    setSession((previous) => {
+      if (!previous) return previous;
+      return {
+        ...withCore(
+          previous,
+          promptEditorSessionReducer(coreSession(previous), { type: 'versionConflict' })
+        ),
+        isUnlocked: false,
+      };
+    });
+    toast.error(t('editor.dialog.conflictTitle'));
+  }, [t]);
 
   // Save Draft Action
   const handleSaveDraft = async () => {
@@ -110,20 +311,31 @@ export function QuotationEditorView({ id = '' }: Props) {
 
       setSession((prev) => {
         if (!prev) return prev;
-        return {
-          ...prev,
+        const next = promptEditorSessionReducer(coreSession(prev), {
+          type: 'saveSucceeded',
           contentHtml: result.content_html,
-          canonicalVersion: result.content_version,
+          contentVersion: result.content_version,
+        });
+        return {
+          ...withCore(prev, next),
           legalModified: result.legal_content_modified,
           commercialModified: result.commercial_content_modified,
-          isDirty: false,
         };
       });
 
       toast.success(t('editor.saved'));
     } catch (err: any) {
       if (err.status === 409 || err.message?.includes('409') || err.message?.includes('conflict')) {
-        setSession((prev) => (prev ? { ...prev, isConflict: true, isUnlocked: false } : prev));
+        setSession((prev) => {
+          if (!prev) return prev;
+          return {
+            ...withCore(
+              prev,
+              promptEditorSessionReducer(coreSession(prev), { type: 'versionConflict' })
+            ),
+            isUnlocked: false,
+          };
+        });
         toast.error(t('editor.dialog.conflictTitle'));
       } else {
         toast.error(err.message || t('editor.saveFailed'));
@@ -349,14 +561,39 @@ export function QuotationEditorView({ id = '' }: Props) {
             </Button>
           </Card>
         ) : session ? (
-          <QuotationEditor
-            content={currentHtml}
-            isUnlocked={session.isUnlocked}
-            disabled={session.isConflict}
-            onToggleUnlock={handleToggleUnlock}
-            onRestoreOfficial={handleRestoreOfficial}
-            onChange={handleEditorChange}
-          />
+          <>
+            {session.promptState && (
+              <Stack spacing={1}>
+                <QuotationReadiness readiness={session.promptState.readiness} />
+                <PromptCommercialLock
+                  message={t('editor.commercialLockHint')}
+                  focusLabel={t('editor.focusEditor')}
+                  onFocusEditor={() =>
+                    document.querySelector<HTMLElement>('[contenteditable="true"]')?.focus()
+                  }
+                />
+              </Stack>
+            )}
+            <Stack direction={{ xs: 'column', lg: 'row' }} spacing={2} alignItems="stretch">
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <QuotationEditor
+                  content={currentHtml}
+                  isUnlocked={session.isUnlocked}
+                  disabled={session.isConflict}
+                  onToggleUnlock={handleToggleUnlock}
+                  onRestoreOfficial={handleRestoreOfficial}
+                  onChange={handleEditorChange}
+                />
+              </Box>
+              {session.promptState && (
+                <PromptEditorWorkspace
+                  session={session}
+                  onServerUpdate={handlePromptServerUpdate}
+                  onConflict={handlePromptConflict}
+                />
+              )}
+            </Stack>
+          </>
         ) : null}
       </Stack>
 
@@ -389,6 +626,13 @@ export function QuotationEditorView({ id = '' }: Props) {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={() => document.querySelector<HTMLElement>('[contenteditable="true"]')?.focus()}
+          >
+            {t('editor.dialog.conflictCompare')}
+          </Button>
           <Button
             variant="contained"
             color="primary"

@@ -236,9 +236,10 @@ describe('kiosk queue document round-trip', () => {
 
     const getNonMetadataSnapshot = (ed: Editor) => {
       const json = ed.getJSON();
-      const sections = (json.content ?? []).filter((node) =>
-        ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
-        node.attrs?.['data-block-type'] !== 'metadata'
+      const sections = (json.content ?? []).filter(
+        (node) =>
+          ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
+          node.attrs?.['data-block-type'] !== 'metadata'
       );
       return JSON.stringify(sections);
     };
@@ -265,14 +266,20 @@ describe('kiosk queue document round-trip', () => {
     expect(numPos).toBeGreaterThan(0);
     expect(sysPos).toBeGreaterThan(0);
 
-    editor.commands.insertContentAt({ from: numPos, to: numPos + numSize }, 'LANDA/MPP-Antrian/0726/003-REV');
+    editor.commands.insertContentAt(
+      { from: numPos, to: numPos + numSize },
+      'LANDA/MPP-Antrian/0726/003-REV'
+    );
     editor.state.doc.descendants((node, pos) => {
       if (node.type.name === 'quotationMetadataRow' && node.attrs.field === 'system_name') {
         sysPos = pos + 1;
         sysSize = node.nodeSize - 2;
       }
     });
-    editor.commands.insertContentAt({ from: sysPos, to: sysPos + sysSize }, 'Sistem Antrian MPP V2');
+    editor.commands.insertContentAt(
+      { from: sysPos, to: sysPos + sysSize },
+      'Sistem Antrian MPP V2'
+    );
 
     const nonMetadataAfter = getNonMetadataSnapshot(editor);
     expect(nonMetadataAfter).toBe(nonMetadataBefore);

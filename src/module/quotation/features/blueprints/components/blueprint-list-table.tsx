@@ -1,4 +1,4 @@
-import type { BlueprintListItem, GenerationStatus } from '../types';
+import type { GenerationStatus, BlueprintListItem } from '../types';
 
 import { useNavigate } from 'react-router';
 
@@ -17,6 +17,7 @@ import TableContainer from '@mui/material/TableContainer';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
+
 import { Iconify } from 'src/shared/ui/iconify';
 import { TablePaginationCustom } from 'src/shared/ui/table';
 
@@ -39,7 +40,9 @@ export function getBlueprintStatusChip(status: GenerationStatus | string) {
     case 'in_progress':
       return <Chip size="small" label="Sedang Berjalan" color="info" variant="soft" />;
     case 'partial_failed':
-      return <Chip size="small" label="Menunggu input / pemulihan" color="warning" variant="soft" />;
+      return (
+        <Chip size="small" label="Menunggu input / pemulihan" color="warning" variant="soft" />
+      );
     case 'failed':
       return <Chip size="small" label="Gagal / butuh pemulihan" color="warning" variant="soft" />;
     case 'pending':

@@ -30,9 +30,9 @@ import { LoadingScreen } from 'src/shared/ui/loading-screen';
 
 import { useBlueprintRunner } from '../hooks/use-blueprint-runner';
 import { SectionStatusList } from '../components/section-status-list';
+import { presentBlueprintError } from '../utils/blueprint-error-presentation';
 import { BlueprintResultPreview } from '../components/blueprint-result-preview';
 import { ManualCompletionDialog } from '../components/manual-completion-dialog';
-import { presentBlueprintError } from '../utils/blueprint-error-presentation';
 import { ValidationPanel, mapToProviderSection } from '../components/validation-panel';
 
 export interface BlueprintProgressViewProps {
@@ -169,12 +169,11 @@ export function BlueprintProgressView({
     hookHasFailedSection ??
     Boolean(
       failedSection ||
-        status?.generation_status === 'failed' ||
-        status?.generation_status === 'partial_failed'
+      status?.generation_status === 'failed' ||
+      status?.generation_status === 'partial_failed'
     );
 
-  const needsLeaseRecovery =
-    hookNeedsLeaseRecovery ?? (isStaleLease || runnerState === 'recovery');
+  const needsLeaseRecovery = hookNeedsLeaseRecovery ?? (isStaleLease || runnerState === 'recovery');
 
   const failedProviderSection: ProviderSection | null =
     failedSection &&
@@ -304,12 +303,7 @@ export function BlueprintProgressView({
                 ) : undefined
               ) : activeErrorPresentation.action === 'refresh' ? (
                 !isCompact ? (
-                  <Button
-                    color="inherit"
-                    size="small"
-                    variant="outlined"
-                    onClick={handleRefresh}
-                  >
+                  <Button color="inherit" size="small" variant="outlined" onClick={handleRefresh}>
                     Segarkan
                   </Button>
                 ) : undefined

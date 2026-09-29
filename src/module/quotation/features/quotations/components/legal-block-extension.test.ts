@@ -1,3 +1,5 @@
+// @vitest-environment happy-dom
+
 import { it, describe } from 'vitest';
 import { Editor } from '@tiptap/core';
 import assert from 'node:assert/strict';
@@ -11,6 +13,96 @@ import {
 } from './legal-block-extension';
 
 describe('LegalBlockExtension', () => {
+  it('round-trips prompt section identity and managed attributes', () => {
+    const editor = new Editor({
+      extensions: [StarterKit, QuotationSectionExtension],
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'quotationSection',
+            attrs: {
+              'data-quotation-section': 'commercial',
+              'data-section-version': '1',
+              'data-managed': 'true',
+            },
+            content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Total' }] }],
+          },
+          {
+            type: 'quotationSection',
+            attrs: { 'data-quotation-section': 'scope', 'data-section-version': '1' },
+            content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Scope' }] }],
+          },
+          {
+            type: 'quotationSection',
+            attrs: {
+              'data-quotation-section': 'payment',
+              'data-section-version': '1',
+              'data-managed': 'true',
+            },
+            content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Payment' }] }],
+          },
+        ],
+      },
+    });
+
+    const html = editor.getHTML();
+    assert.match(html, /data-quotation-section="commercial"/);
+    assert.match(html, /data-section-version="1"/);
+    assert.match(html, /data-managed="true"/);
+    assert.match(html, /data-quotation-section="scope"/);
+    assert.match(html, /data-quotation-section="payment"/);
+    editor.destroy();
+  });
+
+  it('blocks direct edits inside managed commercial sections but allows narrative edits', () => {
+    const editor = new Editor({
+      extensions: [StarterKit, QuotationSectionExtension],
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'quotationSection',
+            attrs: {
+              'data-quotation-section': 'commercial',
+              'data-section-version': '1',
+              'data-managed': 'true',
+            },
+            content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Total' }] }],
+          },
+          {
+            type: 'quotationSection',
+            attrs: { 'data-quotation-section': 'scope', 'data-section-version': '1' },
+            content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Scope' }] }],
+          },
+        ],
+      },
+    });
+    const stateWithPlugins = editor.state.reconfigure({ plugins: editor.extensionManager.plugins });
+    editor.view.updateState(stateWithPlugins);
+
+    let commercialPos = -1;
+    let scopePos = -1;
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name !== 'quotationSection') return;
+      if (node.attrs['data-quotation-section'] === 'commercial') commercialPos = pos + 2;
+      if (node.attrs['data-quotation-section'] === 'scope') scopePos = pos + 2;
+    });
+    assert.ok(commercialPos > 0);
+    assert.ok(scopePos > 0);
+
+    const before = JSON.stringify(editor.getJSON());
+    (editor as any).dispatchTransaction(editor.state.tr.insertText('HACKED ', commercialPos));
+    assert.equal(JSON.stringify(editor.getJSON()), before);
+
+    (editor as any).dispatchTransaction(editor.state.tr.delete(commercialPos, commercialPos + 3));
+    assert.equal(JSON.stringify(editor.getJSON()), before);
+
+    (editor as any).dispatchTransaction(editor.state.tr.insertText('EDITED ', scopePos));
+    assert.match(JSON.stringify(editor.getJSON()), /EDITED Scope/);
+    editor.destroy();
+  });
+
   const initialContent = {
     type: 'doc',
     content: [

@@ -369,11 +369,14 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
       );
     });
 
-    await waitFor(() => {
-      expect(screen.getByTestId('location-display').textContent).toBe(
-        '/quotation/quotation-uuid-101/edit'
-      );
-    }, { timeout: 2_000 });
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('location-display').textContent).toBe(
+          '/quotation/quotation-uuid-101/edit'
+        );
+      },
+      { timeout: 2_000 }
+    );
 
     // Session storage should be cleared
     const stored = sessionStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY);
@@ -409,10 +412,12 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     expect(screen.getByRole('button', { name: 'Retry Generation' })).toBeDefined();
   });
 
-  it('shows targeted guidance without rendering technical code when meeting extraction has qualified reason', async () => {
+  it('shows duration guidance without rendering technical code when meeting evidence is unsupported', async () => {
     mockCreateQuotationFromMeeting.mockRejectedValue({
-      message: 'invalid_extraction.unsupported_evidence',
-      response: { data: { errors: { detail: ['invalid_extraction.unsupported_evidence'] } } },
+      message: 'invalid_extraction.unsupported_evidence.duration_months',
+      response: {
+        data: { errors: { detail: ['invalid_extraction.unsupported_evidence.duration_months'] } },
+      },
     });
     sessionStorage.setItem(
       QUOTATION_ENTRY_STORAGE_KEY,
@@ -429,10 +434,10 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     renderView(['/quotation']);
     await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
 
+    expect(await screen.findByText(/durasi proyek/i)).toBeDefined();
     expect(
-      await screen.findByText(/tidak dapat dicocokkan dengan catatan meeting/i)
-    ).toBeDefined();
-    expect(screen.queryByText('invalid_extraction.unsupported_evidence')).toBeNull();
+      screen.queryByText('invalid_extraction.unsupported_evidence.duration_months')
+    ).toBeNull();
     expect(screen.getByRole('button', { name: 'Retry Generation' })).toBeDefined();
   });
 
@@ -465,7 +470,9 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     ['invalid_extraction.unsupported_evidence', /tidak dapat dicocokkan dengan catatan meeting/i],
     ['invalid_extraction.malformed_json', /belum dapat dibaca dalam format yang diperlukan/i],
   ])('shows safe extraction reason for %s', async (code, message) => {
-    mockCreateQuotationFromMeeting.mockRejectedValue({ response: { data: { errors: { detail: [code] } } } });
+    mockCreateQuotationFromMeeting.mockRejectedValue({
+      response: { data: { errors: { detail: [code] } } },
+    });
     renderView(['/quotation']);
     await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
     expect(await screen.findByText(message)).toBeDefined();

@@ -1,9 +1,11 @@
-// @vitest-environment happy-dom
-import { renderHook, act } from '@testing-library/react';
-import { useForm } from 'react-hook-form';
-import { describe, it, expect, vi } from 'vitest';
-import { useEntryIdentityBridge } from './use-entry-identity-bridge';
 import type { QuotationEntryIdentity } from '../types/quotation-entry';
+
+import { useForm } from 'react-hook-form';
+import { it, vi, expect, describe } from 'vitest';
+// @vitest-environment happy-dom
+import { act, renderHook } from '@testing-library/react';
+
+import { useEntryIdentityBridge } from './use-entry-identity-bridge';
 
 describe('useEntryIdentityBridge', () => {
   type TestFormValues = {

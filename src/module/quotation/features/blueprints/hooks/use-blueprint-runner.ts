@@ -1,4 +1,9 @@
-import type { BlueprintDetail, BlueprintStatus, ProviderSection, BlueprintRunnerError } from '../types';
+import type {
+  BlueprintDetail,
+  BlueprintStatus,
+  ProviderSection,
+  BlueprintRunnerError,
+} from '../types';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRef, useMemo, useState, useEffect, useCallback } from 'react';
@@ -315,9 +320,7 @@ export function useBlueprintRunner(
   const hasFailedSection = useMemo(() => {
     if (!status) return false;
     const hasFailedSec = Boolean(
-      status.sections?.some(
-        (s) => s.status === 'failed' || (s.status as string) === 'interrupted'
-      )
+      status.sections?.some((s) => s.status === 'failed' || (s.status as string) === 'interrupted')
     );
     return (
       hasFailedSec ||
@@ -484,12 +487,11 @@ export function useBlueprintRunner(
             break;
           }
 
-          const failedSec = (latestStatus ?? queryClient.getQueryData<BlueprintStatus>(statusQueryKey))
-            ?.sections?.find((s) => s.status === 'failed' || (s.status as string) === 'interrupted');
+          const failedSec = (
+            latestStatus ?? queryClient.getQueryData<BlueprintStatus>(statusQueryKey)
+          )?.sections?.find((s) => s.status === 'failed' || (s.status as string) === 'interrupted');
           const section: ProviderSection | null =
-            failedSec &&
-            failedSec.type !== 'context' &&
-            failedSec.type !== 'cross_validation'
+            failedSec && failedSec.type !== 'context' && failedSec.type !== 'cross_validation'
               ? (failedSec.type as ProviderSection)
               : null;
 

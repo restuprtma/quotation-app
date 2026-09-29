@@ -2,15 +2,15 @@ import { it, expect, describe, beforeEach } from 'vitest';
 
 import {
   EMPTY_QUOTATION_ENTRY,
-  QUOTATION_ENTRY_STORAGE_KEY,
   type QuotationEntryState,
+  QUOTATION_ENTRY_STORAGE_KEY,
   type QuotationEntryIdentity,
 } from '../types/quotation-entry';
 import {
+  mergeEntryIdentity,
   loadQuotationEntryState,
   saveQuotationEntryState,
   clearQuotationEntryState,
-  mergeEntryIdentity,
   applyEntryIdentityToSchemeDefaults,
 } from './quotation-entry-state';
 
@@ -61,7 +61,10 @@ describe('quotation-entry-state utils', () => {
     });
 
     it('returns EMPTY_QUOTATION_ENTRY when storage contains invalid version or non-object', () => {
-      mockStorage.setItem(QUOTATION_ENTRY_STORAGE_KEY, JSON.stringify({ version: 2, project_name: 'Test' }));
+      mockStorage.setItem(
+        QUOTATION_ENTRY_STORAGE_KEY,
+        JSON.stringify({ version: 2, project_name: 'Test' })
+      );
       expect(loadQuotationEntryState(mockStorage)).toEqual(EMPTY_QUOTATION_ENTRY);
 
       mockStorage.setItem(QUOTATION_ENTRY_STORAGE_KEY, JSON.stringify('plain string'));

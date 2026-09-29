@@ -5,8 +5,6 @@ import type { SubscriptionSaaSFormValues } from './subscription-saas-form-model'
 import { useRef, useMemo, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
-import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -30,8 +28,10 @@ import { useActiveSkills } from '../hooks/use-active-skills';
 import { SubscriptionSaaSPreview } from './subscription-saas-preview';
 import { SubscriptionRightsPanel } from './subscription-rights-panel';
 import { SubscriptionFeatureEditor } from './subscription-feature-editor';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 import { subscriptionSaaSFormSchema } from './subscription-saas-form-model';
 import { useSubscriptionSaaSPreview } from '../hooks/use-quotation-generation';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import { SubscriptionPricingPeriodEditor } from './subscription-pricing-period-editor';
 import { SubscriptionPaymentScheduleEditor } from './subscription-payment-schedule-editor';
 import {

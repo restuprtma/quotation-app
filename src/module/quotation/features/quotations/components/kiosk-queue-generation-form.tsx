@@ -1,12 +1,10 @@
 import type { KioskQueueFormValues } from './kiosk-queue-form-model';
-import type { ActiveSkill, KioskQueueVariant, GenerateQuotationPayload } from '../types';
 import type { QuotationEntryIdentity } from '../types/quotation-entry';
+import type { ActiveSkill, KioskQueueVariant, GenerateQuotationPayload } from '../types';
 
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRef, useMemo, useState, useEffect } from 'react';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
-import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -38,8 +36,10 @@ import { useActiveSkills } from '../hooks/use-active-skills';
 import { KioskQueueCostEditor } from './kiosk-queue-cost-editor';
 import { KioskQueueScopeEditor } from './kiosk-queue-scope-editor';
 import { fieldId, kioskQueueFormSchema } from './kiosk-queue-form-model';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 import { KioskQueuePaymentLegalEditor } from './kiosk-queue-payment-legal-editor';
 import { KioskQueuePreview, isKioskQueueSubmitReady } from './kiosk-queue-preview';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import {
   toKioskQueuePayload,
   createDefaultKioskQueueValues,

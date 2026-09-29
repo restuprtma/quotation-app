@@ -2,13 +2,13 @@ import type { TalentOutsourcingInput } from '../types';
 
 import { it, expect, describe } from 'vitest';
 
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import {
   talentCostLineTotal,
   calculateTalentDraftTotals,
   normalizeTalentOutsourcing,
   createDefaultTalentOutsourcingValues,
 } from './talent-outsourcing';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 const bpjs: TalentOutsourcingInput = {
   engagement_mode: 'manpower_supply',

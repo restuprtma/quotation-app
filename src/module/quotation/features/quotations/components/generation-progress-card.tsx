@@ -125,10 +125,7 @@ export function GenerationProgressCard({
   onOpenEditor,
 }: Props) {
   const isCompleted = activeStageIndex >= stages.length - 1 && !isError;
-  const progressPercent = Math.min(
-    Math.round(((activeStageIndex + 1) / stages.length) * 100),
-    100
-  );
+  const progressPercent = Math.min(Math.round(((activeStageIndex + 1) / stages.length) * 100), 100);
 
   const getSafeErrorMessage = (code?: string | null, rawMsg?: string | null) => {
     switch (code) {

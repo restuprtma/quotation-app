@@ -213,9 +213,7 @@ export function MeetingNotesForm({
               label={t('prompt.promptFirst.projectName')}
               placeholder={t('prompt.promptFirst.projectNamePlaceholder')}
               error={Boolean(errors.project_name)}
-              helperText={
-                errors.project_name ? t(errors.project_name.message ?? '') : undefined
-              }
+              helperText={errors.project_name ? t(errors.project_name.message ?? '') : undefined}
             />
           )}
         />
@@ -282,7 +280,12 @@ export function MeetingNotesForm({
                 key={`${issue.code}-${issue.field}`}
                 severity={issue.severity === 'blocking' ? 'error' : 'warning'}
               >
-                {issue.code ? <><strong>{issue.code}</strong>: </> : null}{issue.message}
+                {issue.code ? (
+                  <>
+                    <strong>{issue.code}</strong>:{' '}
+                  </>
+                ) : null}
+                {issue.message}
               </Alert>
             ))}
           </Stack>

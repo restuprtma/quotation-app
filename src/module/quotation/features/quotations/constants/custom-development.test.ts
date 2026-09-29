@@ -3,6 +3,7 @@ import type { CustomDevelopmentFormValues } from '../components/custom-developme
 
 import { it, expect, describe } from 'vitest';
 
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import {
   normalizeCustomDevelopment,
   toCustomDevelopmentPayload,
@@ -15,7 +16,6 @@ import {
   DEFAULT_CUSTOM_DEVELOPMENT_LIMITATION_CODES,
   CUSTOM_DEVELOPMENT_PAYMENT_COMPONENT_OPTIONS,
 } from './custom-development';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 describe('custom-development constants & pure helpers', () => {
   const sampleKopiStudio24Input: CustomDevelopmentInput = {

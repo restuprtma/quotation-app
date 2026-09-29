@@ -78,7 +78,9 @@ describe('MeetingNotesForm', () => {
       target: { value: 'Portal Vendor Onboarding' },
     });
 
-    const clientCombobox = screen.getByRole('combobox', { name: /Perusahaan \/ Organisasi Klien/i });
+    const clientCombobox = screen.getByRole('combobox', {
+      name: /Perusahaan \/ Organisasi Klien/i,
+    });
     fireEvent.focus(clientCombobox);
     fireEvent.change(clientCombobox, { target: { value: 'Alpha' } });
     const option = await screen.findByText('PT Alpha Digital');
@@ -90,7 +92,8 @@ describe('MeetingNotesForm', () => {
 
     fireEvent.change(screen.getByRole('textbox', { name: /Catatan Meeting/i }), {
       target: {
-        value: 'Klien membutuhkan portal onboarding vendor untuk integrasi ERP dan verifikasi dokumen legal.',
+        value:
+          'Klien membutuhkan portal onboarding vendor untuk integrasi ERP dan verifikasi dokumen legal.',
       },
     });
 
@@ -246,7 +249,9 @@ describe('MeetingNotesForm', () => {
     fireEvent.change(screen.getByRole('textbox', { name: /Judul Proyek \/ Subjek Proposal/i }), {
       target: { value: 'Proyek Double Submit' },
     });
-    const clientCombobox = screen.getByRole('combobox', { name: /Perusahaan \/ Organisasi Klien/i });
+    const clientCombobox = screen.getByRole('combobox', {
+      name: /Perusahaan \/ Organisasi Klien/i,
+    });
     fireEvent.focus(clientCombobox);
     fireEvent.change(clientCombobox, { target: { value: 'Alpha' } });
     fireEvent.click(await screen.findByText('PT Alpha Digital'));
@@ -264,7 +269,10 @@ describe('MeetingNotesForm', () => {
     });
 
     expect(screen.getByRole('button', { name: /Membuat draf\.\.\./i })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /Membuat draf\.\.\./i })).toHaveProperty('disabled', true);
+    expect(screen.getByRole('button', { name: /Membuat draf\.\.\./i })).toHaveProperty(
+      'disabled',
+      true
+    );
 
     resolveSubmit();
   });
@@ -272,8 +280,18 @@ describe('MeetingNotesForm', () => {
   it('renders backend issues alerts', () => {
     renderForm({
       issues: [
-        { code: 'client_required', field: 'client', message: 'Klien belum valid', severity: 'blocking' },
-        { code: 'budget_missing', field: 'budget', message: 'Budget belum diisi', severity: 'warning' },
+        {
+          code: 'client_required',
+          field: 'client',
+          message: 'Klien belum valid',
+          severity: 'blocking',
+        },
+        {
+          code: 'budget_missing',
+          field: 'budget',
+          message: 'Budget belum diisi',
+          severity: 'warning',
+        },
       ],
     });
 

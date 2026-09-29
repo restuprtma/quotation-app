@@ -101,9 +101,10 @@ describe('cloud infrastructure document round-trip', () => {
 
     const getNonMetadataSnapshot = (ed: Editor) => {
       const json = ed.getJSON();
-      const sections = (json.content ?? []).filter((node) =>
-        ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
-        node.attrs?.['data-block-type'] !== 'metadata'
+      const sections = (json.content ?? []).filter(
+        (node) =>
+          ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
+          node.attrs?.['data-block-type'] !== 'metadata'
       );
       return JSON.stringify(sections);
     };
@@ -130,14 +131,20 @@ describe('cloud infrastructure document round-trip', () => {
     expect(numPos).toBeGreaterThan(0);
     expect(subPos).toBeGreaterThan(0);
 
-    editor.commands.insertContentAt({ from: numPos, to: numPos + numSize }, 'CLOUD/2026/REVISED/999');
+    editor.commands.insertContentAt(
+      { from: numPos, to: numPos + numSize },
+      'CLOUD/2026/REVISED/999'
+    );
     editor.state.doc.descendants((node, pos) => {
       if (node.type.name === 'quotationMetadataRow' && node.attrs.field === 'subject') {
         subPos = pos + 1;
         subSize = node.nodeSize - 2;
       }
     });
-    editor.commands.insertContentAt({ from: subPos, to: subPos + subSize }, 'Layanan Cloud Kubernetes Enterprise HA');
+    editor.commands.insertContentAt(
+      { from: subPos, to: subPos + subSize },
+      'Layanan Cloud Kubernetes Enterprise HA'
+    );
 
     const nonMetadataAfter = getNonMetadataSnapshot(editor);
     expect(nonMetadataAfter).toBe(nonMetadataBefore);

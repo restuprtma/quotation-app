@@ -15,7 +15,8 @@ export const paths = {
       root: '/quotation',
       prompt: '/quotation',
       advanced: '/quotation?view=advanced',
-      advancedScheme: (scheme: string) => `/quotation?view=advanced&scheme=${encodeURIComponent(scheme)}`,
+      advancedScheme: (scheme: string) =>
+        `/quotation?view=advanced&scheme=${encodeURIComponent(scheme)}`,
       list: '/quotation/list',
       edit: (id: string) => `/quotation/${id}/edit`,
       aiSettings: '/quotation/ai-settings',

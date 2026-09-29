@@ -1,11 +1,9 @@
-import type { ActiveSkill, TalentEngagementMode, GenerateQuotationPayload } from '../types';
 import type { QuotationEntryIdentity } from '../types/quotation-entry';
+import type { ActiveSkill, TalentEngagementMode, GenerateQuotationPayload } from '../types';
 
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch, FormProvider } from 'react-hook-form';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
-import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
@@ -24,7 +22,9 @@ import { TalentCostEditor } from './talent-cost-editor';
 import { TalentScopeEditor } from './talent-scope-editor';
 import { useActiveSkills } from '../hooks/use-active-skills';
 import { TalentPaymentLegalEditor } from './talent-payment-legal-editor';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 import { makeTalentOutsourcingFormSchema } from './talent-outsourcing-form-model';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import {
   TalentOutsourcingPreview,
   isTalentOutsourcingSubmitReady,

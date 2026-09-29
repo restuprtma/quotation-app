@@ -1106,7 +1106,9 @@ describe('useBlueprintRunner', () => {
         ),
       };
 
-      const continueSpy = vi.spyOn(api, 'continueBlueprint').mockResolvedValueOnce(reconciledStatus);
+      const continueSpy = vi
+        .spyOn(api, 'continueBlueprint')
+        .mockResolvedValueOnce(reconciledStatus);
 
       const { wrapper } = createWrapper();
       const { result } = renderHook(() => useBlueprintRunner('bp-123'), { wrapper });

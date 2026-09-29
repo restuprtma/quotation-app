@@ -7,7 +7,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import * as api from '../api/prompt-first';
 import * as generationApi from '../api/generation';
-import { usePromptClients, usePromptQuotation, useCreatePromptClient } from './use-prompt-quotation';
+import {
+  usePromptClients,
+  usePromptQuotation,
+  useCreatePromptClient,
+} from './use-prompt-quotation';
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -47,16 +51,16 @@ describe('usePromptQuotation hook suite', () => {
 
   it('useCreatePromptClient invokes createClientOrganization and updates cache', async () => {
     const { queryClient, wrapper } = createWrapper();
-    const existingClients = [
-      { id: '40000000-0000-0000-0000-000000000001', name: 'PT Alpha Tech' },
-    ];
+    const existingClients = [{ id: '40000000-0000-0000-0000-000000000001', name: 'PT Alpha Tech' }];
     queryClient.setQueryData(['quotation', 'clients'], existingClients);
 
     const newClient = {
       id: '40000000-0000-0000-0000-000000000003',
       name: 'PT Gamma Solusi',
     };
-    const createSpy = vi.spyOn(generationApi, 'createClientOrganization').mockResolvedValueOnce(newClient);
+    const createSpy = vi
+      .spyOn(generationApi, 'createClientOrganization')
+      .mockResolvedValueOnce(newClient);
 
     const { result } = renderHook(() => useCreatePromptClient(), { wrapper });
 
@@ -92,7 +96,9 @@ describe('usePromptQuotation hook suite', () => {
       idempotent_replay: false,
     };
 
-    const createSpy = vi.spyOn(api, 'createQuotationFromMeeting').mockResolvedValueOnce(mockDraftResponse);
+    const createSpy = vi
+      .spyOn(api, 'createQuotationFromMeeting')
+      .mockResolvedValueOnce(mockDraftResponse);
 
     const { result } = renderHook(() => usePromptQuotation(), { wrapper });
 
@@ -139,7 +145,9 @@ describe('usePromptQuotation hook suite', () => {
       idempotent_replay: false,
     };
 
-    const createSpy = vi.spyOn(api, 'createQuotationFromMeeting').mockResolvedValue(mockDraftResponse);
+    const createSpy = vi
+      .spyOn(api, 'createQuotationFromMeeting')
+      .mockResolvedValue(mockDraftResponse);
 
     const { result } = renderHook(() => usePromptQuotation(), { wrapper });
 

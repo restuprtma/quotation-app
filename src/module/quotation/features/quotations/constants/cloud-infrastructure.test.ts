@@ -1,11 +1,12 @@
 import { it, expect, describe } from 'vitest';
+
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import {
   projectCloudCalculation,
   copyInfrastructurePackage,
   normalizeCloudInfrastructure,
   makeDefaultCloudInfrastructureValues,
 } from './cloud-infrastructure';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 const authen = {
   document_number: ' CTH/Authen ',

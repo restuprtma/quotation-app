@@ -73,8 +73,7 @@ export function extractHeaderData(metadata: Element): ExtractedHeaderData {
   let clientPic = metadata.querySelector('[data-field="client_pic"]')?.textContent?.trim() ?? '';
   let clientCompany =
     metadata.querySelector('[data-field="client_company"]')?.textContent?.trim() ?? '';
-  let systemName =
-    metadata.querySelector('[data-field="system_name"]')?.textContent?.trim() ?? '';
+  let systemName = metadata.querySelector('[data-field="system_name"]')?.textContent?.trim() ?? '';
 
   const paragraphs = Array.from(metadata.querySelectorAll('p'));
   const unassignedParagraphs: { index: number; text: string }[] = [];
@@ -182,8 +181,7 @@ export function normalizeQuotationHeaderHTML(content: string): string {
   const parser = new DOMParser();
   const doc = parser.parseFromString(content, 'text/html');
 
-  const metadata =
-    doc.querySelector('[data-block-type="metadata"]') ?? doc.querySelector('header');
+  const metadata = doc.querySelector('[data-block-type="metadata"]') ?? doc.querySelector('header');
   if (!metadata) {
     return content;
   }

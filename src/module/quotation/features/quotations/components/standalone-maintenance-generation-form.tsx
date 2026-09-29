@@ -1,5 +1,5 @@
-import type { StandaloneMaintenanceFormValues } from './standalone-maintenance-form-model';
 import type { QuotationEntryIdentity } from '../types/quotation-entry';
+import type { StandaloneMaintenanceFormValues } from './standalone-maintenance-form-model';
 import type {
   ActiveSkill,
   GenerateQuotationPayload,
@@ -10,8 +10,6 @@ import type {
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRef, useMemo, useState, useEffect } from 'react';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
-import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -40,8 +38,10 @@ import { useClients } from '../hooks/use-clients';
 import { DefectMatrixEditor } from './defect-matrix-editor';
 import { SOLUTION_TYPES } from '../constants/scope-presets';
 import { useActiveSkills } from '../hooks/use-active-skills';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 import { MaintenanceHourlyTaskEditor } from './maintenance-hourly-task-editor';
 import { StandaloneMaintenancePreview } from './standalone-maintenance-preview';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import { useStandaloneMaintenancePreview } from '../hooks/use-quotation-generation';
 import { standaloneMaintenanceFormSchema } from './standalone-maintenance-form-model';
 import { StandaloneMaintenanceCostEditor } from './standalone-maintenance-cost-editor';

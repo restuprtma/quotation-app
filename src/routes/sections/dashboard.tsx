@@ -34,9 +34,7 @@ const BlueprintCreatePage = lazy(
 const BlueprintProcessPage = lazy(
   () => import('src/module/quotation/features/blueprints/pages/process')
 );
-const BlueprintListPage = lazy(
-  () => import('src/module/quotation/features/blueprints/pages/list')
-);
+const BlueprintListPage = lazy(() => import('src/module/quotation/features/blueprints/pages/list'));
 const BlueprintProgressPage = lazy(
   () => import('src/module/quotation/features/blueprints/pages/progress')
 );

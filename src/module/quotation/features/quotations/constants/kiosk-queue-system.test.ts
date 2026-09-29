@@ -2,13 +2,13 @@ import type { KioskQueueSystemInput } from '../types';
 
 import { it, expect, describe } from 'vitest';
 
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import {
   calculateKioskQueueLocal,
   normalizeKioskQueueSystem,
   KIOSK_QUEUE_DEFAULT_VALUES,
   createDefaultKioskQueueValues,
 } from './kiosk-queue-system';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 export const governmentHardwareValues: KioskQueueSystemInput = {
   variant: 'government_mpp',

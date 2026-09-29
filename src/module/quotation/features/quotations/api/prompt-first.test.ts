@@ -1,8 +1,8 @@
+import type { MeetingQuotationPayload } from '../types/prompt-first';
+
 import { it, vi, expect, describe } from 'vitest';
 
 import axios, { endpoints } from 'src/shared/lib/axios';
-
-import type { MeetingQuotationPayload } from '../types/prompt-first';
 
 import {
   getPromptIssues,
@@ -105,11 +105,9 @@ describe('Prompt-first Quotation API', () => {
 
     const result = await createQuotationFromMeeting(legacyPayload);
 
-    expect(postSpy).toHaveBeenCalledWith(
-      '/quotation/v1/quotations/from-meeting',
-      legacyPayload,
-      { signal: undefined }
-    );
+    expect(postSpy).toHaveBeenCalledWith('/quotation/v1/quotations/from-meeting', legacyPayload, {
+      signal: undefined,
+    });
     expect(result).toEqual(mockResponse);
   });
 

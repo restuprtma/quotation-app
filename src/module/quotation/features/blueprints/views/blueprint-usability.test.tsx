@@ -266,7 +266,9 @@ describe('Blueprint Usability, Accessibility & Responsive Guards (6.03-6.05)', (
       expect(screen.getByText(/Layanan AI Provider Tidak Tersedia/i)).toBeTruthy();
       expect(screen.queryByText(/Konfigurasi AI Provider Belum Diatur/i)).toBeNull();
       expect(screen.queryByRole('button', { name: /Buka Pengaturan/i })).toBeNull();
-      expect(screen.getAllByRole('button', { name: /Coba Lagi/i }).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByRole('button', { name: /Coba Lagi/i }).length).toBeGreaterThanOrEqual(
+        1
+      );
     });
   });
 

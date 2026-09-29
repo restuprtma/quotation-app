@@ -67,8 +67,7 @@ export function useBlueprintList(
 
   const quotationId = normalizedParams.quotationId ?? null;
   const statuses = normalizedParams.statuses;
-  const sortedStatusesKey =
-    statuses && statuses.length > 0 ? [...statuses].sort().join(',') : null;
+  const sortedStatusesKey = statuses && statuses.length > 0 ? [...statuses].sort().join(',') : null;
   const page = normalizedParams.page ?? 1;
   const limit = normalizedParams.limit ?? 20;
 

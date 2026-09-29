@@ -12,6 +12,7 @@ export default defineConfig({
   testDir: './e2e',
   outputDir: 'test-results',
   timeout: 180_000,
+  workers: 1,
   webServer: [
     {
       command: 'go run ./cmd/blueprint-qa',

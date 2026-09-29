@@ -15,6 +15,8 @@ const MONEY_VALUE_PATTERN = /^(0|[1-9][0-9]{0,14})$/;
 const CLOUD_INDEX_PATTERN = /^(0|[1-9][0-9]{0,5})$/;
 const CLOUD_FIELD_PATTERN = /^[a-z0-9][a-z0-9_.-]{0,127}$/i;
 const CLOUD_COMPONENT_PATTERN = /^(setup|monthly_service)$/;
+const SECTION_VERSION_PATTERN = /^[1-9][0-9]{0,2}$/;
+const MANAGED_PATTERN = /^true$/;
 
 function readMarker(element: HTMLElement, name: string, pattern = MARKER_PATTERN): string | null {
   const value = element.getAttribute(name);
@@ -67,6 +69,19 @@ export const QuotationSectionExtension = Node.create({
         renderHTML: (attributes: Record<string, unknown>) =>
           renderMarker(attributes, 'data-quotation-section'),
       },
+      'data-section-version': {
+        default: null,
+        parseHTML: (element: HTMLElement) =>
+          readMarker(element, 'data-section-version', SECTION_VERSION_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-section-version', SECTION_VERSION_PATTERN),
+      },
+      'data-managed': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-managed', MANAGED_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-managed', MANAGED_PATTERN),
+      },
       'data-quotation-section-number': {
         default: null,
         parseHTML: (element: HTMLElement) =>
@@ -115,6 +130,33 @@ export const QuotationSectionExtension = Node.create({
 
   renderHTML({ HTMLAttributes }) {
     return ['section', HTMLAttributes, 0];
+  },
+
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: ManagedCommercialPluginKey,
+        filterTransaction: (tr, state) => {
+          if (!tr.docChanged || tr.getMeta('preventUpdate')) return true;
+          const managedRanges: Array<{ from: number; to: number }> = [];
+          state.doc.descendants((node, pos) => {
+            if (node.attrs?.['data-managed'] === 'true') {
+              managedRanges.push({ from: pos, to: pos + node.nodeSize });
+            }
+          });
+          if (managedRanges.length === 0) return true;
+          let touchesManaged = false;
+          tr.steps.forEach((step) => {
+            step.getMap().forEach((oldStart, oldEnd) => {
+              if (managedRanges.some((range) => oldStart <= range.to && oldEnd >= range.from)) {
+                touchesManaged = true;
+              }
+            });
+          });
+          return !touchesManaged;
+        },
+      }),
+    ];
   },
 });
 
@@ -414,6 +456,7 @@ declare module '@tiptap/core' {
 }
 
 export const LegalBlockPluginKey = new PluginKey('legalBlockLock');
+export const ManagedCommercialPluginKey = new PluginKey('managedCommercialLock');
 
 export interface LegalBlockStorage {
   unlocked: boolean;
@@ -501,6 +544,19 @@ export const LegalBlockExtension = Node.create<LegalBlockOptions, LegalBlockStor
         parseHTML: (element: HTMLElement) => readMarker(element, 'data-section-code'),
         renderHTML: (attributes: Record<string, unknown>) =>
           renderMarker(attributes, 'data-section-code'),
+      },
+      'data-section-version': {
+        default: null,
+        parseHTML: (element: HTMLElement) =>
+          readMarker(element, 'data-section-version', SECTION_VERSION_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-section-version', SECTION_VERSION_PATTERN),
+      },
+      'data-managed': {
+        default: null,
+        parseHTML: (element: HTMLElement) => readMarker(element, 'data-managed', MANAGED_PATTERN),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          renderMarker(attributes, 'data-managed', MANAGED_PATTERN),
       },
     };
   },

@@ -110,7 +110,9 @@ describe('normalizeQuotationHeaderHTML', () => {
     );
     expect(normalized).toContain('Etik Mudarifa, S.STP., M.Si.');
     expect(normalized).toContain('DPMPTSP');
-    expect(normalized).toContain('<section data-block-type="opening"><p>Kesiapan tim IT Profesional.</p></section>');
+    expect(normalized).toContain(
+      '<section data-block-type="opening"><p>Kesiapan tim IT Profesional.</p></section>'
+    );
   });
 
   it('3. is byte-idempotent for canonical inputs', () => {

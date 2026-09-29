@@ -139,9 +139,7 @@ describe('BlueprintCreateView', () => {
   });
 
   it('handles duplicate 409 by calling listBlueprints and navigating to existing blueprint', async () => {
-    const listSpy = vi
-      .spyOn(api, 'listBlueprints')
-      .mockResolvedValue(mockBlueprintListPopulated);
+    const listSpy = vi.spyOn(api, 'listBlueprints').mockResolvedValue(mockBlueprintListPopulated);
 
     vi.spyOn(api, 'listQuotationRevisions').mockImplementation(async (qid) => {
       if (qid === 'q-1') return mockRevisionsQ1;
@@ -196,13 +194,11 @@ describe('BlueprintCreateView', () => {
     fireEvent.click(openExistingBtn);
 
     await waitFor(() => {
-      expect(listSpy).toHaveBeenCalledWith(
-        {
-          quotationId: 'q-1',
-          page: 1,
-          limit: 1,
-        }
-      );
+      expect(listSpy).toHaveBeenCalledWith({
+        quotationId: 'q-1',
+        page: 1,
+        limit: 1,
+      });
       expect(mockNavigate).toHaveBeenCalledWith('/blueprint/bp-100');
     });
   });

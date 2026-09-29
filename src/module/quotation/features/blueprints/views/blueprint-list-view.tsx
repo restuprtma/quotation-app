@@ -7,12 +7,13 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
 import { paths } from 'src/routes/paths';
+
 import { Iconify } from 'src/shared/ui/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import { PROCESS_BLUEPRINT_STATUSES, type GenerationStatus } from '../types';
 import { useBlueprintList } from '../hooks/use-blueprint';
 import { BlueprintListTable } from '../components/blueprint-list-table';
+import { type GenerationStatus, PROCESS_BLUEPRINT_STATUSES } from '../types';
 
 export type BlueprintListViewProps = {
   mode: 'process' | 'completed';

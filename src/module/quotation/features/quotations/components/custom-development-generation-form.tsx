@@ -5,8 +5,6 @@ import type { CustomDevelopmentFormValues } from './custom-development-form-mode
 import { useRef, useMemo, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
-import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -28,10 +26,12 @@ import { Form, RHFSelect, RHFTextField } from 'src/shared/ui/hook-form';
 import { useClients } from '../hooks/use-clients';
 import { SOLUTION_TYPES } from '../constants/scope-presets';
 import { useActiveSkills } from '../hooks/use-active-skills';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 import { customDevelopmentFormSchema } from './custom-development-form-model';
 import { CustomDevelopmentCostEditor } from './custom-development-cost-editor';
 import { useCustomDevelopmentPreview } from '../hooks/use-quotation-generation';
 import { CustomDevelopmentScopeEditor } from './custom-development-scope-editor';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import { CustomDevelopmentMonthlyEditor } from './custom-development-monthly-editor';
 import { CustomDevelopmentPaymentLegalEditor } from './custom-development-payment-legal-editor';
 import {

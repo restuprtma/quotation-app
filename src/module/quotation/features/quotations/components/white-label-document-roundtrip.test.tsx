@@ -688,9 +688,10 @@ describe('white label quotation document round-trip', () => {
 
     const getNonMetadataSnapshot = (ed: Editor) => {
       const json = ed.getJSON();
-      const sections = (json.content ?? []).filter((node) =>
-        ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
-        node.attrs?.['data-block-type'] !== 'metadata'
+      const sections = (json.content ?? []).filter(
+        (node) =>
+          ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
+          node.attrs?.['data-block-type'] !== 'metadata'
       );
       return JSON.stringify(sections);
     };
@@ -724,7 +725,10 @@ describe('white label quotation document round-trip', () => {
         compSize = node.nodeSize - 2;
       }
     });
-    editor.commands.insertContentAt({ from: compPos, to: compPos + compSize }, 'Ponpes Modern Al-Hikmah');
+    editor.commands.insertContentAt(
+      { from: compPos, to: compPos + compSize },
+      'Ponpes Modern Al-Hikmah'
+    );
 
     const nonMetadataAfter = getNonMetadataSnapshot(editor);
     expect(nonMetadataAfter).toBe(nonMetadataBefore);

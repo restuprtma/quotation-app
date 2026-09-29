@@ -394,8 +394,7 @@ export function SectionStatusList({
                         (status === 'completed' ||
                           status === 'validated' ||
                           status === 'manual_edit') &&
-                        onOpenManual &&
-                        !onOpenEditor && (
+                        onOpenManual && (
                           <Button
                             size="small"
                             variant="outlined"

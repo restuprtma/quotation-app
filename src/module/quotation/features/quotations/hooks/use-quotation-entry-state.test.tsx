@@ -1,14 +1,14 @@
 // @vitest-environment happy-dom
 
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { it, expect, describe, beforeEach } from 'vitest';
 
+import { useQuotationEntryState } from './use-quotation-entry-state';
 import {
   EMPTY_QUOTATION_ENTRY,
-  QUOTATION_ENTRY_STORAGE_KEY,
   type QuotationEntryState,
+  QUOTATION_ENTRY_STORAGE_KEY,
 } from '../types/quotation-entry';
-import { useQuotationEntryState } from './use-quotation-entry-state';
 
 describe('useQuotationEntryState hook', () => {
   let mockStorage: Storage;

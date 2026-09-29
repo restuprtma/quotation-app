@@ -2,6 +2,7 @@ import type { StandaloneMaintenanceInput } from '../types';
 
 import { it, expect, describe } from 'vitest';
 
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import {
   formatHalfHours,
   retainerLineTotal,
@@ -9,10 +10,9 @@ import {
   normalizeStandaloneMaintenance,
   MAX_STANDALONE_MAINTENANCE_MONEY,
   DEFAULT_STANDALONE_MAINTENANCE_FORM,
-  calculateStandaloneMaintenanceDraftTotals,
   createDefaultStandaloneMaintenanceValues,
+  calculateStandaloneMaintenanceDraftTotals,
 } from './standalone-maintenance';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 describe('standalone maintenance pure helpers', () => {
   describe('formatHalfHours', () => {

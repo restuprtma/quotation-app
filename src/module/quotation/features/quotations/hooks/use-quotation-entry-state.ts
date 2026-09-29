@@ -6,14 +6,16 @@ import {
   type QuotationEntryIdentity,
 } from '../types/quotation-entry';
 import {
+  mergeEntryIdentity,
   loadQuotationEntryState,
   saveQuotationEntryState,
   clearQuotationEntryState,
-  mergeEntryIdentity,
 } from '../utils/quotation-entry-state';
 
 export function useQuotationEntryState(storage?: Storage) {
-  const [entry, setEntryState] = useState<QuotationEntryState>(() => loadQuotationEntryState(storage));
+  const [entry, setEntryState] = useState<QuotationEntryState>(() =>
+    loadQuotationEntryState(storage)
+  );
 
   const setEntry = useCallback(
     (next: QuotationEntryState | ((prev: QuotationEntryState) => QuotationEntryState)) => {

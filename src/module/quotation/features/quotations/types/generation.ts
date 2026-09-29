@@ -1,4 +1,4 @@
-import type { DraftIssue, PromptQuotationState } from './prompt-first';
+import type { DraftIssue, CatalogRoleOption, PromptQuotationState } from './prompt-first';
 
 export type PaymentTermItem = {
   milestone_name: string;
@@ -1044,6 +1044,8 @@ export type QuotationGenerationDetail = {
   legal_content_modified?: boolean;
   commercial_content_modified?: boolean;
   generated_at?: string;
+  /** Safe role metadata from the prompt-first revision's persisted rate-card snapshot. */
+  catalog_roles?: CatalogRoleOption[];
 };
 
 export type SaveDraftPayload = {

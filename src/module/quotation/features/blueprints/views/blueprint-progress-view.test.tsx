@@ -481,6 +481,8 @@ describe('BlueprintProgressView', () => {
       isFetching: false,
       isPolling: false,
       isStaleLease: false,
+      needsLeaseRecovery: false,
+      hasFailedSection: true,
       error: null,
       start: vi.fn(),
       stop: vi.fn(),
@@ -523,6 +525,8 @@ describe('BlueprintProgressView', () => {
       isFetching: false,
       isPolling: false,
       isStaleLease: false,
+      needsLeaseRecovery: false,
+      hasFailedSection: true,
       error: null,
       start: vi.fn(),
       stop: vi.fn(),
@@ -566,6 +570,8 @@ describe('BlueprintProgressView', () => {
       isFetching: false,
       isPolling: false,
       isStaleLease: false,
+      needsLeaseRecovery: false,
+      hasFailedSection: true,
       error: null,
       start: vi.fn(),
       stop: vi.fn(),
@@ -611,6 +617,8 @@ describe('BlueprintProgressView', () => {
       isFetching: false,
       isPolling: false,
       isStaleLease: false,
+      needsLeaseRecovery: false,
+      hasFailedSection: true,
       error: null,
       start: vi.fn(),
       stop: vi.fn(),
@@ -649,6 +657,8 @@ describe('BlueprintProgressView', () => {
       isFetching: false,
       isPolling: false,
       isStaleLease: false,
+      needsLeaseRecovery: false,
+      hasFailedSection: true,
       error: null,
       start: vi.fn(),
       stop: vi.fn(),
@@ -687,6 +697,8 @@ describe('BlueprintProgressView', () => {
       isFetching: false,
       isPolling: false,
       isStaleLease: false,
+      needsLeaseRecovery: false,
+      hasFailedSection: true,
       error: null,
       start: vi.fn(),
       stop: vi.fn(),
@@ -747,7 +759,9 @@ describe('BlueprintProgressView', () => {
       // Assert Lanjutkan Generasi is NOT present in header actions
       expect(screen.queryByRole('button', { name: /lanjutkan generasi/i })).toBeNull();
       // Assert section-level retry and manual buttons are available
-      expect(screen.getAllByRole('button', { name: /coba lagi/i }).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByRole('button', { name: /coba lagi/i }).length).toBeGreaterThanOrEqual(
+        1
+      );
       expect(screen.getByRole('button', { name: /lengkapi manual/i })).toBeTruthy();
     });
 

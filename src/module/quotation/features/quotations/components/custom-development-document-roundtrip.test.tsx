@@ -886,9 +886,10 @@ describe('custom development quotation document round-trip', () => {
 
     const getNonMetadataSnapshot = (ed: Editor) => {
       const json = ed.getJSON();
-      const sections = (json.content ?? []).filter((node) =>
-        ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
-        node.attrs?.['data-block-type'] !== 'metadata'
+      const sections = (json.content ?? []).filter(
+        (node) =>
+          ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
+          node.attrs?.['data-block-type'] !== 'metadata'
       );
       return JSON.stringify(sections);
     };
@@ -915,14 +916,20 @@ describe('custom development quotation document round-trip', () => {
     expect(numPos).toBeGreaterThan(0);
     expect(compPos).toBeGreaterThan(0);
 
-    editor.commands.insertContentAt({ from: numPos, to: numPos + numSize }, 'BENCH-KOPI-REVISED-2026');
+    editor.commands.insertContentAt(
+      { from: numPos, to: numPos + numSize },
+      'BENCH-KOPI-REVISED-2026'
+    );
     editor.state.doc.descendants((node, pos) => {
       if (node.type.name === 'quotationRecipientLine' && node.attrs.field === 'client_company') {
         compPos = pos + 1;
         compSize = node.nodeSize - 2;
       }
     });
-    editor.commands.insertContentAt({ from: compPos, to: compPos + compSize }, 'PT Kopi Studio Global');
+    editor.commands.insertContentAt(
+      { from: compPos, to: compPos + compSize },
+      'PT Kopi Studio Global'
+    );
 
     const nonMetadataAfter = getNonMetadataSnapshot(editor);
     expect(nonMetadataAfter).toBe(nonMetadataBefore);

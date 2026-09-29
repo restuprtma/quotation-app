@@ -64,14 +64,32 @@ const NO_BUSINESS_SIGNAL_MESSAGE =
   'Catatan belum memuat informasi kebutuhan yang dapat dikenali. Tambahkan scope, durasi, tim, skema layanan, atau pola pembayaran.';
 
 const INVALID_EXTRACTION_REASON_MESSAGES: Record<string, string> = {
-  malformed_json: 'Respons AI belum dapat dibaca dalam format yang diperlukan. Coba buat draf lagi.',
-  trailing_content: 'Respons AI belum dapat dibaca dalam format yang diperlukan. Coba buat draf lagi.',
+  malformed_json:
+    'Respons AI belum dapat dibaca dalam format yang diperlukan. Coba buat draf lagi.',
+  trailing_content:
+    'Respons AI belum dapat dibaca dalam format yang diperlukan. Coba buat draf lagi.',
   missing_required_field:
     'Informasi penting dari catatan meeting belum lengkap untuk membuat draf. Lengkapi catatan lalu coba lagi.',
   unknown_field: 'Respons AI memuat format yang belum didukung. Coba buat draf lagi.',
   schema_version: 'Versi format ekstraksi belum sesuai. Coba buat draf lagi.',
   unsupported_evidence:
     'Sebagian informasi hasil AI tidak dapat dicocokkan dengan catatan meeting. Periksa penulisan nama, durasi, tim, dan skema layanan; lalu coba lagi.',
+  'unsupported_evidence.client_company':
+    'AI belum dapat mencocokkan nama perusahaan klien dengan catatan meeting. Pastikan nama perusahaan ditulis jelas, lalu coba lagi.',
+  'unsupported_evidence.project_name':
+    'AI belum dapat mencocokkan nama proyek dengan catatan meeting. Pastikan nama proyek ditulis jelas, lalu coba lagi.',
+  'unsupported_evidence.duration_months':
+    'AI belum dapat mencocokkan durasi proyek dengan catatan meeting. Pastikan durasi ditulis jelas, lalu coba lagi.',
+  'unsupported_evidence.team':
+    'AI belum dapat mencocokkan informasi tim dengan catatan meeting. Pastikan peran, jumlah, dan durasi tim ditulis jelas, lalu coba lagi.',
+  'unsupported_evidence.scope':
+    'AI belum dapat mencocokkan ruang lingkup pekerjaan dengan catatan meeting. Perjelas daftar fitur atau kebutuhan, lalu coba lagi.',
+  'unsupported_evidence.payment_pattern':
+    'AI belum dapat mencocokkan pola pembayaran dengan catatan meeting. Pastikan tahapan atau persentase pembayaran ditulis jelas, lalu coba lagi.',
+  'unsupported_evidence.commercial_scheme':
+    'AI belum dapat mencocokkan skema layanan dengan catatan meeting. Pastikan jenis layanan yang dibutuhkan ditulis jelas, lalu coba lagi.',
+  'unsupported_evidence.service_input':
+    'AI belum dapat mencocokkan detail layanan dengan catatan meeting. Perjelas kebutuhan layanan, lalu coba lagi.',
   state_validation:
     'Hasil ekstraksi tidak memenuhi validasi struktur draf. Periksa catatan meeting lalu coba lagi.',
 };
@@ -142,9 +160,10 @@ export function QuotationPromptView() {
   const [lastSubmittedPayload, setLastSubmittedPayload] = useState<GenerateQuotationPayload | null>(
     null
   );
-  const [lastMeetingPayload, setLastMeetingPayload] = useState<
-    Omit<MeetingQuotationPayload, 'idempotency_key'> | null
-  >(null);
+  const [lastMeetingPayload, setLastMeetingPayload] = useState<Omit<
+    MeetingQuotationPayload,
+    'idempotency_key'
+  > | null>(null);
   const progressTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const clearProgressTimers = () => {
@@ -190,9 +209,11 @@ export function QuotationPromptView() {
       toast.success('Quotation draft generated successfully!');
 
       // Auto-navigate to editor after short delay
-      progressTimersRef.current = [setTimeout(() => {
-        navigate(paths.dashboard.quotation.edit(response.quotation_id));
-      }, 1200)];
+      progressTimersRef.current = [
+        setTimeout(() => {
+          navigate(paths.dashboard.quotation.edit(response.quotation_id));
+        }, 1200),
+      ];
     } catch (err: any) {
       clearProgressTimers();
       const { code: errCode, message: defaultMessage } = getGenerationError(err);
@@ -244,9 +265,11 @@ export function QuotationPromptView() {
       setGeneratedQuotationId(response.quotation_id);
       clear();
       toast.success('Quotation draft generated successfully!');
-      progressTimersRef.current = [setTimeout(() => {
-        navigate(paths.dashboard.quotation.edit(response.quotation_id));
-      }, 1200)];
+      progressTimersRef.current = [
+        setTimeout(() => {
+          navigate(paths.dashboard.quotation.edit(response.quotation_id));
+        }, 1200),
+      ];
     } catch (err: any) {
       clearProgressTimers();
       const { code, message: defaultMessage } = getGenerationError(err);

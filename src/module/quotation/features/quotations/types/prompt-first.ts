@@ -411,6 +411,8 @@ export type PromptPatchResponse = {
   issues: DraftIssue[];
   readiness: string;
   calculation: PromptCalculation;
+  /** Safe role metadata from the quotation's persisted rate-card snapshot. */
+  catalog_roles?: CatalogRoleOption[];
 };
 
 export type MeetingQuotationPayload = {
@@ -435,6 +437,8 @@ export type MeetingDraftResponse = {
   readiness: string;
   calculation?: unknown;
   idempotent_replay: boolean;
+  /** Safe role metadata from the quotation's persisted rate-card snapshot. */
+  catalog_roles?: CatalogRoleOption[];
 };
 
 /** A role option returned by the prompt-first quotation catalog. */

@@ -124,8 +124,7 @@ export function presentBlueprintError(code?: string | null): BlueprintErrorPrese
       return {
         category: 'generic',
         title: 'Pipeline Terblokir',
-        message:
-          'Pipeline terhalang oleh tahapan sebelumnya yang belum selesai atau tidak valid.',
+        message: 'Pipeline terhalang oleh tahapan sebelumnya yang belum selesai atau tidak valid.',
         action: 'refresh',
       };
 

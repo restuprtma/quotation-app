@@ -3,16 +3,18 @@ import type { ReactNode } from 'react';
 
 import i18n from 'i18next';
 import { MemoryRouter } from 'react-router';
-import { initReactI18next, I18nextProvider } from 'react-i18next';
 import { it, expect, describe, afterEach } from 'vitest';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { render, screen, cleanup, renderHook } from '@testing-library/react';
 
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
 import { paths } from 'src/routes/paths';
+
 import { mixins } from 'src/theme/core/mixins';
+import { NavSectionVertical } from 'src/shared/ui/nav-section';
 import idNavigation from 'src/locales/langs/id/navigation.json';
 import enNavigation from 'src/locales/langs/en/navigation.json';
-import { NavSectionVertical } from 'src/shared/ui/nav-section';
 
 import { useNavData } from './nav-config-dashboard';
 

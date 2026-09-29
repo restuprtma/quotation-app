@@ -5,10 +5,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-import {
-  GenerationProgressCard,
-  MEETING_GENERATION_STAGES,
-} from './generation-progress-card';
+import { GenerationProgressCard, MEETING_GENERATION_STAGES } from './generation-progress-card';
 
 vi.mock('src/shared/ui/iconify', () => ({
   Iconify: ({ icon }: { icon: string }) => <span data-icon={icon} />,
@@ -17,12 +14,7 @@ vi.mock('src/shared/ui/iconify', () => ({
 function renderCard(props: Partial<React.ComponentProps<typeof GenerationProgressCard>> = {}) {
   return render(
     <ThemeProvider theme={createTheme()}>
-      <GenerationProgressCard
-        open
-        activeStageIndex={0}
-        isError={false}
-        {...props}
-      />
+      <GenerationProgressCard open activeStageIndex={0} isError={false} {...props} />
     </ThemeProvider>
   );
 }

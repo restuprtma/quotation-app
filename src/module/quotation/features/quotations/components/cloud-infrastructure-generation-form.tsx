@@ -6,8 +6,6 @@ import type { CloudInfrastructureFormValues } from './cloud-infrastructure-form-
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRef, useMemo, useState, useEffect } from 'react';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
-import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -31,9 +29,11 @@ import { CloudFormField as RHFTextField } from './cloud-form-field';
 import { useActiveRateCards } from '../hooks/use-active-rate-cards';
 import { CloudPaymentLegalEditor } from './cloud-payment-legal-editor';
 import { useRateCardDetail } from '../../rate-cards/hooks/use-rate-cards';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 import { CloudInfrastructurePreview } from './cloud-infrastructure-preview';
 import { useCloudInfrastructurePreview } from '../hooks/use-quotation-generation';
 import { cloudInfrastructureFormSchema } from './cloud-infrastructure-form-model';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import {
   normalizeCloudInfrastructure,
   makeDefaultCloudInfrastructureValues,

@@ -5,8 +5,6 @@ import type { QuotationEntryIdentity } from '../types/quotation-entry';
 import { useRef, useMemo, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
-import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
 
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -33,6 +31,8 @@ import { WhiteLabelScopeEditor } from './white-label-scope-editor';
 import { WhiteLabelLicenseEditor } from './white-label-license-editor';
 import { WhiteLabelServiceEditor } from './white-label-service-editor';
 import { useWhiteLabelPreview } from '../hooks/use-quotation-generation';
+import { useEntryIdentityBridge } from '../hooks/use-entry-identity-bridge';
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import { WhiteLabelPaymentRightsEditor } from './white-label-payment-rights-editor';
 import {
   toWhiteLabelPayload,

@@ -150,10 +150,7 @@ describe('QuotationHeaderExtensions', () => {
       }
     });
     expect(numberPos).toBeGreaterThan(0);
-    editor.commands.insertContentAt(
-      { from: numberPos, to: numberPos + numberSize },
-      'Q-2026-001'
-    );
+    editor.commands.insertContentAt({ from: numberPos, to: numberPos + numberSize }, 'Q-2026-001');
 
     // 3. Edit client_company (which was empty)
     let companyPos = -1;

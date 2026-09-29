@@ -276,9 +276,10 @@ describe('dedicated quotation document round-trip', () => {
     // Snapshot non-metadata sections before header edit
     const getNonMetadataSnapshot = (ed: Editor) => {
       const json = ed.getJSON();
-      const sections = (json.content ?? []).filter((node) =>
-        ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
-        node.attrs?.['data-block-type'] !== 'metadata'
+      const sections = (json.content ?? []).filter(
+        (node) =>
+          ['quotationSection', 'legalBlock'].includes(node.type ?? '') &&
+          node.attrs?.['data-block-type'] !== 'metadata'
       );
       return JSON.stringify(sections);
     };
@@ -305,7 +306,10 @@ describe('dedicated quotation document round-trip', () => {
     expect(headingPos).toBeGreaterThan(0);
     expect(numPos).toBeGreaterThan(0);
 
-    editor.commands.insertContentAt({ from: headingPos, to: headingPos + headingSize }, 'PENAWARAN DEDICATED SQUAD REVISED');
+    editor.commands.insertContentAt(
+      { from: headingPos, to: headingPos + headingSize },
+      'PENAWARAN DEDICATED SQUAD REVISED'
+    );
     // Recalculate numPos after heading edit
     editor.state.doc.descendants((node, pos) => {
       if (node.type.name === 'quotationMetadataRow' && node.attrs.field === 'quotation_number') {

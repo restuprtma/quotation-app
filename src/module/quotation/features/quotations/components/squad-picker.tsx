@@ -1,4 +1,4 @@
-import type { SquadModel } from '../types';
+import type { SquadModel, CatalogRoleOption } from '../types';
 
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 
@@ -21,6 +21,8 @@ import { SENIORITIES, STANDARD_ROLES } from '../../rate-cards/types';
 type Props = {
   name: string;
   model: SquadModel;
+  /** Catalog options from the prompt-first response. Omit for the legacy form. */
+  options?: CatalogRoleOption[];
   maintenance?: boolean;
   disabled?: boolean;
 };
@@ -98,10 +100,14 @@ function WorkdayInput({ name, label, disabled }: Omit<QuarterInputProps, 'max'>)
   );
 }
 
-function defaultLine(model: SquadModel) {
+function defaultLine(model: SquadModel, options?: CatalogRoleOption[]) {
+  const selectedCatalogOption = options?.length === 1 ? options[0] : undefined;
+
   return {
-    role: 'frontend_programmer',
-    seniority: 'intermediate',
+    // Prompt-first lines must be explicitly resolved from the catalog. The
+    // legacy form keeps its historical default when options are omitted.
+    role: options === undefined ? 'frontend_programmer' : selectedCatalogOption?.role || '',
+    seniority: selectedCatalogOption?.seniority || 'intermediate',
     headcount_quarters: 4,
     period_quarters: model === '1D' ? 0 : 24,
     // A newly added sprint line starts with the same five-weekday default as
@@ -111,11 +117,27 @@ function defaultLine(model: SquadModel) {
   };
 }
 
-export function SquadPicker({ name, model, maintenance = false, disabled = false }: Props) {
+export function SquadPicker({
+  name,
+  model,
+  options,
+  maintenance = false,
+  disabled = false,
+}: Props) {
   const { t } = useTranslate('quotation');
   const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name });
   const isSprint = model === '1D';
+  const catalogMode = options !== undefined;
+  const roleOptions = catalogMode
+    ? options
+    : STANDARD_ROLES.map((role) => ({
+        rate_item_id: role.role,
+        role: role.role,
+        display_name: role.displayName,
+        seniority: '',
+        term_type: '',
+      }));
 
   return (
     <Stack
@@ -139,7 +161,7 @@ export function SquadPicker({ name, model, maintenance = false, disabled = false
           size="small"
           variant="outlined"
           startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={() => append(defaultLine(model))}
+          onClick={() => append(defaultLine(model, options))}
           disabled={disabled}
         >
           {t('dedicatedSquadForm.picker.addLine')}
@@ -171,11 +193,29 @@ export function SquadPicker({ name, model, maintenance = false, disabled = false
                       label={t('dedicatedSquadForm.picker.role')}
                       disabled={disabled}
                       error={!!error}
-                      helperText={error?.message}
+                      helperText={
+                        error?.message ||
+                        (catalogMode &&
+                        (!inputField.value ||
+                          !roleOptions.some((option) => option.role === inputField.value))
+                          ? 'Select a role from the active catalog to continue.'
+                          : catalogMode &&
+                              roleOptions.filter((option) => option.role === inputField.value)
+                                .length > 1
+                            ? 'Confirm the catalog role and seniority for this request.'
+                            : undefined)
+                      }
                     >
-                      {STANDARD_ROLES.map((role) => (
-                        <MenuItem key={role.role} value={role.role}>
-                          {role.displayName}
+                      {catalogMode &&
+                        inputField.value &&
+                        !roleOptions.some((option) => option.role === inputField.value) && (
+                          <MenuItem value={inputField.value}>
+                            Confirm role: {inputField.value}
+                          </MenuItem>
+                        )}
+                      {roleOptions.map((role) => (
+                        <MenuItem key={`${role.rate_item_id}-${role.role}`} value={role.role}>
+                          {role.display_name}
                         </MenuItem>
                       ))}
                     </TextField>

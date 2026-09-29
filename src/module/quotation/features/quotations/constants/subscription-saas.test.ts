@@ -2,18 +2,16 @@ import type { ActiveSkill, ClientSummary } from '../types';
 
 import { it, expect, describe } from 'vitest';
 
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import {
   buildPaymentRowSkeletons,
-  createDefaultHubungValues,
   normalizeSubscriptionSaaS,
   toSubscriptionSaaSPayload,
   syncFeatureGroupsForLayout,
   MAX_SUBSCRIPTION_SAFE_AMOUNT,
   calculatePaymentScheduleTotal,
   createDefaultSubscriptionSaaSValues,
-  RIGHTS_CLAUSE_VENTURO_SOFTWARE_OWNERSHIP_V1,
 } from './subscription-saas';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 describe('subscription-saas constants & pure helpers', () => {
   const today = '2026-09-07';

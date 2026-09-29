@@ -110,7 +110,7 @@ export function ClientOrganizationField({
         options={options}
         loading={isLoading}
         disabled={disabled}
-        getOptionLabel={(option) => (typeof option === 'string' ? option : option?.name ?? '')}
+        getOptionLabel={(option) => (typeof option === 'string' ? option : (option?.name ?? ''))}
         isOptionEqualToValue={(option, val) => option?.id === val?.id}
         filterOptions={(opts, state) => {
           const filterText = (state.inputValue ?? '').toLowerCase().trim();

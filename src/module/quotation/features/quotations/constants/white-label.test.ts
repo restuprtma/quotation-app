@@ -2,6 +2,7 @@ import type { ActiveSkill, ClientSummary, WhiteLabelInput } from '../types';
 
 import { it, expect, describe } from 'vitest';
 
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import {
   FTE_OPTIONS,
   hostingLineTotal,
@@ -17,7 +18,6 @@ import {
   createDefaultWhiteLabelValues,
   calculateWhiteLabelDraftTotals,
 } from './white-label';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 describe('white-label constants & pure helpers', () => {
   const today = '2026-09-08';

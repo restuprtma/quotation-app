@@ -1,11 +1,11 @@
 import { it, expect, describe } from 'vitest';
 
+import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 import {
   toDedicatedSquadPayload,
   quotationGenerationSchema,
   createDefaultDedicatedSquadValues,
 } from './quotation-generation-form';
-import { applyEntryIdentityToSchemeDefaults } from '../utils/quotation-entry-state';
 
 describe('dedicated squad generation form contract', () => {
   it('creates a 1D form with sprint dates and workday units', () => {

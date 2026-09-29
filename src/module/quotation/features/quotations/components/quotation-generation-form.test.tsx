@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { it, vi, expect, describe, afterEach } from 'vitest';
-import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
+import { render, cleanup, waitFor, fireEvent } from '@testing-library/react';
 
 import { QuotationGenerationForm } from './quotation-generation-form';
 

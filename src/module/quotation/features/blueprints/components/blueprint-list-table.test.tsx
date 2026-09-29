@@ -144,7 +144,7 @@ describe('BlueprintListTable', () => {
           total={0}
           page={1}
           limit={20}
-          isLoading={true}
+          isLoading
           onPageChange={vi.fn()}
           onLimitChange={vi.fn()}
         />

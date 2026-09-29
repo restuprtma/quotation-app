@@ -6,10 +6,7 @@ import { it, expect, describe } from 'vitest';
 
 import { wrapOfficialDocument } from './quotation-editor';
 import { QuotationSectionExtension } from './legal-block-extension';
-import {
-  HEADER_FIELDS,
-  QuotationHeaderExtensions,
-} from './quotation-header-extension';
+import { HEADER_FIELDS, QuotationHeaderExtensions } from './quotation-header-extension';
 import {
   buildCanonicalHeaderHTML,
   normalizeQuotationHeaderHTML,
@@ -178,10 +175,20 @@ describe('quotation header round-trip across all quotation types', () => {
       // Edit heading and all 5 fields
       editHeading(firstEditor, 'PENAWARAN REVISI KHUSUS ENTERPRISE');
       editField(firstEditor, 'quotationMetadataRow', 'quotation_number', 'VEN/REVISED/2026/888');
-      editField(firstEditor, 'quotationMetadataRow', 'subject', 'Pengembangan Portal Digital Terpadu');
+      editField(
+        firstEditor,
+        'quotationMetadataRow',
+        'subject',
+        'Pengembangan Portal Digital Terpadu'
+      );
       editField(firstEditor, 'quotationMetadataRow', 'issue_date_header', '15 Oktober 2026');
       editField(firstEditor, 'quotationRecipientLine', 'client_pic', 'Dr. Hendra Wijaya');
-      editField(firstEditor, 'quotationRecipientLine', 'client_company', 'PT Solusi Digital Pratama');
+      editField(
+        firstEditor,
+        'quotationRecipientLine',
+        'client_company',
+        'PT Solusi Digital Pratama'
+      );
 
       // Serialize from first editor
       const serializedFirst = firstEditor.getHTML();
@@ -311,7 +318,9 @@ describe('quotation header round-trip across all quotation types', () => {
       expect(serialized).toContain('PT Global Tech');
 
       // Verify non-metadata section is intact
-      expect(serialized).toContain('<section data-block-type="commercial" data-section-number="1"><p>Commercial content</p></section>');
+      expect(serialized).toContain(
+        '<section data-block-type="commercial" data-section-number="1"><p>Commercial content</p></section>'
+      );
 
       editor.destroy();
     });
