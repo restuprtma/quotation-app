@@ -28,7 +28,7 @@ function getServerUrl(): string {
       envUrl.includes('127.0.0.1') ||
       /^\d+\.\d+\.\d+\.\d+/.test(envUrl.replace(/^https?:\/\//, ''))
     ) {
-      const port = envUrl ? new URL(envUrl).port || '8083' : '8083';
+      const port = envUrl ? new URL(envUrl).port || '8082' : '8082';
       return `${window.location.protocol}//${window.location.hostname}:${port}`;
     }
   }
