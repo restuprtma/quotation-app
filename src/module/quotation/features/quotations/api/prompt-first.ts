@@ -5,6 +5,7 @@ import type {
   MeetingDraftResponse,
   PromptRevisionPayload,
   MeetingQuotationPayload,
+  PendingMeetingDraftResponse,
 } from '../types/prompt-first';
 
 import axios, { endpoints } from 'src/shared/lib/axios';
@@ -15,9 +16,14 @@ type ApiEnvelope<T> = {
   errors?: string | { detail?: string[] } | null;
 };
 
-function extractError(payload: ApiEnvelope<unknown>) {
-  if (typeof payload.errors === 'string') return payload.errors;
-  return payload.errors?.detail?.[0] ?? payload.message ?? 'generation_failed';
+function apiEnvelopeError(payload: ApiEnvelope<unknown>, response?: unknown) {
+  const error = new Error(
+    typeof payload.errors === 'string'
+      ? payload.errors
+      : payload.errors?.detail?.[0] ?? payload.message ?? 'generation_failed'
+  );
+  Object.assign(error, { response });
+  return error;
 }
 
 export async function revisePromptQuotationSection(
@@ -31,27 +37,36 @@ export async function revisePromptQuotationSection(
     { signal }
   );
   if (!response.data.data) {
-    const error = new Error(extractError(response.data));
-    Object.assign(error, { response });
-    throw error;
+    throw apiEnvelopeError(response.data, response);
   }
   return response.data.data;
 }
 
-export async function createQuotationFromMeeting(
+export async function createMeetingDraft(
   payload: MeetingQuotationPayload,
   signal?: AbortSignal
-): Promise<MeetingDraftResponse> {
-  const response = await axios.post<ApiEnvelope<MeetingDraftResponse>>(
+): Promise<PendingMeetingDraftResponse> {
+  const response = await axios.post<ApiEnvelope<PendingMeetingDraftResponse>>(
     endpoints.quotation.quotations.fromMeeting,
     payload,
     { signal }
   );
   if (!response.data.data) {
-    const error = new Error(extractError(response.data));
-    Object.assign(error, { response });
-    throw error;
+    throw apiEnvelopeError(response.data, response);
   }
+  return response.data.data;
+}
+
+export async function processMeetingDraft(
+  quotationId: string,
+  signal?: AbortSignal
+): Promise<MeetingDraftResponse> {
+  const response = await axios.post<ApiEnvelope<MeetingDraftResponse>>(
+    endpoints.quotation.quotations.processMeeting(quotationId),
+    {},
+    { signal }
+  );
+  if (!response.data.data) throw apiEnvelopeError(response.data, response);
   return response.data.data;
 }
 
@@ -66,9 +81,7 @@ export async function patchPromptQuotation(
     { signal }
   );
   if (!response.data.data) {
-    const error = new Error(extractError(response.data));
-    Object.assign(error, { response });
-    throw error;
+    throw apiEnvelopeError(response.data, response);
   }
   return response.data.data;
 }

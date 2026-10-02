@@ -1,5 +1,10 @@
 import type { GenerateQuotationPayload } from '../types';
-import type { DraftIssue, MeetingQuotationPayload } from '../types/prompt-first';
+import type {
+  DraftIssue,
+  MeetingGenerationPhase,
+  MeetingQuotationPayload,
+} from '../types/prompt-first';
+import type { MeetingExtractionServiceScheme, MeetingExtractionStatus } from '../types/meeting-extraction';
 
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
@@ -10,6 +15,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
 import { paths } from 'src/routes/paths';
+import { CONFIG } from 'src/shared/config';
 
 import { useTranslate } from 'src/locales';
 import { toast } from 'src/shared/ui/snackbar';
@@ -17,6 +23,7 @@ import { Iconify } from 'src/shared/ui/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { MeetingNotesForm } from '../components/meeting-notes-form';
+import { MeetingExtractionProgressCard } from '../components/meeting-extraction-progress-card';
 import { useGenerateQuotation } from '../hooks/use-quotation-generation';
 import { useQuotationEntryState } from '../hooks/use-quotation-entry-state';
 import { QuotationGenerationForm } from '../components/quotation-generation-form';
@@ -32,6 +39,7 @@ import {
   usePromptQuotation,
   useCreatePromptClient,
 } from '../hooks/use-prompt-quotation';
+import { useMeetingExtraction } from '../hooks/use-meeting-extraction';
 import {
   CommercialSchemeSelector,
   type CommercialSchemeType,
@@ -108,6 +116,15 @@ function mapDraftIssue(issue: DraftIssue): DraftIssue {
 
 type ProgressMode = 'advanced' | 'meeting';
 
+const meetingStageByPhase: Record<MeetingGenerationPhase, number> = {
+  idle: 0,
+  creating_draft: 1,
+  extracting_meeting: 2,
+  finalizing_draft: 5,
+  completed: MEETING_GENERATION_STAGES.length - 1,
+  failed: 2,
+};
+
 function getGenerationError(err: any) {
   const responseData = err.response?.data;
   let code = 'generation_failed';
@@ -134,6 +151,25 @@ function meetingExtractionErrorMessage(code: string, fallback: string) {
   return INVALID_EXTRACTION_REASON_MESSAGES[reason] ?? INVALID_EXTRACTION_MESSAGE;
 }
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const isOpaqueId = (value: string | null): value is string => Boolean(value && UUID_PATTERN.test(value));
+
+function pendingPipelineStatus(quotationId: string, runId: string): MeetingExtractionStatus {
+  return {
+    quotation_id: quotationId,
+    run_id: runId,
+    status: 'queued',
+    current_phase: null,
+    progress: { completed: 0, total: 0 },
+    phases: [],
+    failed_phase: null,
+    error: null,
+    needs_input: [],
+    warnings: [],
+  };
+}
+
 export function QuotationPromptView() {
   const { t } = useTranslate('quotation');
   const [searchParams] = useSearchParams();
@@ -147,6 +183,15 @@ export function QuotationPromptView() {
 
   const view = searchParams.get('view');
   const schemeParam = searchParams.get('scheme') as CommercialSchemeType | null;
+  const pipelineEnabled = CONFIG.meetingExtraction.pipelineEnabled;
+  const queryQuotationId = searchParams.get('quotationId');
+  const queryRunId = searchParams.get('runId');
+  const recoveredQuotationId = isOpaqueId(queryQuotationId) && isOpaqueId(queryRunId) ? queryQuotationId : undefined;
+  const recoveredRunId = isOpaqueId(queryQuotationId) && isOpaqueId(queryRunId) ? queryRunId : undefined;
+  const meetingExtraction = useMeetingExtraction({
+    quotationId: pipelineEnabled ? recoveredQuotationId : undefined,
+    runId: pipelineEnabled ? recoveredRunId : undefined,
+  });
 
   // Generation state machine
   const [isProgressOpen, setIsProgressOpen] = useState(false);
@@ -157,13 +202,10 @@ export function QuotationPromptView() {
   } | null>(null);
   const [generatedQuotationId, setGeneratedQuotationId] = useState<string | null>(null);
   const [progressMode, setProgressMode] = useState<ProgressMode>('advanced');
+  const [pipelineActive, setPipelineActive] = useState(Boolean(recoveredQuotationId && recoveredRunId));
   const [lastSubmittedPayload, setLastSubmittedPayload] = useState<GenerateQuotationPayload | null>(
     null
   );
-  const [lastMeetingPayload, setLastMeetingPayload] = useState<Omit<
-    MeetingQuotationPayload,
-    'idempotency_key'
-  > | null>(null);
   const progressTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const clearProgressTimers = () => {
@@ -186,6 +228,19 @@ export function QuotationPromptView() {
   }, [view, schemeParam, navigate]);
 
   useEffect(() => clearProgressTimers, []);
+
+  useEffect(() => {
+    if (!pipelineEnabled || !pipelineActive || !meetingExtraction.ids) return;
+    const { quotationId, runId } = meetingExtraction.ids;
+    if (queryQuotationId === quotationId && queryRunId === runId) return;
+    navigate({ search: `?quotationId=${encodeURIComponent(quotationId)}&runId=${encodeURIComponent(runId)}` }, { replace: true });
+  }, [meetingExtraction.ids, navigate, pipelineActive, pipelineEnabled, queryQuotationId, queryRunId]);
+
+  useEffect(() => {
+    if (!pipelineEnabled || meetingExtraction.status?.status !== 'completed' || !meetingExtraction.ids) return;
+    clear();
+    navigate(paths.dashboard.quotation.edit(meetingExtraction.ids.quotationId));
+  }, [clear, meetingExtraction.ids, meetingExtraction.status?.status, navigate, pipelineEnabled]);
 
   // Submit Handler for Advanced Scheme Forms
   const handleFormSubmit = async (payload: GenerateQuotationPayload) => {
@@ -249,19 +304,38 @@ export function QuotationPromptView() {
     }
   };
 
-  const handleMeetingSubmit = async (payload: Omit<MeetingQuotationPayload, 'idempotency_key'>) => {
+  const handleMeetingSubmit = async (
+    payload: Omit<MeetingQuotationPayload, 'idempotency_key'> & {
+      service_scheme?: MeetingExtractionServiceScheme;
+    }
+  ) => {
     setProgressMode('meeting');
-    setLastMeetingPayload(payload);
     setIsProgressOpen(true);
-    setActiveStageIndex(0);
     setGenerationError(null);
     setGeneratedQuotationId(null);
-    scheduleProgress([1, 2, 3, 4, 5]);
+
+    if (pipelineEnabled) {
+      setPipelineActive(true);
+      try {
+        const draft = await promptMutation.createPipelineDraft(payload);
+        const started = await meetingExtraction.start({
+          quotationId: draft.quotation_id,
+          meetingNotes: payload.meeting_notes,
+          serviceScheme: payload.service_scheme ?? 'auto',
+          idempotencyKey: draft.idempotencyKey,
+        });
+        navigate(
+          { search: `?quotationId=${encodeURIComponent(started.quotation_id)}&runId=${encodeURIComponent(started.run_id)}` },
+          { replace: true }
+        );
+      } catch {
+        setGenerationError({ code: 'INTERNAL_ERROR', message: 'Quotation belum dapat diproses. Coba lagi.' });
+      }
+      return;
+    }
 
     try {
-      const response = await promptMutation.mutateAsync(payload);
-      clearProgressTimers();
-      setActiveStageIndex(MEETING_GENERATION_STAGES.length - 1);
+      const response = await promptMutation.submitMeeting(payload);
       setGeneratedQuotationId(response.quotation_id);
       clear();
       toast.success('Quotation draft generated successfully!');
@@ -271,22 +345,49 @@ export function QuotationPromptView() {
         }, 1200),
       ];
     } catch (err: any) {
-      clearProgressTimers();
       const { code, message: defaultMessage } = getGenerationError(err);
       const message =
         code === 'meeting_notes_no_business_signal'
           ? NO_BUSINESS_SIGNAL_MESSAGE
           : meetingExtractionErrorMessage(code, defaultMessage);
-      setActiveStageIndex(2);
       setGenerationError({ code, message });
     }
   };
 
-  const handleMeetingRetry = () => {
-    if (lastMeetingPayload) {
-      handleMeetingSubmit(lastMeetingPayload);
+  const handleMeetingRetry = async () => {
+    setProgressMode('meeting');
+    setIsProgressOpen(true);
+    setGenerationError(null);
+    try {
+      const response = await promptMutation.retryProcessing();
+      setGeneratedQuotationId(response.quotation_id);
+      clear();
+      toast.success('Quotation draft generated successfully!');
+      progressTimersRef.current = [
+        setTimeout(() => {
+          navigate(paths.dashboard.quotation.edit(response.quotation_id));
+        }, 1200),
+      ];
+    } catch (err: any) {
+      const { code, message: defaultMessage } = getGenerationError(err);
+      const message =
+        code === 'meeting_notes_no_business_signal'
+          ? NO_BUSINESS_SIGNAL_MESSAGE
+          : meetingExtractionErrorMessage(code, defaultMessage);
+      setGenerationError({ code, message });
     }
   };
+
+  const handlePipelineStartNew = () => {
+    setPipelineActive(false);
+    setGenerationError(null);
+    navigate({ search: '' }, { replace: true });
+  };
+
+  const pipelineStatus = meetingExtraction.status ??
+    (meetingExtraction.ids
+      ? pendingPipelineStatus(meetingExtraction.ids.quotationId, meetingExtraction.ids.runId)
+      : null);
 
   const renderSchemeForm = (scheme: CommercialSchemeType) => {
     switch (scheme) {
@@ -550,24 +651,45 @@ export function QuotationPromptView() {
             isSubmitting={promptMutation.isPending}
             onSubmit={handleMeetingSubmit}
             onOpenAdvanced={() => navigate(paths.dashboard.quotation.advanced)}
+            pipelineEnabled={pipelineEnabled}
           />
         )}
       </Stack>
 
-      {/* Generation Progress State UI Modal */}
+      {pipelineEnabled && pipelineActive && pipelineStatus ? (
+        <>
+          <MeetingExtractionProgressCard
+            status={pipelineStatus}
+            onRetry={() => void meetingExtraction.retry()}
+            onStartNew={handlePipelineStartNew}
+            onOpenEditor={() => {
+              if (meetingExtraction.ids) navigate(paths.dashboard.quotation.edit(meetingExtraction.ids.quotationId));
+            }}
+            isRetrying={meetingExtraction.isPolling}
+          />
+          {pipelineStatus.status === 'failed' && pipelineStatus.error?.code === 'MEETING_NOTES_CHANGED' && (
+            <Button onClick={handlePipelineStartNew}>Buat ulang</Button>
+          )}
+        </>
+      ) : (
       <GenerationProgressCard
         open={isProgressOpen}
-        activeStageIndex={activeStageIndex}
+        activeStageIndex={
+          progressMode === 'meeting'
+            ? meetingStageByPhase[promptMutation.phase]
+            : activeStageIndex
+        }
         isError={Boolean(generationError)}
         errorCode={generationError?.code}
         errorMessage={generationError?.message}
-        quotationId={generatedQuotationId}
+        quotationId={generatedQuotationId ?? promptMutation.quotationId}
         stages={progressMode === 'meeting' ? MEETING_GENERATION_STAGES : GENERATION_STAGES}
         showRetry={generationError?.code !== 'meeting_notes_no_business_signal'}
         onRetry={progressMode === 'meeting' ? handleMeetingRetry : handleRetry}
         onClose={() => setIsProgressOpen(false)}
         onOpenEditor={(id) => navigate(paths.dashboard.quotation.edit(id))}
       />
+      )}
     </DashboardContent>
   );
 }

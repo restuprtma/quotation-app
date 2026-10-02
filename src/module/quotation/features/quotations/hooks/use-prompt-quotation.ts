@@ -1,15 +1,19 @@
 import type { ClientSummary } from '../types';
 import type {
   DraftIssue,
+  MeetingDraftInput,
   MeetingDraftResponse,
-  MeetingQuotationPayload,
+  MeetingGenerationPhase,
+  PendingMeetingDraftResponse,
 } from '../types/prompt-first';
 
 import { useRef, useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { getClients, createClientOrganization } from '../api/generation';
-import { getPromptIssues, createQuotationFromMeeting } from '../api/prompt-first';
+import { getPromptIssues, createMeetingDraft, processMeetingDraft } from '../api/prompt-first';
+
+type PipelineDraft = PendingMeetingDraftResponse & { idempotencyKey: string };
 
 function createIdempotencyKey() {
   return typeof crypto !== 'undefined' && crypto.randomUUID
@@ -44,11 +48,56 @@ export function usePromptQuotation() {
   const controllerRef = useRef<AbortController | null>(null);
   const idempotencyRef = useRef<{ fingerprint: string; key: string } | null>(null);
   const [issues, setIssues] = useState<DraftIssue[]>([]);
-  const mutation = useMutation<
-    MeetingDraftResponse,
-    Error,
-    Omit<MeetingQuotationPayload, 'idempotency_key'>
-  >({
+  const [quotationId, setQuotationId] = useState<string | null>(null);
+  const [phase, setPhase] = useState<MeetingGenerationPhase>('idle');
+  const mutation = useMutation<MeetingDraftResponse, Error, MeetingDraftInput>({
+    mutationFn: async (payload) => {
+      controllerRef.current?.abort();
+      const controller = new AbortController();
+      controllerRef.current = controller;
+      const fingerprint = JSON.stringify(payload);
+      if (!idempotencyRef.current || idempotencyRef.current.fingerprint !== fingerprint) {
+        idempotencyRef.current = { fingerprint, key: createIdempotencyKey() };
+        setQuotationId(null);
+      }
+      setPhase('creating_draft');
+      const pending = await createMeetingDraft(
+        { ...payload, idempotency_key: idempotencyRef.current.key },
+        controller.signal
+      );
+      setQuotationId(pending.quotation_id);
+      setPhase('extracting_meeting');
+      const result = await processMeetingDraft(pending.quotation_id, controller.signal);
+      setPhase('finalizing_draft');
+      setIssues(result.issues ?? []);
+      setPhase('completed');
+      return result;
+    },
+    onError: (error) => {
+      setPhase('failed');
+      setIssues(getPromptIssues(error));
+    },
+  });
+
+  const retryMutation = useMutation<MeetingDraftResponse, Error, void>({
+    mutationFn: async () => {
+      if (!quotationId) throw new Error('generation_failed');
+      controllerRef.current?.abort();
+      const controller = new AbortController();
+      controllerRef.current = controller;
+      setPhase('extracting_meeting');
+      const result = await processMeetingDraft(quotationId, controller.signal);
+      setPhase('completed');
+      setIssues(result.issues ?? []);
+      return result;
+    },
+    onError: (error) => {
+      setPhase('failed');
+      setIssues(getPromptIssues(error));
+    },
+  });
+
+  const pipelineDraftMutation = useMutation<PipelineDraft, Error, MeetingDraftInput>({
     mutationFn: async (payload) => {
       controllerRef.current?.abort();
       const controller = new AbortController();
@@ -57,17 +106,37 @@ export function usePromptQuotation() {
       if (!idempotencyRef.current || idempotencyRef.current.fingerprint !== fingerprint) {
         idempotencyRef.current = { fingerprint, key: createIdempotencyKey() };
       }
-      const result = await createQuotationFromMeeting(
+      const draft = await createMeetingDraft(
         { ...payload, idempotency_key: idempotencyRef.current.key },
         controller.signal
       );
-      setIssues(result.issues ?? []);
-      return result;
+      return { ...draft, idempotencyKey: idempotencyRef.current.key };
     },
-    onError: (error) => setIssues(getPromptIssues(error)),
   });
+
+  const reset = () => {
+    controllerRef.current?.abort();
+    idempotencyRef.current = null;
+    setQuotationId(null);
+    setIssues([]);
+    setPhase('idle');
+    mutation.reset();
+    retryMutation.reset();
+  };
 
   useEffect(() => () => controllerRef.current?.abort(), []);
 
-  return { ...mutation, issues };
+  return {
+    ...mutation,
+    issues,
+    phase,
+    quotationId,
+    error: mutation.error ?? retryMutation.error,
+    isPending: mutation.isPending || retryMutation.isPending,
+    canRetry: Boolean(quotationId) && phase === 'failed',
+    submitMeeting: mutation.mutateAsync,
+    retryProcessing: retryMutation.mutateAsync,
+    createPipelineDraft: pipelineDraftMutation.mutateAsync,
+    reset,
+  };
 }

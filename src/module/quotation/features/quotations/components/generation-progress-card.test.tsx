@@ -26,12 +26,27 @@ describe('GenerationProgressCard', () => {
     renderCard({ stages: MEETING_GENERATION_STAGES });
 
     expect(screen.getByText('Memvalidasi catatan meeting')).toBeDefined();
-    expect(screen.getByText('Mengekstrak kebutuhan dengan AI')).toBeDefined();
-    expect(screen.getByText('Memvalidasi hasil ekstraksi')).toBeDefined();
+    expect(screen.getByText('Menyimpan draf awal')).toBeDefined();
+    expect(screen.getByText('Mengekstrak dan memvalidasi kebutuhan dengan AI')).toBeDefined();
     expect(screen.getByText('Mencocokkan skema dan katalog')).toBeDefined();
-    expect(screen.getByText('Menyusun draf quotation')).toBeDefined();
-    expect(screen.getByText('Menyimpan draf')).toBeDefined();
+    expect(screen.getByText('Menghitung dan menyusun quotation')).toBeDefined();
+    expect(screen.getByText('Menyelesaikan draf')).toBeDefined();
     expect(screen.getByText('Selesai')).toBeDefined();
+  });
+
+  it('only claims a saved draft and offers retry plus Open Draft for a persisted timeout', () => {
+    const onRetry = vi.fn();
+    const onOpenEditor = vi.fn();
+    renderCard({
+      isError: true,
+      errorCode: 'provider_timeout',
+      quotationId: 'quotation-1',
+      onRetry,
+      onOpenEditor,
+    });
+    expect(screen.getByText(/draft is saved/i)).toBeDefined();
+    expect(screen.getByRole('button', { name: /Retry Generation/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /Open Draft/i })).toBeDefined();
   });
 
   it('hides retry when callers disable it while retaining Back to Form', () => {

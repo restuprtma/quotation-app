@@ -175,6 +175,7 @@ export const endpoints = {
       update: (id: string) => `/quotation/v1/quotations/${id}`,
       generate: '/quotation/v1/quotations/generate',
       fromMeeting: '/quotation/v1/quotations/from-meeting',
+      processMeeting: (id: string) => `/quotation/v1/quotations/${id}/process-meeting`,
       promptState: (id: string) => `/quotation/v1/quotations/${id}/prompt-state`,
       reviseSection: (id: string) => `/quotation/v1/quotations/${id}/revise-section`,
       preview: '/quotation/v1/quotations/preview',

@@ -1,4 +1,4 @@
-import type { MeetingQuotationPayload } from '../types/prompt-first';
+import type { MeetingDraftResponse, MeetingQuotationPayload } from '../types/prompt-first';
 
 import { it, vi, expect, describe } from 'vitest';
 
@@ -7,18 +7,32 @@ import axios, { endpoints } from 'src/shared/lib/axios';
 import {
   getPromptIssues,
   patchPromptQuotation,
-  createQuotationFromMeeting,
+  createMeetingDraft,
+  processMeetingDraft,
   revisePromptQuotationSection,
 } from './prompt-first';
 
 describe('Prompt-first Quotation API', () => {
+  it('models server prompt state without meeting_notes', () => {
+    const response: MeetingDraftResponse = {
+      quotation_id: '60000000-0000-0000-0000-000000000001',
+      revision_id: '70000000-0000-0000-0000-000000000001',
+      quotation_number: 'QUO-2026-0001',
+      content_html: '', content_version: 1, state_version: 1,
+      prompt_state: { schema_version: 'prompt_quotation_v1', scope: [], team: [], issues: [], readiness: 'incomplete' },
+      issues: [], readiness: 'incomplete', idempotent_replay: false,
+    };
+
+    expect(response.prompt_state).not.toHaveProperty('meeting_notes');
+  });
+
   it('endpoints.quotation.quotations.fromMeeting is configured correctly', () => {
     expect(endpoints.quotation.quotations.fromMeeting).toBe(
       '/quotation/v1/quotations/from-meeting'
     );
   });
 
-  it('createQuotationFromMeeting sends canonical payload without synthesizing client_name', async () => {
+  it('createMeetingDraft posts the canonical payload and processMeetingDraft uses its ID', async () => {
     const canonicalPayload: MeetingQuotationPayload = {
       project_name: 'Website Redesign',
       client_id: '40000000-0000-0000-0000-000000000001',
@@ -32,19 +46,7 @@ describe('Prompt-first Quotation API', () => {
       quotation_id: '60000000-0000-0000-0000-000000000001',
       revision_id: '70000000-0000-0000-0000-000000000001',
       quotation_number: 'QUO-2026-0001',
-      content_html: '<article>Quotation</article>',
-      content_version: 1,
-      state_version: 1,
-      prompt_state: {
-        schema_version: 'prompt_quotation_v1',
-        meeting_notes: canonicalPayload.meeting_notes,
-        scope: [],
-        team: [],
-        issues: [],
-        readiness: 'incomplete',
-      },
-      issues: [],
-      readiness: 'incomplete',
+      generation_status: 'pending' as const,
       idempotent_replay: false,
     };
 
@@ -56,7 +58,7 @@ describe('Prompt-first Quotation API', () => {
     });
 
     const signal = new AbortController().signal;
-    const result = await createQuotationFromMeeting(canonicalPayload, signal);
+    const result = await createMeetingDraft(canonicalPayload, signal);
 
     expect(postSpy).toHaveBeenCalledWith(
       '/quotation/v1/quotations/from-meeting',
@@ -67,9 +69,17 @@ describe('Prompt-first Quotation API', () => {
     expect(canonicalPayload.client_name).toBeUndefined();
     expect(postSpy.mock.calls[0][1]).not.toHaveProperty('client_name');
     expect(result).toEqual(mockResponse);
+
+    postSpy.mockResolvedValueOnce({ data: { data: { quotation_id: mockResponse.quotation_id } } } as any);
+    await processMeetingDraft(mockResponse.quotation_id, signal);
+    expect(postSpy).toHaveBeenLastCalledWith(
+      `/quotation/v1/quotations/${mockResponse.quotation_id}/process-meeting`,
+      {},
+      { signal }
+    );
   });
 
-  it('createQuotationFromMeeting accepts legacy payload containing client_name', async () => {
+  it('createMeetingDraft accepts legacy payload containing client_name', async () => {
     const legacyPayload: MeetingQuotationPayload = {
       client_name: 'Legacy Client',
       meeting_notes: 'Legacy meeting note text',
@@ -80,19 +90,7 @@ describe('Prompt-first Quotation API', () => {
       quotation_id: '60000000-0000-0000-0000-000000000002',
       revision_id: '70000000-0000-0000-0000-000000000002',
       quotation_number: 'QUO-2026-0002',
-      content_html: '<article>Quotation</article>',
-      content_version: 1,
-      state_version: 1,
-      prompt_state: {
-        schema_version: 'prompt_quotation_v1',
-        meeting_notes: legacyPayload.meeting_notes,
-        scope: [],
-        team: [],
-        issues: [],
-        readiness: 'incomplete',
-      },
-      issues: [],
-      readiness: 'incomplete',
+      generation_status: 'pending' as const,
       idempotent_replay: false,
     };
 
@@ -103,7 +101,7 @@ describe('Prompt-first Quotation API', () => {
       },
     });
 
-    const result = await createQuotationFromMeeting(legacyPayload);
+    const result = await createMeetingDraft(legacyPayload);
 
     expect(postSpy).toHaveBeenCalledWith('/quotation/v1/quotations/from-meeting', legacyPayload, {
       signal: undefined,

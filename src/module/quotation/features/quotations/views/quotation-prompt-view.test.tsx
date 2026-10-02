@@ -11,6 +11,7 @@ import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/re
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import { paths } from 'src/routes/paths';
+import { CONFIG } from 'src/shared/config';
 
 import idQuotation from 'src/locales/langs/id/quotation.json';
 
@@ -19,15 +20,19 @@ import { QUOTATION_ENTRY_STORAGE_KEY } from '../types/quotation-entry';
 
 // ----------------------------------------------------------------------
 
-const { mockClients, mockGenerateQuotation, mockCreateQuotationFromMeeting, mockGetClients } =
+const { mockClients, mockGenerateQuotation, mockCreateMeetingDraft, mockProcessMeetingDraft, mockGetClients, mockStartMeetingExtraction, mockGetMeetingExtractionStatus, mockRetryMeetingExtraction } =
   vi.hoisted(() => ({
     mockClients: [
       { id: 'client-1', name: 'PT Alpha Digital', pic_name: 'Bpk. Budi' },
       { id: 'client-2', name: 'CV Beta Solusi', pic_name: 'Ibu Siti' },
     ],
     mockGenerateQuotation: vi.fn(),
-    mockCreateQuotationFromMeeting: vi.fn(),
+    mockCreateMeetingDraft: vi.fn(),
+    mockProcessMeetingDraft: vi.fn(),
     mockGetClients: vi.fn(),
+    mockStartMeetingExtraction: vi.fn(),
+    mockGetMeetingExtractionStatus: vi.fn(),
+    mockRetryMeetingExtraction: vi.fn(),
   }));
 
 vi.mock('../api', async (importOriginal) => {
@@ -35,7 +40,8 @@ vi.mock('../api', async (importOriginal) => {
   return {
     ...actual,
     generateQuotation: mockGenerateQuotation,
-    createQuotationFromMeeting: mockCreateQuotationFromMeeting,
+    createMeetingDraft: mockCreateMeetingDraft,
+    processMeetingDraft: mockProcessMeetingDraft,
     getClients: mockGetClients,
   };
 });
@@ -44,7 +50,8 @@ vi.mock('../api/prompt-first', async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,
-    createQuotationFromMeeting: mockCreateQuotationFromMeeting,
+    createMeetingDraft: mockCreateMeetingDraft,
+    processMeetingDraft: mockProcessMeetingDraft,
   };
 });
 
@@ -56,6 +63,12 @@ vi.mock('../api/generation', async (importOriginal) => {
     getClients: mockGetClients,
   };
 });
+
+vi.mock('../api/meeting-extraction', () => ({
+  startMeetingExtraction: mockStartMeetingExtraction,
+  getMeetingExtractionStatus: mockGetMeetingExtractionStatus,
+  retryMeetingExtraction: mockRetryMeetingExtraction,
+}));
 
 vi.mock('@mui/x-data-grid', () => ({
   gridClasses: {},
@@ -215,9 +228,16 @@ function renderView(initialEntries: string[] = ['/quotation']) {
 
 describe('QuotationPromptView URL orchestration and Prompt First', () => {
   beforeEach(() => {
+    CONFIG.meetingExtraction.pipelineEnabled = false;
     sessionStorage.clear();
     vi.restoreAllMocks();
+    mockCreateMeetingDraft.mockReset();
+    mockProcessMeetingDraft.mockReset();
+    mockStartMeetingExtraction.mockReset();
+    mockGetMeetingExtractionStatus.mockReset();
+    mockRetryMeetingExtraction.mockReset();
     mockGetClients.mockResolvedValue(mockClients);
+    mockGetMeetingExtractionStatus.mockResolvedValue({ notModified: true });
     sessionStorage.setItem(
       QUOTATION_ENTRY_STORAGE_KEY,
       JSON.stringify({
@@ -234,6 +254,7 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
   afterEach(() => {
     cleanup();
     sessionStorage.clear();
+    CONFIG.meetingExtraction.pipelineEnabled = false;
   });
 
   it('renders MeetingNotesForm on default route /quotation without slash command launcher or quick skill chips', () => {
@@ -336,7 +357,14 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
       quotation_id: 'quotation-uuid-101',
       issues: [],
     };
-    mockCreateQuotationFromMeeting.mockResolvedValue(mockResponse as any);
+    mockCreateMeetingDraft.mockResolvedValue({
+      quotation_id: 'quotation-uuid-101',
+      revision_id: 'revision-uuid-101',
+      quotation_number: 'QUO-2026-0101',
+      generation_status: 'pending',
+      idempotent_replay: false,
+    });
+    mockProcessMeetingDraft.mockResolvedValue(mockResponse as any);
 
     // Seed session state
     sessionStorage.setItem(
@@ -357,7 +385,7 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(mockCreateQuotationFromMeeting).toHaveBeenCalledWith(
+      expect(mockCreateMeetingDraft).toHaveBeenCalledWith(
         expect.objectContaining({
           project_name: 'Aplikasi ERP Logistik',
           client_id: 'client-1',
@@ -377,6 +405,8 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
       },
       { timeout: 2_000 }
     );
+    expect(mockProcessMeetingDraft).toHaveBeenCalled();
+    expect(mockStartMeetingExtraction).not.toHaveBeenCalled();
 
     // Session storage should be cleared
     const stored = sessionStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY);
@@ -388,7 +418,10 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
   });
 
   it('shows an actionable message when meeting extraction is invalid', async () => {
-    mockCreateQuotationFromMeeting.mockRejectedValue({
+    mockCreateMeetingDraft.mockResolvedValue({
+      quotation_id: 'quotation-timeout', revision_id: 'revision-timeout', quotation_number: 'QUO-2026-0102', generation_status: 'pending', idempotent_replay: false,
+    });
+    mockProcessMeetingDraft.mockRejectedValue({
       message: 'invalid_extraction',
       response: { data: { errors: { detail: ['invalid_extraction'] } } },
     });
@@ -412,8 +445,100 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     expect(screen.getByRole('button', { name: 'Retry Generation' })).toBeDefined();
   });
 
+  it('creates a draft, starts one pipeline run, and writes only opaque IDs to the URL', async () => {
+    const quotationId = '60000000-0000-4000-8000-000000000001';
+    const runId = '70000000-0000-4000-8000-000000000001';
+    CONFIG.meetingExtraction.pipelineEnabled = true;
+    mockCreateMeetingDraft.mockResolvedValue({
+      quotation_id: quotationId,
+      revision_id: '80000000-0000-4000-8000-000000000001',
+      quotation_number: 'QUO-2026-0201',
+      generation_status: 'pending',
+      idempotent_replay: false,
+    });
+    mockStartMeetingExtraction.mockResolvedValue({
+      quotation_id: quotationId,
+      run_id: runId,
+      status: 'queued',
+      status_url: '/safe',
+    });
+
+    renderView(['/quotation']);
+    await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
+
+    await waitFor(() => expect(mockStartMeetingExtraction).toHaveBeenCalledWith(
+      quotationId,
+      expect.objectContaining({ meeting_notes: expect.any(String), service_scheme: 'auto' })
+    ));
+    expect(mockProcessMeetingDraft).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.getByTestId('location-display').textContent).toBe(
+      `/quotation?quotationId=${quotationId}&runId=${runId}`
+    ));
+    expect(screen.getByTestId('location-display').textContent).not.toContain('meeting_notes');
+  });
+
+  it('resumes from validated opaque IDs and navigates when the pipeline completes', async () => {
+    const quotationId = '60000000-0000-4000-8000-000000000001';
+    const runId = '70000000-0000-4000-8000-000000000001';
+    CONFIG.meetingExtraction.pipelineEnabled = true;
+    mockGetMeetingExtractionStatus.mockResolvedValue({
+      notModified: false,
+      etag: null,
+      data: {
+        quotation_id: quotationId,
+        run_id: runId,
+        status: 'completed',
+        current_phase: null,
+        progress: { completed: 1, total: 1 },
+        phases: [],
+        failed_phase: null,
+        error: null,
+        needs_input: [],
+        warnings: [],
+      },
+    });
+
+    renderView([`/quotation?quotationId=${quotationId}&runId=${runId}`]);
+
+    await waitFor(() => expect(mockGetMeetingExtractionStatus).toHaveBeenCalledWith(quotationId, runId, undefined));
+    await waitFor(() => expect(screen.getByTestId('location-display').textContent).toBe(
+      `/quotation/${quotationId}/edit`
+    ));
+  });
+
+  it('starts a new flow instead of retrying a changed-notes conflict', async () => {
+    const quotationId = '60000000-0000-4000-8000-000000000001';
+    const runId = '70000000-0000-4000-8000-000000000001';
+    CONFIG.meetingExtraction.pipelineEnabled = true;
+    mockGetMeetingExtractionStatus.mockResolvedValue({
+      notModified: false,
+      etag: null,
+      data: {
+        quotation_id: quotationId,
+        run_id: runId,
+        status: 'failed',
+        current_phase: null,
+        progress: { completed: 0, total: 1 },
+        phases: [],
+        failed_phase: 'extract',
+        error: { code: 'MEETING_NOTES_CHANGED', message: 'provider raw secret', retryable: false, retry_after: null },
+        needs_input: [],
+        warnings: [],
+      },
+    });
+
+    renderView([`/quotation?quotationId=${quotationId}&runId=${runId}`]);
+    await userEvent.click(await screen.findByRole('button', { name: /buat ulang/i }));
+
+    expect(mockRetryMeetingExtraction).not.toHaveBeenCalled();
+    expect(screen.getByTestId('location-display').textContent).toBe('/quotation');
+  });
+
   it('shows duration guidance without rendering technical code when meeting evidence is unsupported', async () => {
-    mockCreateQuotationFromMeeting.mockRejectedValue({
+    mockCreateMeetingDraft.mockResolvedValue({
+      quotation_id: 'quotation-invalid', revision_id: 'revision-invalid', quotation_number: 'QUO-2026-0103', generation_status: 'pending', idempotent_replay: false,
+    });
+    mockProcessMeetingDraft.mockRejectedValue({
       message: 'invalid_extraction.unsupported_evidence.duration_months',
       response: {
         data: { errors: { detail: ['invalid_extraction.unsupported_evidence.duration_months'] } },
@@ -442,7 +567,10 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
   });
 
   it('falls back to generic message and clears technical code when meeting extraction has unknown qualified suffix', async () => {
-    mockCreateQuotationFromMeeting.mockRejectedValue({
+    mockCreateMeetingDraft.mockResolvedValue({
+      quotation_id: 'quotation-unknown', revision_id: 'revision-unknown', quotation_number: 'QUO-2026-0104', generation_status: 'pending', idempotent_replay: false,
+    });
+    mockProcessMeetingDraft.mockRejectedValue({
       message: 'invalid_extraction.future_unknown_reason',
       response: { data: { errors: { detail: ['invalid_extraction.future_unknown_reason'] } } },
     });
@@ -470,7 +598,10 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     ['invalid_extraction.unsupported_evidence', /tidak dapat dicocokkan dengan catatan meeting/i],
     ['invalid_extraction.malformed_json', /belum dapat dibaca dalam format yang diperlukan/i],
   ])('shows safe extraction reason for %s', async (code, message) => {
-    mockCreateQuotationFromMeeting.mockRejectedValue({
+    mockCreateMeetingDraft.mockResolvedValue({
+      quotation_id: 'quotation-error', revision_id: 'revision-error', quotation_number: 'QUO-2026-0105', generation_status: 'pending', idempotent_replay: false,
+    });
+    mockProcessMeetingDraft.mockRejectedValue({
       response: { data: { errors: { detail: [code] } } },
     });
     renderView(['/quotation']);

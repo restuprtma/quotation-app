@@ -96,9 +96,14 @@ describe('usePromptQuotation hook suite', () => {
       idempotent_replay: false,
     };
 
-    const createSpy = vi
-      .spyOn(api, 'createQuotationFromMeeting')
-      .mockResolvedValueOnce(mockDraftResponse);
+    const createSpy = vi.spyOn(api, 'createMeetingDraft').mockResolvedValueOnce({
+      quotation_id: mockDraftResponse.quotation_id,
+      revision_id: mockDraftResponse.revision_id,
+      quotation_number: mockDraftResponse.quotation_number,
+      generation_status: 'pending',
+      idempotent_replay: false,
+    });
+    const processSpy = vi.spyOn(api, 'processMeetingDraft').mockResolvedValueOnce(mockDraftResponse);
 
     const { result } = renderHook(() => usePromptQuotation(), { wrapper });
 
@@ -126,6 +131,8 @@ describe('usePromptQuotation hook suite', () => {
     expect(sentPayload.idempotency_key).toBeDefined();
     expect(typeof sentPayload.idempotency_key).toBe('string');
 
+    expect(processSpy).toHaveBeenCalledWith(mockDraftResponse.quotation_id, expect.any(AbortSignal));
+
     expect(response).toEqual(mockDraftResponse);
     expect(result.current.issues).toEqual(mockDraftResponse.issues);
   });
@@ -145,9 +152,14 @@ describe('usePromptQuotation hook suite', () => {
       idempotent_replay: false,
     };
 
-    const createSpy = vi
-      .spyOn(api, 'createQuotationFromMeeting')
-      .mockResolvedValue(mockDraftResponse);
+    const createSpy = vi.spyOn(api, 'createMeetingDraft').mockResolvedValue({
+      quotation_id: mockDraftResponse.quotation_id,
+      revision_id: mockDraftResponse.revision_id,
+      quotation_number: mockDraftResponse.quotation_number,
+      generation_status: 'pending',
+      idempotent_replay: false,
+    });
+    vi.spyOn(api, 'processMeetingDraft').mockResolvedValue(mockDraftResponse);
 
     const { result } = renderHook(() => usePromptQuotation(), { wrapper });
 
@@ -202,7 +214,7 @@ describe('usePromptQuotation hook suite', () => {
       },
     };
 
-    vi.spyOn(api, 'createQuotationFromMeeting').mockRejectedValueOnce(apiError);
+    vi.spyOn(api, 'createMeetingDraft').mockRejectedValueOnce(apiError);
 
     const { result } = renderHook(() => usePromptQuotation(), { wrapper });
 
@@ -222,5 +234,31 @@ describe('usePromptQuotation hook suite', () => {
         severity: 'blocking',
       },
     ]);
+  });
+
+  it('creates a durable pipeline draft without invoking legacy meeting processing', async () => {
+    const { wrapper } = createWrapper();
+    const createSpy = vi.spyOn(api, 'createMeetingDraft').mockResolvedValueOnce({
+      quotation_id: '60000000-0000-0000-0000-000000000001',
+      revision_id: '70000000-0000-0000-0000-000000000001',
+      quotation_number: 'QUO-2026-0001',
+      generation_status: 'pending',
+      idempotent_replay: false,
+    });
+    const processSpy = vi.spyOn(api, 'processMeetingDraft');
+    const { result } = renderHook(() => usePromptQuotation(), { wrapper });
+
+    await act(async () => {
+      await result.current.createPipelineDraft({
+        project_name: 'Pipeline project',
+        meeting_notes: 'Pipeline meeting notes stay in request memory only.',
+      });
+    });
+
+    expect(createSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ meeting_notes: 'Pipeline meeting notes stay in request memory only.' }),
+      expect.any(AbortSignal)
+    );
+    expect(processSpy).not.toHaveBeenCalled();
   });
 });

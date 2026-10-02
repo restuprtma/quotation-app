@@ -344,9 +344,10 @@ export type PromptCloudInfrastructureServiceInput = {
   additional_limitations?: Fact<string>[];
 };
 
-export type PromptQuotationState = {
+// Server responses never carry raw meeting notes. Keep this projection distinct
+// from MeetingDraftInput, whose notes exist only in form/request memory.
+export type PromptQuotationStateView = {
   schema_version: string;
-  meeting_notes: string;
   client_name?: Fact<string>;
   client_company?: Fact<string>;
   pic_name?: Fact<string>;
@@ -361,6 +362,9 @@ export type PromptQuotationState = {
   issues: DraftIssue[];
   readiness: 'incomplete' | 'priceable' | 'ready_for_final' | string;
 };
+
+/** @deprecated Use PromptQuotationStateView for every server-facing state. */
+export type PromptQuotationState = PromptQuotationStateView;
 
 export type PromptPatchOperation =
   | { type: 'set_duration_months'; duration_months: number }
@@ -415,15 +419,34 @@ export type PromptPatchResponse = {
   catalog_roles?: CatalogRoleOption[];
 };
 
-export type MeetingQuotationPayload = {
+export type MeetingDraftInput = {
   project_name?: string;
   client_id?: string;
   client_company_name?: string;
   pic_name?: string;
   client_name?: string; // accepted only for old callers
   meeting_notes: string;
+};
+
+export type MeetingQuotationPayload = MeetingDraftInput & {
   idempotency_key: string;
 };
+
+export type PendingMeetingDraftResponse = {
+  quotation_id: string;
+  revision_id: string;
+  quotation_number: string;
+  generation_status: 'pending' | 'in_progress' | 'failed' | 'completed';
+  idempotent_replay: boolean;
+};
+
+export type MeetingGenerationPhase =
+  | 'idle'
+  | 'creating_draft'
+  | 'extracting_meeting'
+  | 'finalizing_draft'
+  | 'completed'
+  | 'failed';
 
 export type MeetingDraftResponse = {
   quotation_id: string;

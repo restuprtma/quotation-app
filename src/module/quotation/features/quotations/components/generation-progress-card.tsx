@@ -66,14 +66,14 @@ export const MEETING_GENERATION_STAGES: GenerationProgressStep[] = [
     description: 'Memeriksa identitas proyek dan batas catatan meeting',
   },
   {
-    id: 'extracting_meeting',
-    label: 'Mengekstrak kebutuhan dengan AI',
-    description: 'Membaca scope, tim, durasi, skema layanan, dan pembayaran',
+    id: 'creating_draft',
+    label: 'Menyimpan draf awal',
+    description: 'Menyimpan quotation dan revision sebelum AI dipanggil',
   },
   {
-    id: 'validating_extraction',
-    label: 'Memvalidasi hasil ekstraksi',
-    description: 'Memeriksa JSON, struktur data, dan evidence dari catatan',
+    id: 'extracting_meeting',
+    label: 'Mengekstrak dan memvalidasi kebutuhan dengan AI',
+    description: 'Membaca dan memvalidasi scope, tim, durasi, serta skema layanan',
   },
   {
     id: 'matching_catalog',
@@ -82,13 +82,13 @@ export const MEETING_GENERATION_STAGES: GenerationProgressStep[] = [
   },
   {
     id: 'composing_quotation',
-    label: 'Menyusun draf quotation',
-    description: 'Menyiapkan struktur dokumen, readiness, dan issue',
+    label: 'Menghitung dan menyusun quotation',
+    description: 'Menghitung harga secara deterministik dan menyusun draf aman',
   },
   {
     id: 'saving_draft',
-    label: 'Menyimpan draf',
-    description: 'Menyimpan quotation setelah validasi kebutuhan berhasil',
+    label: 'Menyelesaikan draf',
+    description: 'Menyimpan konten quotation yang telah tervalidasi',
   },
   {
     id: 'completed',
@@ -127,7 +127,11 @@ export function GenerationProgressCard({
   const isCompleted = activeStageIndex >= stages.length - 1 && !isError;
   const progressPercent = Math.min(Math.round(((activeStageIndex + 1) / stages.length) * 100), 100);
 
-  const getSafeErrorMessage = (code?: string | null, rawMsg?: string | null) => {
+  const getSafeErrorMessage = (
+    code?: string | null,
+    rawMsg?: string | null,
+    persistedQuotationId?: string | null
+  ) => {
     switch (code) {
       case 'settings_incomplete':
         return 'AI provider is not configured or missing credentials. Please configure AI Settings first.';
@@ -137,7 +141,9 @@ export function GenerationProgressCard({
       case 'rate_item_missing':
         return 'Selected rate card does not contain required resource roles. Please select a complete rate card.';
       case 'provider_timeout':
-        return 'AI Provider timed out. Draft has been saved safely and can be regenerated.';
+        return persistedQuotationId
+          ? 'AI provider timed out. The draft is saved and can be retried using the same quotation.'
+          : 'AI provider timed out. Your meeting input has been preserved; please try again.';
       case 'provider_rate_limited':
         return 'AI provider rate limit reached. Please wait a moment before retrying.';
       case 'unsafe_html':
@@ -244,7 +250,7 @@ export function GenerationProgressCard({
                 Generation Error
               </Typography>
               <Typography variant="body2">
-                {getSafeErrorMessage(errorCode, errorMessage)}
+                {getSafeErrorMessage(errorCode, errorMessage, quotationId)}
               </Typography>
             </Alert>
           )}
@@ -338,6 +344,11 @@ export function GenerationProgressCard({
                 onClick={onRetry}
               >
                 Retry Generation
+              </Button>
+            )}
+            {quotationId && onOpenEditor && (
+              <Button variant="contained" color="primary" onClick={() => onOpenEditor(quotationId)}>
+                Open Draft
               </Button>
             )}
           </>
