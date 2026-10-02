@@ -18,6 +18,51 @@ type RefreshHandler = (
 ) => Promise<{ access_token: string; refresh_token: string }>;
 type UnauthorizedHandler = () => void;
 
+const SAFE_ERROR_MESSAGES = {
+  MEETING_NOTES_CHANGED: 'Meeting notes changed. Start a new extraction.',
+  AI_BUDGET_EXHAUSTED: 'The AI extraction budget has been exhausted.',
+  EXTRACTION_RETRY_CONFLICT: 'This extraction cannot be retried right now.',
+  NOT_FOUND: 'The requested resource was not found.',
+  INVALID_REQUEST: 'The request could not be processed.',
+  INTERNAL_ERROR: 'Unable to process the request.',
+} as const;
+
+type SafeApiErrorCode = keyof typeof SAFE_ERROR_MESSAGES;
+
+export type SafeApiError = Error & {
+  code: SafeApiErrorCode;
+  status?: number;
+  retryAfter?: number | null;
+};
+
+function isSafeErrorPayload(value: unknown): value is {
+  code: SafeApiErrorCode;
+  retry_after?: number;
+} {
+  if (!value || typeof value !== 'object') return false;
+
+  const code = (value as { code?: unknown }).code;
+  return typeof code === 'string' && Object.hasOwn(SAFE_ERROR_MESSAGES, code);
+}
+
+function allowlistedMessage(code: SafeApiErrorCode | undefined): string {
+  return SAFE_ERROR_MESSAGES[code ?? 'INTERNAL_ERROR'];
+}
+
+export function toSafeApiError(error: unknown): SafeApiError {
+  const axiosError = axios.isAxiosError(error);
+  const payload = axiosError && isSafeErrorPayload(error.response?.data) ? error.response.data : null;
+  const safe = new Error(allowlistedMessage(payload?.code));
+
+  Object.assign(safe, {
+    code: payload?.code ?? 'INTERNAL_ERROR',
+    status: axiosError ? error.response?.status : undefined,
+    retryAfter: typeof payload?.retry_after === 'number' ? payload.retry_after : null,
+  });
+
+  return safe as SafeApiError;
+}
+
 const axiosInstance = axios.create({
   baseURL: CONFIG.serverUrl,
   headers: { 'Content-Type': 'application/json' },
@@ -60,7 +105,7 @@ axiosInstance.interceptors.response.use(
       const refreshToken = getRefreshTokenFn();
       if (!refreshToken || !refreshHandler) {
         onUnauthorized?.();
-        return Promise.reject(normalizeError(error));
+        return Promise.reject(toSafeApiError(error));
       }
 
       original._retry = true;
@@ -82,43 +127,13 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(original);
       } catch (refreshError) {
         onUnauthorized?.();
-        return Promise.reject(normalizeError(refreshError));
+        return Promise.reject(toSafeApiError(refreshError));
       }
     }
 
-    return Promise.reject(normalizeError(error));
+    return Promise.reject(toSafeApiError(error));
   }
 );
-
-function normalizeError(error: unknown): Error {
-  if (axios.isAxiosError(error)) {
-    const payload = error.response?.data as
-      | { message?: string; errors?: string | { detail?: string[] } | null }
-      | undefined;
-    let detail = 'Something went wrong!';
-    if (typeof payload?.errors === 'string') {
-      detail = payload.errors;
-    } else if (
-      payload?.errors &&
-      typeof payload.errors === 'object' &&
-      Array.isArray((payload.errors as any).detail) &&
-      (payload.errors as any).detail.length > 0
-    ) {
-      detail = (payload.errors as any).detail[0];
-    } else if (payload?.message) {
-      detail = payload.message;
-    } else if (error.message) {
-      detail = error.message;
-    }
-
-    const wrapped = new Error(detail);
-    (wrapped as Error & { status?: number; response?: any }).status = error.response?.status;
-    (wrapped as any).response = error.response;
-    return wrapped;
-  }
-  if (error instanceof Error) return error;
-  return new Error('Something went wrong!');
-}
 
 export default axiosInstance;
 

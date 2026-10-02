@@ -12,6 +12,9 @@ export type ConfigValue = {
     skip: boolean;
     redirectPath: string;
   };
+  meetingExtraction: {
+    pipelineEnabled: boolean;
+  };
   firebase: {
     apiKey: string;
     authDomain: string;
@@ -44,6 +47,9 @@ export const CONFIG: ConfigValue = {
     method: 'jwt',
     skip: false,
     redirectPath: paths.dashboard.root,
+  },
+  meetingExtraction: {
+    pipelineEnabled: import.meta.env.VITE_MEETING_EXTRACTION_PIPELINE_ENABLED === 'true',
   },
   firebase: {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY ?? '',
