@@ -1,6 +1,7 @@
 import type { ClientSummary } from '../types';
 import type { DraftIssue } from '../types/prompt-first';
 import type { QuotationEntryState } from '../types/quotation-entry';
+import type { MeetingExtractionServiceScheme } from '../types/meeting-extraction';
 
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,10 +14,15 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import NativeSelect from '@mui/material/NativeSelect';
 
 import { useTranslate } from 'src/locales';
 
 import { ClientOrganizationField } from './client-organization-field';
+
+import { MEETING_EXTRACTION_SCHEMES } from '../types/meeting-extraction';
 
 const schema = z.object({
   project_name: z.string().trim().min(1, 'prompt.promptFirst.errors.projectNameRequired'),
@@ -24,6 +30,7 @@ const schema = z.object({
   client_company_name: z.string().optional(),
   pic_name: z.string().optional(),
   meeting_notes: z.string().trim().min(20, 'prompt.promptFirst.errors.meetingNotesRequired'),
+  service_scheme: z.enum(['auto', ...MEETING_EXTRACTION_SCHEMES]),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -43,7 +50,9 @@ export type MeetingNotesFormProps = {
     client_company_name: string;
     pic_name?: string;
     meeting_notes: string;
+    service_scheme?: MeetingExtractionServiceScheme;
   }) => void | Promise<void>;
+  pipelineEnabled?: boolean;
   isSubmitting?: boolean;
   issues?: DraftIssue[];
   onOpenAdvanced?: () => void;
@@ -64,6 +73,7 @@ export function MeetingNotesForm({
   issues = [],
   onOpenAdvanced,
   disabled = false,
+  pipelineEnabled = false,
 }: MeetingNotesFormProps) {
   const { t } = useTranslate('quotation');
   const [isLocallySubmitting, setIsLocallySubmitting] = useState(false);
@@ -84,6 +94,7 @@ export function MeetingNotesForm({
       client_company_name: value?.client_company_name ?? '',
       pic_name: value?.pic_name ?? '',
       meeting_notes: value?.meeting_notes ?? '',
+      service_scheme: 'auto',
     },
   });
 
@@ -108,6 +119,7 @@ export function MeetingNotesForm({
           client_company_name: value.client_company_name ?? '',
           pic_name: value.pic_name ?? '',
           meeting_notes: value.meeting_notes ?? '',
+          service_scheme: 'auto',
         });
       }
     }
@@ -147,13 +159,16 @@ export function MeetingNotesForm({
     submittingRef.current = true;
     setIsLocallySubmitting(true);
     try {
-      await onSubmit({
+      const payload = {
         project_name: values.project_name.trim(),
         client_id: values.client_id,
         client_company_name: values.client_company_name?.trim() ?? '',
         pic_name: values.pic_name?.trim() || undefined,
         meeting_notes: values.meeting_notes.trim(),
-      });
+      };
+      await onSubmit(
+        pipelineEnabled ? { ...payload, service_scheme: values.service_scheme } : payload
+      );
     } finally {
       submittingRef.current = false;
       setIsLocallySubmitting(false);
@@ -272,6 +287,31 @@ export function MeetingNotesForm({
             />
           )}
         />
+
+        {pipelineEnabled && (
+          <Controller
+            name="service_scheme"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth disabled={disabled || submitting}>
+                <InputLabel shrink htmlFor="meeting-extraction-service-scheme">
+                  Skema layanan
+                </InputLabel>
+                <NativeSelect
+                  {...field}
+                  inputProps={{ id: 'meeting-extraction-service-scheme', 'aria-label': 'Skema layanan' }}
+                >
+                  <option value="auto">Auto</option>
+                  {MEETING_EXTRACTION_SCHEMES.map((scheme) => (
+                    <option key={scheme} value={scheme}>
+                      {scheme.replaceAll('_', ' ')}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </FormControl>
+            )}
+          />
+        )}
 
         {issues.length > 0 && (
           <Stack spacing={1} aria-live="polite">

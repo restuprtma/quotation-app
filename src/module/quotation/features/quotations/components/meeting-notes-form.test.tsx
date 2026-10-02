@@ -70,6 +70,46 @@ describe('MeetingNotesForm', () => {
     expect(screen.queryByLabelText('Nama Perusahaan')).toBeNull();
   });
 
+  it('offers Auto and all eight schemes only when pipelineEnabled is true', () => {
+    renderForm({ pipelineEnabled: true });
+
+    expect(screen.getByRole('option', { name: 'Auto' })).toBeTruthy();
+    expect(screen.getAllByRole('option')).toHaveLength(9);
+  });
+
+  it('does not render a scheme selector or submit service_scheme for legacy callers', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    renderForm({ onSubmit });
+
+    expect(screen.queryByLabelText(/Skema layanan/i)).toBeNull();
+  });
+
+  it('submits auto service_scheme only for pipeline callers', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    renderForm({ onSubmit, pipelineEnabled: true });
+
+    fireEvent.change(screen.getByRole('textbox', { name: /Judul Proyek \/ Subjek Proposal/i }), {
+      target: { value: 'Pipeline quotation' },
+    });
+    const clientCombobox = screen.getByRole('combobox', {
+      name: /Perusahaan \/ Organisasi Klien/i,
+    });
+    fireEvent.focus(clientCombobox);
+    fireEvent.change(clientCombobox, { target: { value: 'Alpha' } });
+    fireEvent.click(await screen.findByText('PT Alpha Digital'));
+    fireEvent.change(screen.getByRole('textbox', { name: /Catatan Meeting/i }), {
+      target: { value: 'Catatan meeting untuk pemrosesan pipeline quotation yang aman.' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ service_scheme: 'auto' })
+      );
+    });
+  });
+
   it('submits canonical payload with project_name, client_id, client_company_name, pic_name, and meeting_notes', async () => {
     const onSubmit = vi.fn().mockResolvedValue(undefined);
     renderForm({ onSubmit });
