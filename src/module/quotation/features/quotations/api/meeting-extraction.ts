@@ -1,7 +1,7 @@
 import type {
   MeetingExtractionStart,
-  MeetingExtractionStartPayload,
   MeetingExtractionStatus,
+  MeetingExtractionStartPayload,
 } from '../types/meeting-extraction';
 
 import axios, { toSafeApiError } from 'src/shared/lib/axios';

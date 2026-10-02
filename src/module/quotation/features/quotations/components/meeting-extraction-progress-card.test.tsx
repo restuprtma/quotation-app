@@ -2,8 +2,8 @@
 
 import type { MeetingExtractionStatus } from '../types/meeting-extraction';
 
-import { act, cleanup, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, render, screen, cleanup } from '@testing-library/react';
+import { it, vi, expect, describe, afterEach, beforeEach } from 'vitest';
 
 import { MeetingExtractionProgressCard } from './meeting-extraction-progress-card';
 
@@ -61,6 +61,46 @@ describe('MeetingExtractionProgressCard', () => {
 
     expect(screen.getByRole('button', { name: /coba lagi/i })).toHaveProperty('disabled', true);
     act(() => vi.advanceTimersByTime(60_000));
+    expect(screen.getByRole('button', { name: /coba lagi/i })).toHaveProperty('disabled', false);
+  });
+
+  it('does not recompute retry deadline when status changes without retry_after changing', () => {
+    const retry = vi.fn();
+    const error = {
+      code: 'AI_BUDGET_EXHAUSTED',
+      message: 'provider raw',
+      retryable: true,
+      retry_after: 60,
+    };
+
+    const { rerender } = render(
+      <MeetingExtractionProgressCard
+        status={{
+          ...status,
+          status: 'processing',
+          error,
+        }}
+        onRetry={retry}
+      />
+    );
+
+    act(() => vi.advanceTimersByTime(30_000));
+
+    rerender(
+      <MeetingExtractionProgressCard
+        status={{
+          ...status,
+          status: 'waiting_rate_limit',
+          error,
+        }}
+        onRetry={retry}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: /coba lagi/i })).toHaveProperty('disabled', true);
+
+    act(() => vi.advanceTimersByTime(30_000));
+
     expect(screen.getByRole('button', { name: /coba lagi/i })).toHaveProperty('disabled', false);
   });
 

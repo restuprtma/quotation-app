@@ -1,16 +1,16 @@
 import type {
+  MeetingExtractionStatus,
   MeetingExtractionSafeError,
   MeetingExtractionServiceScheme,
-  MeetingExtractionStatus,
 } from '../types/meeting-extraction';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRef, useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import {
-  getMeetingExtractionStatus,
   retryMeetingExtraction,
   startMeetingExtraction,
+  getMeetingExtractionStatus,
 } from '../api/meeting-extraction';
 
 const TERMINAL = new Set(['completed', 'failed', 'needs_input', 'needs_review']);

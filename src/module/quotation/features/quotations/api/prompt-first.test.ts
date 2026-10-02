@@ -6,9 +6,9 @@ import axios, { endpoints } from 'src/shared/lib/axios';
 
 import {
   getPromptIssues,
-  patchPromptQuotation,
   createMeetingDraft,
   processMeetingDraft,
+  patchPromptQuotation,
   revisePromptQuotationSection,
 } from './prompt-first';
 

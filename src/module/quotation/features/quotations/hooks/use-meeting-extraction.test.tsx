@@ -3,13 +3,13 @@ import type { PropsWithChildren } from 'react';
 
 import { act, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { it, vi, expect, describe, afterEach, beforeEach } from 'vitest';
 
 import { useMeetingExtraction } from './use-meeting-extraction';
 import {
-  getMeetingExtractionStatus,
   retryMeetingExtraction,
   startMeetingExtraction,
+  getMeetingExtractionStatus,
 } from '../api/meeting-extraction';
 
 vi.mock('../api/meeting-extraction', () => ({

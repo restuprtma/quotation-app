@@ -1,6 +1,6 @@
 import type { MeetingExtractionStatus } from '../types/meeting-extraction';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 import Card from '@mui/material/Card';
 import Alert from '@mui/material/Alert';
@@ -62,7 +62,7 @@ export function MeetingExtractionProgressCard({
   const [now, setNow] = useState(() => Date.now());
   const retryAt = useMemo(
     () => retryDueAt(status.error?.retry_after),
-    [status.status, status.error?.retry_after]
+    [status.error?.retry_after]
   );
   const retryBlocked = status.status === 'waiting_rate_limit' && retryAt !== null && now < retryAt;
 

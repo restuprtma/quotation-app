@@ -54,7 +54,13 @@ export function saveQuotationEntryState(state: QuotationEntryState, storage?: St
   if (!s) return;
 
   try {
-    const { meeting_notes: _meetingNotes, ...persistedState } = state;
+    const persistedState: Omit<QuotationEntryState, 'meeting_notes'> = {
+      version: state.version,
+      project_name: state.project_name,
+      client_id: state.client_id,
+      client_company_name: state.client_company_name,
+      pic_name: state.pic_name,
+    };
     s.setItem(QUOTATION_ENTRY_STORAGE_KEY, JSON.stringify(persistedState));
   } catch {
     // Ignore storage write failures (e.g. quota exceeded or disabled storage)

@@ -140,6 +140,27 @@ describe('quotation-entry-state utils', () => {
       );
     });
 
+    it('never serializes meeting_notes to storage even if notes contain sensitive keywords', () => {
+      const stateWithSecrets: QuotationEntryState = {
+        version: 1,
+        project_name: 'Secret Project',
+        client_id: 'org-secret',
+        client_company_name: 'Confidential Corp',
+        pic_name: 'Alice',
+        meeting_notes: 'Authorization: Bearer secret-token; api-key=abc123xyz; budget: 500M',
+      };
+      saveQuotationEntryState(stateWithSecrets, mockStorage);
+      const rawStored = mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY);
+      expect(rawStored).not.toBeNull();
+      expect(rawStored).not.toContain('Authorization');
+      expect(rawStored).not.toContain('secret-token');
+      expect(rawStored).not.toContain('api-key');
+      expect(rawStored).not.toContain('meeting_notes');
+      const parsed = JSON.parse(rawStored || '{}');
+      expect(parsed).not.toHaveProperty('meeting_notes');
+      expect(parsed.project_name).toBe('Secret Project');
+    });
+
     it('does not throw when storage is undefined or throws an error', () => {
       const brokenStorage: Storage = {
         ...mockStorage,

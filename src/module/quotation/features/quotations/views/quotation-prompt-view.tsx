@@ -1,5 +1,5 @@
 import type { GenerateQuotationPayload } from '../types';
-import type { MeetingExtractionServiceScheme, MeetingExtractionStatus } from '../types/meeting-extraction';
+import type { MeetingExtractionStatus, MeetingExtractionServiceScheme } from '../types/meeting-extraction';
 import type {
   DraftIssue,
   MeetingGenerationPhase,

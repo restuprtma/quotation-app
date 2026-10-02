@@ -1,11 +1,11 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { it, vi, expect, describe, afterEach } from 'vitest';
 
 import axios from 'src/shared/lib/axios';
 
 import {
-  getMeetingExtractionStatus,
   retryMeetingExtraction,
   startMeetingExtraction,
+  getMeetingExtractionStatus,
 } from './meeting-extraction';
 
 describe('meeting extraction API', () => {

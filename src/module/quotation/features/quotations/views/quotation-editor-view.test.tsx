@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { MemoryRouter } from 'react-router';
-import { it, expect, vi, describe } from 'vitest';
+import { it, vi, expect, describe } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 
 import { QuotationEditorView } from './quotation-editor-view';
