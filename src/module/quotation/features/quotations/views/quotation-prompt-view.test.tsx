@@ -226,6 +226,10 @@ function renderView(initialEntries: string[] = ['/quotation']) {
   );
 }
 
+async function fillMeetingNotes(notes = 'Catatan meeting inventori yang cukup panjang untuk diuji.') {
+  await userEvent.type(screen.getByRole('textbox', { name: /Catatan Meeting/i }), notes);
+}
+
 describe('QuotationPromptView URL orchestration and Prompt First', () => {
   beforeEach(() => {
     CONFIG.meetingExtraction.pipelineEnabled = false;
@@ -246,7 +250,6 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
         client_id: 'client-1',
         client_company_name: 'PT Alpha',
         pic_name: 'Andi',
-        meeting_notes: 'Catatan meeting inventori yang cukup panjang untuk diuji.',
       })
     );
   });
@@ -311,7 +314,6 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
         client_id: 'client-1',
         client_company_name: 'PT Alpha Digital',
         pic_name: 'Bpk. Budi',
-        meeting_notes: 'Kebutuhan migrasi 20 server ke AWS.',
       })
     );
 
@@ -366,7 +368,7 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     });
     mockProcessMeetingDraft.mockResolvedValue(mockResponse as any);
 
-    // Seed session state
+    // Seed only non-sensitive entry identity.
     sessionStorage.setItem(
       QUOTATION_ENTRY_STORAGE_KEY,
       JSON.stringify({
@@ -375,11 +377,11 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
         client_id: 'client-1',
         client_company_name: 'PT Alpha Digital',
         pic_name: 'Bpk. Budi',
-        meeting_notes: 'Meeting kick-off mengenai modul inventori dan tracking armada pengiriman.',
       })
     );
 
     renderView(['/quotation']);
+    await fillMeetingNotes('Meeting kick-off mengenai modul inventori dan tracking armada pengiriman.');
 
     const submitBtn = screen.getByRole('button', { name: /Buat Draf/i });
     fireEvent.click(submitBtn);
@@ -413,7 +415,7 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     if (stored) {
       const parsed = JSON.parse(stored);
       expect(parsed.project_name).toBe('');
-      expect(parsed.meeting_notes).toBe('');
+      expect(parsed).not.toHaveProperty('meeting_notes');
     }
   });
 
@@ -433,11 +435,11 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
         client_id: 'client-1',
         client_company_name: 'PT Alpha',
         pic_name: 'Andi',
-        meeting_notes: 'Catatan meeting inventori yang cukup panjang untuk diuji.',
       })
     );
 
     renderView(['/quotation']);
+    await fillMeetingNotes();
     await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
 
     expect(await screen.findByText(/Catatan belum dapat diproses/i)).toBeDefined();
@@ -464,6 +466,7 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     });
 
     renderView(['/quotation']);
+    await fillMeetingNotes();
     await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
 
     await waitFor(() => expect(mockStartMeetingExtraction).toHaveBeenCalledWith(
@@ -552,11 +555,11 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
         client_id: 'client-1',
         client_company_name: 'PT Alpha',
         pic_name: 'Andi',
-        meeting_notes: 'Catatan meeting inventori yang cukup panjang untuk diuji.',
       })
     );
 
     renderView(['/quotation']);
+    await fillMeetingNotes();
     await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
 
     expect(await screen.findByText(/durasi proyek/i)).toBeDefined();
@@ -582,11 +585,11 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
         client_id: 'client-1',
         client_company_name: 'PT Alpha',
         pic_name: 'Andi',
-        meeting_notes: 'Catatan meeting inventori yang cukup panjang untuk diuji.',
       })
     );
 
     renderView(['/quotation']);
+    await fillMeetingNotes();
     await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
 
     expect(await screen.findByText(/Catatan belum dapat diproses/i)).toBeDefined();
@@ -605,6 +608,7 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
       response: { data: { errors: { detail: [code] } } },
     });
     renderView(['/quotation']);
+    await fillMeetingNotes();
     await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
     expect(await screen.findByText(message)).toBeDefined();
     expect(screen.queryByText(code)).toBeNull();
@@ -627,7 +631,6 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
         client_id: 'client-1',
         client_company_name: 'PT Alpha Digital',
         pic_name: 'Bpk. Budi',
-        meeting_notes: '',
       })
     );
 

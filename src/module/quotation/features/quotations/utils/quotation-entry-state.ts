@@ -26,15 +26,24 @@ export function loadQuotationEntryState(storage?: Storage): QuotationEntryState 
       return EMPTY_QUOTATION_ENTRY;
     }
 
-    return {
+    const persistedState = {
       version: 1,
       project_name: typeof parsed.project_name === 'string' ? parsed.project_name : '',
       client_id: typeof parsed.client_id === 'string' ? parsed.client_id : '',
       client_company_name:
         typeof parsed.client_company_name === 'string' ? parsed.client_company_name : '',
       pic_name: typeof parsed.pic_name === 'string' ? parsed.pic_name : '',
-      meeting_notes: typeof parsed.meeting_notes === 'string' ? parsed.meeting_notes : '',
     };
+
+    if ('meeting_notes' in parsed) {
+      try {
+        s.setItem(QUOTATION_ENTRY_STORAGE_KEY, JSON.stringify(persistedState));
+      } catch {
+        // Ignore storage write failures while still returning the safe in-memory state.
+      }
+    }
+
+    return { ...persistedState, meeting_notes: '' };
   } catch {
     return EMPTY_QUOTATION_ENTRY;
   }
@@ -45,7 +54,8 @@ export function saveQuotationEntryState(state: QuotationEntryState, storage?: St
   if (!s) return;
 
   try {
-    s.setItem(QUOTATION_ENTRY_STORAGE_KEY, JSON.stringify(state));
+    const { meeting_notes: _meetingNotes, ...persistedState } = state;
+    s.setItem(QUOTATION_ENTRY_STORAGE_KEY, JSON.stringify(persistedState));
   } catch {
     // Ignore storage write failures (e.g. quota exceeded or disabled storage)
   }

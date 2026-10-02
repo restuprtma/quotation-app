@@ -74,7 +74,7 @@ describe('quotation-entry-state utils', () => {
       expect(loadQuotationEntryState(mockStorage)).toEqual(EMPTY_QUOTATION_ENTRY);
     });
 
-    it('returns parsed QuotationEntryState when valid state is present', () => {
+    it('loads identity fields while discarding and removing legacy stored meeting notes', () => {
       const validState: QuotationEntryState = {
         version: 1,
         project_name: 'Portal Vendor',
@@ -84,7 +84,13 @@ describe('quotation-entry-state utils', () => {
         meeting_notes: 'Meeting notes content',
       };
       mockStorage.setItem(QUOTATION_ENTRY_STORAGE_KEY, JSON.stringify(validState));
-      expect(loadQuotationEntryState(mockStorage)).toEqual(validState);
+      expect(loadQuotationEntryState(mockStorage)).toEqual({
+        ...validState,
+        meeting_notes: '',
+      });
+      expect(JSON.parse(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY) || '{}')).not.toHaveProperty(
+        'meeting_notes'
+      );
     });
 
     it('sanitizes missing or non-string fields to empty strings while preserving valid version', () => {
@@ -111,7 +117,7 @@ describe('quotation-entry-state utils', () => {
   });
 
   describe('saveQuotationEntryState', () => {
-    it('persists entry state to storage under QUOTATION_ENTRY_STORAGE_KEY', () => {
+    it('persists only non-sensitive entry state under QUOTATION_ENTRY_STORAGE_KEY', () => {
       const state: QuotationEntryState = {
         version: 1,
         project_name: 'ERP System',
@@ -121,7 +127,17 @@ describe('quotation-entry-state utils', () => {
         meeting_notes: 'Scope discussion',
       };
       saveQuotationEntryState(state, mockStorage);
-      expect(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY)).toBe(JSON.stringify(state));
+      expect(JSON.parse(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY) || '{}')).toEqual({
+        version: 1,
+        project_name: 'ERP System',
+        client_id: 'org-99',
+        client_company_name: 'PT Mega',
+        pic_name: 'Budi',
+      });
+      expect(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY)).not.toContain('Scope discussion');
+      expect(JSON.parse(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY) || '{}')).not.toHaveProperty(
+        'meeting_notes'
+      );
     });
 
     it('does not throw when storage is undefined or throws an error', () => {

@@ -38,7 +38,7 @@ describe('useQuotationEntryState hook', () => {
     expect(result.current.entry).toEqual(EMPTY_QUOTATION_ENTRY);
   });
 
-  it('loads initial state from storage if present', () => {
+  it('loads identity fields from storage but clears stored meeting notes', () => {
     const savedState: QuotationEntryState = {
       version: 1,
       project_name: 'Existing Project',
@@ -51,10 +51,10 @@ describe('useQuotationEntryState hook', () => {
 
     const { result } = renderHook(() => useQuotationEntryState(mockStorage));
 
-    expect(result.current.entry).toEqual(savedState);
+    expect(result.current.entry).toEqual({ ...savedState, meeting_notes: '' });
   });
 
-  it('setEntry updates entry and persists to storage', () => {
+  it('setEntry updates entry and persists only non-sensitive fields to storage', () => {
     const { result } = renderHook(() => useQuotationEntryState(mockStorage));
 
     const newState: QuotationEntryState = {
@@ -71,7 +71,13 @@ describe('useQuotationEntryState hook', () => {
     });
 
     expect(result.current.entry).toEqual(newState);
-    expect(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY)).toBe(JSON.stringify(newState));
+    expect(JSON.parse(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY) || '{}')).toEqual({
+      version: 1,
+      project_name: 'Updated Project',
+      client_id: 'org-2',
+      client_company_name: 'PT Beta',
+      pic_name: 'Budi',
+    });
   });
 
   it('setEntry supports functional state updater', () => {
@@ -90,7 +96,7 @@ describe('useQuotationEntryState hook', () => {
     });
   });
 
-  it('patchIdentity updates identity fields, keeps meeting_notes, and persists to storage', () => {
+  it('patchIdentity keeps notes in memory but excludes them from storage', () => {
     const { result } = renderHook(() => useQuotationEntryState(mockStorage));
 
     act(() => {
@@ -120,11 +126,10 @@ describe('useQuotationEntryState hook', () => {
       client_id: 'org-patched',
       client_company_name: 'PT Patched',
       pic_name: 'PIC Person',
-      meeting_notes: 'Important meeting notes to keep',
     });
   });
 
-  it('setMeetingNotes updates meeting_notes, keeps identity fields, and persists to storage', () => {
+  it('setMeetingNotes updates in-memory notes without persisting them', () => {
     const { result } = renderHook(() => useQuotationEntryState(mockStorage));
 
     act(() => {
@@ -144,8 +149,10 @@ describe('useQuotationEntryState hook', () => {
     expect(JSON.parse(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY) || '{}')).toMatchObject({
       project_name: 'Project Alpha',
       client_id: 'org-alpha',
-      meeting_notes: 'New meeting notes line',
     });
+    expect(JSON.parse(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY) || '{}')).not.toHaveProperty(
+      'meeting_notes'
+    );
   });
 
   it('clear resets entry in memory to EMPTY_QUOTATION_ENTRY and removes key from storage', () => {
