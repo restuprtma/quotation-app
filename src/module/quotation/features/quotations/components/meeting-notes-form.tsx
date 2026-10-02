@@ -303,7 +303,7 @@ export function MeetingNotesForm({
                   <option value="auto">Auto</option>
                   {MEETING_EXTRACTION_SCHEMES.map((scheme) => (
                     <option key={scheme} value={scheme}>
-                      {scheme.replaceAll('_', ' ')}
+                      {scheme.replace(/_/g, ' ')}
                     </option>
                   ))}
                 </NativeSelect>

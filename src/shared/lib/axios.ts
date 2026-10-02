@@ -42,7 +42,10 @@ function isSafeErrorPayload(value: unknown): value is {
   if (!value || typeof value !== 'object') return false;
 
   const code = (value as { code?: unknown }).code;
-  return typeof code === 'string' && Object.hasOwn(SAFE_ERROR_MESSAGES, code);
+  return (
+    typeof code === 'string' &&
+    Object.prototype.hasOwnProperty.call(SAFE_ERROR_MESSAGES, code)
+  );
 }
 
 function allowlistedMessage(code: SafeApiErrorCode | undefined): string {

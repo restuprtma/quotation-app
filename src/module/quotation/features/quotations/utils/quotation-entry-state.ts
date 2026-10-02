@@ -27,7 +27,7 @@ export function loadQuotationEntryState(storage?: Storage): QuotationEntryState 
     }
 
     const persistedState = {
-      version: 1,
+      version: 1 as const,
       project_name: typeof parsed.project_name === 'string' ? parsed.project_name : '',
       client_id: typeof parsed.client_id === 'string' ? parsed.client_id : '',
       client_company_name:
