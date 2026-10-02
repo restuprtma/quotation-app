@@ -14,14 +14,13 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
 import NativeSelect from '@mui/material/NativeSelect';
 
 import { useTranslate } from 'src/locales';
 
 import { ClientOrganizationField } from './client-organization-field';
-
 import { MEETING_EXTRACTION_SCHEMES } from '../types/meeting-extraction';
 
 const schema = z.object({

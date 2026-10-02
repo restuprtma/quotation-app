@@ -2,12 +2,12 @@ import type { MeetingExtractionStatus } from '../types/meeting-extraction';
 
 import { useEffect, useMemo, useState } from 'react';
 
-import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import LinearProgress from '@mui/material/LinearProgress';
+import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import LinearProgress from '@mui/material/LinearProgress';
 
 const FIELD_LABELS: Record<string, string> = {
   client_name: 'Nama klien',

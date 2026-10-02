@@ -11,8 +11,8 @@ import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/re
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import { paths } from 'src/routes/paths';
-import { CONFIG } from 'src/shared/config';
 
+import { CONFIG } from 'src/shared/config';
 import idQuotation from 'src/locales/langs/id/quotation.json';
 
 import { QuotationPromptView } from './quotation-prompt-view';

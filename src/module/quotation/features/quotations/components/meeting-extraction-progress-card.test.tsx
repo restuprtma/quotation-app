@@ -1,9 +1,9 @@
 // @vitest-environment happy-dom
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, render, screen } from '@testing-library/react';
-
 import type { MeetingExtractionStatus } from '../types/meeting-extraction';
+
+import { act, cleanup, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MeetingExtractionProgressCard } from './meeting-extraction-progress-card';
 

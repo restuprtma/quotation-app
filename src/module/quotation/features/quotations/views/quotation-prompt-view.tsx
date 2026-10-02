@@ -1,10 +1,10 @@
 import type { GenerateQuotationPayload } from '../types';
+import type { MeetingExtractionServiceScheme, MeetingExtractionStatus } from '../types/meeting-extraction';
 import type {
   DraftIssue,
   MeetingGenerationPhase,
   MeetingQuotationPayload,
 } from '../types/prompt-first';
-import type { MeetingExtractionServiceScheme, MeetingExtractionStatus } from '../types/meeting-extraction';
 
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
@@ -15,20 +15,21 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
 import { paths } from 'src/routes/paths';
-import { CONFIG } from 'src/shared/config';
 
+import { CONFIG } from 'src/shared/config';
 import { useTranslate } from 'src/locales';
 import { toast } from 'src/shared/ui/snackbar';
 import { Iconify } from 'src/shared/ui/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { MeetingNotesForm } from '../components/meeting-notes-form';
-import { MeetingExtractionProgressCard } from '../components/meeting-extraction-progress-card';
+import { useMeetingExtraction } from '../hooks/use-meeting-extraction';
 import { useGenerateQuotation } from '../hooks/use-quotation-generation';
 import { useQuotationEntryState } from '../hooks/use-quotation-entry-state';
 import { QuotationGenerationForm } from '../components/quotation-generation-form';
 import { WhiteLabelGenerationForm } from '../components/white-label-generation-form';
 import { KioskQueueGenerationForm } from '../components/kiosk-queue-generation-form';
+import { MeetingExtractionProgressCard } from '../components/meeting-extraction-progress-card';
 import { SubscriptionSaaSGenerationForm } from '../components/subscription-saas-generation-form';
 import { CustomDevelopmentGenerationForm } from '../components/custom-development-generation-form';
 import { TalentOutsourcingGenerationForm } from '../components/talent-outsourcing-generation-form';
@@ -39,7 +40,6 @@ import {
   usePromptQuotation,
   useCreatePromptClient,
 } from '../hooks/use-prompt-quotation';
-import { useMeetingExtraction } from '../hooks/use-meeting-extraction';
 import {
   CommercialSchemeSelector,
   type CommercialSchemeType,
