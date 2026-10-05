@@ -18,16 +18,55 @@ type RefreshHandler = (
 ) => Promise<{ access_token: string; refresh_token: string }>;
 type UnauthorizedHandler = () => void;
 
-const SAFE_ERROR_MESSAGES = {
+export const SAFE_ERROR_MESSAGES = {
+  // Existing
   MEETING_NOTES_CHANGED: 'Meeting notes changed. Start a new extraction.',
   AI_BUDGET_EXHAUSTED: 'The AI extraction budget has been exhausted.',
   EXTRACTION_RETRY_CONFLICT: 'This extraction cannot be retried right now.',
   NOT_FOUND: 'The requested resource was not found.',
   INVALID_REQUEST: 'The request could not be processed.',
   INTERNAL_ERROR: 'Unable to process the request.',
+
+  // Meeting extraction codes
+  invalid_extraction: 'Meeting notes could not be processed into a draft.',
+  'invalid_extraction.malformed_json': 'AI response was not valid JSON.',
+  'invalid_extraction.trailing_content': 'AI response contained unexpected trailing content.',
+  'invalid_extraction.missing_required_field': 'Meeting notes are missing required fields.',
+  'invalid_extraction.unknown_field': 'AI response contained unsupported fields.',
+  'invalid_extraction.schema_version': 'Unsupported extraction schema version.',
+  'invalid_extraction.state_validation': 'Extraction failed draft validation.',
+  'invalid_extraction.unsupported_evidence':
+    'Extracted details could not be verified in the meeting notes.',
+  'invalid_extraction.unsupported_evidence.client_company':
+    'Client company could not be verified in the meeting notes.',
+  'invalid_extraction.unsupported_evidence.project_name':
+    'Project name could not be verified in the meeting notes.',
+  'invalid_extraction.unsupported_evidence.duration_months':
+    'Project duration could not be verified in the meeting notes.',
+  'invalid_extraction.unsupported_evidence.team':
+    'Team information could not be verified in the meeting notes.',
+  'invalid_extraction.unsupported_evidence.scope':
+    'Scope details could not be verified in the meeting notes.',
+  'invalid_extraction.unsupported_evidence.payment_pattern':
+    'Payment pattern could not be verified in the meeting notes.',
+  'invalid_extraction.unsupported_evidence.commercial_scheme':
+    'Commercial scheme could not be verified in the meeting notes.',
+  'invalid_extraction.unsupported_evidence.service_input':
+    'Service details could not be verified in the meeting notes.',
+
+  // Domain & provider lifecycle codes
+  meeting_notes_no_business_signal:
+    'No recognizable business requirements found in meeting notes.',
+  draft_already_processing: 'Draft is currently being processed.',
+  draft_already_completed: 'Draft has already been completed.',
+  generation_failed: 'Failed to generate quotation draft.',
+  provider_timeout: 'AI provider timed out.',
+  provider_rate_limited: 'AI provider rate limit reached.',
+  provider_auth_error: 'AI provider authentication failed.',
+  provider_unavailable: 'AI provider is temporarily unavailable.',
 } as const;
 
-type SafeApiErrorCode = keyof typeof SAFE_ERROR_MESSAGES;
+export type SafeApiErrorCode = keyof typeof SAFE_ERROR_MESSAGES;
 
 export type SafeApiError = Error & {
   code: SafeApiErrorCode;
@@ -35,32 +74,56 @@ export type SafeApiError = Error & {
   retryAfter?: number | null;
 };
 
-function isSafeErrorPayload(value: unknown): value is {
-  code: SafeApiErrorCode;
-  retry_after?: number;
-} {
-  if (!value || typeof value !== 'object') return false;
-
-  const code = (value as { code?: unknown }).code;
+function isSafeErrorCode(code: unknown): code is SafeApiErrorCode {
   return (
     typeof code === 'string' &&
     Object.prototype.hasOwnProperty.call(SAFE_ERROR_MESSAGES, code)
   );
 }
 
-function allowlistedMessage(code: SafeApiErrorCode | undefined): string {
-  return SAFE_ERROR_MESSAGES[code ?? 'INTERNAL_ERROR'];
+function extractSafeCandidate(data: unknown): SafeApiErrorCode | null {
+  if (!data || typeof data !== 'object') return null;
+
+  const payload = data as {
+    code?: unknown;
+    errors?: unknown;
+  };
+
+  // 1. Check candidate payload.code (if string and in SAFE_ERROR_MESSAGES)
+  if (isSafeErrorCode(payload.code)) {
+    return payload.code;
+  }
+
+  // 2. Check candidate from payload.errors.detail (if array of strings, check detail[0] in SAFE_ERROR_MESSAGES)
+  if (payload.errors && typeof payload.errors === 'object') {
+    const detail = (payload.errors as { detail?: unknown }).detail;
+    if (Array.isArray(detail) && detail.length > 0 && isSafeErrorCode(detail[0])) {
+      return detail[0];
+    }
+  }
+
+  // 3. Check candidate payload.errors (if string and in SAFE_ERROR_MESSAGES)
+  if (isSafeErrorCode(payload.errors)) {
+    return payload.errors;
+  }
+
+  return null;
 }
 
 export function toSafeApiError(error: unknown): SafeApiError {
   const axiosError = axios.isAxiosError(error);
-  const payload = axiosError && isSafeErrorPayload(error.response?.data) ? error.response.data : null;
-  const safe = new Error(allowlistedMessage(payload?.code));
+  const data = axiosError ? error.response?.data : null;
+  const safeCode = extractSafeCandidate(data);
+  const code: SafeApiErrorCode = safeCode ?? 'INTERNAL_ERROR';
+  const safe = new Error(SAFE_ERROR_MESSAGES[code]);
 
   Object.assign(safe, {
-    code: payload?.code ?? 'INTERNAL_ERROR',
+    code,
     status: axiosError ? error.response?.status : undefined,
-    retryAfter: typeof payload?.retry_after === 'number' ? payload.retry_after : null,
+    retryAfter:
+      data && typeof (data as { retry_after?: unknown }).retry_after === 'number'
+        ? (data as { retry_after: number }).retry_after
+        : null,
   });
 
   return safe as SafeApiError;
@@ -192,6 +255,7 @@ export const endpoints = {
       regenerate: (id: string) => `/quotation/v1/quotations/${id}/regenerate`,
       generationStatus: (id: string) => `/quotation/v1/quotations/${id}/generation-status`,
       saveDraft: (id: string) => `/quotation/v1/quotations/${id}/draft`,
+      publish: (id: string) => `/quotation/v1/quotations/${id}/publish`,
       revisions: (id: string) => `/quotation/v1/quotations/${id}/revisions`,
     },
     ai: {

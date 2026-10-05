@@ -1,10 +1,12 @@
 // @vitest-environment happy-dom
 
+import { toast } from 'sonner';
 import { MemoryRouter } from 'react-router';
-import { it, vi, expect, describe } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { it, vi, expect, describe, afterEach, beforeEach } from 'vitest';
+import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
 
 import { QuotationEditorView } from './quotation-editor-view';
+import { publishQuotation, createQuotationRevision } from '../api/lifecycle';
 
 const { quotationDetail } = vi.hoisted(() => ({
   quotationDetail: {
@@ -50,12 +52,13 @@ vi.mock('src/shared/ui/iconify', () => ({
 }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), info: vi.fn(), success: vi.fn() } }));
 
+const mockRefetch = vi.fn();
 vi.mock('../hooks/use-quotation-draft', () => ({
   useQuotationDraft: () => ({
     data: quotationDetail,
     isLoading: false,
     error: null,
-    refetch: vi.fn(),
+    refetch: mockRefetch,
   }),
 }));
 vi.mock('../hooks/use-draft-save', () => ({
@@ -64,6 +67,11 @@ vi.mock('../hooks/use-draft-save', () => ({
 }));
 vi.mock('../hooks/use-prompt-workspace', () => ({
   usePromptWorkspace: () => ({ isPending: false, patch: vi.fn(), revise: vi.fn() }),
+}));
+
+vi.mock('../api/lifecycle', () => ({
+  publishQuotation: vi.fn(),
+  createQuotationRevision: vi.fn(),
 }));
 
 vi.mock('../../rate-cards/hooks/use-rate-cards', () => ({
@@ -88,6 +96,16 @@ vi.mock('../components/prompt-workspace-panel', () => ({
 }));
 
 describe('QuotationEditorView', () => {
+  beforeEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+    quotationDetail.status = 'draft';
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
   it('uses catalog roles from the quotation detail without querying rate cards', async () => {
     render(
       <MemoryRouter>
@@ -97,5 +115,70 @@ describe('QuotationEditorView', () => {
 
     await waitFor(() => expect(screen.getByText(/Backend Programmer/)).toBeTruthy());
     expect(screen.getByText(/Frontend Programmer/)).toBeTruthy();
+  });
+
+  it('renders Publikasikan button in draft mode, opens PublishDialog, and publishes', async () => {
+    vi.mocked(publishQuotation).mockResolvedValueOnce({ status: 'published' });
+
+    render(
+      <MemoryRouter>
+        <QuotationEditorView id="quotation-1" />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(screen.getByRole('button', { name: /^Publikasikan$/i })).toBeTruthy());
+    const publishBtn = screen.getByRole('button', { name: /^Publikasikan$/i });
+    expect((publishBtn as HTMLButtonElement).disabled).toBe(false);
+
+    // Open PublishDialog
+    fireEvent.click(publishBtn);
+
+    await waitFor(() => expect(screen.getByText('Publikasikan Quotation')).toBeTruthy());
+
+    // Inside dialog, click publish
+    const dialogPublishBtns = screen.getAllByRole('button', { name: /^Publikasikan$/i });
+    const dialogConfirmBtn = dialogPublishBtns[dialogPublishBtns.length - 1];
+    fireEvent.click(dialogConfirmBtn);
+
+    await waitFor(() => {
+      expect(publishQuotation).toHaveBeenCalledWith('quotation-1', {
+        revision_id: 'revision-1',
+        content_version: 1,
+        confirm_legal_modified: false,
+        confirm_commercial_modified: false,
+      });
+      expect(toast.success).toHaveBeenCalledWith('Quotation berhasil dipublikasikan!');
+      expect(mockRefetch).toHaveBeenCalled();
+    });
+  });
+
+  it('renders Buat Revisi Baru button when quotation is published, and creates revision on click', async () => {
+    quotationDetail.status = 'published';
+    vi.mocked(createQuotationRevision).mockResolvedValueOnce({
+      id: 'revision-2',
+      quotation_id: 'quotation-1',
+      revision_number: 2,
+      publication_status: 'draft',
+      content_version: 1,
+    });
+
+    render(
+      <MemoryRouter>
+        <QuotationEditorView id="quotation-1" />
+      </MemoryRouter>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /Buat Revisi Baru/i })).toBeTruthy()
+    );
+
+    const createRevBtn = screen.getByRole('button', { name: /Buat Revisi Baru/i });
+    fireEvent.click(createRevBtn);
+
+    await waitFor(() => {
+      expect(createQuotationRevision).toHaveBeenCalledWith('quotation-1');
+      expect(toast.success).toHaveBeenCalledWith('Revisi baru berhasil dibuat');
+      expect(mockRefetch).toHaveBeenCalled();
+    });
   });
 });

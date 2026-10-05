@@ -15,6 +15,7 @@ import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
@@ -28,6 +29,7 @@ import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 
+import { PublishDialog } from '../components/PublishDialog';
 import { QuotationEditor } from '../components/quotation-editor';
 import { useQuotationDraft } from '../hooks/use-quotation-draft';
 import { RegenerateDialog } from '../components/regenerate-dialog';
@@ -35,6 +37,7 @@ import { usePromptWorkspace } from '../hooks/use-prompt-workspace';
 import { LegalUnlockDialog } from '../components/legal-unlock-dialog';
 import { QuotationReadiness } from '../components/quotation-readiness';
 import { PromptCommercialLock } from '../components/prompt-commercial-lock';
+import { publishQuotation, createQuotationRevision } from '../api/lifecycle';
 import { useSaveDraft, useRegenerateQuotation } from '../hooks/use-draft-save';
 import { PromptRevisionBox, type PromptRevisionBoxCopy } from '../components/prompt-revision-box';
 import {
@@ -200,6 +203,9 @@ export function QuotationEditorView({ id = '' }: Props) {
   const [isRegenerateDialogOpen, setIsRegenerateDialogOpen] = useState(false);
   const [isUnsavedDialogOpen, setIsUnsavedDialogOpen] = useState(false);
   const [isBlueprintWarningOpen, setIsBlueprintWarningOpen] = useState(false);
+  const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isCreatingRevision, setIsCreatingRevision] = useState(false);
 
   sessionRef.current = session;
 
@@ -446,6 +452,46 @@ export function QuotationEditorView({ id = '' }: Props) {
     }
   };
 
+  // Publish quotation draft
+  const handlePublish = async (flags: {
+    confirmLegalModified: boolean;
+    confirmCommercialModified: boolean;
+  }) => {
+    if (!session) return;
+    try {
+      setIsPublishing(true);
+      await publishQuotation(session.quotationId, {
+        revision_id: session.revisionId,
+        content_version: session.canonicalVersion,
+        confirm_legal_modified: flags.confirmLegalModified,
+        confirm_commercial_modified: flags.confirmCommercialModified,
+      });
+      toast.success('Quotation berhasil dipublikasikan!');
+      setIsPublishDialogOpen(false);
+      await refetch();
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal mempublikasikan quotation');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  // Create new revision from published quotation
+  const handleCreateRevision = async () => {
+    if (!session || isCreatingRevision) return;
+    try {
+      setIsCreatingRevision(true);
+      await createQuotationRevision(session.quotationId);
+      toast.success('Revisi baru berhasil dibuat');
+      await refetch();
+      navigate(paths.dashboard.quotation.edit(session.quotationId));
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal membuat revisi baru');
+    } finally {
+      setIsCreatingRevision(false);
+    }
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Stack spacing={3}>
@@ -542,6 +588,56 @@ export function QuotationEditorView({ id = '' }: Props) {
               >
                 {saveMutation.isPending ? t('editor.saving') : t('editor.saveDraft')}
               </Button>
+
+              {data.status === 'published' || (data as any).publication_status === 'published' ? (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={
+                    isCreatingRevision ? (
+                      <CircularProgress size={16} color="inherit" />
+                    ) : (
+                      <Iconify icon="solar:restart-bold" />
+                    )
+                  }
+                  onClick={handleCreateRevision}
+                  disabled={isCreatingRevision}
+                >
+                  Buat Revisi Baru
+                </Button>
+              ) : (
+                <Tooltip
+                  title={
+                    session.isDirty
+                      ? 'Simpan draft terlebih dahulu sebelum mempublikasikan'
+                      : ''
+                  }
+                >
+                  <span>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      startIcon={
+                        isPublishing ? (
+                          <CircularProgress size={16} color="inherit" />
+                        ) : (
+                          <Iconify icon="solar:check-circle-bold" />
+                        )
+                      }
+                      onClick={() => setIsPublishDialogOpen(true)}
+                      disabled={
+                        session.isConflict ||
+                        session.isDirty ||
+                        saveMutation.isPending ||
+                        isPublishing ||
+                        isCreatingRevision
+                      }
+                    >
+                      Publikasikan
+                    </Button>
+                  </span>
+                </Tooltip>
+              )}
             </Stack>
           )}
         </Stack>
@@ -610,6 +706,17 @@ export function QuotationEditorView({ id = '' }: Props) {
         loading={regenerateMutation.isPending}
         onClose={() => setIsRegenerateDialogOpen(false)}
         onConfirm={handleConfirmRegenerate}
+      />
+
+      {/* Publish Confirmation Modal */}
+      <PublishDialog
+        open={isPublishDialogOpen}
+        onClose={() => setIsPublishDialogOpen(false)}
+        onPublish={handlePublish}
+        isSubmitting={isPublishing}
+        legalModified={session?.legalModified}
+        commercialModified={session?.commercialModified}
+        revisionNumber={session?.canonicalVersion}
       />
 
       {/* 409 Conflict Modal */}
