@@ -113,7 +113,15 @@
     "signatureHint": "Draw your signature inside the box.",
     "signatureSuccess": "Thank you, the quotation has been approved.",
     "signatureRequired": "A signature is required before approving the quotation.",
-    "signatureCanvas": "Signature area"
+    "signatureCanvas": "Signature area",
+    "signerName": "Signer Name",
+    "signerEmail": "Signer Email",
+    "consentLabel": "I have read and agree to all terms and conditions outlined in this quotation.",
+    "submitSignature": "Sign Quotation",
+    "signedConfirmation": "This quotation has been signed.",
+    "signedBy": "Signed by",
+    "signedOn": "Signed on",
+    "genericError": "An error occurred while processing the request."
   },
   "blueprint": {
     "title": "Project blueprint",

@@ -9,6 +9,9 @@ import { LoadingScreen } from 'src/shared/ui/loading-screen';
 const ContractPublicPage = lazy(
   () => import('src/module/contract/features/contracts/pages/public')
 );
+const QuotationPublicPage = lazy(
+  () => import('src/module/quotation/features/quotations/pages/public')
+);
 
 export const publicRoutes: RouteObject[] = [
   {
@@ -25,6 +28,9 @@ export const publicRoutes: RouteObject[] = [
         </Suspense>
       </SimpleLayout>
     ),
-    children: [{ path: 'c/:token', element: <ContractPublicPage /> }],
+    children: [
+      { path: 'c/:token', element: <ContractPublicPage /> },
+      { path: 'q/:token', element: <QuotationPublicPage /> },
+    ],
   },
 ];

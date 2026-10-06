@@ -113,7 +113,15 @@
     "signatureHint": "Gambar tanda tangan Anda di dalam kotak.",
     "signatureSuccess": "Terima kasih, penawaran telah disetujui.",
     "signatureRequired": "Tanda tangan diperlukan sebelum menyetujui quotation.",
-    "signatureCanvas": "Area tanda tangan"
+    "signatureCanvas": "Area tanda tangan",
+    "signerName": "Nama Penandatangan",
+    "signerEmail": "Email Penandatangan",
+    "consentLabel": "Saya telah membaca dan menyetujui seluruh ketentuan yang tercantum dalam penawaran ini.",
+    "submitSignature": "Tandatangani Penawaran",
+    "signedConfirmation": "Penawaran ini telah ditandatangani.",
+    "signedBy": "Ditandatangani oleh",
+    "signedOn": "Pada tanggal",
+    "genericError": "Terjadi kesalahan saat memproses permintaan."
   },
   "blueprint": {
     "title": "Blueprint proyek",
