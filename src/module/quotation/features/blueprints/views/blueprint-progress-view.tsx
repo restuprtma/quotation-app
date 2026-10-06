@@ -12,12 +12,16 @@ import Tabs from '@mui/material/Tabs';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import Tooltip from '@mui/material/Tooltip';
 import { useTheme } from '@mui/material/styles';
 import AlertTitle from '@mui/material/AlertTitle';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import CircularProgress from '@mui/material/CircularProgress';
 
@@ -28,12 +32,20 @@ import { Iconify } from 'src/shared/ui/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { LoadingScreen } from 'src/shared/ui/loading-screen';
 
+import { listQuotationRevisions } from '../api';
 import { useBlueprintRunner } from '../hooks/use-blueprint-runner';
 import { SectionStatusList } from '../components/section-status-list';
+import { CreateRevisionDialog } from '../components/CreateRevisionDialog';
+import { PublishBlueprintDialog } from '../components/PublishBlueprintDialog';
 import { presentBlueprintError } from '../utils/blueprint-error-presentation';
 import { BlueprintResultPreview } from '../components/blueprint-result-preview';
 import { ManualCompletionDialog } from '../components/manual-completion-dialog';
 import { ValidationPanel, mapToProviderSection } from '../components/validation-panel';
+import {
+  publishBlueprint,
+  deleteBlueprintDraft,
+  createBlueprintRevision,
+} from '../api/lifecycle';
 
 export interface BlueprintProgressViewProps {
   blueprintId?: string;
@@ -119,6 +131,82 @@ export function BlueprintProgressView({
       toast.success('Data blueprint berhasil diperbarui.');
     } catch (err: any) {
       toast.error('Gagal menyegarkan data: ' + (err.message || 'Error'));
+    }
+  };
+
+  const [publishDialogOpen, setPublishDialogOpen] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [createRevisionDialogOpen, setCreateRevisionDialogOpen] = useState(false);
+  const [isCreatingRevision, setIsCreatingRevision] = useState(false);
+  const [deleteDraftDialogOpen, setDeleteDraftDialogOpen] = useState(false);
+  const [isDeletingDraft, setIsDeletingDraft] = useState(false);
+  const [quotationRevisions, setQuotationRevisions] = useState<any[]>([]);
+
+  const handleOpenCreateRevision = async () => {
+    const qId = detail?.quotation_id;
+    if (qId) {
+      try {
+        const revs = await listQuotationRevisions(qId);
+        setQuotationRevisions(revs);
+      } catch {
+        // continue with empty
+      }
+    }
+    setCreateRevisionDialogOpen(true);
+  };
+
+  const handlePublishBlueprint = async (req: { confirmPartial: boolean; warningCodes: string[] }) => {
+    if (!blueprintId || !status?.revision_id) return;
+    try {
+      setIsPublishing(true);
+      await publishBlueprint(blueprintId, {
+        revision_id: status.revision_id,
+        confirm_partial: req.confirmPartial,
+        warning_codes: req.warningCodes,
+      });
+      toast.success('Blueprint berhasil dipublikasikan!');
+      setPublishDialogOpen(false);
+      await refresh();
+    } catch (err: any) {
+      toast.error('Gagal mempublikasikan blueprint: ' + (err.message || 'Error'));
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handleCreateBlueprintRevision = async (req: {
+    mode: 'clone' | 'regenerate_from_source';
+    sourceQuotationRevId?: string;
+  }) => {
+    if (!blueprintId) return;
+    try {
+      setIsCreatingRevision(true);
+      await createBlueprintRevision(blueprintId, {
+        mode: req.mode,
+        source_quotation_revision_id: req.sourceQuotationRevId,
+      });
+      toast.success('Revisi blueprint baru berhasil dibuat!');
+      setCreateRevisionDialogOpen(false);
+      await refresh();
+    } catch (err: any) {
+      toast.error('Gagal membuat revisi blueprint: ' + (err.message || 'Error'));
+    } finally {
+      setIsCreatingRevision(false);
+    }
+  };
+
+  const handleDeleteDraft = async () => {
+    if (!blueprintId) return;
+    try {
+      setIsDeletingDraft(true);
+      await deleteBlueprintDraft(blueprintId);
+      toast.success('Draft blueprint berhasil dihapus.');
+      setDeleteDraftDialogOpen(false);
+      navigate(paths.dashboard.blueprint.list);
+    } catch (err: any) {
+      toast.error('Gagal menghapus draft blueprint: ' + (err.message || 'Error'));
+    } finally {
+      setIsDeletingDraft(false);
     }
   };
 
@@ -446,6 +534,50 @@ export function BlueprintProgressView({
                 {status?.generation_status === 'pending' ? 'Mulai Generasi' : 'Lanjutkan Generasi'}
               </Button>
             )}
+
+            {/* Published State: Buat Revisi Baru */}
+            {status?.publication_status === 'published' && (
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<Iconify icon="solar:restart-bold" />}
+                onClick={handleOpenCreateRevision}
+                disabled={isCreatingRevision}
+                sx={{ minHeight: 44 }}
+                aria-label="Buat Revisi Baru"
+              >
+                Buat Revisi Baru
+              </Button>
+            )}
+
+            {/* Draft State: Hapus Draft & Publikasikan */}
+            {status?.publication_status !== 'published' && (
+              <>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
+                  onClick={() => setDeleteDraftDialogOpen(true)}
+                  disabled={isRunning || isDeletingDraft}
+                  sx={{ minHeight: 44 }}
+                  aria-label="Hapus Draft"
+                >
+                  Hapus Draft
+                </Button>
+
+                <Button
+                  variant="contained"
+                  color="success"
+                  startIcon={<Iconify icon="solar:check-circle-bold" />}
+                  onClick={() => setPublishDialogOpen(true)}
+                  disabled={isRunning || isPublishing}
+                  sx={{ minHeight: 44 }}
+                  aria-label="Publikasikan Blueprint"
+                >
+                  Publikasikan
+                </Button>
+              </>
+            )}
           </Stack>
         </Stack>
 
@@ -588,6 +720,61 @@ export function BlueprintProgressView({
         onSuccess={handleManualSuccess}
         isBusy={isRunning}
       />
+
+      {/* Publish Blueprint Dialog */}
+      <PublishBlueprintDialog
+        open={publishDialogOpen}
+        onClose={() => setPublishDialogOpen(false)}
+        onPublish={handlePublishBlueprint}
+        isSubmitting={isPublishing}
+        completenessStatus={status?.completeness_status}
+        sections={status?.sections}
+        revisionNumber={status?.content_version}
+      />
+
+      {/* Create Revision Dialog */}
+      <CreateRevisionDialog
+        open={createRevisionDialogOpen}
+        onClose={() => setCreateRevisionDialogOpen(false)}
+        onCreateRevision={handleCreateBlueprintRevision}
+        isSubmitting={isCreatingRevision}
+        quotationRevisions={quotationRevisions}
+        currentSourceQuotationRevId={detail?.source_quotation_revision_id || undefined}
+      />
+
+      {/* Delete Draft Confirmation Dialog */}
+      <Dialog
+        open={deleteDraftDialogOpen}
+        onClose={isDeletingDraft ? undefined : () => setDeleteDraftDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Hapus Draft Blueprint?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            Apakah Anda yakin ingin menghapus draft blueprint ini? Tindakan ini bersifat permanen dan tidak dapat dibatalkan.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={() => setDeleteDraftDialogOpen(false)}
+            disabled={isDeletingDraft}
+          >
+            Batal
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDeleteDraft}
+            disabled={isDeletingDraft}
+            startIcon={isDeletingDraft ? <CircularProgress size={16} color="inherit" /> : null}
+          >
+            Hapus Draft
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DashboardContent>
   );
 }

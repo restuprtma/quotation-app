@@ -281,6 +281,9 @@ export const endpoints = {
         `/quotation/v1/blueprints/${id}/sections/${section}/manual`,
       draftSection: (id: string, section: string) =>
         `/quotation/v1/blueprints/${id}/sections/${section}/draft`,
+      publish: (id: string) => `/quotation/v1/blueprints/${id}/publish`,
+      revisions: (id: string) => `/quotation/v1/blueprints/${id}/revisions`,
+      deleteDraft: (id: string) => `/quotation/v1/blueprints/${id}/draft`,
     },
   },
 } as const;

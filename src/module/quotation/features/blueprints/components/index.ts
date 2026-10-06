@@ -6,3 +6,5 @@ export * from './blueprint-flow-canvas';
 export * from './blueprint-source-form';
 export * from './blueprint-result-preview';
 export * from './manual-completion-dialog';
+export * from './PublishBlueprintDialog';
+export * from './CreateRevisionDialog';

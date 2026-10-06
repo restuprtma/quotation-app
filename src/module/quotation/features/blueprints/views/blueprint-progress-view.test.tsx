@@ -849,4 +849,75 @@ describe('BlueprintProgressView', () => {
       expect(screen.getByRole('button', { name: /coba lagi/i })).toBeTruthy();
     });
   });
+
+  describe('Lifecycle Actions & Dialogs', () => {
+    it('renders Publikasikan and Hapus Draft buttons in draft mode and opens dialogs', () => {
+      vi.spyOn(runnerHook, 'useBlueprintRunner').mockReturnValue({
+        blueprintId: 'bp-123',
+        status: { ...mockStatus, publication_status: 'draft', generation_status: 'completed' },
+        detail: mockDetail,
+        runnerState: 'idle',
+        isLoading: false,
+        isFetching: false,
+        isPolling: false,
+        isStaleLease: false,
+        needsLeaseRecovery: false,
+        hasFailedSection: false,
+        error: null,
+        start: vi.fn(),
+        stop: vi.fn(),
+        recover: vi.fn(),
+        retrySection: vi.fn(),
+        refresh: vi.fn(),
+      });
+
+      render(<BlueprintProgressView />, { wrapper: createWrapper() });
+
+      const publishBtn = screen.getByRole('button', { name: /publikasikan blueprint/i });
+      const deleteBtn = screen.getByRole('button', { name: /hapus draft/i });
+
+      expect(publishBtn).toBeTruthy();
+      expect(deleteBtn).toBeTruthy();
+
+      // Open publish dialog
+      fireEvent.click(publishBtn);
+      expect(screen.getByRole('heading', { name: /publikasikan blueprint/i })).toBeTruthy();
+
+      // Close publish dialog
+      fireEvent.click(screen.getByRole('button', { name: /batal/i }));
+
+      // Open delete draft dialog
+      fireEvent.click(deleteBtn);
+      expect(screen.getByRole('heading', { name: /hapus draft blueprint\?/i })).toBeTruthy();
+    });
+
+    it('renders Buat Revisi Baru button in published mode and opens CreateRevisionDialog', async () => {
+      vi.spyOn(runnerHook, 'useBlueprintRunner').mockReturnValue({
+        blueprintId: 'bp-123',
+        status: { ...mockStatus, publication_status: 'published', generation_status: 'completed' },
+        detail: mockDetail,
+        runnerState: 'idle',
+        isLoading: false,
+        isFetching: false,
+        isPolling: false,
+        isStaleLease: false,
+        needsLeaseRecovery: false,
+        hasFailedSection: false,
+        error: null,
+        start: vi.fn(),
+        stop: vi.fn(),
+        recover: vi.fn(),
+        retrySection: vi.fn(),
+        refresh: vi.fn(),
+      });
+
+      render(<BlueprintProgressView />, { wrapper: createWrapper() });
+
+      const createRevBtn = screen.getByRole('button', { name: /buat revisi baru/i });
+      expect(createRevBtn).toBeTruthy();
+
+      fireEvent.click(createRevBtn);
+      expect(await screen.findByRole('heading', { name: /buat revisi blueprint/i })).toBeTruthy();
+    });
+  });
 });
