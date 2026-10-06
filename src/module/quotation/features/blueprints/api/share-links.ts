@@ -1,4 +1,8 @@
-import type { ShareLinkItem, CreateShareLinkPayload, CreateShareLinkResponse } from '../types/share-links';
+import type {
+  ShareLinkItem,
+  CreateShareLinkPayload,
+  CreateShareLinkResponse,
+} from '../types/share-links';
 
 import axios, { endpoints } from 'src/shared/lib/axios';
 
@@ -14,7 +18,7 @@ async function unwrap<T>(promise: Promise<{ data: ApiEnvelope<T> }>): Promise<T>
     const errorMsg =
       typeof response.data.errors === 'string'
         ? response.data.errors
-        : response.data.message ?? 'Request failed';
+        : (response.data.message ?? 'Request failed');
     throw new Error(errorMsg);
   }
   return response.data.data;
@@ -30,9 +34,7 @@ export async function createShareLink(
 }
 
 export async function listShareLinks(blueprintId: string): Promise<ShareLinkItem[]> {
-  return unwrap<ShareLinkItem[]>(
-    axios.get(endpoints.quotation.blueprints.shareLinks(blueprintId))
-  );
+  return unwrap<ShareLinkItem[]>(axios.get(endpoints.quotation.blueprints.shareLinks(blueprintId)));
 }
 
 export async function revokeShareLink(blueprintId: string, linkId: string): Promise<void> {

@@ -982,4 +982,3 @@ describe('BlueprintProgressView', () => {
     });
   });
 });
-

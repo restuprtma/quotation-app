@@ -15,7 +15,9 @@ import { BlueprintResultPreview } from '../../blueprints/components/blueprint-re
 
 export function SharedBlueprintView({ token }: { token: string }) {
   const { data: blueprint, isLoading, isError } = useSharedBlueprint(token);
-  const [activeSection, setActiveSection] = useState<'journey' | 'architecture' | 'state_machine' | 'workflow' | 'wbs'>('journey');
+  const [activeSection, setActiveSection] = useState<
+    'journey' | 'architecture' | 'state_machine' | 'workflow' | 'wbs'
+  >('journey');
 
   if (isLoading) {
     return (
@@ -70,7 +72,8 @@ export function SharedBlueprintView({ token }: { token: string }) {
           <Stack spacing={1.5}>
             <Typography variant="h4">{blueprint.title}</Typography>
             <Typography variant="body2" color="text.secondary">
-              Revisi {blueprint.revision_number} • Dipublikasikan pada: {fDateTime(blueprint.published_at)}
+              Revisi {blueprint.revision_number} • Dipublikasikan pada:{' '}
+              {fDateTime(blueprint.published_at)}
             </Typography>
             {blueprint.summary && (
               <Typography variant="body1" sx={{ mt: 1 }}>
@@ -84,10 +87,22 @@ export function SharedBlueprintView({ token }: { token: string }) {
         <Card sx={{ p: 2 }}>
           <BlueprintResultPreview
             contentJson={{
-              journey: blueprint.completeness_matrix?.journey === 'pending' ? undefined : blueprint.journey,
-              architecture: blueprint.completeness_matrix?.architecture === 'pending' ? undefined : blueprint.architecture,
-              state_machine: blueprint.completeness_matrix?.state_machine === 'pending' ? undefined : blueprint.state_machine,
-              workflow: blueprint.completeness_matrix?.workflow === 'pending' ? undefined : blueprint.workflow,
+              journey:
+                blueprint.completeness_matrix?.journey === 'pending'
+                  ? undefined
+                  : blueprint.journey,
+              architecture:
+                blueprint.completeness_matrix?.architecture === 'pending'
+                  ? undefined
+                  : blueprint.architecture,
+              state_machine:
+                blueprint.completeness_matrix?.state_machine === 'pending'
+                  ? undefined
+                  : blueprint.state_machine,
+              workflow:
+                blueprint.completeness_matrix?.workflow === 'pending'
+                  ? undefined
+                  : blueprint.workflow,
               wbs: blueprint.completeness_matrix?.wbs === 'pending' ? undefined : blueprint.wbs,
             }}
             activeSection={activeSection}

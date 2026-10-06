@@ -57,8 +57,6 @@ describe('sharedBlueprintApi', () => {
       },
     });
 
-    await expect(sharedBlueprintApi.getShared('invalid-token')).rejects.toThrow(
-      'Not found'
-    );
+    await expect(sharedBlueprintApi.getShared('invalid-token')).rejects.toThrow('Not found');
   });
 });

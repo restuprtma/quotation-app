@@ -14,7 +14,7 @@ async function unwrap<T>(promise: Promise<{ data: ApiEnvelope<T> }>): Promise<T>
     const errorMsg =
       typeof response.data.errors === 'string'
         ? response.data.errors
-        : response.data.message ?? 'Request failed';
+        : (response.data.message ?? 'Request failed');
     throw new Error(errorMsg);
   }
   return response.data.data;
@@ -22,7 +22,5 @@ async function unwrap<T>(promise: Promise<{ data: ApiEnvelope<T> }>): Promise<T>
 
 export const sharedBlueprintApi = {
   getShared: (token: string) =>
-    unwrap<SharedBlueprintData>(
-      axios.get(`/p/blueprint/${token}`, withoutAuthRefresh())
-    ),
+    unwrap<SharedBlueprintData>(axios.get(`/p/blueprint/${token}`, withoutAuthRefresh())),
 };

@@ -49,12 +49,7 @@ describe('ShareLinkDialog', () => {
     });
 
     render(
-      <ShareLinkDialog
-        open
-        onClose={vi.fn()}
-        revisions={eligibleRevisions}
-        onCreate={mockCreate}
-      />
+      <ShareLinkDialog open onClose={vi.fn()} revisions={eligibleRevisions} onCreate={mockCreate} />
     );
 
     const submitBtn = screen.getByRole('button', { name: /Buat Tautan/i });
@@ -74,12 +69,7 @@ describe('ShareLinkDialog', () => {
   it('calls onClose when Batal is clicked', () => {
     const mockClose = vi.fn();
     render(
-      <ShareLinkDialog
-        open
-        onClose={mockClose}
-        revisions={eligibleRevisions}
-        onCreate={vi.fn()}
-      />
+      <ShareLinkDialog open onClose={mockClose} revisions={eligibleRevisions} onCreate={vi.fn()} />
     );
 
     const cancelBtn = screen.getByRole('button', { name: /Batal/i });

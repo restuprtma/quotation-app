@@ -42,4 +42,3 @@ export const paths = {
     blueprint: (token: string) => `/p/blueprint/${token}`,
   },
 };
-

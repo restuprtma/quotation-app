@@ -2,11 +2,7 @@ import { it, vi, expect, describe, beforeEach } from 'vitest';
 
 import axios, { endpoints } from 'src/shared/lib/axios';
 
-import {
-  listShareLinks,
-  createShareLink,
-  revokeShareLink,
-} from './share-links';
+import { listShareLinks, createShareLink, revokeShareLink } from './share-links';
 
 describe('Blueprint Share Links API', () => {
   beforeEach(() => {
@@ -55,10 +51,7 @@ describe('Blueprint Share Links API', () => {
 
       const result = await createShareLink(blueprintId, payload);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        '/quotation/v1/blueprints/bp-123/share-links',
-        payload
-      );
+      expect(mockPost).toHaveBeenCalledWith('/quotation/v1/blueprints/bp-123/share-links', payload);
       expect(result).toEqual(mockResponseData);
     });
 
@@ -103,9 +96,7 @@ describe('Blueprint Share Links API', () => {
 
       const result = await listShareLinks(blueprintId);
 
-      expect(mockGet).toHaveBeenCalledWith(
-        '/quotation/v1/blueprints/bp-123/share-links'
-      );
+      expect(mockGet).toHaveBeenCalledWith('/quotation/v1/blueprints/bp-123/share-links');
       expect(result).toEqual(mockList);
     });
   });
@@ -121,9 +112,7 @@ describe('Blueprint Share Links API', () => {
 
       await revokeShareLink(blueprintId, linkId);
 
-      expect(mockDelete).toHaveBeenCalledWith(
-        '/quotation/v1/blueprints/bp-123/share-links/link-1'
-      );
+      expect(mockDelete).toHaveBeenCalledWith('/quotation/v1/blueprints/bp-123/share-links/link-1');
     });
   });
 });

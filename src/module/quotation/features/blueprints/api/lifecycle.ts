@@ -44,9 +44,7 @@ export async function publishBlueprint(
   id: string,
   req: PublishBlueprintRequest
 ): Promise<{ status: string }> {
-  return unwrap<{ status: string }>(
-    axios.post(endpoints.quotation.blueprints.publish(id), req)
-  );
+  return unwrap<{ status: string }>(axios.post(endpoints.quotation.blueprints.publish(id), req));
 }
 
 export async function createBlueprintRevision(
@@ -70,4 +68,3 @@ export async function deleteBlueprintDraft(id: string): Promise<void> {
     throw new Error(extractError(response.data));
   }
 }
-

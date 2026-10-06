@@ -55,7 +55,10 @@ export function ShareLinkDialog({ open, onClose, revisions, onCreate }: ShareLin
   const handleRevisionChange = (newRevId: string) => {
     setSelectedRevId(newRevId);
     const rev = eligibleRevisions.find((r) => r.id === newRevId);
-    if (rev && (!label || label.startsWith('Programmer - Revisi ') || label === 'Programmer Access')) {
+    if (
+      rev &&
+      (!label || label.startsWith('Programmer - Revisi ') || label === 'Programmer Access')
+    ) {
       setLabel(`Programmer - Revisi ${rev.revision_number}`);
     }
   };
@@ -132,7 +135,8 @@ export function ShareLinkDialog({ open, onClose, revisions, onCreate }: ShareLin
         ) : (
           <Stack spacing={2.5} sx={{ mt: 1 }}>
             <Typography variant="body2" color="text.secondary">
-              Pilih revisi yang telah dipublikasikan dan berikan label untuk tautan berbagi programmer.
+              Pilih revisi yang telah dipublikasikan dan berikan label untuk tautan berbagi
+              programmer.
             </Typography>
             <FormControl fullWidth size="small">
               <InputLabel>Pilih Revisi</InputLabel>

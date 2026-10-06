@@ -144,7 +144,8 @@ function RenderJourneySection({
   data: any;
   emptyDescription?: string;
 }) {
-  if (!data) return <EmptySectionState sectionLabel="User Journey" emptyDescription={emptyDescription} />;
+  if (!data)
+    return <EmptySectionState sectionLabel="User Journey" emptyDescription={emptyDescription} />;
 
   const journeys = Array.isArray(data)
     ? data
@@ -266,7 +267,10 @@ function RenderArchitectureSection({
   data: any;
   emptyDescription?: string;
 }) {
-  if (!data) return <EmptySectionState sectionLabel="Arsitektur Sistem" emptyDescription={emptyDescription} />;
+  if (!data)
+    return (
+      <EmptySectionState sectionLabel="Arsitektur Sistem" emptyDescription={emptyDescription} />
+    );
 
   const components = Array.isArray(data.components)
     ? data.components
@@ -286,7 +290,9 @@ function RenderArchitectureSection({
 
   const hasAnyData = overview || components || layers || dataStores || integrations;
   if (!hasAnyData) {
-    return <EmptySectionState sectionLabel="Arsitektur Sistem" emptyDescription={emptyDescription} />;
+    return (
+      <EmptySectionState sectionLabel="Arsitektur Sistem" emptyDescription={emptyDescription} />
+    );
   }
 
   return (
@@ -457,7 +463,8 @@ function RenderStateMachineSection({
   data: any;
   emptyDescription?: string;
 }) {
-  if (!data) return <EmptySectionState sectionLabel="State Machine" emptyDescription={emptyDescription} />;
+  if (!data)
+    return <EmptySectionState sectionLabel="State Machine" emptyDescription={emptyDescription} />;
 
   const states = Array.isArray(data.states) ? data.states : null;
   const transitions = Array.isArray(data.transitions) ? data.transitions : null;
@@ -601,7 +608,8 @@ function RenderWorkflowSection({
   data: any;
   emptyDescription?: string;
 }) {
-  if (!data) return <EmptySectionState sectionLabel="Workflow Bisnis" emptyDescription={emptyDescription} />;
+  if (!data)
+    return <EmptySectionState sectionLabel="Workflow Bisnis" emptyDescription={emptyDescription} />;
 
   const workflows = Array.isArray(data)
     ? data
@@ -710,14 +718,14 @@ function RenderWorkflowSection({
   );
 }
 
-function RenderWbsSection({
-  data,
-  emptyDescription,
-}: {
-  data: any;
-  emptyDescription?: string;
-}) {
-  if (!data) return <EmptySectionState sectionLabel="Work Breakdown Structure (WBS)" emptyDescription={emptyDescription} />;
+function RenderWbsSection({ data, emptyDescription }: { data: any; emptyDescription?: string }) {
+  if (!data)
+    return (
+      <EmptySectionState
+        sectionLabel="Work Breakdown Structure (WBS)"
+        emptyDescription={emptyDescription}
+      />
+    );
 
   const items = Array.isArray(data.items)
     ? data.items
@@ -732,7 +740,12 @@ function RenderWbsSection({
   const totalDays = data.total_estimation_days || data.total_days || data.total_effort;
 
   if (!items || items.length === 0) {
-    return <EmptySectionState sectionLabel="Work Breakdown Structure (WBS)" emptyDescription={emptyDescription} />;
+    return (
+      <EmptySectionState
+        sectionLabel="Work Breakdown Structure (WBS)"
+        emptyDescription={emptyDescription}
+      />
+    );
   }
 
   return (
@@ -839,7 +852,9 @@ export function BlueprintResultPreview({
       case 'wbs':
         return <RenderWbsSection data={sectionData} emptyDescription={emptyDescription} />;
       default:
-        return <EmptySectionState sectionLabel={activeSection} emptyDescription={emptyDescription} />;
+        return (
+          <EmptySectionState sectionLabel={activeSection} emptyDescription={emptyDescription} />
+        );
     }
   };
 

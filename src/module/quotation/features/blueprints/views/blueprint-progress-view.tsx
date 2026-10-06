@@ -42,11 +42,7 @@ import { presentBlueprintError } from '../utils/blueprint-error-presentation';
 import { BlueprintResultPreview } from '../components/blueprint-result-preview';
 import { ManualCompletionDialog } from '../components/manual-completion-dialog';
 import { ValidationPanel, mapToProviderSection } from '../components/validation-panel';
-import {
-  publishBlueprint,
-  deleteBlueprintDraft,
-  createBlueprintRevision,
-} from '../api/lifecycle';
+import { publishBlueprint, deleteBlueprintDraft, createBlueprintRevision } from '../api/lifecycle';
 import {
   listShareLinks,
   createShareLink,
@@ -171,7 +167,10 @@ export function BlueprintProgressView({
     setCreateRevisionDialogOpen(true);
   };
 
-  const handlePublishBlueprint = async (req: { confirmPartial: boolean; warningCodes: string[] }) => {
+  const handlePublishBlueprint = async (req: {
+    confirmPartial: boolean;
+    warningCodes: string[];
+  }) => {
     if (!blueprintId || !status?.revision_id) return;
     try {
       setIsPublishing(true);
@@ -754,7 +753,9 @@ export function BlueprintProgressView({
           <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
             <Tabs
               value={activeTab}
-              onChange={(_: SyntheticEvent, v: 'preview' | 'validation' | 'share') => setActiveTab(v)}
+              onChange={(_: SyntheticEvent, v: 'preview' | 'validation' | 'share') =>
+                setActiveTab(v)
+              }
             >
               <Tab
                 value="preview"
@@ -808,7 +809,12 @@ export function BlueprintProgressView({
             )}
             {activeTab === 'share' && (
               <Box sx={{ p: 1 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  sx={{ mb: 2 }}
+                >
                   <Typography variant="subtitle1">Riwayat Tautan Berbagi</Typography>
                   <Button
                     variant="contained"
@@ -869,7 +875,8 @@ export function BlueprintProgressView({
         <DialogTitle>Hapus Draft Blueprint?</DialogTitle>
         <DialogContent>
           <Typography variant="body2">
-            Apakah Anda yakin ingin menghapus draft blueprint ini? Tindakan ini bersifat permanen dan tidak dapat dibatalkan.
+            Apakah Anda yakin ingin menghapus draft blueprint ini? Tindakan ini bersifat permanen
+            dan tidak dapat dibatalkan.
           </Typography>
         </DialogContent>
         <DialogActions>

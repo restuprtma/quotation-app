@@ -55,8 +55,7 @@ export const SAFE_ERROR_MESSAGES = {
     'Service details could not be verified in the meeting notes.',
 
   // Domain & provider lifecycle codes
-  meeting_notes_no_business_signal:
-    'No recognizable business requirements found in meeting notes.',
+  meeting_notes_no_business_signal: 'No recognizable business requirements found in meeting notes.',
   draft_already_processing: 'Draft is currently being processed.',
   draft_already_completed: 'Draft has already been completed.',
   generation_failed: 'Failed to generate quotation draft.',
@@ -76,8 +75,7 @@ export type SafeApiError = Error & {
 
 function isSafeErrorCode(code: unknown): code is SafeApiErrorCode {
   return (
-    typeof code === 'string' &&
-    Object.prototype.hasOwnProperty.call(SAFE_ERROR_MESSAGES, code)
+    typeof code === 'string' && Object.prototype.hasOwnProperty.call(SAFE_ERROR_MESSAGES, code)
   );
 }
 

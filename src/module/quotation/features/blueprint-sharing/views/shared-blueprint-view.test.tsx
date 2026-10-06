@@ -56,9 +56,7 @@ describe('SharedBlueprintView', () => {
     } as any);
 
     render(<SharedBlueprintView token="sample-token" />);
-    expect(
-      screen.getByText(/Blueprint Parsial - Revision 2/i)
-    ).toBeDefined();
+    expect(screen.getByText(/Blueprint Parsial - Revision 2/i)).toBeDefined();
     expect(
       screen.getByText(/Dokumen ini belum lengkap dan dapat berubah pada revision berikutnya/i)
     ).toBeDefined();
@@ -84,7 +82,9 @@ describe('SharedBlueprintView', () => {
 
     render(<SharedBlueprintView token="sample-token" />);
     expect(
-      screen.getByText(/Bagian ini belum tersedia pada Revision 2. Hubungi Business Analyst untuk revision berikutnya./i)
+      screen.getByText(
+        /Bagian ini belum tersedia pada Revision 2. Hubungi Business Analyst untuk revision berikutnya./i
+      )
     ).toBeDefined();
   });
 
