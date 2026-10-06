@@ -258,6 +258,10 @@ export const endpoints = {
       publish: (id: string) => `/quotation/v1/quotations/${id}/publish`,
       revisions: (id: string) => `/quotation/v1/quotations/${id}/revisions`,
     },
+    public: {
+      get: (token: string) => `/p/q/${token}`,
+      sign: (token: string) => `/p/q/${token}/sign`,
+    },
     ai: {
       skills: '/quotation/v1/ai/skills',
       settings: '/quotation/v1/ai/settings',
