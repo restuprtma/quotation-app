@@ -137,5 +137,33 @@
     "unsaved_leave_desc": "Anda memiliki perubahan pada draft yang belum disimpan. Yakin ingin keluar dan membuang perubahan lokal?",
     "leave_page": "Tinggalkan Halaman",
     "stay_page": "Batal"
+  },
+  "share_links": {
+    "dialog_title": "Bagikan Blueprint",
+    "dialog_description": "Pilih revisi yang telah dipublikasikan dan berikan label untuk tautan berbagi programmer.",
+    "select_revision": "Pilih Revisi",
+    "link_label": "Label Tautan",
+    "link_label_placeholder": "mis. Backend Team - Revisi 2",
+    "create_button": "Buat Tautan",
+    "creating": "Membuat...",
+    "copy_button": "Salin",
+    "copied": "Tautan berhasil disalin ke clipboard",
+    "one_time_warning": "URL ini hanya ditampilkan satu kali. Harap salin dan simpan dengan aman sekarang.",
+    "share_blueprint_button": "Bagikan Blueprint",
+    "tab_title": "Tautan Berbagi",
+    "empty": "Belum ada tautan berbagi aktif.",
+    "col_label": "Label",
+    "col_revision": "Revisi",
+    "col_status": "Status",
+    "col_last_accessed": "Terakhir Diakses",
+    "col_created_at": "Dibuat Pada",
+    "col_actions": "Aksi",
+    "status_active": "Aktif",
+    "status_revoked": "Dicabut",
+    "revoke_button": "Cabut Akses",
+    "never_accessed": "Belum Pernah",
+    "revoke_confirm_title": "Cabut Akses Tautan Berbagi?",
+    "revoke_confirm_desc": "Programmer yang menggunakan tautan ini tidak akan dapat mengakses blueprint lagi.",
+    "revoke_success": "Tautan berhasil dicabut"
   }
 }

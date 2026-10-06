@@ -920,4 +920,66 @@ describe('BlueprintProgressView', () => {
       expect(await screen.findByRole('heading', { name: /buat revisi blueprint/i })).toBeTruthy();
     });
   });
+
+  describe('Share Links Integration', () => {
+    it('renders Bagikan Blueprint button and opens ShareLinkDialog', async () => {
+      vi.spyOn(runnerHook, 'useBlueprintRunner').mockReturnValue({
+        blueprintId: 'bp-123',
+        status: { ...mockStatus, publication_status: 'published' },
+        detail: mockDetail,
+        runnerState: 'idle',
+        isLoading: false,
+        isFetching: false,
+        isPolling: false,
+        isStaleLease: false,
+        needsLeaseRecovery: false,
+        hasFailedSection: false,
+        error: null,
+        start: vi.fn(),
+        stop: vi.fn(),
+        recover: vi.fn(),
+        retrySection: vi.fn(),
+        refresh: vi.fn(),
+      });
+
+      render(<BlueprintProgressView />, { wrapper: createWrapper() });
+
+      const shareBtn = screen.getByRole('button', { name: /bagikan blueprint/i });
+      expect(shareBtn).toBeTruthy();
+
+      fireEvent.click(shareBtn);
+      expect(await screen.findByRole('heading', { name: /bagikan blueprint/i })).toBeTruthy();
+    });
+
+    it('switches to Tautan Berbagi tab and renders share link list', async () => {
+      vi.spyOn(runnerHook, 'useBlueprintRunner').mockReturnValue({
+        blueprintId: 'bp-123',
+        status: mockStatus,
+        detail: mockDetail,
+        runnerState: 'idle',
+        isLoading: false,
+        isFetching: false,
+        isPolling: false,
+        isStaleLease: false,
+        needsLeaseRecovery: false,
+        hasFailedSection: false,
+        error: null,
+        start: vi.fn(),
+        stop: vi.fn(),
+        recover: vi.fn(),
+        retrySection: vi.fn(),
+        refresh: vi.fn(),
+      });
+
+      render(<BlueprintProgressView />, { wrapper: createWrapper() });
+
+      const shareTab = screen.getByRole('tab', { name: /tautan berbagi/i });
+      expect(shareTab).toBeTruthy();
+
+      fireEvent.click(shareTab);
+      expect(screen.getByText(/riwayat tautan berbagi/i)).toBeTruthy();
+      expect(screen.getByText(/belum ada tautan berbagi aktif\./i)).toBeTruthy();
+    });
+  });
 });
+

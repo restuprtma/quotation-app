@@ -288,6 +288,9 @@ export const endpoints = {
       publish: (id: string) => `/quotation/v1/blueprints/${id}/publish`,
       revisions: (id: string) => `/quotation/v1/blueprints/${id}/revisions`,
       deleteDraft: (id: string) => `/quotation/v1/blueprints/${id}/draft`,
+      shareLinks: (id: string) => `/quotation/v1/blueprints/${id}/share-links`,
+      revokeShareLink: (id: string, linkId: string) =>
+        `/quotation/v1/blueprints/${id}/share-links/${linkId}`,
     },
   },
 } as const;

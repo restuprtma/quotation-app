@@ -58,9 +58,16 @@ export async function createBlueprintRevision(
   );
 }
 
+export async function listBlueprintRevisions(id: string): Promise<BlueprintRevisionResponse[]> {
+  return unwrap<BlueprintRevisionResponse[]>(
+    axios.get(endpoints.quotation.blueprints.revisions(id))
+  );
+}
+
 export async function deleteBlueprintDraft(id: string): Promise<void> {
   const response = await axios.delete(endpoints.quotation.blueprints.deleteDraft(id));
   if (response.data && response.data.errors) {
     throw new Error(extractError(response.data));
   }
 }
+

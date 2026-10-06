@@ -137,5 +137,33 @@
     "unsaved_leave_desc": "You have unsaved draft changes. Are you sure you want to leave and discard local edits?",
     "leave_page": "Leave Page",
     "stay_page": "Cancel"
+  },
+  "share_links": {
+    "dialog_title": "Share Blueprint",
+    "dialog_description": "Select a published revision and provide a label for programmer share link.",
+    "select_revision": "Select Revision",
+    "link_label": "Link Label",
+    "link_label_placeholder": "e.g. Backend Team - Revision 2",
+    "create_button": "Create Link",
+    "creating": "Creating...",
+    "copy_button": "Copy",
+    "copied": "Link successfully copied to clipboard",
+    "one_time_warning": "This URL is only displayed once. Please copy and store it safely now.",
+    "share_blueprint_button": "Share Blueprint",
+    "tab_title": "Share Links",
+    "empty": "No active share links yet.",
+    "col_label": "Label",
+    "col_revision": "Revision",
+    "col_status": "Status",
+    "col_last_accessed": "Last Accessed",
+    "col_created_at": "Created At",
+    "col_actions": "Actions",
+    "status_active": "Active",
+    "status_revoked": "Revoked",
+    "revoke_button": "Revoke Access",
+    "never_accessed": "Never",
+    "revoke_confirm_title": "Revoke Share Link Access?",
+    "revoke_confirm_desc": "Programmers using this link will no longer be able to access the blueprint.",
+    "revoke_success": "Share link successfully revoked"
   }
 }

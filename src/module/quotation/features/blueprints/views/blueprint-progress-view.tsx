@@ -1,8 +1,8 @@
 import type { SyntheticEvent } from 'react';
-import type { ProviderSection } from '../types';
+import type { ShareLinkItem, ProviderSection, CreateShareLinkPayload } from '../types';
 
-import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
@@ -32,7 +32,8 @@ import { Iconify } from 'src/shared/ui/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { LoadingScreen } from 'src/shared/ui/loading-screen';
 
-import { listQuotationRevisions } from '../api';
+import { ShareLinkList } from '../components/share-link-list';
+import { ShareLinkDialog } from '../components/share-link-dialog';
 import { useBlueprintRunner } from '../hooks/use-blueprint-runner';
 import { SectionStatusList } from '../components/section-status-list';
 import { CreateRevisionDialog } from '../components/CreateRevisionDialog';
@@ -46,6 +47,13 @@ import {
   deleteBlueprintDraft,
   createBlueprintRevision,
 } from '../api/lifecycle';
+import {
+  listShareLinks,
+  createShareLink,
+  revokeShareLink,
+  listQuotationRevisions,
+  listBlueprintRevisions,
+} from '../api';
 
 export interface BlueprintProgressViewProps {
   blueprintId?: string;
@@ -62,10 +70,18 @@ export function BlueprintProgressView({
   const params = useParams<{ id: string }>();
   const blueprintId = propBlueprintId || params.id;
 
-  const [activeTab, setActiveTab] = useState<'preview' | 'validation'>('preview');
+  const [activeTab, setActiveTab] = useState<'preview' | 'validation' | 'share'>('preview');
   const [manualDialogOpen, setManualDialogOpen] = useState(false);
   const [selectedManualSection, setSelectedManualSection] = useState<ProviderSection | null>(null);
   const [showContinuePrompt, setShowContinuePrompt] = useState(false);
+
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareLinks, setShareLinks] = useState<ShareLinkItem[]>([]);
+  const [revokeLinkId, setRevokeLinkId] = useState<string | null>(null);
+  const [isRevoking, setIsRevoking] = useState(false);
+  const [blueprintRevisions, setBlueprintRevisions] = useState<
+    Array<{ id: string; revision_number: number; publication_status: string }>
+  >([]);
 
   const {
     status,
@@ -207,6 +223,67 @@ export function BlueprintProgressView({
       toast.error('Gagal menghapus draft blueprint: ' + (err.message || 'Error'));
     } finally {
       setIsDeletingDraft(false);
+    }
+  };
+
+  const loadBlueprintRevisions = useCallback(async () => {
+    if (!blueprintId) return;
+    try {
+      const revs = await listBlueprintRevisions(blueprintId);
+      setBlueprintRevisions(revs);
+    } catch {
+      if (status?.revision_id) {
+        setBlueprintRevisions([
+          {
+            id: status.revision_id,
+            revision_number: status.content_version || 1,
+            publication_status: status.publication_status || 'draft',
+          },
+        ]);
+      }
+    }
+  }, [blueprintId, status?.revision_id, status?.content_version, status?.publication_status]);
+
+  const loadShareLinks = useCallback(async () => {
+    if (!blueprintId) return;
+    try {
+      const links = await listShareLinks(blueprintId);
+      setShareLinks(links);
+    } catch {
+      // ignore
+    }
+  }, [blueprintId]);
+
+  useEffect(() => {
+    if (blueprintId) {
+      loadShareLinks();
+    }
+  }, [blueprintId, loadShareLinks]);
+
+  const handleOpenShareDialog = async () => {
+    await loadBlueprintRevisions();
+    setShareDialogOpen(true);
+  };
+
+  const handleCreateShareLink = async (payload: CreateShareLinkPayload) => {
+    if (!blueprintId) throw new Error('Blueprint ID not found');
+    const res = await createShareLink(blueprintId, payload);
+    await loadShareLinks();
+    return res;
+  };
+
+  const handleConfirmRevoke = async () => {
+    if (!blueprintId || !revokeLinkId) return;
+    try {
+      setIsRevoking(true);
+      await revokeShareLink(blueprintId, revokeLinkId);
+      toast.success('Tautan berhasil dicabut');
+      setRevokeLinkId(null);
+      await loadShareLinks();
+    } catch (err: any) {
+      toast.error('Gagal mencabut tautan: ' + (err.message || 'Error'));
+    } finally {
+      setIsRevoking(false);
     }
   };
 
@@ -467,6 +544,20 @@ export function BlueprintProgressView({
               </Button>
             )}
 
+            {/* Bagikan Blueprint button */}
+            {blueprintId && (
+              <Button
+                variant="outlined"
+                color="info"
+                startIcon={<Iconify icon="solar:share-bold" />}
+                onClick={handleOpenShareDialog}
+                sx={{ minHeight: 44 }}
+                aria-label="Bagikan Blueprint"
+              >
+                Bagikan Blueprint
+              </Button>
+            )}
+
             {/* Refresh button */}
             <Tooltip title="Segarkan Data dari Server">
               <span>
@@ -658,12 +749,12 @@ export function BlueprintProgressView({
           </Alert>
         )}
 
-        {/* Tabs: Result Preview vs Validation Panel */}
+        {/* Tabs: Result Preview vs Validation Panel vs Share Links */}
         <Card>
           <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
             <Tabs
               value={activeTab}
-              onChange={(_: SyntheticEvent, v: 'preview' | 'validation') => setActiveTab(v)}
+              onChange={(_: SyntheticEvent, v: 'preview' | 'validation' | 'share') => setActiveTab(v)}
             >
               <Tab
                 value="preview"
@@ -683,12 +774,22 @@ export function BlueprintProgressView({
                   </Stack>
                 }
               />
+              <Tab
+                value="share"
+                label={
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Iconify icon="solar:link-bold" width={18} />
+                    <span>Tautan Berbagi</span>
+                  </Stack>
+                }
+              />
             </Tabs>
           </Box>
           <CardContent sx={{ p: 2 }}>
-            {activeTab === 'preview' ? (
+            {activeTab === 'preview' && (
               <BlueprintResultPreview contentJson={detail?.content_json} />
-            ) : (
+            )}
+            {activeTab === 'validation' && (
               <ValidationPanel
                 validationResult={detail?.validation_result}
                 crossValidationResult={detail?.cross_validation_result}
@@ -704,6 +805,22 @@ export function BlueprintProgressView({
                       }
                 }
               />
+            )}
+            {activeTab === 'share' && (
+              <Box sx={{ p: 1 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                  <Typography variant="subtitle1">Riwayat Tautan Berbagi</Typography>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<Iconify icon="solar:share-bold" />}
+                    onClick={handleOpenShareDialog}
+                  >
+                    Buat Tautan
+                  </Button>
+                </Stack>
+                <ShareLinkList links={shareLinks} onRevoke={(id) => setRevokeLinkId(id)} />
+              </Box>
             )}
           </CardContent>
         </Card>
@@ -772,6 +889,48 @@ export function BlueprintProgressView({
             startIcon={isDeletingDraft ? <CircularProgress size={16} color="inherit" /> : null}
           >
             Hapus Draft
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Share Link Dialog */}
+      <ShareLinkDialog
+        open={shareDialogOpen}
+        onClose={() => setShareDialogOpen(false)}
+        revisions={blueprintRevisions}
+        onCreate={handleCreateShareLink}
+      />
+
+      {/* Revoke Share Link Confirmation Dialog */}
+      <Dialog
+        open={Boolean(revokeLinkId)}
+        onClose={isRevoking ? undefined : () => setRevokeLinkId(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Cabut Akses Tautan Berbagi?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            Programmer yang menggunakan tautan ini tidak akan dapat mengakses blueprint lagi.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={() => setRevokeLinkId(null)}
+            disabled={isRevoking}
+          >
+            Batal
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleConfirmRevoke}
+            disabled={isRevoking}
+            startIcon={isRevoking ? <CircularProgress size={16} color="inherit" /> : null}
+          >
+            Cabut Akses
           </Button>
         </DialogActions>
       </Dialog>
