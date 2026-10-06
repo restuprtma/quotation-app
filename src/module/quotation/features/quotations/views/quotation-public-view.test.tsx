@@ -1,6 +1,6 @@
+import { it, vi, expect, describe } from 'vitest';
 // @vitest-environment happy-dom
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
 
 import * as useHooks from '../hooks/use-quotation-public';
 import { QuotationPublicView } from './quotation-public-view';

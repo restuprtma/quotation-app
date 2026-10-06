@@ -1,6 +1,6 @@
 import { it, vi, expect, describe, beforeEach } from 'vitest';
 
-import axios, { endpoints, withoutAuthRefresh } from 'src/shared/lib/axios';
+import axios, { endpoints } from 'src/shared/lib/axios';
 
 import { publicQuotationApi } from './public';
 

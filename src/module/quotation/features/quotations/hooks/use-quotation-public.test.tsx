@@ -1,8 +1,9 @@
-// @vitest-environment happy-dom
-import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { it, vi, expect, describe } from 'vitest';
 import type { ReactNode } from 'react';
+
+import { it, vi, expect, describe } from 'vitest';
+// @vitest-environment happy-dom
+import { waitFor, renderHook } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { publicQuotationApi } from '../api/public';
 import { usePublicQuotation } from './use-quotation-public';

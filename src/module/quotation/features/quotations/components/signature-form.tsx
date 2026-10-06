@@ -1,3 +1,5 @@
+import type { SignPublicQuotationPayload } from '../types/public';
+
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 
@@ -11,8 +13,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { useTranslate } from 'src/locales';
+
 import { SignatureCanvas } from './signature-canvas';
-import type { SignPublicQuotationPayload } from '../types/public';
 
 type FormValues = {
   signer_name: string;

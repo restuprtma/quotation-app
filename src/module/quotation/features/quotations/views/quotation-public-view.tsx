@@ -1,3 +1,5 @@
+import type { SignPublicQuotationPayload } from '../types/public';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Alert from '@mui/material/Alert';
@@ -10,10 +12,9 @@ import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
 import { fDateTime } from 'src/shared/utils/format-time';
 
-import { usePublicQuotation, useSignPublicQuotation } from '../hooks/use-quotation-public';
-import { DocumentCanvas } from '../components/document-canvas';
 import { SignatureForm } from '../components/signature-form';
-import type { SignPublicQuotationPayload } from '../types/public';
+import { DocumentCanvas } from '../components/document-canvas';
+import { usePublicQuotation, useSignPublicQuotation } from '../hooks/use-quotation-public';
 
 export function QuotationPublicView({ token }: { token: string }) {
   const { t } = useTranslate('quotation');

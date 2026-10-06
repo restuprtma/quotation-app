@@ -1,6 +1,6 @@
+import { it, vi, expect, describe, afterEach } from 'vitest';
 // @vitest-environment happy-dom
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, waitFor, cleanup, fireEvent } from '@testing-library/react';
 
 import { SignatureForm } from './signature-form';
 
