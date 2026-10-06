@@ -1,6 +1,14 @@
 {
   "title": "Quotation",
   "subtitle": "Manage project proposals and prepare documents for clients.",
+  "history": "History",
+  "history_title": "Revision History",
+  "history_empty": "No revision history available",
+  "status_superseded": "Superseded",
+  "status_published": "Published",
+  "status_draft": "Draft",
+  "active_published": "Active Published",
+  "read_only_notice": "This revision is published/superseded and is read-only.",
   "buttons": {
     "new": "Quotation",
     "generateAI": "Generate AI",
@@ -255,7 +263,12 @@
       "errors": {
         "projectNameRequired": "Project title is required.",
         "clientRequired": "Client company / organization is required.",
-        "meetingNotesRequired": "Meeting notes must be at least 20 characters."
+        "meetingNotesRequired": "Meeting notes must be at least 20 characters.",
+        "invalidJson": "AI response was not valid JSON. Please try creating the draft again.",
+        "evidenceMismatch": "Some extracted information could not be verified against the meeting notes. Please check names, duration, team, and service scheme, then try again.",
+        "providerTimeout": "AI provider timed out. Your meeting input has been preserved; please try again.",
+        "authConfig": "AI provider authentication or configuration failed. Please check AI Settings.",
+        "draftAlreadyProcessing": "Draft is currently being processed. Please wait a moment."
       }
     }
   },

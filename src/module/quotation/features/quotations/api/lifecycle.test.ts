@@ -3,9 +3,11 @@ import { it, vi, expect, describe, beforeEach } from 'vitest';
 import axios, { endpoints } from 'src/shared/lib/axios';
 
 import {
-  publishQuotation,
   createQuotationRevision,
+  getQuotationHistory,
+  publishQuotation,
   type PublishQuotationRequest,
+  type QuotationRevisionHistoryItem,
   type QuotationRevisionResponse,
 } from './lifecycle';
 
@@ -111,9 +113,7 @@ describe('Quotation Lifecycle API', () => {
 
       const result = await createQuotationRevision(quotationId);
 
-      expect(mockPost).toHaveBeenCalledWith(
-        '/quotation/v1/quotations/quotation-uuid-2/revisions'
-      );
+      expect(mockPost).toHaveBeenCalledWith('/quotation/v1/quotations/quotation-uuid-2/revisions');
       expect(result).toEqual(mockRevision);
     });
 
@@ -134,6 +134,58 @@ describe('Quotation Lifecycle API', () => {
       vi.spyOn(axios, 'post').mockRejectedValueOnce(new Error('Server unavailable'));
 
       await expect(createQuotationRevision(quotationId)).rejects.toThrow('Server unavailable');
+    });
+  });
+
+  describe('getQuotationHistory', () => {
+    const quotationId = 'quotation-uuid-3';
+    const mockHistory: QuotationRevisionHistoryItem[] = [
+      {
+        id: 'rev-1',
+        revision_number: 1,
+        publication_status: 'published',
+        is_signed: true,
+        legal_content_modified: false,
+        commercial_content_modified: true,
+        created_at: '2026-10-01T10:00:00Z',
+        published_at: '2026-10-01T11:00:00Z',
+        rate_card_version: '1.0.0',
+        legal_template_version: '1.0.0',
+        prompt_version: '1.0.0',
+      },
+    ];
+
+    it('successfully calls revisions endpoint with view=history param and unwraps data', async () => {
+      const mockGet = vi.spyOn(axios, 'get').mockResolvedValueOnce({
+        data: {
+          data: mockHistory,
+          message: 'Quotation revision history retrieved successfully',
+        },
+      });
+
+      const result = await getQuotationHistory(quotationId);
+
+      expect(mockGet).toHaveBeenCalledWith('/quotation/v1/quotations/quotation-uuid-3/revisions', {
+        params: { view: 'history' },
+      });
+      expect(result).toEqual(mockHistory);
+    });
+
+    it('throws error when envelope response has null data', async () => {
+      vi.spyOn(axios, 'get').mockResolvedValueOnce({
+        data: {
+          data: null,
+          message: 'Failed to retrieve history',
+        },
+      });
+
+      await expect(getQuotationHistory(quotationId)).rejects.toThrow('Failed to retrieve history');
+    });
+
+    it('propagates rejection when axios.get rejects', async () => {
+      vi.spyOn(axios, 'get').mockRejectedValueOnce(new Error('Network error'));
+
+      await expect(getQuotationHistory(quotationId)).rejects.toThrow('Network error');
     });
   });
 });

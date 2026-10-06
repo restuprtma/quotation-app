@@ -614,6 +614,91 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     expect(screen.queryByText(code)).toBeNull();
   });
 
+  it('shows specific message on malformed extraction SafeApiError and retries using existing quotation ID', async () => {
+    mockCreateMeetingDraft.mockResolvedValue({
+      quotation_id: 'quotation-malformed-001',
+      revision_id: 'revision-malformed-001',
+      quotation_number: 'QUO-2026-0099',
+      generation_status: 'pending',
+      idempotent_replay: false,
+    });
+
+    const malformedSafeError = Object.assign(new Error('AI response was not valid JSON.'), {
+      code: 'invalid_extraction.malformed_json',
+      status: 422,
+      retryAfter: null,
+    });
+
+    // First attempt fails with SafeApiError, retry resolves successfully
+    mockProcessMeetingDraft
+      .mockRejectedValueOnce(malformedSafeError)
+      .mockResolvedValueOnce({
+        quotation_id: 'quotation-malformed-001',
+        issues: [],
+      });
+
+    renderView(['/quotation']);
+    await fillMeetingNotes();
+    await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
+
+    // Expect specific actionable message
+    expect(await screen.findByText(/belum dapat dibaca dalam format yang diperlukan/i)).toBeDefined();
+    expect(screen.queryByText('invalid_extraction.malformed_json')).toBeNull();
+
+    // Click retry
+    const retryBtn = screen.getByRole('button', { name: 'Retry Generation' });
+    await userEvent.click(retryBtn);
+
+    // Verify retry used the existing quotation ID without calling createMeetingDraft again
+    expect(mockCreateMeetingDraft).toHaveBeenCalledTimes(1);
+    expect(mockProcessMeetingDraft).toHaveBeenLastCalledWith('quotation-malformed-001', expect.anything());
+
+    // Navigates to editor
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('location-display').textContent).toBe(
+          '/quotation/quotation-malformed-001/edit'
+        );
+      },
+      { timeout: 3000 }
+    );
+  });
+
+  it('navigates to editor when extraction returns a valid incomplete draft', async () => {
+    mockCreateMeetingDraft.mockResolvedValue({
+      quotation_id: 'quotation-incomplete-001',
+      revision_id: 'revision-incomplete-001',
+      quotation_number: 'QUO-2026-0100',
+      generation_status: 'pending',
+      idempotent_replay: false,
+    });
+    mockProcessMeetingDraft.mockResolvedValue({
+      quotation_id: 'quotation-incomplete-001',
+      readiness: 'incomplete',
+      issues: [
+        {
+          code: 'team.empty',
+          field: 'team',
+          message: 'Komposisi tim belum lengkap',
+          severity: 'blocking',
+        },
+      ],
+    } as any);
+
+    renderView(['/quotation']);
+    await fillMeetingNotes('Klien membutuhkan modul inventori.');
+    await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
+
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('location-display').textContent).toBe(
+          '/quotation/quotation-incomplete-001/edit'
+        );
+      },
+      { timeout: 3000 }
+    );
+  });
+
   it('submits advanced scheme generation form, navigates to quotation edit page, and clears entry session', async () => {
     const mockGenerateResponse = {
       quotation_id: 'gen-uuid-202',

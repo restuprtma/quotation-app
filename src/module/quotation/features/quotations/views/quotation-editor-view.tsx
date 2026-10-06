@@ -29,6 +29,7 @@ import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 
+import { HistoryPanel } from '../components/HistoryPanel';
 import { PublishDialog } from '../components/PublishDialog';
 import { QuotationEditor } from '../components/quotation-editor';
 import { useQuotationDraft } from '../hooks/use-quotation-draft';
@@ -96,10 +97,12 @@ function withCore(session: SessionState, core: PromptEditorSession): SessionStat
 
 function PromptEditorWorkspace({
   session,
+  isReadOnly,
   onServerUpdate,
   onConflict,
 }: {
   session: SessionState;
+  isReadOnly?: boolean;
   onServerUpdate: (response: PromptPatchResponse) => void;
   onConflict: () => void;
 }) {
@@ -170,14 +173,22 @@ function PromptEditorWorkspace({
 
   return (
     <Stack spacing={2} sx={{ width: { xs: '100%', lg: 360 }, flexShrink: 0 }}>
-      <PromptRevisionBox copy={revisionCopy} pending={isPending} onSubmit={revise} />
+      <PromptRevisionBox
+        copy={revisionCopy}
+        pending={isPending || Boolean(isReadOnly)}
+        onSubmit={(instruction, target) => {
+          if (isReadOnly) return Promise.resolve();
+          return revise(instruction, target);
+        }}
+      />
       <PromptWorkspacePanel
         state={session.promptState!}
         calculation={session.promptCalculation}
         catalogRoles={session.catalogRoles}
-        pending={isPending}
+        pending={isPending || Boolean(isReadOnly)}
         copy={copy}
         onPatch={(operations) => {
+          if (isReadOnly) return;
           void patch(operations).catch(() => undefined);
         }}
         conflict={session.isConflict}
@@ -206,6 +217,13 @@ export function QuotationEditorView({ id = '' }: Props) {
   const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isCreatingRevision, setIsCreatingRevision] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
+  const isReadOnly = Boolean(
+    data?.status === 'published' ||
+    (data as any)?.publication_status === 'published' ||
+    (data as any)?.publication_status === 'superseded'
+  );
 
   sessionRef.current = session;
 
@@ -518,6 +536,18 @@ export function QuotationEditorView({ id = '' }: Props) {
 
           {data && session && (
             <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
+              {isReadOnly && (
+                <Chip
+                  size="small"
+                  label={t(
+                    'read_only_notice',
+                    'Revisi ini sudah dipublikasikan/usang dan bersifat read-only.'
+                  )}
+                  color="info"
+                  variant="soft"
+                  icon={<Iconify icon="solar:lock-bold" />}
+                />
+              )}
               {session.legalModified && (
                 <Chip
                   size="small"
@@ -551,9 +581,18 @@ export function QuotationEditorView({ id = '' }: Props) {
               <Button
                 variant="outlined"
                 color="inherit"
+                startIcon={<Iconify icon="solar:history-bold" />}
+                onClick={() => setIsHistoryOpen(true)}
+              >
+                {t('history', 'Riwayat')}
+              </Button>
+
+              <Button
+                variant="outlined"
+                color="inherit"
                 startIcon={<Iconify icon="solar:restart-bold" />}
                 onClick={() => setIsRegenerateDialogOpen(true)}
-                disabled={session.isConflict || regenerateMutation.isPending}
+                disabled={session.isConflict || regenerateMutation.isPending || isReadOnly}
               >
                 {t('editor.regenerate')}
               </Button>
@@ -580,6 +619,7 @@ export function QuotationEditorView({ id = '' }: Props) {
                 }
                 onClick={handleSaveDraft}
                 disabled={
+                  isReadOnly ||
                   session.isConflict ||
                   !session.isDirty ||
                   saveMutation.isPending ||
@@ -589,7 +629,7 @@ export function QuotationEditorView({ id = '' }: Props) {
                 {saveMutation.isPending ? t('editor.saving') : t('editor.saveDraft')}
               </Button>
 
-              {data.status === 'published' || (data as any).publication_status === 'published' ? (
+              {isReadOnly ? (
                 <Button
                   variant="contained"
                   color="primary"
@@ -608,9 +648,7 @@ export function QuotationEditorView({ id = '' }: Props) {
               ) : (
                 <Tooltip
                   title={
-                    session.isDirty
-                      ? 'Simpan draft terlebih dahulu sebelum mempublikasikan'
-                      : ''
+                    session.isDirty ? 'Simpan draft terlebih dahulu sebelum mempublikasikan' : ''
                   }
                 >
                   <span>
@@ -675,7 +713,7 @@ export function QuotationEditorView({ id = '' }: Props) {
                 <QuotationEditor
                   content={currentHtml}
                   isUnlocked={session.isUnlocked}
-                  disabled={session.isConflict}
+                  disabled={session.isConflict || isReadOnly}
                   onToggleUnlock={handleToggleUnlock}
                   onRestoreOfficial={handleRestoreOfficial}
                   onChange={handleEditorChange}
@@ -684,6 +722,7 @@ export function QuotationEditorView({ id = '' }: Props) {
               {session.promptState && (
                 <PromptEditorWorkspace
                   session={session}
+                  isReadOnly={isReadOnly}
                   onServerUpdate={handlePromptServerUpdate}
                   onConflict={handlePromptConflict}
                 />
@@ -831,6 +870,15 @@ export function QuotationEditorView({ id = '' }: Props) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Revision History Drawer */}
+      <HistoryPanel
+        open={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        quotationId={id}
+        activePublishedRevisionId={(data as any)?.active_published_revision_id}
+        currentRevisionId={session?.revisionId}
+      />
     </DashboardContent>
   );
 }

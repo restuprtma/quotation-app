@@ -83,7 +83,22 @@ vi.mock('../../rate-cards/hooks/use-rate-cards', () => ({
   },
 }));
 
-vi.mock('../components/quotation-editor', () => ({ QuotationEditor: () => <div /> }));
+const mockQuotationEditor = vi.fn();
+vi.mock('../components/quotation-editor', () => ({
+  QuotationEditor: (props: any) => {
+    mockQuotationEditor(props);
+    return <div data-testid="quotation-editor" data-disabled={props.disabled} />;
+  },
+}));
+vi.mock('../components/HistoryPanel', () => ({
+  HistoryPanel: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
+    open ? (
+      <div data-testid="mock-history-panel">
+        <span>Riwayat Revisi Mock</span>
+        <button onClick={onClose}>Close History</button>
+      </div>
+    ) : null,
+}));
 vi.mock('../components/regenerate-dialog', () => ({ RegenerateDialog: () => null }));
 vi.mock('../components/legal-unlock-dialog', () => ({ LegalUnlockDialog: () => null }));
 vi.mock('../components/quotation-readiness', () => ({ QuotationReadiness: () => null }));
@@ -126,7 +141,9 @@ describe('QuotationEditorView', () => {
       </MemoryRouter>
     );
 
-    await waitFor(() => expect(screen.getByRole('button', { name: /^Publikasikan$/i })).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /^Publikasikan$/i })).toBeTruthy()
+    );
     const publishBtn = screen.getByRole('button', { name: /^Publikasikan$/i });
     expect((publishBtn as HTMLButtonElement).disabled).toBe(false);
 
@@ -180,5 +197,73 @@ describe('QuotationEditorView', () => {
       expect(toast.success).toHaveBeenCalledWith('Revisi baru berhasil dibuat');
       expect(mockRefetch).toHaveBeenCalled();
     });
+  });
+
+  it('renders Riwayat button in header toolbar and opens HistoryPanel on click', async () => {
+    render(
+      <MemoryRouter>
+        <QuotationEditorView id="quotation-1" />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(screen.getByRole('button', { name: /^history$/i })).toBeTruthy());
+
+    // Before clicking, history panel is not open
+    expect(screen.queryByTestId('mock-history-panel')).toBeNull();
+
+    // Click Riwayat button
+    fireEvent.click(screen.getByRole('button', { name: /^history$/i }));
+
+    // Now history panel is open
+    expect(screen.getByTestId('mock-history-panel')).toBeTruthy();
+  });
+
+  it('enforces read-only guard when quotation status is published', async () => {
+    quotationDetail.status = 'published';
+
+    render(
+      <MemoryRouter>
+        <QuotationEditorView id="quotation-1" />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('read_only_notice')).toBeTruthy());
+
+    // QuotationEditor receives disabled=true
+    expect(mockQuotationEditor).toHaveBeenCalledWith(expect.objectContaining({ disabled: true }));
+
+    // Save Draft button is disabled
+    const saveDraftBtn = screen.getByRole('button', { name: /editor\.saveDraft/i });
+    expect((saveDraftBtn as HTMLButtonElement).disabled).toBe(true);
+
+    // Regenerate button is disabled
+    const regenBtn = screen.getByRole('button', { name: /editor\.regenerate/i });
+    expect((regenBtn as HTMLButtonElement).disabled).toBe(true);
+
+    // Buat Revisi Baru is displayed, not Publikasikan
+    expect(screen.getByRole('button', { name: /Buat Revisi Baru/i })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /^Publikasikan$/i })).toBeNull();
+  });
+
+  it('enforces read-only guard when quotation has superseded publication_status', async () => {
+    quotationDetail.status = 'draft';
+    (quotationDetail as any).publication_status = 'superseded';
+
+    render(
+      <MemoryRouter>
+        <QuotationEditorView id="quotation-1" />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('read_only_notice')).toBeTruthy());
+
+    // QuotationEditor receives disabled=true
+    expect(mockQuotationEditor).toHaveBeenCalledWith(expect.objectContaining({ disabled: true }));
+
+    // Save Draft button is disabled
+    const saveDraftBtn = screen.getByRole('button', { name: /editor\.saveDraft/i });
+    expect((saveDraftBtn as HTMLButtonElement).disabled).toBe(true);
+
+    delete (quotationDetail as any).publication_status;
   });
 });

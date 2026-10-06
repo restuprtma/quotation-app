@@ -125,7 +125,20 @@ const meetingStageByPhase: Record<MeetingGenerationPhase, number> = {
   failed: 2,
 };
 
+const MEETING_EXTRACTION_LIFECYCLE_MESSAGES: Record<string, string> = {
+  draft_already_processing: 'Draf saat ini sedang diproses. Mohon tunggu beberapa saat.',
+  draft_already_completed: 'Draf sudah selesai dibuat.',
+  provider_auth_error: 'Pengaturan atau autentikasi penyedia AI belum sesuai. Periksa Pengaturan AI.',
+  provider_unavailable: 'Penyedia AI sedang tidak tersedia. Silakan coba beberapa saat lagi.',
+  provider_timeout: 'Penyedia AI mengalami batas waktu (timeout). Catatan Anda tetap tersimpan; silakan coba lagi.',
+  provider_rate_limited: 'Batas penggunaan penyedia AI tercapai. Mohon tunggu beberapa saat sebelum mencoba lagi.',
+};
+
 function getGenerationError(err: any) {
+  if (err?.code && typeof err.code === 'string') {
+    return { code: err.code, message: err.message || 'Failed to generate quotation draft' };
+  }
+
   const responseData = err.response?.data;
   let code = 'generation_failed';
   let message = err?.message || 'Failed to generate quotation draft';
@@ -146,6 +159,7 @@ function getGenerationError(err: any) {
 
 function meetingExtractionErrorMessage(code: string, fallback: string) {
   if (code === 'invalid_extraction') return INVALID_EXTRACTION_MESSAGE;
+  if (MEETING_EXTRACTION_LIFECYCLE_MESSAGES[code]) return MEETING_EXTRACTION_LIFECYCLE_MESSAGES[code];
   if (!code.startsWith(INVALID_EXTRACTION_PREFIX)) return fallback;
   const reason = code.slice(INVALID_EXTRACTION_PREFIX.length);
   return INVALID_EXTRACTION_REASON_MESSAGES[reason] ?? INVALID_EXTRACTION_MESSAGE;

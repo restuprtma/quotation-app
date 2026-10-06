@@ -1,6 +1,14 @@
 {
   "title": "Quotation",
   "subtitle": "Kelola penawaran proyek dan siapkan dokumen untuk klien.",
+  "history": "Riwayat",
+  "history_title": "Riwayat Revisi",
+  "history_empty": "Belum ada riwayat revisi",
+  "status_superseded": "Usang",
+  "status_published": "Diterbitkan",
+  "status_draft": "Draf",
+  "active_published": "Publikasi Aktif",
+  "read_only_notice": "Revisi ini sudah dipublikasikan/usang dan bersifat read-only.",
   "buttons": {
     "new": "Quotation",
     "generateAI": "Generate AI",
@@ -255,7 +263,12 @@
       "errors": {
         "projectNameRequired": "Judul proyek wajib diisi.",
         "clientRequired": "Perusahaan / Organisasi klien wajib dipilih.",
-        "meetingNotesRequired": "Tambahkan minimal 20 karakter catatan meeting."
+        "meetingNotesRequired": "Tambahkan minimal 20 karakter catatan meeting.",
+        "invalidJson": "Respons AI belum dapat dibaca dalam format yang diperlukan. Coba buat draf lagi.",
+        "evidenceMismatch": "Sebagian informasi hasil AI tidak dapat dicocokkan dengan catatan meeting. Periksa penulisan nama, durasi, tim, dan skema layanan; lalu coba lagi.",
+        "providerTimeout": "Penyedia AI mengalami batas waktu (timeout). Catatan Anda tetap tersimpan; silakan coba lagi.",
+        "authConfig": "Pengaturan atau autentikasi penyedia AI belum sesuai. Periksa Pengaturan AI.",
+        "draftAlreadyProcessing": "Draf saat ini sedang diproses. Mohon tunggu beberapa saat."
       }
     }
   },
