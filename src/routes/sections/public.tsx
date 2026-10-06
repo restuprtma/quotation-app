@@ -12,6 +12,9 @@ const ContractPublicPage = lazy(
 const QuotationPublicPage = lazy(
   () => import('src/module/quotation/features/quotations/pages/public')
 );
+const SharedBlueprintPublicPage = lazy(
+  () => import('src/module/quotation/features/blueprint-sharing/pages/public')
+);
 
 export const publicRoutes: RouteObject[] = [
   {
@@ -31,6 +34,7 @@ export const publicRoutes: RouteObject[] = [
     children: [
       { path: 'c/:token', element: <ContractPublicPage /> },
       { path: 'q/:token', element: <QuotationPublicPage /> },
+      { path: 'blueprint/:token', element: <SharedBlueprintPublicPage /> },
     ],
   },
 ];

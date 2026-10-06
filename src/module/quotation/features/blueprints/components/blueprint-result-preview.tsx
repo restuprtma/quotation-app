@@ -26,6 +26,7 @@ export interface BlueprintResultPreviewProps {
   contentJson?: Record<string, any> | null;
   activeSection?: ProviderSection;
   onSectionChange?: (section: ProviderSection) => void;
+  emptyDescription?: string;
 }
 
 const SECTION_TABS: { value: ProviderSection; label: string; icon: string }[] = [
@@ -36,7 +37,13 @@ const SECTION_TABS: { value: ProviderSection; label: string; icon: string }[] = 
   { value: 'wbs', label: 'WBS', icon: 'solar:checklist-minimalistic-bold' },
 ];
 
-function EmptySectionState({ sectionLabel }: { sectionLabel: string }) {
+function EmptySectionState({
+  sectionLabel,
+  emptyDescription,
+}: {
+  sectionLabel: string;
+  emptyDescription?: string;
+}) {
   return (
     <Box
       sx={{
@@ -62,7 +69,8 @@ function EmptySectionState({ sectionLabel }: { sectionLabel: string }) {
         Data {sectionLabel} Belum Tersedia
       </Typography>
       <Typography variant="body2" color="text.disabled" sx={{ maxWidth: 400 }}>
-        Tahapan ini belum selesai digenerasi atau belum memiliki output konten yang tersimpan.
+        {emptyDescription ??
+          'Tahapan ini belum selesai digenerasi atau belum memiliki output konten yang tersimpan.'}
       </Typography>
     </Box>
   );
@@ -129,8 +137,14 @@ function RenderGenericTable({ data }: { data: any[] }) {
   );
 }
 
-function RenderJourneySection({ data }: { data: any }) {
-  if (!data) return <EmptySectionState sectionLabel="User Journey" />;
+function RenderJourneySection({
+  data,
+  emptyDescription,
+}: {
+  data: any;
+  emptyDescription?: string;
+}) {
+  if (!data) return <EmptySectionState sectionLabel="User Journey" emptyDescription={emptyDescription} />;
 
   const journeys = Array.isArray(data)
     ? data
@@ -161,7 +175,7 @@ function RenderJourneySection({ data }: { data: any }) {
         </Stack>
       );
     }
-    return <EmptySectionState sectionLabel="User Journey" />;
+    return <EmptySectionState sectionLabel="User Journey" emptyDescription={emptyDescription} />;
   }
 
   return (
@@ -245,8 +259,14 @@ function RenderJourneySection({ data }: { data: any }) {
   );
 }
 
-function RenderArchitectureSection({ data }: { data: any }) {
-  if (!data) return <EmptySectionState sectionLabel="Arsitektur Sistem" />;
+function RenderArchitectureSection({
+  data,
+  emptyDescription,
+}: {
+  data: any;
+  emptyDescription?: string;
+}) {
+  if (!data) return <EmptySectionState sectionLabel="Arsitektur Sistem" emptyDescription={emptyDescription} />;
 
   const components = Array.isArray(data.components)
     ? data.components
@@ -266,7 +286,7 @@ function RenderArchitectureSection({ data }: { data: any }) {
 
   const hasAnyData = overview || components || layers || dataStores || integrations;
   if (!hasAnyData) {
-    return <EmptySectionState sectionLabel="Arsitektur Sistem" />;
+    return <EmptySectionState sectionLabel="Arsitektur Sistem" emptyDescription={emptyDescription} />;
   }
 
   return (
@@ -430,8 +450,14 @@ function RenderArchitectureSection({ data }: { data: any }) {
   );
 }
 
-function RenderStateMachineSection({ data }: { data: any }) {
-  if (!data) return <EmptySectionState sectionLabel="State Machine" />;
+function RenderStateMachineSection({
+  data,
+  emptyDescription,
+}: {
+  data: any;
+  emptyDescription?: string;
+}) {
+  if (!data) return <EmptySectionState sectionLabel="State Machine" emptyDescription={emptyDescription} />;
 
   const states = Array.isArray(data.states) ? data.states : null;
   const transitions = Array.isArray(data.transitions) ? data.transitions : null;
@@ -442,7 +468,7 @@ function RenderStateMachineSection({ data }: { data: any }) {
     if (Array.isArray(data) && data.length > 0) {
       return <RenderGenericTable data={data} />;
     }
-    return <EmptySectionState sectionLabel="State Machine" />;
+    return <EmptySectionState sectionLabel="State Machine" emptyDescription={emptyDescription} />;
   }
 
   return (
@@ -568,8 +594,14 @@ function RenderStateMachineSection({ data }: { data: any }) {
   );
 }
 
-function RenderWorkflowSection({ data }: { data: any }) {
-  if (!data) return <EmptySectionState sectionLabel="Workflow Bisnis" />;
+function RenderWorkflowSection({
+  data,
+  emptyDescription,
+}: {
+  data: any;
+  emptyDescription?: string;
+}) {
+  if (!data) return <EmptySectionState sectionLabel="Workflow Bisnis" emptyDescription={emptyDescription} />;
 
   const workflows = Array.isArray(data)
     ? data
@@ -598,7 +630,7 @@ function RenderWorkflowSection({ data }: { data: any }) {
         </Stack>
       );
     }
-    return <EmptySectionState sectionLabel="Workflow Bisnis" />;
+    return <EmptySectionState sectionLabel="Workflow Bisnis" emptyDescription={emptyDescription} />;
   }
 
   return (
@@ -678,8 +710,14 @@ function RenderWorkflowSection({ data }: { data: any }) {
   );
 }
 
-function RenderWbsSection({ data }: { data: any }) {
-  if (!data) return <EmptySectionState sectionLabel="Work Breakdown Structure (WBS)" />;
+function RenderWbsSection({
+  data,
+  emptyDescription,
+}: {
+  data: any;
+  emptyDescription?: string;
+}) {
+  if (!data) return <EmptySectionState sectionLabel="Work Breakdown Structure (WBS)" emptyDescription={emptyDescription} />;
 
   const items = Array.isArray(data.items)
     ? data.items
@@ -694,7 +732,7 @@ function RenderWbsSection({ data }: { data: any }) {
   const totalDays = data.total_estimation_days || data.total_days || data.total_effort;
 
   if (!items || items.length === 0) {
-    return <EmptySectionState sectionLabel="Work Breakdown Structure (WBS)" />;
+    return <EmptySectionState sectionLabel="Work Breakdown Structure (WBS)" emptyDescription={emptyDescription} />;
   }
 
   return (
@@ -771,6 +809,7 @@ export function BlueprintResultPreview({
   contentJson,
   activeSection: controlledSection,
   onSectionChange,
+  emptyDescription,
 }: BlueprintResultPreviewProps) {
   const [internalSection, setInternalSection] = useState<ProviderSection>('journey');
 
@@ -790,17 +829,17 @@ export function BlueprintResultPreview({
 
     switch (activeSection) {
       case 'journey':
-        return <RenderJourneySection data={sectionData} />;
+        return <RenderJourneySection data={sectionData} emptyDescription={emptyDescription} />;
       case 'architecture':
-        return <RenderArchitectureSection data={sectionData} />;
+        return <RenderArchitectureSection data={sectionData} emptyDescription={emptyDescription} />;
       case 'state_machine':
-        return <RenderStateMachineSection data={sectionData} />;
+        return <RenderStateMachineSection data={sectionData} emptyDescription={emptyDescription} />;
       case 'workflow':
-        return <RenderWorkflowSection data={sectionData} />;
+        return <RenderWorkflowSection data={sectionData} emptyDescription={emptyDescription} />;
       case 'wbs':
-        return <RenderWbsSection data={sectionData} />;
+        return <RenderWbsSection data={sectionData} emptyDescription={emptyDescription} />;
       default:
-        return <EmptySectionState sectionLabel={activeSection} />;
+        return <EmptySectionState sectionLabel={activeSection} emptyDescription={emptyDescription} />;
     }
   };
 

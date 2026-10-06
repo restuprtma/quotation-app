@@ -39,5 +39,7 @@ export const paths = {
   public: {
     contract: (token: string) => `/p/c/${token}`,
     quotation: (token: string) => `/p/q/${token}`,
+    blueprint: (token: string) => `/p/blueprint/${token}`,
   },
 };
+
