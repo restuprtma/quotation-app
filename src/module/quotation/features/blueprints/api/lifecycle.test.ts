@@ -177,9 +177,7 @@ describe('Blueprint Lifecycle API', () => {
 
       await deleteBlueprintDraft(blueprintId);
 
-      expect(mockDelete).toHaveBeenCalledWith(
-        '/quotation/v1/blueprints/blueprint-uuid-3/draft'
-      );
+      expect(mockDelete).toHaveBeenCalledWith('/quotation/v1/blueprints/blueprint-uuid-3/draft');
     });
 
     it('throws error when envelope response contains errors', async () => {

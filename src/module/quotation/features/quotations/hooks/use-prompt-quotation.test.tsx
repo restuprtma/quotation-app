@@ -103,7 +103,9 @@ describe('usePromptQuotation hook suite', () => {
       generation_status: 'pending',
       idempotent_replay: false,
     });
-    const processSpy = vi.spyOn(api, 'processMeetingDraft').mockResolvedValueOnce(mockDraftResponse);
+    const processSpy = vi
+      .spyOn(api, 'processMeetingDraft')
+      .mockResolvedValueOnce(mockDraftResponse);
 
     const { result } = renderHook(() => usePromptQuotation(), { wrapper });
 
@@ -131,7 +133,10 @@ describe('usePromptQuotation hook suite', () => {
     expect(sentPayload.idempotency_key).toBeDefined();
     expect(typeof sentPayload.idempotency_key).toBe('string');
 
-    expect(processSpy).toHaveBeenCalledWith(mockDraftResponse.quotation_id, expect.any(AbortSignal));
+    expect(processSpy).toHaveBeenCalledWith(
+      mockDraftResponse.quotation_id,
+      expect.any(AbortSignal)
+    );
 
     expect(response).toEqual(mockDraftResponse);
     expect(result.current.issues).toEqual(mockDraftResponse.issues);
@@ -256,7 +261,9 @@ describe('usePromptQuotation hook suite', () => {
     });
 
     expect(createSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ meeting_notes: 'Pipeline meeting notes stay in request memory only.' }),
+      expect.objectContaining({
+        meeting_notes: 'Pipeline meeting notes stay in request memory only.',
+      }),
       expect.any(AbortSignal)
     );
     expect(processSpy).not.toHaveBeenCalled();

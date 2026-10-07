@@ -30,17 +30,11 @@ describe('PublishDialog', () => {
 
     expect(screen.getByText('Publikasikan Quotation')).toBeTruthy();
     expect(
-      screen.getByText(
-        /Quotation yang dipublikasikan bersifat resmi dan immutable/i
-      )
+      screen.getByText(/Quotation yang dipublikasikan bersifat resmi dan immutable/i)
     ).toBeTruthy();
 
-    expect(
-      screen.queryByLabelText(/Saya mengonfirmasi perubahan pada klausul legal/i)
-    ).toBeNull();
-    expect(
-      screen.queryByLabelText(/Saya mengonfirmasi perubahan nilai komersial/i)
-    ).toBeNull();
+    expect(screen.queryByLabelText(/Saya mengonfirmasi perubahan pada klausul legal/i)).toBeNull();
+    expect(screen.queryByLabelText(/Saya mengonfirmasi perubahan nilai komersial/i)).toBeNull();
 
     const publishBtn = screen.getByRole('button', { name: /^Publikasikan$/i }) as HTMLButtonElement;
     expect(publishBtn.disabled).toBe(false);
@@ -67,7 +61,9 @@ describe('PublishDialog', () => {
     );
 
     expect(
-      screen.getByText(/Perubahan klausul legal terdeteksi. Harap konfirmasi sebelum mempublikasikan./i)
+      screen.getByText(
+        /Perubahan klausul legal terdeteksi. Harap konfirmasi sebelum mempublikasikan./i
+      )
     ).toBeTruthy();
 
     const checkbox = screen.getByLabelText(
@@ -227,14 +223,7 @@ describe('PublishDialog', () => {
   });
 
   it('displays revision number when revisionNumber prop is provided', () => {
-    render(
-      <PublishDialog
-        open
-        onClose={vi.fn()}
-        onPublish={vi.fn()}
-        revisionNumber={4}
-      />
-    );
+    render(<PublishDialog open onClose={vi.fn()} onPublish={vi.fn()} revisionNumber={4} />);
 
     expect(screen.getByText('Revisi #4')).toBeTruthy();
   });

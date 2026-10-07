@@ -64,7 +64,7 @@ export function CreateRevisionDialog({
     await onCreateRevision({
       mode,
       sourceQuotationRevId:
-        mode === 'regenerate_from_source' ? (selectedSourceRevId || undefined) : undefined,
+        mode === 'regenerate_from_source' ? selectedSourceRevId || undefined : undefined,
     });
   };
 
@@ -91,7 +91,8 @@ export function CreateRevisionDialog({
                     Klon Revisi Aktif
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Salin data dan section dari revisi aktif yang sudah dipublikasikan untuk diedit manual.
+                    Salin data dan section dari revisi aktif yang sudah dipublikasikan untuk diedit
+                    manual.
                   </Typography>
                 </Box>
               }

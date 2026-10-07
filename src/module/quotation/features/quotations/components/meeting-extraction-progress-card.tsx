@@ -60,10 +60,7 @@ export function MeetingExtractionProgressCard({
   isRetrying = false,
 }: MeetingExtractionProgressCardProps) {
   const [now, setNow] = useState(() => Date.now());
-  const retryAt = useMemo(
-    () => retryDueAt(status.error?.retry_after),
-    [status.error?.retry_after]
-  );
+  const retryAt = useMemo(() => retryDueAt(status.error?.retry_after), [status.error?.retry_after]);
   const retryBlocked = status.status === 'waiting_rate_limit' && retryAt !== null && now < retryAt;
 
   useEffect(() => {
@@ -72,8 +69,11 @@ export function MeetingExtractionProgressCard({
     return () => window.clearTimeout(timer);
   }, [retryAt, retryBlocked]);
 
-  const progress = status.progress.total > 0 ? (status.progress.completed / status.progress.total) * 100 : 0;
-  const errorCopy = status.error ? (ERROR_COPY[status.error.code] ?? ERROR_COPY.INTERNAL_ERROR) : null;
+  const progress =
+    status.progress.total > 0 ? (status.progress.completed / status.progress.total) * 100 : 0;
+  const errorCopy = status.error
+    ? (ERROR_COPY[status.error.code] ?? ERROR_COPY.INTERNAL_ERROR)
+    : null;
   const canRetry = status.status === 'failed' && status.error?.retryable === true;
   const showRetry = (canRetry || status.status === 'waiting_rate_limit') && Boolean(onRetry);
   const needsAttention = status.status === 'needs_input' || status.status === 'needs_review';
@@ -83,7 +83,9 @@ export function MeetingExtractionProgressCard({
       <Stack spacing={2} aria-live="polite">
         <Stack spacing={0.5}>
           <Typography variant="h5">Progres quotation</Typography>
-          <Typography color="text.secondary">{STATUS_COPY[status.status] ?? 'Quotation sedang diproses.'}</Typography>
+          <Typography color="text.secondary">
+            {STATUS_COPY[status.status] ?? 'Quotation sedang diproses.'}
+          </Typography>
         </Stack>
 
         <Stack spacing={0.75}>
@@ -100,14 +102,17 @@ export function MeetingExtractionProgressCard({
 
         {status.status === 'waiting_rate_limit' && retryAt !== null && (
           <Alert severity="info">
-            Coba lagi setelah {new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(retryAt)}.
+            Coba lagi setelah{' '}
+            {new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(retryAt)}.
           </Alert>
         )}
 
         {needsAttention && (
           <Alert severity="warning">
-            {status.needs_input.concat(status.warnings).map((notice) => noticeLabel(notice.field)).join(', ') ||
-              'Informasi quotation'}
+            {status.needs_input
+              .concat(status.warnings)
+              .map((notice) => noticeLabel(notice.field))
+              .join(', ') || 'Informasi quotation'}
           </Alert>
         )}
 

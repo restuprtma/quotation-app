@@ -104,9 +104,7 @@ describe('MeetingNotesForm', () => {
     fireEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
 
     await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith(
-        expect.objectContaining({ service_scheme: 'auto' })
-      );
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ service_scheme: 'auto' }));
     });
   });
 

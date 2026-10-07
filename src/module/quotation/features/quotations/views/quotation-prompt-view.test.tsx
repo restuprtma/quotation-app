@@ -20,20 +20,28 @@ import { QUOTATION_ENTRY_STORAGE_KEY } from '../types/quotation-entry';
 
 // ----------------------------------------------------------------------
 
-const { mockClients, mockGenerateQuotation, mockCreateMeetingDraft, mockProcessMeetingDraft, mockGetClients, mockStartMeetingExtraction, mockGetMeetingExtractionStatus, mockRetryMeetingExtraction } =
-  vi.hoisted(() => ({
-    mockClients: [
-      { id: 'client-1', name: 'PT Alpha Digital', pic_name: 'Bpk. Budi' },
-      { id: 'client-2', name: 'CV Beta Solusi', pic_name: 'Ibu Siti' },
-    ],
-    mockGenerateQuotation: vi.fn(),
-    mockCreateMeetingDraft: vi.fn(),
-    mockProcessMeetingDraft: vi.fn(),
-    mockGetClients: vi.fn(),
-    mockStartMeetingExtraction: vi.fn(),
-    mockGetMeetingExtractionStatus: vi.fn(),
-    mockRetryMeetingExtraction: vi.fn(),
-  }));
+const {
+  mockClients,
+  mockGenerateQuotation,
+  mockCreateMeetingDraft,
+  mockProcessMeetingDraft,
+  mockGetClients,
+  mockStartMeetingExtraction,
+  mockGetMeetingExtractionStatus,
+  mockRetryMeetingExtraction,
+} = vi.hoisted(() => ({
+  mockClients: [
+    { id: 'client-1', name: 'PT Alpha Digital', pic_name: 'Bpk. Budi' },
+    { id: 'client-2', name: 'CV Beta Solusi', pic_name: 'Ibu Siti' },
+  ],
+  mockGenerateQuotation: vi.fn(),
+  mockCreateMeetingDraft: vi.fn(),
+  mockProcessMeetingDraft: vi.fn(),
+  mockGetClients: vi.fn(),
+  mockStartMeetingExtraction: vi.fn(),
+  mockGetMeetingExtractionStatus: vi.fn(),
+  mockRetryMeetingExtraction: vi.fn(),
+}));
 
 vi.mock('../api', async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, unknown>;
@@ -226,7 +234,9 @@ function renderView(initialEntries: string[] = ['/quotation']) {
   );
 }
 
-async function fillMeetingNotes(notes = 'Catatan meeting inventori yang cukup panjang untuk diuji.') {
+async function fillMeetingNotes(
+  notes = 'Catatan meeting inventori yang cukup panjang untuk diuji.'
+) {
   await userEvent.type(screen.getByRole('textbox', { name: /Catatan Meeting/i }), notes);
 }
 
@@ -381,7 +391,9 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     );
 
     renderView(['/quotation']);
-    await fillMeetingNotes('Meeting kick-off mengenai modul inventori dan tracking armada pengiriman.');
+    await fillMeetingNotes(
+      'Meeting kick-off mengenai modul inventori dan tracking armada pengiriman.'
+    );
 
     const submitBtn = screen.getByRole('button', { name: /Buat Draf/i });
     fireEvent.click(submitBtn);
@@ -421,7 +433,11 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
 
   it('shows an actionable message when meeting extraction is invalid', async () => {
     mockCreateMeetingDraft.mockResolvedValue({
-      quotation_id: 'quotation-timeout', revision_id: 'revision-timeout', quotation_number: 'QUO-2026-0102', generation_status: 'pending', idempotent_replay: false,
+      quotation_id: 'quotation-timeout',
+      revision_id: 'revision-timeout',
+      quotation_number: 'QUO-2026-0102',
+      generation_status: 'pending',
+      idempotent_replay: false,
     });
     mockProcessMeetingDraft.mockRejectedValue({
       message: 'invalid_extraction',
@@ -469,14 +485,18 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     await fillMeetingNotes();
     await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
 
-    await waitFor(() => expect(mockStartMeetingExtraction).toHaveBeenCalledWith(
-      quotationId,
-      expect.objectContaining({ meeting_notes: expect.any(String), service_scheme: 'auto' })
-    ));
+    await waitFor(() =>
+      expect(mockStartMeetingExtraction).toHaveBeenCalledWith(
+        quotationId,
+        expect.objectContaining({ meeting_notes: expect.any(String), service_scheme: 'auto' })
+      )
+    );
     expect(mockProcessMeetingDraft).not.toHaveBeenCalled();
-    await waitFor(() => expect(screen.getByTestId('location-display').textContent).toBe(
-      `/quotation?quotationId=${quotationId}&runId=${runId}`
-    ));
+    await waitFor(() =>
+      expect(screen.getByTestId('location-display').textContent).toBe(
+        `/quotation?quotationId=${quotationId}&runId=${runId}`
+      )
+    );
     expect(screen.getByTestId('location-display').textContent).not.toContain('meeting_notes');
   });
 
@@ -503,10 +523,14 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
 
     renderView([`/quotation?quotationId=${quotationId}&runId=${runId}`]);
 
-    await waitFor(() => expect(mockGetMeetingExtractionStatus).toHaveBeenCalledWith(quotationId, runId, undefined));
-    await waitFor(() => expect(screen.getByTestId('location-display').textContent).toBe(
-      `/quotation/${quotationId}/edit`
-    ));
+    await waitFor(() =>
+      expect(mockGetMeetingExtractionStatus).toHaveBeenCalledWith(quotationId, runId, undefined)
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId('location-display').textContent).toBe(
+        `/quotation/${quotationId}/edit`
+      )
+    );
   });
 
   it('starts a new flow instead of retrying a changed-notes conflict', async () => {
@@ -524,7 +548,12 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
         progress: { completed: 0, total: 1 },
         phases: [],
         failed_phase: 'extract',
-        error: { code: 'MEETING_NOTES_CHANGED', message: 'provider raw secret', retryable: false, retry_after: null },
+        error: {
+          code: 'MEETING_NOTES_CHANGED',
+          message: 'provider raw secret',
+          retryable: false,
+          retry_after: null,
+        },
         needs_input: [],
         warnings: [],
       },
@@ -539,7 +568,11 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
 
   it('shows duration guidance without rendering technical code when meeting evidence is unsupported', async () => {
     mockCreateMeetingDraft.mockResolvedValue({
-      quotation_id: 'quotation-invalid', revision_id: 'revision-invalid', quotation_number: 'QUO-2026-0103', generation_status: 'pending', idempotent_replay: false,
+      quotation_id: 'quotation-invalid',
+      revision_id: 'revision-invalid',
+      quotation_number: 'QUO-2026-0103',
+      generation_status: 'pending',
+      idempotent_replay: false,
     });
     mockProcessMeetingDraft.mockRejectedValue({
       message: 'invalid_extraction.unsupported_evidence.duration_months',
@@ -571,7 +604,11 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
 
   it('falls back to generic message and clears technical code when meeting extraction has unknown qualified suffix', async () => {
     mockCreateMeetingDraft.mockResolvedValue({
-      quotation_id: 'quotation-unknown', revision_id: 'revision-unknown', quotation_number: 'QUO-2026-0104', generation_status: 'pending', idempotent_replay: false,
+      quotation_id: 'quotation-unknown',
+      revision_id: 'revision-unknown',
+      quotation_number: 'QUO-2026-0104',
+      generation_status: 'pending',
+      idempotent_replay: false,
     });
     mockProcessMeetingDraft.mockRejectedValue({
       message: 'invalid_extraction.future_unknown_reason',
@@ -602,7 +639,11 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     ['invalid_extraction.malformed_json', /belum dapat dibaca dalam format yang diperlukan/i],
   ])('shows safe extraction reason for %s', async (code, message) => {
     mockCreateMeetingDraft.mockResolvedValue({
-      quotation_id: 'quotation-error', revision_id: 'revision-error', quotation_number: 'QUO-2026-0105', generation_status: 'pending', idempotent_replay: false,
+      quotation_id: 'quotation-error',
+      revision_id: 'revision-error',
+      quotation_number: 'QUO-2026-0105',
+      generation_status: 'pending',
+      idempotent_replay: false,
     });
     mockProcessMeetingDraft.mockRejectedValue({
       response: { data: { errors: { detail: [code] } } },
@@ -630,19 +671,19 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
     });
 
     // First attempt fails with SafeApiError, retry resolves successfully
-    mockProcessMeetingDraft
-      .mockRejectedValueOnce(malformedSafeError)
-      .mockResolvedValueOnce({
-        quotation_id: 'quotation-malformed-001',
-        issues: [],
-      });
+    mockProcessMeetingDraft.mockRejectedValueOnce(malformedSafeError).mockResolvedValueOnce({
+      quotation_id: 'quotation-malformed-001',
+      issues: [],
+    });
 
     renderView(['/quotation']);
     await fillMeetingNotes();
     await userEvent.click(screen.getByRole('button', { name: /Buat Draf/i }));
 
     // Expect specific actionable message
-    expect(await screen.findByText(/belum dapat dibaca dalam format yang diperlukan/i)).toBeDefined();
+    expect(
+      await screen.findByText(/belum dapat dibaca dalam format yang diperlukan/i)
+    ).toBeDefined();
     expect(screen.queryByText('invalid_extraction.malformed_json')).toBeNull();
 
     // Click retry
@@ -651,7 +692,10 @@ describe('QuotationPromptView URL orchestration and Prompt First', () => {
 
     // Verify retry used the existing quotation ID without calling createMeetingDraft again
     expect(mockCreateMeetingDraft).toHaveBeenCalledTimes(1);
-    expect(mockProcessMeetingDraft).toHaveBeenLastCalledWith('quotation-malformed-001', expect.anything());
+    expect(mockProcessMeetingDraft).toHaveBeenLastCalledWith(
+      'quotation-malformed-001',
+      expect.anything()
+    );
 
     // Navigates to editor
     await waitFor(

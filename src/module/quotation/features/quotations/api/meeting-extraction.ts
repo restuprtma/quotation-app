@@ -29,12 +29,15 @@ export async function startMeetingExtraction(
   payload: MeetingExtractionStartPayload
 ): Promise<MeetingExtractionStart> {
   const { service_scheme, meeting_notes, pipeline_version, idempotency_key } = payload;
-  const response = await axios.post<ApiEnvelope<MeetingExtractionStart>>(extractionUrl(quotationId), {
-    service_scheme,
-    meeting_notes,
-    ...(pipeline_version ? { pipeline_version } : {}),
-    ...(idempotency_key ? { idempotency_key } : {}),
-  });
+  const response = await axios.post<ApiEnvelope<MeetingExtractionStart>>(
+    extractionUrl(quotationId),
+    {
+      service_scheme,
+      meeting_notes,
+      ...(pipeline_version ? { pipeline_version } : {}),
+      ...(idempotency_key ? { idempotency_key } : {}),
+    }
+  );
 
   return requireData(response.data);
 }
@@ -44,13 +47,15 @@ export async function getMeetingExtractionStatus(
   runId: string,
   etag?: string
 ): Promise<
-  | { notModified: true }
-  | { notModified: false; data: MeetingExtractionStatus; etag: string | null }
+  { notModified: true } | { notModified: false; data: MeetingExtractionStatus; etag: string | null }
 > {
-  const response = await axios.get<ApiEnvelope<MeetingExtractionStatus>>(statusUrl(quotationId, runId), {
-    headers: etag ? { 'If-None-Match': etag } : undefined,
-    validateStatus: (status) => status === 200 || status === 304,
-  });
+  const response = await axios.get<ApiEnvelope<MeetingExtractionStatus>>(
+    statusUrl(quotationId, runId),
+    {
+      headers: etag ? { 'If-None-Match': etag } : undefined,
+      validateStatus: (status) => status === 200 || status === 304,
+    }
+  );
 
   if (response.status === 304) return { notModified: true };
 

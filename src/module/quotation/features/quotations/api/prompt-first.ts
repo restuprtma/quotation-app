@@ -20,7 +20,7 @@ function apiEnvelopeError(payload: ApiEnvelope<unknown>, response?: unknown) {
   const error = new Error(
     typeof payload.errors === 'string'
       ? payload.errors
-      : payload.errors?.detail?.[0] ?? payload.message ?? 'generation_failed'
+      : (payload.errors?.detail?.[0] ?? payload.message ?? 'generation_failed')
   );
   Object.assign(error, { response });
   return error;

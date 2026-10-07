@@ -1,5 +1,8 @@
 import type { GenerateQuotationPayload } from '../types';
-import type { MeetingExtractionStatus, MeetingExtractionServiceScheme } from '../types/meeting-extraction';
+import type {
+  MeetingExtractionStatus,
+  MeetingExtractionServiceScheme,
+} from '../types/meeting-extraction';
 import type {
   DraftIssue,
   MeetingGenerationPhase,
@@ -128,10 +131,13 @@ const meetingStageByPhase: Record<MeetingGenerationPhase, number> = {
 const MEETING_EXTRACTION_LIFECYCLE_MESSAGES: Record<string, string> = {
   draft_already_processing: 'Draf saat ini sedang diproses. Mohon tunggu beberapa saat.',
   draft_already_completed: 'Draf sudah selesai dibuat.',
-  provider_auth_error: 'Pengaturan atau autentikasi penyedia AI belum sesuai. Periksa Pengaturan AI.',
+  provider_auth_error:
+    'Pengaturan atau autentikasi penyedia AI belum sesuai. Periksa Pengaturan AI.',
   provider_unavailable: 'Penyedia AI sedang tidak tersedia. Silakan coba beberapa saat lagi.',
-  provider_timeout: 'Penyedia AI mengalami batas waktu (timeout). Catatan Anda tetap tersimpan; silakan coba lagi.',
-  provider_rate_limited: 'Batas penggunaan penyedia AI tercapai. Mohon tunggu beberapa saat sebelum mencoba lagi.',
+  provider_timeout:
+    'Penyedia AI mengalami batas waktu (timeout). Catatan Anda tetap tersimpan; silakan coba lagi.',
+  provider_rate_limited:
+    'Batas penggunaan penyedia AI tercapai. Mohon tunggu beberapa saat sebelum mencoba lagi.',
 };
 
 function getGenerationError(err: any) {
@@ -159,7 +165,8 @@ function getGenerationError(err: any) {
 
 function meetingExtractionErrorMessage(code: string, fallback: string) {
   if (code === 'invalid_extraction') return INVALID_EXTRACTION_MESSAGE;
-  if (MEETING_EXTRACTION_LIFECYCLE_MESSAGES[code]) return MEETING_EXTRACTION_LIFECYCLE_MESSAGES[code];
+  if (MEETING_EXTRACTION_LIFECYCLE_MESSAGES[code])
+    return MEETING_EXTRACTION_LIFECYCLE_MESSAGES[code];
   if (!code.startsWith(INVALID_EXTRACTION_PREFIX)) return fallback;
   const reason = code.slice(INVALID_EXTRACTION_PREFIX.length);
   return INVALID_EXTRACTION_REASON_MESSAGES[reason] ?? INVALID_EXTRACTION_MESSAGE;
@@ -167,7 +174,8 @@ function meetingExtractionErrorMessage(code: string, fallback: string) {
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-const isOpaqueId = (value: string | null): value is string => Boolean(value && UUID_PATTERN.test(value));
+const isOpaqueId = (value: string | null): value is string =>
+  Boolean(value && UUID_PATTERN.test(value));
 
 function pendingPipelineStatus(quotationId: string, runId: string): MeetingExtractionStatus {
   return {
@@ -200,8 +208,10 @@ export function QuotationPromptView() {
   const pipelineEnabled = CONFIG.meetingExtraction.pipelineEnabled;
   const queryQuotationId = searchParams.get('quotationId');
   const queryRunId = searchParams.get('runId');
-  const recoveredQuotationId = isOpaqueId(queryQuotationId) && isOpaqueId(queryRunId) ? queryQuotationId : undefined;
-  const recoveredRunId = isOpaqueId(queryQuotationId) && isOpaqueId(queryRunId) ? queryRunId : undefined;
+  const recoveredQuotationId =
+    isOpaqueId(queryQuotationId) && isOpaqueId(queryRunId) ? queryQuotationId : undefined;
+  const recoveredRunId =
+    isOpaqueId(queryQuotationId) && isOpaqueId(queryRunId) ? queryRunId : undefined;
   const meetingExtraction = useMeetingExtraction({
     quotationId: pipelineEnabled ? recoveredQuotationId : undefined,
     runId: pipelineEnabled ? recoveredRunId : undefined,
@@ -216,7 +226,9 @@ export function QuotationPromptView() {
   } | null>(null);
   const [generatedQuotationId, setGeneratedQuotationId] = useState<string | null>(null);
   const [progressMode, setProgressMode] = useState<ProgressMode>('advanced');
-  const [pipelineActive, setPipelineActive] = useState(Boolean(recoveredQuotationId && recoveredRunId));
+  const [pipelineActive, setPipelineActive] = useState(
+    Boolean(recoveredQuotationId && recoveredRunId)
+  );
   const [lastSubmittedPayload, setLastSubmittedPayload] = useState<GenerateQuotationPayload | null>(
     null
   );
@@ -247,11 +259,28 @@ export function QuotationPromptView() {
     if (!pipelineEnabled || !pipelineActive || !meetingExtraction.ids) return;
     const { quotationId, runId } = meetingExtraction.ids;
     if (queryQuotationId === quotationId && queryRunId === runId) return;
-    navigate({ search: `?quotationId=${encodeURIComponent(quotationId)}&runId=${encodeURIComponent(runId)}` }, { replace: true });
-  }, [meetingExtraction.ids, navigate, pipelineActive, pipelineEnabled, queryQuotationId, queryRunId]);
+    navigate(
+      {
+        search: `?quotationId=${encodeURIComponent(quotationId)}&runId=${encodeURIComponent(runId)}`,
+      },
+      { replace: true }
+    );
+  }, [
+    meetingExtraction.ids,
+    navigate,
+    pipelineActive,
+    pipelineEnabled,
+    queryQuotationId,
+    queryRunId,
+  ]);
 
   useEffect(() => {
-    if (!pipelineEnabled || meetingExtraction.status?.status !== 'completed' || !meetingExtraction.ids) return;
+    if (
+      !pipelineEnabled ||
+      meetingExtraction.status?.status !== 'completed' ||
+      !meetingExtraction.ids
+    )
+      return;
     clear();
     navigate(paths.dashboard.quotation.edit(meetingExtraction.ids.quotationId));
   }, [clear, meetingExtraction.ids, meetingExtraction.status?.status, navigate, pipelineEnabled]);
@@ -339,11 +368,16 @@ export function QuotationPromptView() {
           idempotencyKey: draft.idempotencyKey,
         });
         navigate(
-          { search: `?quotationId=${encodeURIComponent(started.quotation_id)}&runId=${encodeURIComponent(started.run_id)}` },
+          {
+            search: `?quotationId=${encodeURIComponent(started.quotation_id)}&runId=${encodeURIComponent(started.run_id)}`,
+          },
           { replace: true }
         );
       } catch {
-        setGenerationError({ code: 'INTERNAL_ERROR', message: 'Quotation belum dapat diproses. Coba lagi.' });
+        setGenerationError({
+          code: 'INTERNAL_ERROR',
+          message: 'Quotation belum dapat diproses. Coba lagi.',
+        });
       }
       return;
     }
@@ -398,7 +432,8 @@ export function QuotationPromptView() {
     navigate({ search: '' }, { replace: true });
   };
 
-  const pipelineStatus = meetingExtraction.status ??
+  const pipelineStatus =
+    meetingExtraction.status ??
     (meetingExtraction.ids
       ? pendingPipelineStatus(meetingExtraction.ids.quotationId, meetingExtraction.ids.runId)
       : null);
@@ -677,32 +712,34 @@ export function QuotationPromptView() {
             onRetry={() => void meetingExtraction.retry()}
             onStartNew={handlePipelineStartNew}
             onOpenEditor={() => {
-              if (meetingExtraction.ids) navigate(paths.dashboard.quotation.edit(meetingExtraction.ids.quotationId));
+              if (meetingExtraction.ids)
+                navigate(paths.dashboard.quotation.edit(meetingExtraction.ids.quotationId));
             }}
             isRetrying={meetingExtraction.isPolling}
           />
-          {pipelineStatus.status === 'failed' && pipelineStatus.error?.code === 'MEETING_NOTES_CHANGED' && (
-            <Button onClick={handlePipelineStartNew}>Buat ulang</Button>
-          )}
+          {pipelineStatus.status === 'failed' &&
+            pipelineStatus.error?.code === 'MEETING_NOTES_CHANGED' && (
+              <Button onClick={handlePipelineStartNew}>Buat ulang</Button>
+            )}
         </>
       ) : (
-      <GenerationProgressCard
-        open={isProgressOpen}
-        activeStageIndex={
-          progressMode === 'meeting'
-            ? meetingStageByPhase[promptMutation.phase]
-            : activeStageIndex
-        }
-        isError={Boolean(generationError)}
-        errorCode={generationError?.code}
-        errorMessage={generationError?.message}
-        quotationId={generatedQuotationId ?? promptMutation.quotationId}
-        stages={progressMode === 'meeting' ? MEETING_GENERATION_STAGES : GENERATION_STAGES}
-        showRetry={generationError?.code !== 'meeting_notes_no_business_signal'}
-        onRetry={progressMode === 'meeting' ? handleMeetingRetry : handleRetry}
-        onClose={() => setIsProgressOpen(false)}
-        onOpenEditor={(id) => navigate(paths.dashboard.quotation.edit(id))}
-      />
+        <GenerationProgressCard
+          open={isProgressOpen}
+          activeStageIndex={
+            progressMode === 'meeting'
+              ? meetingStageByPhase[promptMutation.phase]
+              : activeStageIndex
+          }
+          isError={Boolean(generationError)}
+          errorCode={generationError?.code}
+          errorMessage={generationError?.message}
+          quotationId={generatedQuotationId ?? promptMutation.quotationId}
+          stages={progressMode === 'meeting' ? MEETING_GENERATION_STAGES : GENERATION_STAGES}
+          showRetry={generationError?.code !== 'meeting_notes_no_business_signal'}
+          onRetry={progressMode === 'meeting' ? handleMeetingRetry : handleRetry}
+          onClose={() => setIsProgressOpen(false)}
+          onOpenEditor={(id) => navigate(paths.dashboard.quotation.edit(id))}
+        />
       )}
     </DashboardContent>
   );

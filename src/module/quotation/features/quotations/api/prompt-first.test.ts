@@ -18,9 +18,19 @@ describe('Prompt-first Quotation API', () => {
       quotation_id: '60000000-0000-0000-0000-000000000001',
       revision_id: '70000000-0000-0000-0000-000000000001',
       quotation_number: 'QUO-2026-0001',
-      content_html: '', content_version: 1, state_version: 1,
-      prompt_state: { schema_version: 'prompt_quotation_v1', scope: [], team: [], issues: [], readiness: 'incomplete' },
-      issues: [], readiness: 'incomplete', idempotent_replay: false,
+      content_html: '',
+      content_version: 1,
+      state_version: 1,
+      prompt_state: {
+        schema_version: 'prompt_quotation_v1',
+        scope: [],
+        team: [],
+        issues: [],
+        readiness: 'incomplete',
+      },
+      issues: [],
+      readiness: 'incomplete',
+      idempotent_replay: false,
     };
 
     expect(response.prompt_state).not.toHaveProperty('meeting_notes');
@@ -70,7 +80,9 @@ describe('Prompt-first Quotation API', () => {
     expect(postSpy.mock.calls[0][1]).not.toHaveProperty('client_name');
     expect(result).toEqual(mockResponse);
 
-    postSpy.mockResolvedValueOnce({ data: { data: { quotation_id: mockResponse.quotation_id } } } as any);
+    postSpy.mockResolvedValueOnce({
+      data: { data: { quotation_id: mockResponse.quotation_id } },
+    } as any);
     await processMeetingDraft(mockResponse.quotation_id, signal);
     expect(postSpy).toHaveBeenLastCalledWith(
       `/quotation/v1/quotations/${mockResponse.quotation_id}/process-meeting`,

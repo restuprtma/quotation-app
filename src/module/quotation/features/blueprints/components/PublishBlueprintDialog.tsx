@@ -71,7 +71,8 @@ export function PublishBlueprintDialog({
 
   const isPartial =
     completenessStatus === 'partial' ||
-    (completenessStatus !== 'complete' && (completenessStatus === 'incomplete' || hasIncompleteSection));
+    (completenessStatus !== 'complete' &&
+      (completenessStatus === 'incomplete' || hasIncompleteSection));
 
   const isPublishDisabled = Boolean(isSubmitting || (isPartial && !confirmPartial));
 
@@ -124,7 +125,12 @@ export function PublishBlueprintDialog({
                           ) : isFailed ? (
                             <Chip size="small" color="error" variant="soft" label="Gagal" />
                           ) : (
-                            <Chip size="small" color="warning" variant="soft" label="Belum Selesai" />
+                            <Chip
+                              size="small"
+                              color="warning"
+                              variant="soft"
+                              label="Belum Selesai"
+                            />
                           )}
                         </TableCell>
                       </TableRow>
@@ -153,7 +159,8 @@ export function PublishBlueprintDialog({
           {isPartial ? (
             <Stack spacing={1.5}>
               <Alert severity="warning">
-                Blueprint belum lengkap (status: Parsial). Beberapa section belum selesai atau memiliki warning.
+                Blueprint belum lengkap (status: Parsial). Beberapa section belum selesai atau
+                memiliki warning.
               </Alert>
               <FormControlLabel
                 control={
@@ -168,7 +175,8 @@ export function PublishBlueprintDialog({
             </Stack>
           ) : (
             <Alert severity="info">
-              Seluruh section telah lengkap dan tervalidasi. Dokumen blueprint yang dipublikasikan akan bersifat resmi dan immutable.
+              Seluruh section telah lengkap dan tervalidasi. Dokumen blueprint yang dipublikasikan
+              akan bersifat resmi dan immutable.
             </Alert>
           )}
         </Stack>

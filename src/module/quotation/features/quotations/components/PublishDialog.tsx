@@ -46,8 +46,8 @@ export function PublishDialog({
 
   const isPublishDisabled = Boolean(
     isSubmitting ||
-      (legalModified && !confirmLegalModified) ||
-      (commercialModified && !confirmCommercialModified)
+    (legalModified && !confirmLegalModified) ||
+    (commercialModified && !confirmCommercialModified)
   );
 
   const handlePublish = async () => {
@@ -89,7 +89,8 @@ export function PublishDialog({
           {commercialModified && (
             <Stack spacing={1}>
               <Alert severity="warning">
-                Perubahan komersial / harga manual terdeteksi. BA bertanggung jawab penuh atas perubahan harga ini.
+                Perubahan komersial / harga manual terdeteksi. BA bertanggung jawab penuh atas
+                perubahan harga ini.
               </Alert>
               <FormControlLabel
                 control={
@@ -106,7 +107,8 @@ export function PublishDialog({
 
           {!legalModified && !commercialModified && (
             <Alert severity="info">
-              Quotation yang dipublikasikan bersifat resmi dan immutable (tidak dapat diubah lagi). Perubahan selanjutnya harus melalui revisi baru.
+              Quotation yang dipublikasikan bersifat resmi dan immutable (tidak dapat diubah lagi).
+              Perubahan selanjutnya harus melalui revisi baru.
             </Alert>
           )}
         </Stack>

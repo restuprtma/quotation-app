@@ -88,9 +88,9 @@ describe('quotation-entry-state utils', () => {
         ...validState,
         meeting_notes: '',
       });
-      expect(JSON.parse(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY) || '{}')).not.toHaveProperty(
-        'meeting_notes'
-      );
+      expect(
+        JSON.parse(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY) || '{}')
+      ).not.toHaveProperty('meeting_notes');
     });
 
     it('sanitizes missing or non-string fields to empty strings while preserving valid version', () => {
@@ -135,9 +135,9 @@ describe('quotation-entry-state utils', () => {
         pic_name: 'Budi',
       });
       expect(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY)).not.toContain('Scope discussion');
-      expect(JSON.parse(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY) || '{}')).not.toHaveProperty(
-        'meeting_notes'
-      );
+      expect(
+        JSON.parse(mockStorage.getItem(QUOTATION_ENTRY_STORAGE_KEY) || '{}')
+      ).not.toHaveProperty('meeting_notes');
     });
 
     it('never serializes meeting_notes to storage even if notes contain sensitive keywords', () => {

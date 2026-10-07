@@ -51,13 +51,21 @@ describe('useMeetingExtraction', () => {
       etag: '"etag-1"',
     });
     vi.mocked(retryMeetingExtraction).mockResolvedValue({
-      quotation_id: 'q-1', run_id: 'r-1', status: 'queued', status_url: '/safe',
+      quotation_id: 'q-1',
+      run_id: 'r-1',
+      status: 'queued',
+      status_url: '/safe',
     });
     vi.mocked(startMeetingExtraction).mockResolvedValue({
-      quotation_id: 'q-2', run_id: 'r-2', status: 'queued', status_url: '/safe',
+      quotation_id: 'q-2',
+      run_id: 'r-2',
+      status: 'queued',
+      status_url: '/safe',
     });
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    wrapper = ({ children }) => <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    wrapper = ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
   });
 
   afterEach(() => {
@@ -70,15 +78,25 @@ describe('useMeetingExtraction', () => {
     renderHook(() => useMeetingExtraction({ quotationId: 'q-1', runId: 'r-1' }), { wrapper });
     await flushQuery();
     expect(getMeetingExtractionStatus).toHaveBeenCalledTimes(1);
-    await act(async () => { await vi.advanceTimersByTimeAsync(2_000); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2_000);
+    });
     expect(getMeetingExtractionStatus).toHaveBeenCalledTimes(2);
-    await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5_000);
+    });
     expect(getMeetingExtractionStatus).toHaveBeenCalledTimes(3);
     vi.mocked(getMeetingExtractionStatus).mockResolvedValueOnce({
-      notModified: false, data: status('completed'), etag: '"etag-2"',
+      notModified: false,
+      data: status('completed'),
+      etag: '"etag-2"',
     });
-    await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
-    await act(async () => { await vi.advanceTimersByTimeAsync(10_000); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5_000);
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10_000);
+    });
     expect(getMeetingExtractionStatus).toHaveBeenCalledTimes(4);
   });
 
@@ -86,11 +104,16 @@ describe('useMeetingExtraction', () => {
     Object.defineProperty(document, 'hidden', { configurable: true, value: true });
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });
     renderHook(() => useMeetingExtraction({ quotationId: 'q-1', runId: 'r-1' }), { wrapper });
-    await act(async () => { await vi.advanceTimersByTimeAsync(10_000); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10_000);
+    });
     expect(getMeetingExtractionStatus).not.toHaveBeenCalled();
     Object.defineProperty(document, 'hidden', { configurable: true, value: false });
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
-    act(() => { window.dispatchEvent(new Event('visibilitychange')); window.dispatchEvent(new Event('online')); });
+    act(() => {
+      window.dispatchEvent(new Event('visibilitychange'));
+      window.dispatchEvent(new Event('online'));
+    });
     await flushQuery();
     expect(getMeetingExtractionStatus).toHaveBeenCalledTimes(1);
   });
@@ -107,13 +130,20 @@ describe('useMeetingExtraction', () => {
     renderHook(() => useMeetingExtraction({ quotationId: 'q-1', runId: 'r-1' }), { wrapper });
     await flushQuery();
     expect(getMeetingExtractionStatus).toHaveBeenCalledWith('q-1', 'r-1', undefined);
-    await act(async () => { await vi.advanceTimersByTimeAsync(2_000); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2_000);
+    });
     expect(getMeetingExtractionStatus).toHaveBeenLastCalledWith('q-1', 'r-1', '"etag-1"');
   });
 
   it('uses the original quotation and run IDs for retry', async () => {
-    const { result } = renderHook(() => useMeetingExtraction({ quotationId: 'q-1', runId: 'r-1' }), { wrapper });
-    await act(async () => { await result.current.retry(); });
+    const { result } = renderHook(
+      () => useMeetingExtraction({ quotationId: 'q-1', runId: 'r-1' }),
+      { wrapper }
+    );
+    await act(async () => {
+      await result.current.retry();
+    });
     expect(retryMeetingExtraction).toHaveBeenCalledWith('q-1', 'r-1');
   });
 });

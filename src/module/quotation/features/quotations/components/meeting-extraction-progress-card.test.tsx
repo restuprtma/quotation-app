@@ -53,7 +53,12 @@ describe('MeetingExtractionProgressCard', () => {
         status={{
           ...status,
           status: 'waiting_rate_limit',
-          error: { code: 'AI_BUDGET_EXHAUSTED', message: 'provider raw', retryable: true, retry_after: 60 },
+          error: {
+            code: 'AI_BUDGET_EXHAUSTED',
+            message: 'provider raw',
+            retryable: true,
+            retry_after: 60,
+          },
         }}
         onRetry={retry}
       />

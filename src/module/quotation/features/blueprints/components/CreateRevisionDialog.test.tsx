@@ -2,10 +2,7 @@
 import { vi, it, expect, describe, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 
-import {
-  CreateRevisionDialog,
-  type QuotationRevisionSelectOption,
-} from './CreateRevisionDialog';
+import { CreateRevisionDialog, type QuotationRevisionSelectOption } from './CreateRevisionDialog';
 
 describe('CreateRevisionDialog', () => {
   afterEach(() => {
@@ -120,13 +117,7 @@ describe('CreateRevisionDialog', () => {
   it('calls onClose when Batal is clicked', () => {
     const handleClose = vi.fn();
 
-    render(
-      <CreateRevisionDialog
-        open
-        onClose={handleClose}
-        onCreateRevision={vi.fn()}
-      />
-    );
+    render(<CreateRevisionDialog open onClose={handleClose} onCreateRevision={vi.fn()} />);
 
     const cancelButton = screen.getByRole('button', { name: 'Batal' });
     fireEvent.click(cancelButton);

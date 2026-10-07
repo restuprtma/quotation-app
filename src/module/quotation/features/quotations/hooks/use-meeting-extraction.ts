@@ -111,7 +111,12 @@ export function useMeetingExtraction({ quotationId, runId }: UseMeetingExtractio
   });
 
   const startMutation = useMutation({
-    mutationFn: async ({ quotationId: durableQuotationId, meetingNotes, serviceScheme, idempotencyKey }: StartInput) =>
+    mutationFn: async ({
+      quotationId: durableQuotationId,
+      meetingNotes,
+      serviceScheme,
+      idempotencyKey,
+    }: StartInput) =>
       startMeetingExtraction(durableQuotationId, {
         meeting_notes: meetingNotes,
         service_scheme: serviceScheme,
@@ -147,9 +152,10 @@ export function useMeetingExtraction({ quotationId, runId }: UseMeetingExtractio
     setIds({ quotationId: nextQuotationId, runId: nextRunId });
   }, []);
 
-  const safeError = (query.error ?? startMutation.error ?? retryMutation.error ?? null) as
-    | MeetingExtractionSafeError
-    | null;
+  const safeError = (query.error ??
+    startMutation.error ??
+    retryMutation.error ??
+    null) as MeetingExtractionSafeError | null;
 
   return {
     start: startMutation.mutateAsync,

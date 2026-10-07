@@ -298,7 +298,10 @@ export function MeetingNotesForm({
                 </InputLabel>
                 <NativeSelect
                   {...field}
-                  inputProps={{ id: 'meeting-extraction-service-scheme', 'aria-label': 'Skema layanan' }}
+                  inputProps={{
+                    id: 'meeting-extraction-service-scheme',
+                    'aria-label': 'Skema layanan',
+                  }}
                 >
                   <option value="auto">Auto</option>
                   {MEETING_EXTRACTION_SCHEMES.map((scheme) => (

@@ -48,6 +48,9 @@ describe('meeting extraction API', () => {
 
     await retryMeetingExtraction('q-1', 'r-1');
 
-    expect(post).toHaveBeenCalledWith('/quotation/v1/quotations/q-1/meeting-extraction/r-1/retry', {});
+    expect(post).toHaveBeenCalledWith(
+      '/quotation/v1/quotations/q-1/meeting-extraction/r-1/retry',
+      {}
+    );
   });
 });

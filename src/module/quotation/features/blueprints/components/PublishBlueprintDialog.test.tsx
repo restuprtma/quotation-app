@@ -2,10 +2,7 @@
 import { vi, it, expect, describe, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 
-import {
-  PublishBlueprintDialog,
-  type SectionSummaryItem,
-} from './PublishBlueprintDialog';
+import { PublishBlueprintDialog, type SectionSummaryItem } from './PublishBlueprintDialog';
 
 describe('PublishBlueprintDialog', () => {
   afterEach(() => {
@@ -63,12 +60,8 @@ describe('PublishBlueprintDialog', () => {
       />
     );
 
-    expect(
-      screen.queryByText(/Saya mengonfirmasi publikasi blueprint parsial/i)
-    ).toBeNull();
-    expect(
-      screen.getByText(/Seluruh section telah lengkap dan tervalidasi/i)
-    ).toBeTruthy();
+    expect(screen.queryByText(/Saya mengonfirmasi publikasi blueprint parsial/i)).toBeNull();
+    expect(screen.getByText(/Seluruh section telah lengkap dan tervalidasi/i)).toBeTruthy();
 
     const publishButton = screen.getByRole('button', { name: 'Publikasikan' });
     expect((publishButton as HTMLButtonElement).disabled).toBe(false);
@@ -94,9 +87,7 @@ describe('PublishBlueprintDialog', () => {
       />
     );
 
-    expect(
-      screen.getByText(/Blueprint belum lengkap \(status: Parsial\)/i)
-    ).toBeTruthy();
+    expect(screen.getByText(/Blueprint belum lengkap \(status: Parsial\)/i)).toBeTruthy();
     expect(screen.getByText('WARN_ARCH_INCOMPLETE')).toBeTruthy();
 
     const publishButton = screen.getByRole('button', { name: 'Publikasikan' });

@@ -14,7 +14,7 @@ async function unwrap<T>(promise: Promise<{ data: ApiEnvelope<T> }>): Promise<T>
     const errorMsg =
       typeof response.data.errors === 'string'
         ? response.data.errors
-        : response.data.message ?? 'Request failed';
+        : (response.data.message ?? 'Request failed');
     throw new Error(errorMsg);
   }
   return response.data.data;
@@ -22,9 +22,7 @@ async function unwrap<T>(promise: Promise<{ data: ApiEnvelope<T> }>): Promise<T>
 
 export const publicQuotationApi = {
   getPublic: (token: string) =>
-    unwrap<PublicQuotation>(
-      axios.get(endpoints.quotation.public.get(token), withoutAuthRefresh())
-    ),
+    unwrap<PublicQuotation>(axios.get(endpoints.quotation.public.get(token), withoutAuthRefresh())),
 
   signPublic: (token: string, payload: SignPublicQuotationPayload) =>
     unwrap<PublicQuotation>(
