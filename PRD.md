@@ -1,91 +1,88 @@
-# Product Contract - Quotation & Contract Generator v2
+# Product Contract - Quotation & Contract Generator
 
 **Audience:** IT Business Analyst, Presales, Project Manager, and delivery team.  
-**Updated:** 2026-08-12
+**Updated:** 2026-10-07 (Phase 13 AI-First Canonical Architecture)
 
-This is the short product contract. Read the detail document only when the task requires it. Index: `docs/product/README.md`.
+---
 
-## Product
+## 1. Product Vision
 
-The app creates IT product/project quotations, uses AI as a structured writing assistant, renders three public documents, and later turns signed quotations into contracts.
+Aplikasi ini menghasilkan penawaran IT (Quotation) dan Blueprint teknis menggunakan AI sebagai co-pilot, memungkinkan kolaborasi drafting berbasis TipTap editor dan visual diagramming, menyediakan akses publik terproteksi, serta mengonversi quotation yang telah ditandatangani menjadi kontrak legal.
 
-Internal users authenticate with JWT. Clients use secret UUID artifact links without login.
+Pengguna internal terautentikasi melalui JWT multi-company. Klien dan programmer eksternal mengakses dokumen publik melalui cryptographic share token tanpa login.
 
-## Two Quotation Modes
+---
 
-### Product based
+## 2. Dua Core Domain
 
-Packages/modules/subscriptions. Lines support feature bullets, unit label, unit price, quantity/seat, billing period, setup fee, and recurring fee.
+### A. Quotation (AI-First & TipTap WYSIWYG)
 
-```text
-line_total = unit_price * quantity
-```
+Quotation mengadopsi model **Dedicated Squad / Man-Month** dengan tarif resmi perusahaan:
+- **Rate Cards**: Snapshot rate card resmi (National / International), tier Seniority (Junior, Intermediate, Senior, Lead), dan Term Type (Short-term < 3 bulan vs Long-term >= 3 bulan).
+- **Commercial Guardrails**: Total alokasi tim dibatasi oleh budget client. Client budget bersifat internal dan tidak pernah dicetak pada dokumen final quotation.
+- **TipTap Word-like Editor**: AI men-generate semantik HTML terstruktur yang menjadi canonical editing surface bagi BA. Editor mendukung format paragraf, heading, tabel, bullet lists, dan legal block.
+- **Legal Protection**: Block legal terms berstatus immutable secara default dengan indikator visual gembok. Pengeditan memerlukan konfirmasi unlock dan dicatat pada audit log (`legal_content_modified`).
+- **Commercial Table Protection**: Pengeditan baris/angka tabel komersial dicatat pada audit log (`commercial_content_modified`).
+- **Optimistic Locking**: Draft save menerapkan version check (`expected_version`). Jika versi stale, sistem mengembalikan `409 Conflict`.
 
-### Project based
+### B. Blueprint (Technical System Specification)
 
-Custom delivery/squad/phase pricing. Lines support phase, resource role, rate, employee count, duration, duration unit, and milestone.
+Blueprint mengadopsi model **Structured Visual Diagrams & Specifications**:
+- **5 Canonical Sections**:
+  1. `journey`: User journey map dan persona flow.
+  2. `architecture`: Diagram arsitektur sistem (C4 model / block components).
+  3. `state_machine`: Transisi status dan life-cycle entitas utama.
+  4. `workflow`: Alur proses bisnis dan swimlanes.
+  5. `wbs`: Work Breakdown Structure hierarkis beserta estimasi.
+- **Pipeline Generation**: AI menghasilkan blueprint section-by-section. Jika terjadi kegagalan pada salah satu section, section yang telah selesai tetap tersimpan dan BA dapat melakukan recovery manual atau continue pipeline.
+- **Visual Editors**: Editor diagram interaktif (React Flow / canvas nodes) dengan validasi struktural (pencegahan orphaned nodes dan cyclic dependencies).
+- **Publishing & Sharing**: Mendukung Full Publish atau Partial Publish (dengan banner status parsial).
 
-```text
-line_total = rate * employee_count * duration
-```
+---
 
-Fixed lines use `line_total = fixed_amount`. All money is integer Rupiah. The server recalculates totals.
+## 3. Public Document Surfaces
 
-Detailed fields: `docs/product/pricing-model.md`.
+Sistem menyediakan dua permukaan dokumen publik:
 
-## AI Rules
-
-AI is a co-pilot. It may draft narrative, scope, deliverables, product/project detail, blueprint, and pricing descriptions.
-
-AI must not decide or modify price, rate, quantity, employee count, duration, discount, tax, or total. AI returns versioned JSON, never executable HTML/CSS. Backend validates and sanitizes the bundle before saving. Provider keys are backend-only.
-
-Bundle keys:
-
-- `schema_version`
-- `narrative`
-- `product_or_project_detail`
-- `blueprint`
-- `pricing_labels`
-
-Detailed contract/provider rules: `docs/product/ai-contract.md`.
-
-## Public Artifacts
-
-One revision produces three independent public artifacts:
-
-| Artifact | URL | Purpose |
+| Surface | URL | Deskripsi & Aksesibilitas |
 |---|---|---|
-| Quotation | `/p/q/:artifact_token` | Pricing document and signature |
-| Blueprint | `/p/b/:artifact_token` | Journey, architecture, workflow/state, business rules |
-| Detail | `/p/d/:artifact_token` | Product detail or project detail |
+| **Client Quotation** | `/p/q/:public_token` | **Stable Link UUID**. Selalu menampilkan active published revision dari quotation. Dilengkapi digital signature canvas. Race-safe double-sign protection. |
+| **Programmer Blueprint** | `/p/blueprint/:token` | **Revision-Bound Link**. Mengakses snapshot spesifik dari blueprint revision yang di-share oleh BA. Data komersial, budget, rate card, dan client name sepenuhnya di-redact. |
 
-Each token is a server-generated UUID tied to one revision and artifact type. Only the quotation page has a signature canvas. Public DTOs never expose tenant ID, creator ID, raw AI response, internal notes, or signed IP.
+> **Catatan:** Rute legacy tiga artifak (`/p/b/:token` dan `/p/d/:token`) telah dihapus secara permanen.
 
-Detailed public rules: `docs/product/public-artifacts.md` and `docs/product/security-rules.md`.
+---
 
-## Blueprint
+## 4. Lifecycle & Revisions
 
-Blueprint is versioned JSON rendered by controlled components. It supports `journey`, `architecture`, `state_machine`, `workflow`, `timeline`, and `comparison` diagrams plus actors, rules, assumptions, edge cases, and outputs.
+### Quotation Lifecycle
+```text
+[AI Generator / Manual] -> Draft Rev 1 -> [TipTap Editing] -> Published Rev 1
+                                                                   │
+                                                ┌──────────────────┴──────────────────┐
+                                                ▼                                     ▼
+                                       Client Digital Signature                Branch to Draft Rev 2
+                                                │                                     │
+                                                ▼                                     ▼
+                                      Signed -> Ready for Contract             Published Rev 2
+                                                                               (Stable link updates automatically)
+```
 
-Detailed schema: `docs/product/blueprint-schema.md`.
+- Ketika Revision 2 berstatus draft, public stable link `/p/q/:token` tetap menampilkan Revision 1 yang sudah publish.
+- Ketika Revision 2 dipublish, public stable link otomatis menampilkan Revision 2 unsigned.
+- History signature dari Revision 1 tersimpan aman di database dan tidak terwariskan ke revisi baru.
 
-## Contract
+### Blueprint Lifecycle
+```text
+[Pipeline Queue] -> Section Drafts -> Visual Editing -> Publish (Complete/Partial) -> Generate Share Links -> Revoke Link
+```
 
-Only a quotation with status `signed` can create a contract. Lifecycle: `draft -> shared -> signed`. AI can draft wording, but users approve legal/commercial content.
+---
 
-Detailed contract rules: `docs/product/contract-generator.md`.
+## 5. Security & Isolation Principles
 
-## Security
-
-- Internal API: JWT plus tenant/company context.
-- Public API: UUID artifact token and artifact-type check.
-- Server calculates pricing.
-- Signature is bounded PNG data URL with server timestamp/IP and cannot be overwritten.
-- No raw AI HTML execution.
-- No API keys in frontend.
-
-## Source of Truth Rules
-
-- Use this file for general product decisions.
-- Use the linked detail file for task-specific schemas and contracts.
-- If code conflicts with this file, update the implementation or explicitly update the PRD before coding.
+1. **Multi-Tenant Isolation**: Seluruh kueri data internal terikat secara ketat pada `company_id` dari JWT token.
+2. **HTML UGC Sanitization**: Output AI dan input TipTap disanitasi menggunakan whitelist tag UGC yang ketat sebelum disimpan ke DB dan disajikan ke client.
+3. **Public Token Entropy**: Token share publik dibuat menggunakan CSPRNG (minimal 32 byte entropy) dan diverifikasi via SHA-256 hash lookup di backend. Raw token tidak pernah disimpan di database atau dicatat di log.
+4. **Programmer View Redaction**: Endpoint publik `/p/blueprint/:token` menggunakan DTO serializer terpisah yang secara ketat membuang seluruh field komersial, tarif, margin, nama klien, dan riwayat revisi.
+5. **No Secret in Frontend**: Kunci API provider AI hanya disimpan terenkripsi di backend; frontend hanya menampilkan key hint (4 karakter terakhir).

@@ -31,7 +31,7 @@ Config is read in [src/shared/config/index.ts](src/shared/config/index.ts):
 
 ## Architecture
 
-This is a focused Quotation & Contract Generator frontend built on the Minimals MUI foundation. Stack: Vite 7 + React 19 + React Router 7 + MUI v7 + Emotion + React Hook Form/Zod + Axios. No Redux / no SWR / no React Query; state is local + context.
+This is a focused Quotation & Contract Generator frontend built on the Minimals MUI foundation. Stack: Vite 7 + React 19 + React Router 7 + MUI v7 + Emotion + React Hook Form/Zod + Axios + TanStack Query (rate-cards & blueprint-sharing) + TipTap (Word-like editor) + React Flow (visual diagramming). State is local + context + TanStack Query for server cache.
 
 ### Path alias
 
@@ -42,8 +42,8 @@ Imports under `src/...` resolve via both the Vite alias ([vite.config.ts](vite.c
 Code is split into **domain modules** under [src/module/](src/module/):
 
 - [module/core/](src/module/core/) — cross-cutting: `auth`, `settings`, `error`
-- [module/quotation/](src/module/quotation/) — quotation, pricing, AI bundle, blueprint, and public artifacts
-- [module/contract/](src/module/contract/) — Contract Generator foundation and future contract feature
+- [module/quotation/](src/module/quotation/) — `quotations` (TipTap editor & revisions), `blueprints` (visual diagramming), `blueprint-sharing` (share links management), `rate-cards` (CRUD & cache), and `ai-settings`
+- [module/contract/](src/module/contract/) — Contract Generator foundation and contract feature
 
 Each `features/<feature>/` folder follows a consistent shape: `api/`, `components/`, `context/`, `guard/`, `hooks/`, `pages/`, `types/`, `views/`. `pages/` are the lazy-loaded route leaves; `views/` hold the page body component so pages stay thin. Stick to this layout when adding features.
 
@@ -86,7 +86,7 @@ Everything else lives in [src/shared/](src/shared/) (`api`, `config`, `constants
 - Request interceptor that attaches `Authorization: Bearer <access>`.
 - Response interceptor that, on `401`, calls a registered `refreshHandler` once (deduped via a shared `refreshPromise`) and retries the original request. Failed refresh fires `onUnauthorized` → `AuthProvider` clears tokens.
 - `configureAxiosAuth(...)` is called **once** from `AuthProvider` to wire the token getters and refresh handler — don't instantiate another axios client; extend this one.
-- `withoutAuthRefresh(config)` sets `_skipAuthRefresh: true` — use this for the refresh call itself or any request that must not trigger the refresh loop.
+- `withoutAuthRefresh(config)` sets `_skipAuthRefresh: true` — use this for the refresh call itself and all public endpoints (`/p/q/:token`, `/p/blueprint/:token`) to bypass the auth refresh interceptor.
 - Errors are normalized to a plain `Error` with `.status` and a message extracted from `response.data.errors || response.data.message`. Catch blocks should read `err.message` directly.
 - `fetcher(url | [url, config])` is a `GET`-and-unwrap helper (suitable for SWR-style hooks if added later).
 

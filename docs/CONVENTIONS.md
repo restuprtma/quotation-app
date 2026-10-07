@@ -7,7 +7,9 @@ Ringkasan aturan main. Detail per topik di [patterns/](patterns/).
 - Vite 7 + React 19 + React Router 7 (data router)
 - MUI v7 + Emotion, `sx` prop convention (bukan Tailwind)
 - React Hook Form + Zod (bukan Formik)
-- Axios shared instance (bukan fetch, SWR, React Query)
+- Axios shared instance + TanStack Query (untuk server-state caching di rate cards & blueprint sharing)
+- TipTap Rich Text Editor (Word-like WYSIWYG untuk Quotation HTML)
+- React Flow (Visual Diagramming untuk Blueprint sections)
 - Dayjs untuk date manipulation
 - `yarn` (v1) package manager, Node ≥22
 - **Tidak ada test runner** — jangan bikin `npm test`
@@ -15,7 +17,7 @@ Ringkasan aturan main. Detail per topik di [patterns/](patterns/).
 ## Module Layout
 
 ```
-src/module/{core|finance}/features/{feature-name}/
+src/module/{core|quotation|contract}/features/{feature-name}/
 ├── api/              # axios calls + unwrap<T> helper
 ├── components/       # UI components spesifik feature
 ├── hooks/            # custom hooks (state, cache, mutation)
@@ -352,21 +354,37 @@ Field yang cuma BE kirim di List (mis. `created_by_name`, denormalized joins) ti
 - ❌ `variant="text"` (default) untuk inline form add button — wajib `variant="outlined"` supaya visual weight konsisten dengan Simpan Draft
 - ❌ `variant="contained"` untuk list-top add button — wajib `variant="outlined" color="inherit"` (canonical fund-transfer)
 - ❌ `variant="contained"` untuk tombol **Edit** / **Delete** di `<DialogActions>` detail dialog — wajib `variant="outlined"` (Delete pakai `color="error"`). Edit di detail dialog bukan primary CTA; outlined match visual weight dengan pola transactional detail (fund-transfer, cash-transactions, journal-entry). Lihat [patterns/table.md § Row click](patterns/table.md#row-click--primary-interaction-wajib-konsisten)
-- ❌ Label `"Buat"` / `"Create"` pada tombol save form dialog master data — wajib `tCommon('actions.save')` = "Simpan" / "Save" untuk create **dan** edit. Pengecualian hanya untuk form dengan status workflow (fund-transfer / cash-transactions / journal-entry) yang punya split Save Draft + Save & Submit. Lihat [§ Save button label](#save-button-label--selalu-simpan--save-master-data--non-workflow-form)
+- ❌ Label `"Buat"` / `"Create"` pada tombol save form dialog master data — wajib `tCommon('actions.save')` = "Simpan" / "Save" untuk create **dan** edit. Pengecualian hanya untuk form dengan status workflow yang punya split Save Draft + Save & Submit. Lihat [§ Save button label](#save-button-label--selalu-simpan--save-master-data--non-workflow-form)
+
+### TipTap Rich Text Editor (Quotation HTML)
+
+- **Semantic HTML**: TipTap mengelola konten quotation dalam format HTML terstruktur (paragraf, heading, tabel, bullet lists).
+- **Legal Terms Protection**: Blok hukum terkunci secara default. Perubahan membutuhkan dialog konfirmasi unlock dan menandai audit flag `legal_content_modified`.
+- **Optimistic Locking**: Setiap penyimpanan draft menyertakan `expected_version`. Tangani error status `409` dengan menyajikan opsi perbandingan atau refresh tanpa menimpa data pengguna lain secara paksa.
+- **UGC Sanitization**: Semua input HTML disanitasi menggunakan aturan UGC yang ketat sebelum dikirim ke backend atau dirender di client.
+
+### Visual Diagramming (React Flow for Blueprints)
+
+- **Controlled Nodes & Edges**: Komponen visual blueprint mengelola state diagram menggunakan node terstruktur.
+- **Validation Rules**: Hubungan antar node (edges) divalidasi untuk mencegah orphaned nodes atau relasi siklis (*cyclic dependencies*) yang merusak alur proses.
+- **Auto-layout Support**: Diagram mendukung penataan otomatis (Dagre / layout helpers) dengan kemampuan drag-and-drop manual yang presisi.
+
+### TanStack Query & Server State
+
+- Digunakan untuk entity data yang membutuhkan caching dan sinkronisasi otomatis, seperti `rate-cards` dan `blueprint-sharing`.
+- Invalidate query key yang sesuai setiap kali mutasi (create/edit/delete/revoke) berhasil dilakukan.
+
+### Axios `withoutAuthRefresh()` untuk Public Routes
+
+- Semua panggilan ke endpoint publik (`/p/q/:token`, `/p/blueprint/:token`) wajib menggunakan helper `withoutAuthRefresh(config)` agar tidak memicu interceptor auth refresh atau menyertakan Bearer token kadaluarsa.
 
 ## Canonical Reference
 
-Template yang paling lengkap untuk dicontek:
+Template referensi utama yang aktif:
 
-**[src/module/finance/features/fund-transfer/](../src/module/finance/features/fund-transfer/)**
+- **Quotation Editor & Revisions:** [src/module/quotation/features/quotations/](../src/module/quotation/features/quotations/)
+- **Master Rate Cards (TanStack Query + CRUD):** [src/module/quotation/features/rate-cards/](../src/module/quotation/features/rate-cards/)
+- **Blueprint Sharing Links:** [src/module/quotation/features/blueprint-sharing/](../src/module/quotation/features/blueprint-sharing/)
+- **Public Client Quotation:** [src/module/quotation/features/quotations/pages/public-quotation.tsx](../src/module/quotation/features/quotations/pages/public-quotation.tsx)
+- **Public Programmer Blueprint:** [src/module/quotation/features/blueprints/pages/public-blueprint.tsx](../src/module/quotation/features/blueprints/pages/public-blueprint.tsx)
 
-Feature ini punya:
-
-- CRUD + approval + audit log + attachments
-- Multi-currency support
-- Status workflow
-- Dialog UX (create/edit/view)
-- Row action menu
-- Tabs pattern di detail dialog
-
-Saat bikin feature baru, mulai dari struktur fund-transfer, copy, lalu sesuaikan.
