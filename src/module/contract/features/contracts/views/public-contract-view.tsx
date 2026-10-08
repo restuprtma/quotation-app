@@ -126,9 +126,9 @@ export function PublicContractView({ token }: { token: string }) {
           <Box
             sx={{
               border: '1px solid',
-              borderColor: 'divider',
+              borderColor: '#cbd5e1',
               borderRadius: 1,
-              bgcolor: 'background.neutral',
+              bgcolor: '#ffffff',
             }}
           >
             <SignaturePad

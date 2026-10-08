@@ -100,9 +100,9 @@ export function SignatureCanvas({ disabled = false, onChange, sx }: Props) {
             height: { xs: 170, sm: 210 },
             overflow: 'hidden',
             border: '1px dashed',
-            borderColor: 'divider',
+            borderColor: '#cbd5e1',
             borderRadius: 1.5,
-            bgcolor: 'background.paper',
+            bgcolor: '#ffffff',
           }}
         >
           <Typography
