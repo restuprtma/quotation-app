@@ -1,7 +1,9 @@
 import type { Quotation } from '../types';
 
+import { toast } from 'sonner';
 import { useState } from 'react';
 
+import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import MenuList from '@mui/material/MenuList';
 import TableRow from '@mui/material/TableRow';
@@ -9,12 +11,14 @@ import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 
+import { paths } from 'src/routes/paths';
+
 import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
 import { CustomPopover } from 'src/shared/ui/custom-popover';
 
-import { formatDate, formatCurrency, formatCommercialScheme } from '../utils/format';
 import { QuotationStatusLabel } from './quotation-status-label';
+import { formatDate, formatCurrency, formatCommercialScheme } from '../utils/format';
 
 type Props = {
   row: Quotation;
@@ -37,6 +41,31 @@ export function QuotationTableRow({ row, onView, onEdit }: Props) {
   const picName = row.pic_name?.trim();
   const primaryClient = clientName || picName || '—';
   const showPicSubtitle = !!(clientName && picName && clientName !== picName);
+
+  const isPublicAvailable =
+    (row.status === 'published' || row.status === 'signed') && Boolean(row.public_token);
+  const publicUrl = isPublicAvailable
+    ? `${window.location.origin}${paths.public.quotation(row.public_token)}`
+    : '';
+
+  const handleCopyLink = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+    closeMenu();
+    if (!publicUrl) return;
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      toast.success(t('editor.publicLinkCopied') || 'Link berhasil disalin!');
+    } catch {
+      toast.error(t('editor.copyFailed') || 'Gagal menyalin link');
+    }
+  };
+
+  const handleOpenLink = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    closeMenu();
+    if (!publicUrl) return;
+    window.open(publicUrl, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <>
@@ -80,6 +109,19 @@ export function QuotationTableRow({ row, onView, onEdit }: Props) {
           </Typography>
         </TableCell>
         <TableCell align="right" onClick={(event) => event.stopPropagation()}>
+          {isPublicAvailable && (
+            <Tooltip title={t('rowActions.copyPublicLink') || 'Salin Link Publik'}>
+              <IconButton
+                data-testid="copy-public-link-btn"
+                aria-label="copy-public-link"
+                color="primary"
+                onClick={handleCopyLink}
+              >
+                <Iconify icon="eva:link-2-fill" />
+              </IconButton>
+            </Tooltip>
+          )}
+
           <IconButton
             aria-label={t('table.actions')}
             onClick={(event) => setAnchorEl(event.currentTarget)}
@@ -109,6 +151,20 @@ export function QuotationTableRow({ row, onView, onEdit }: Props) {
             <Iconify icon="solar:pen-bold" />
             {t('rowActions.edit')}
           </MenuItem>
+
+          {isPublicAvailable && (
+            <MenuItem onClick={handleCopyLink}>
+              <Iconify icon="eva:link-2-fill" />
+              {t('rowActions.copyPublicLink') || 'Salin Link Publik'}
+            </MenuItem>
+          )}
+
+          {isPublicAvailable && (
+            <MenuItem onClick={handleOpenLink}>
+              <Iconify icon="eva:external-link-fill" />
+              {t('rowActions.openPublicLink') || 'Buka Link Publik'}
+            </MenuItem>
+          )}
         </MenuList>
       </CustomPopover>
     </>
