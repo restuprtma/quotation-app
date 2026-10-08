@@ -13,7 +13,7 @@ import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
 import { CustomPopover } from 'src/shared/ui/custom-popover';
 
-import { formatDate, formatCurrency } from '../utils/format';
+import { formatDate, formatCurrency, formatCommercialScheme } from '../utils/format';
 import { QuotationStatusLabel } from './quotation-status-label';
 
 type Props = {
@@ -27,30 +27,44 @@ export function QuotationTableRow({ row, onView, onEdit }: Props) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const closeMenu = () => setAnchorEl(null);
 
-  const rawBudget = row.budget_maximum ?? row.revision?.budget;
-  const budget = typeof rawBudget === 'number' && !Number.isNaN(rawBudget) ? rawBudget : null;
-  const displayBudget = budget !== null ? formatCurrency(budget) : '—';
+  const rawAmount = row.total_investment ?? row.budget_maximum ?? row.revision?.budget;
+  const amount = typeof rawAmount === 'number' && !Number.isNaN(rawAmount) && rawAmount > 0
+    ? rawAmount
+    : null;
+  const displayInvestment = amount !== null ? formatCurrency(amount) : '—';
+
+  const clientName = row.client_name?.trim();
+  const picName = row.pic_name?.trim();
+  const primaryClient = clientName || picName || '—';
+  const showPicSubtitle = !!(clientName && picName && clientName !== picName);
 
   return (
     <>
       <TableRow hover sx={{ cursor: 'pointer' }} onClick={() => onView(row.id)}>
         <TableCell>
-          <Typography variant="body2" noWrap>
+          <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
             {row.quotation_number}
           </Typography>
         </TableCell>
         <TableCell>
-          <Typography variant="body2" noWrap>
-            {row.client_name ?? row.client_id}
+          <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>
+            {primaryClient}
           </Typography>
+          {showPicSubtitle && (
+            <Typography variant="caption" color="text.secondary" noWrap display="block">
+              {picName}
+            </Typography>
+          )}
         </TableCell>
         <TableCell>
           <Typography variant="body2" noWrap>
-            {displayBudget}
+            {displayInvestment}
           </Typography>
         </TableCell>
         <TableCell>
-          <Typography variant="body2">{t(`projectTypes.${row.solution_type}`)}</Typography>
+          <Typography variant="body2">
+            {formatCommercialScheme(row.commercial_scheme, row.solution_type, t)}
+          </Typography>
         </TableCell>
         <TableCell>
           <QuotationStatusLabel status={row.status} />

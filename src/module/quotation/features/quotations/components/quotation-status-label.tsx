@@ -12,7 +12,11 @@ type Props = Omit<ChipProps, 'color' | 'label'> & { status: QuotationStatus };
 export function QuotationStatusLabel({ status, ...other }: Props) {
   const { t } = useTranslate('quotation');
 
+  const key = `statuses.${status}`;
+  const label = t(key);
+  const displayLabel = label !== key ? label : status;
+
   return (
-    <Chip size="small" color={statusColor(status)} label={t(`statuses.${status}`)} {...other} />
+    <Chip size="small" color={statusColor(status)} label={displayLabel} {...other} />
   );
 }
