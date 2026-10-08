@@ -35,7 +35,7 @@ import {
 import { useQuotationList } from '../hooks/use-quotation-list';
 import { QuotationTableRow } from '../components/quotation-table-row';
 
-const STATUSES: QuotationStatus[] = ['draft', 'shared', 'signed', 'contract_created'];
+const STATUSES: QuotationStatus[] = ['draft', 'published', 'signed', 'failed', 'queued'];
 
 export function QuotationListView() {
   const { t } = useTranslate('quotation');
