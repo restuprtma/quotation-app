@@ -20,10 +20,10 @@
   "table": {
     "number": "Nomor",
     "client": "Nama Klien",
-    "budget": "Budget",
-    "projectType": "Tipe Proyek",
+    "budget": "Total Investasi",
+    "projectType": "Tipe Layanan",
     "status": "Status",
-    "createdAt": "Tanggal Buat",
+    "createdAt": "Tanggal Dibuat",
     "revision": "Revisi",
     "revisionValue": "Rev {{number}}",
     "actions": "Aksi"
@@ -35,9 +35,24 @@
   },
   "statuses": {
     "draft": "Draft",
-    "shared": "Dibagikan",
+    "published": "Dipublikasikan",
     "signed": "Ditandatangani",
+    "failed": "Gagal",
+    "queued": "Dalam antrean",
+    "shared": "Dibagikan",
     "contract_created": "Kontrak dibuat"
+  },
+  "commercialSchemes": {
+    "dedicated_squad": "Dedicated Squad",
+    "custom_development": "Custom Software",
+    "custom_software": "Custom Software",
+    "subscription_saas": "Langganan Software / SaaS",
+    "white_label": "Produk White Label",
+    "standalone_maintenance": "Maintenance & Support",
+    "cloud_infrastructure": "Infrastruktur Cloud",
+    "hardware_system_integration": "Integrasi Perangkat & Sistem",
+    "kiosk_queue_system": "Sistem Kiosk & Antrean",
+    "talent_outsourcing": "Talent Outsourcing"
   },
   "projectTypes": {
     "product_based": "Product Based",

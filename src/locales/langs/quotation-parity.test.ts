@@ -28,3 +28,25 @@ describe('locale parity', () => {
     expect(flattenKeys(idNavigation).sort()).toEqual(flattenKeys(enNavigation).sort());
   });
 });
+
+describe('Quotation Status & Scheme Translations Parity', () => {
+  it('contains published, failed, and queued in statuses for both en and id', () => {
+    expect((enQuotation.statuses as Record<string, string>).published).toBe('Published');
+    expect((idQuotation.statuses as Record<string, string>).published).toBe('Dipublikasikan');
+
+    expect((enQuotation.statuses as Record<string, string>).failed).toBe('Failed');
+    expect((idQuotation.statuses as Record<string, string>).failed).toBe('Gagal');
+
+    expect((enQuotation.statuses as Record<string, string>).queued).toBe('Queued');
+    expect((idQuotation.statuses as Record<string, string>).queued).toBe('Dalam antrean');
+  });
+
+  it('contains commercialSchemes for all active schemes', () => {
+    expect((enQuotation.commercialSchemes as Record<string, string>).dedicated_squad).toBe('Dedicated Squad');
+    expect((idQuotation.commercialSchemes as Record<string, string>).dedicated_squad).toBe('Dedicated Squad');
+
+    expect((enQuotation.commercialSchemes as Record<string, string>).custom_development).toBe('Custom Software');
+    expect((idQuotation.commercialSchemes as Record<string, string>).custom_development).toBe('Custom Software');
+  });
+});
+

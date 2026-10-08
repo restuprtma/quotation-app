@@ -20,7 +20,7 @@
   "table": {
     "number": "Number",
     "client": "Client Name",
-    "budget": "Budget",
+    "budget": "Investment",
     "projectType": "Project Type",
     "status": "Status",
     "createdAt": "Created Date",
@@ -35,9 +35,24 @@
   },
   "statuses": {
     "draft": "Draft",
-    "shared": "Shared",
+    "published": "Published",
     "signed": "Signed",
+    "failed": "Failed",
+    "queued": "Queued",
+    "shared": "Shared",
     "contract_created": "Contract created"
+  },
+  "commercialSchemes": {
+    "dedicated_squad": "Dedicated Squad",
+    "custom_development": "Custom Software",
+    "custom_software": "Custom Software",
+    "subscription_saas": "Software Subscription / SaaS",
+    "white_label": "White Label Product",
+    "standalone_maintenance": "Maintenance & Support",
+    "cloud_infrastructure": "Cloud Infrastructure",
+    "hardware_system_integration": "Hardware & Integration",
+    "kiosk_queue_system": "Kiosk & Queue System",
+    "talent_outsourcing": "Talent Outsourcing"
   },
   "projectTypes": {
     "product_based": "Product Based",

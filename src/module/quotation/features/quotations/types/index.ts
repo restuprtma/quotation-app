@@ -1,4 +1,11 @@
-export type QuotationStatus = 'draft' | 'shared' | 'signed' | 'contract_created';
+export type QuotationStatus =
+  | 'draft'
+  | 'published'
+  | 'signed'
+  | 'queued'
+  | 'failed'
+  | 'shared'
+  | 'contract_created';
 
 export type ProjectType = 'product_based' | 'project_based';
 
@@ -22,13 +29,16 @@ export type Quotation = {
   company_id?: string;
   client_id: string;
   client_name?: string | null;
+  pic_name?: string | null;
   quotation_number: string;
   solution_type: string;
+  commercial_scheme?: string | null;
   status: QuotationStatus;
   current_revision: number;
   created_at: string;
   updated_at: string;
   budget_maximum?: number | null;
+  total_investment?: number | null;
   revision?: QuotationRevision | null;
 };
 
