@@ -6,6 +6,8 @@ import { lazy, Suspense } from 'react';
 import { SimpleLayout } from 'src/layouts/simple';
 import { LoadingScreen } from 'src/shared/ui/loading-screen';
 
+import { PublicThemeScope } from '../components/public-theme-scope';
+
 const ContractPublicPage = lazy(
   () => import('src/module/contract/features/contracts/pages/public')
 );
@@ -20,16 +22,18 @@ export const publicRoutes: RouteObject[] = [
   {
     path: 'p',
     element: (
-      <SimpleLayout
-        slotProps={{
-          header: { sx: { display: 'none' } },
-          main: { sx: { bgcolor: 'background.neutral' } },
-        }}
-      >
-        <Suspense fallback={<LoadingScreen />}>
-          <Outlet />
-        </Suspense>
-      </SimpleLayout>
+      <PublicThemeScope>
+        <SimpleLayout
+          slotProps={{
+            header: { sx: { display: 'none' } },
+            main: { sx: { bgcolor: 'background.neutral' } },
+          }}
+        >
+          <Suspense fallback={<LoadingScreen />}>
+            <Outlet />
+          </Suspense>
+        </SimpleLayout>
+      </PublicThemeScope>
     ),
     children: [
       { path: 'c/:token', element: <ContractPublicPage /> },
