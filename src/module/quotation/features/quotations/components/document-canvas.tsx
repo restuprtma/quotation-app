@@ -26,10 +26,15 @@ export function DocumentCanvas({ children }: Props) {
         overflow: 'hidden',
         border: 1,
         borderColor: 'divider',
-        bgcolor: 'background.paper',
+        bgcolor: '#ffffff !important',
+        color: '#202124 !important',
         width: '100%',
         maxWidth: '210mm',
         mx: 'auto',
+        boxShadow: (theme) =>
+          theme.palette.mode === 'dark'
+            ? '0 0 24px rgba(0, 0, 0, 0.45)'
+            : theme.customShadows?.card,
       }}
     >
       <Box
