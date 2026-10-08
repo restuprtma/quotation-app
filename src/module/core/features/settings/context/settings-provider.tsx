@@ -5,6 +5,8 @@ import { useLocalStorage } from 'minimal-shared/hooks';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { getStorage as getStorageValue } from 'minimal-shared/utils';
 
+import { themeConfig } from 'src/theme/theme-config';
+
 import { SettingsContext } from './settings-context';
 import { SETTINGS_STORAGE_KEY } from '../settings-config';
 
@@ -43,11 +45,21 @@ export function SettingsProvider({
     if (storedValue) {
       try {
         if (!storedValue.version || storedValue.version !== defaultSettings.version) {
+          try {
+            localStorage.removeItem(themeConfig.modeStorageKey);
+          } catch {
+            // Ignore storage access errors in private/restricted environments
+          }
           onReset();
         } else if (storedValue.navLayout === 'horizontal') {
           setField('navLayout', 'vertical');
         }
       } catch {
+        try {
+          localStorage.removeItem(themeConfig.modeStorageKey);
+        } catch {
+          // Ignore
+        }
         onReset();
       }
     }
