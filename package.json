@@ -1,7 +1,7 @@
 {
   "name": "tuai-fe",
   "author": "Tuai",
-  "version": "7.6.1",
+  "version": "7.6.2",
   "description": "Vite Starter & TypeScript",
   "private": true,
   "type": "module",
