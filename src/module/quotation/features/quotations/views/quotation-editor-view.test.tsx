@@ -369,4 +369,72 @@ describe('QuotationEditorView', () => {
       })
     ).toBeNull();
   });
+
+  it('enforces read-only guard and renders public link buttons when quotation status is signed', async () => {
+    quotationDetail.status = 'signed';
+    (quotationDetail as any).public_token = 'pub-token-signed-123';
+
+    render(
+      <MemoryRouter>
+        <QuotationEditorView id="quotation-1" />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('read_only_notice')).toBeTruthy());
+
+    // QuotationEditor receives disabled=true
+    expect(mockQuotationEditor).toHaveBeenCalledWith(expect.objectContaining({ disabled: true }));
+
+    // Save Draft button is disabled
+    const saveDraftBtn = screen.getByRole('button', { name: /editor\.saveDraft/i });
+    expect((saveDraftBtn as HTMLButtonElement).disabled).toBe(true);
+
+    // Public link buttons are displayed
+    expect(
+      screen.getByRole('button', {
+        name: /Salin Link Publik|Copy Public Link|editor\.copyPublicLink/i,
+      })
+    ).toBeDefined();
+    expect(
+      screen.getByRole('button', {
+        name: /Buka Link Publik|Open Public Link|editor\.openPublicLink/i,
+      })
+    ).toBeDefined();
+  });
+
+  it('shows error toast when copying public link fails', async () => {
+    quotationDetail.status = 'published';
+    (quotationDetail as any).public_token = 'pub-token-abc-123';
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: vi.fn().mockRejectedValue(new Error('Permission denied')),
+      },
+      configurable: true,
+      writable: true,
+    });
+
+    render(
+      <MemoryRouter>
+        <QuotationEditorView id="quotation-1" />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', {
+          name: /Salin Link Publik|Copy Public Link|editor\.copyPublicLink/i,
+        })
+      ).toBeDefined();
+    });
+
+    const copyBtn = screen.getByRole('button', {
+      name: /Salin Link Publik|Copy Public Link|editor\.copyPublicLink/i,
+    });
+    fireEvent.click(copyBtn);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('editor.copyFailed');
+    });
+  });
 });

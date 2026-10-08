@@ -1103,6 +1103,7 @@
     "copyPublicLink": "Salin Link Publik",
     "openPublicLink": "Buka Link Publik",
     "publicLinkCopied": "Link publik berhasil disalin ke clipboard!",
+    "copyFailed": "Gagal menyalin link",
     "publicLink": "Link Publik",
     "backToPrompt": "Kembali ke Form Prompt",
     "saveDraft": "Simpan Draf",

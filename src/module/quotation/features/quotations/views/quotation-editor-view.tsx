@@ -221,6 +221,7 @@ export function QuotationEditorView({ id = '' }: Props) {
 
   const isReadOnly = Boolean(
     data?.status === 'published' ||
+    data?.status === 'signed' ||
     (data as any)?.publication_status === 'published' ||
     (data as any)?.publication_status === 'superseded'
   );
@@ -520,7 +521,7 @@ export function QuotationEditorView({ id = '' }: Props) {
       await navigator.clipboard.writeText(publicUrl);
       toast.success(t('editor.publicLinkCopied'));
     } catch {
-      toast.error('Gagal menyalin link');
+      toast.error(t('editor.copyFailed', 'Gagal menyalin link'));
     }
   };
 

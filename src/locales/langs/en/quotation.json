@@ -1103,6 +1103,7 @@
     "copyPublicLink": "Copy Public Link",
     "openPublicLink": "Open Public Link",
     "publicLinkCopied": "Public link copied to clipboard!",
+    "copyFailed": "Failed to copy link",
     "publicLink": "Public Link",
     "backToPrompt": "Back to Prompt",
     "saveDraft": "Save Draft",
