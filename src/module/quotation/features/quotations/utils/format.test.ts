@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { formatCurrency, formatCommercialScheme, statusColor } from './format';
+import { describe, expect, it } from 'vitest';
+
+import { formatCommercialScheme, formatCurrency, statusColor } from './format';
 
 describe('Quotation Formatters', () => {
   describe('formatCurrency', () => {
