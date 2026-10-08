@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { it, expect, describe } from 'vitest';
 
-import { formatCommercialScheme, formatCurrency, statusColor } from './format';
+import { statusColor, formatCurrency, formatCommercialScheme } from './format';
 
 describe('Quotation Formatters', () => {
   describe('formatCurrency', () => {
@@ -28,7 +28,9 @@ describe('Quotation Formatters', () => {
     };
 
     it('translates known commercial scheme', () => {
-      expect(formatCommercialScheme('dedicated_squad', 'custom_software', mockT)).toBe('Dedicated Squad');
+      expect(formatCommercialScheme('dedicated_squad', 'custom_software', mockT)).toBe(
+        'Dedicated Squad'
+      );
     });
 
     it('translates known project type when scheme is missing', () => {

@@ -69,9 +69,10 @@ describe('QuotationTableRow & List Navigation Specification', () => {
       revision?: { budget: number } | null;
     }) {
       const rawAmount = row.total_investment ?? row.budget_maximum ?? row.revision?.budget;
-      const amount = typeof rawAmount === 'number' && !Number.isNaN(rawAmount) && rawAmount > 0
-        ? rawAmount
-        : null;
+      const amount =
+        typeof rawAmount === 'number' && !Number.isNaN(rawAmount) && rawAmount > 0
+          ? rawAmount
+          : null;
       return amount !== null ? formatCurrency(amount) : '—';
     }
 
@@ -84,7 +85,10 @@ describe('QuotationTableRow & List Navigation Specification', () => {
     }
 
     it('prefers total_investment over budget_maximum', () => {
-      const res = resolveDisplayInvestment({ total_investment: 120000000, budget_maximum: 150000000 });
+      const res = resolveDisplayInvestment({
+        total_investment: 120000000,
+        budget_maximum: 150000000,
+      });
       expect(res).toMatch(/120\.000\.000/);
     });
 
@@ -123,4 +127,3 @@ describe('QuotationTableRow & List Navigation Specification', () => {
     });
   });
 });
-

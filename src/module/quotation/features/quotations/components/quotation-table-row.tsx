@@ -32,9 +32,8 @@ export function QuotationTableRow({ row, onView, onEdit }: Props) {
   const closeMenu = () => setAnchorEl(null);
 
   const rawAmount = row.total_investment ?? row.budget_maximum ?? row.revision?.budget;
-  const amount = typeof rawAmount === 'number' && !Number.isNaN(rawAmount) && rawAmount > 0
-    ? rawAmount
-    : null;
+  const amount =
+    typeof rawAmount === 'number' && !Number.isNaN(rawAmount) && rawAmount > 0 ? rawAmount : null;
   const displayInvestment = amount !== null ? formatCurrency(amount) : '—';
 
   const clientName = row.client_name?.trim();

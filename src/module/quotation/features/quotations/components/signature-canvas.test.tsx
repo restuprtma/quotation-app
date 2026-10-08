@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { it, vi, expect, describe, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
+
 import { SignatureCanvas } from './signature-canvas';
 
 vi.mock('src/locales', () => ({
@@ -10,7 +11,6 @@ vi.mock('src/locales', () => ({
 }));
 
 afterEach(cleanup);
-
 
 describe('SignatureCanvas', () => {
   it('renders canvas with accessible role and aria-label', () => {
@@ -28,4 +28,3 @@ describe('SignatureCanvas', () => {
     expect(computed.borderColor).toBe('#cbd5e1');
   });
 });
-

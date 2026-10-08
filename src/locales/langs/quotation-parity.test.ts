@@ -42,11 +42,18 @@ describe('Quotation Status & Scheme Translations Parity', () => {
   });
 
   it('contains commercialSchemes for all active schemes', () => {
-    expect((enQuotation.commercialSchemes as Record<string, string>).dedicated_squad).toBe('Dedicated Squad');
-    expect((idQuotation.commercialSchemes as Record<string, string>).dedicated_squad).toBe('Dedicated Squad');
+    expect((enQuotation.commercialSchemes as Record<string, string>).dedicated_squad).toBe(
+      'Dedicated Squad'
+    );
+    expect((idQuotation.commercialSchemes as Record<string, string>).dedicated_squad).toBe(
+      'Dedicated Squad'
+    );
 
-    expect((enQuotation.commercialSchemes as Record<string, string>).custom_development).toBe('Custom Software');
-    expect((idQuotation.commercialSchemes as Record<string, string>).custom_development).toBe('Custom Software');
+    expect((enQuotation.commercialSchemes as Record<string, string>).custom_development).toBe(
+      'Custom Software'
+    );
+    expect((idQuotation.commercialSchemes as Record<string, string>).custom_development).toBe(
+      'Custom Software'
+    );
   });
 });
-

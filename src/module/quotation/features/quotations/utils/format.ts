@@ -52,7 +52,9 @@ export function formatCommercialScheme(
   return toTitleCase(raw);
 }
 
-export function statusColor(status: QuotationStatus): 'default' | 'info' | 'success' | 'warning' | 'error' {
+export function statusColor(
+  status: QuotationStatus
+): 'default' | 'info' | 'success' | 'warning' | 'error' {
   switch (status) {
     case 'published':
       return 'info';

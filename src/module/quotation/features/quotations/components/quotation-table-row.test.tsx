@@ -86,7 +86,9 @@ describe('QuotationTableRow', () => {
 
     expect(writeTextMock).toHaveBeenCalledWith(expect.stringContaining('/p/q/token-uuid-1234'));
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('editor.publicLinkCopied'));
+      expect(toast.success).toHaveBeenCalledWith(
+        expect.stringContaining('editor.publicLinkCopied')
+      );
     });
     expect(onViewMock).not.toHaveBeenCalled();
   });

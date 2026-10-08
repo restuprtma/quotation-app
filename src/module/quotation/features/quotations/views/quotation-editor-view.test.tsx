@@ -326,9 +326,7 @@ describe('QuotationEditorView', () => {
     fireEvent.click(copyBtn);
 
     await waitFor(() => {
-      expect(writeTextMock).toHaveBeenCalledWith(
-        `${window.location.origin}/p/q/pub-token-abc-123`
-      );
+      expect(writeTextMock).toHaveBeenCalledWith(`${window.location.origin}/p/q/pub-token-abc-123`);
       expect(toast.success).toHaveBeenCalledWith('editor.publicLinkCopied');
     });
 

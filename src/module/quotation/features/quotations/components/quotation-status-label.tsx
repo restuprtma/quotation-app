@@ -16,7 +16,5 @@ export function QuotationStatusLabel({ status, ...other }: Props) {
   const label = t(key);
   const displayLabel = label !== key ? label : status;
 
-  return (
-    <Chip size="small" color={statusColor(status)} label={displayLabel} {...other} />
-  );
+  return <Chip size="small" color={statusColor(status)} label={displayLabel} {...other} />;
 }

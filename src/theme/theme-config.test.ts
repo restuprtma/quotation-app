@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { it, expect, describe } from 'vitest';
+
 import { themeConfig } from './theme-config';
 import { defaultSettings } from '../module/core/features/settings/settings-config';
 
