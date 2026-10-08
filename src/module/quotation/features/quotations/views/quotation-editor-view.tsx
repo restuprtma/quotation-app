@@ -510,6 +510,25 @@ export function QuotationEditorView({ id = '' }: Props) {
     }
   };
 
+  const publicUrl = data?.public_token
+    ? `${window.location.origin}${paths.public.quotation(data.public_token)}`
+    : '';
+
+  const handleCopyPublicLink = async () => {
+    if (!publicUrl) return;
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      toast.success(t('editor.publicLinkCopied'));
+    } catch {
+      toast.error('Gagal menyalin link');
+    }
+  };
+
+  const handleOpenPublicLink = () => {
+    if (!publicUrl) return;
+    window.open(publicUrl, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <DashboardContent maxWidth="xl">
       <Stack spacing={3}>
@@ -630,21 +649,43 @@ export function QuotationEditorView({ id = '' }: Props) {
               </Button>
 
               {isReadOnly ? (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={
-                    isCreatingRevision ? (
-                      <CircularProgress size={16} color="inherit" />
-                    ) : (
-                      <Iconify icon="solar:restart-bold" />
-                    )
-                  }
-                  onClick={handleCreateRevision}
-                  disabled={isCreatingRevision}
-                >
-                  Buat Revisi Baru
-                </Button>
+                <Stack direction="row" spacing={1}>
+                  {Boolean(data?.public_token) && (
+                    <>
+                      <Button
+                        variant="outlined"
+                        color="inherit"
+                        startIcon={<Iconify icon="eva:link-2-fill" />}
+                        onClick={handleCopyPublicLink}
+                      >
+                        {t('editor.copyPublicLink')}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="info"
+                        startIcon={<Iconify icon="eva:external-link-fill" />}
+                        onClick={handleOpenPublicLink}
+                      >
+                        {t('editor.openPublicLink')}
+                      </Button>
+                    </>
+                  )}
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={
+                      isCreatingRevision ? (
+                        <CircularProgress size={16} color="inherit" />
+                      ) : (
+                        <Iconify icon="solar:restart-bold" />
+                      )
+                    }
+                    onClick={handleCreateRevision}
+                    disabled={isCreatingRevision}
+                  >
+                    Buat Revisi Baru
+                  </Button>
+                </Stack>
               ) : (
                 <Tooltip
                   title={

@@ -115,6 +115,7 @@ describe('QuotationEditorView', () => {
     cleanup();
     vi.clearAllMocks();
     quotationDetail.status = 'draft';
+    delete (quotationDetail as any).public_token;
   });
 
   afterEach(() => {
@@ -265,5 +266,107 @@ describe('QuotationEditorView', () => {
     expect((saveDraftBtn as HTMLButtonElement).disabled).toBe(true);
 
     delete (quotationDetail as any).publication_status;
+  });
+
+  it('renders Copy Public Link and Open Link buttons when quotation is published (read-only)', async () => {
+    quotationDetail.status = 'published';
+    (quotationDetail as any).public_token = 'pub-token-abc-123';
+
+    render(
+      <MemoryRouter>
+        <QuotationEditorView id="quotation-1" />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', {
+          name: /Salin Link Publik|Copy Public Link|editor\.copyPublicLink/i,
+        })
+      ).toBeDefined();
+    });
+    expect(
+      screen.getByRole('button', {
+        name: /Buka Link Publik|Open Public Link|editor\.openPublicLink/i,
+      })
+    ).toBeDefined();
+  });
+
+  it('copies public link and opens public link on button click', async () => {
+    quotationDetail.status = 'published';
+    (quotationDetail as any).public_token = 'pub-token-abc-123';
+
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: writeTextMock,
+      },
+      configurable: true,
+      writable: true,
+    });
+    const openMock = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    render(
+      <MemoryRouter>
+        <QuotationEditorView id="quotation-1" />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', {
+          name: /Salin Link Publik|Copy Public Link|editor\.copyPublicLink/i,
+        })
+      ).toBeDefined();
+    });
+
+    const copyBtn = screen.getByRole('button', {
+      name: /Salin Link Publik|Copy Public Link|editor\.copyPublicLink/i,
+    });
+    fireEvent.click(copyBtn);
+
+    await waitFor(() => {
+      expect(writeTextMock).toHaveBeenCalledWith(
+        `${window.location.origin}/p/q/pub-token-abc-123`
+      );
+      expect(toast.success).toHaveBeenCalledWith('editor.publicLinkCopied');
+    });
+
+    const openBtn = screen.getByRole('button', {
+      name: /Buka Link Publik|Open Public Link|editor\.openPublicLink/i,
+    });
+    fireEvent.click(openBtn);
+
+    expect(openMock).toHaveBeenCalledWith(
+      `${window.location.origin}/p/q/pub-token-abc-123`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  });
+
+  it('does not render public link buttons when quotation is published but public_token is absent', async () => {
+    quotationDetail.status = 'published';
+    delete (quotationDetail as any).public_token;
+
+    render(
+      <MemoryRouter>
+        <QuotationEditorView id="quotation-1" />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Buat Revisi Baru/i })).toBeTruthy();
+    });
+
+    expect(
+      screen.queryByRole('button', {
+        name: /Salin Link Publik|Copy Public Link|editor\.copyPublicLink/i,
+      })
+    ).toBeNull();
+    expect(
+      screen.queryByRole('button', {
+        name: /Buka Link Publik|Open Public Link|editor\.openPublicLink/i,
+      })
+    ).toBeNull();
   });
 });
