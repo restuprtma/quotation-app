@@ -46,7 +46,9 @@ export function SettingsProvider({
       try {
         if (!storedValue.version || storedValue.version !== defaultSettings.version) {
           try {
-            localStorage.removeItem(themeConfig.modeStorageKey);
+            if (themeConfig.modeStorageKey) {
+              localStorage.removeItem(themeConfig.modeStorageKey);
+            }
           } catch {
             // Ignore storage access errors in private/restricted environments
           }
@@ -56,7 +58,9 @@ export function SettingsProvider({
         }
       } catch {
         try {
-          localStorage.removeItem(themeConfig.modeStorageKey);
+          if (themeConfig.modeStorageKey) {
+            localStorage.removeItem(themeConfig.modeStorageKey);
+          }
         } catch {
           // Ignore
         }
