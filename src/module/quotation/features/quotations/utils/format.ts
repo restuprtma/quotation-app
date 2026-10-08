@@ -1,32 +1,72 @@
 import type { QuotationStatus } from '../types';
 
-import i18n from 'i18next';
-
-export function formatCurrency(value: number) {
-  const locale = i18n.resolvedLanguage === 'en' ? 'en-US' : 'id-ID';
-  const currency = i18n.resolvedLanguage === 'en' ? 'USD' : 'IDR';
-  return new Intl.NumberFormat(locale, {
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat('id-ID', {
     style: 'currency',
-    currency,
+    currency: 'IDR',
     maximumFractionDigits: 0,
   }).format(value);
 }
 
-export function formatDate(value: string) {
-  const locale = i18n.resolvedLanguage === 'en' ? 'en-US' : 'id-ID';
-  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(value));
+export function formatDate(value: string): string {
+  return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(value));
 }
 
-export function statusColor(status: QuotationStatus) {
+function toTitleCase(str: string): string {
+  return str
+    .replace(/[_-]+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+export function formatCommercialScheme(
+  scheme?: string | null,
+  solutionType?: string | null,
+  t?: (key: string) => string
+): string {
+  if (scheme && t) {
+    const key = `commercialSchemes.${scheme}`;
+    const translated = t(key);
+    if (translated && translated !== key) {
+      return translated;
+    }
+  }
+
+  if (solutionType && t) {
+    const key = `commercialSchemes.${solutionType}`;
+    const translatedScheme = t(key);
+    if (translatedScheme && translatedScheme !== key) {
+      return translatedScheme;
+    }
+
+    const ptKey = `projectTypes.${solutionType}`;
+    const translatedPt = t(ptKey);
+    if (translatedPt && translatedPt !== ptKey) {
+      return translatedPt;
+    }
+  }
+
+  const raw = scheme || solutionType || '—';
+  if (raw === '—') return '—';
+
+  return toTitleCase(raw);
+}
+
+export function statusColor(status: QuotationStatus): 'default' | 'info' | 'success' | 'warning' | 'error' {
   switch (status) {
-    case 'draft':
-      return 'default';
-    case 'shared':
+    case 'published':
       return 'info';
     case 'signed':
       return 'success';
+    case 'failed':
+      return 'error';
+    case 'queued':
+      return 'warning';
+    case 'shared':
+      return 'info';
     case 'contract_created':
       return 'warning';
+    case 'draft':
     default:
       return 'default';
   }
