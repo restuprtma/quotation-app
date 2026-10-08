@@ -1029,6 +1029,7 @@ export type QuotationGenerationDetail = {
   quotation_number: string;
   subject: string;
   status: string;
+  public_token: string;
   revision_id: string;
   created_at: string;
   updated_at: string;

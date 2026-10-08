@@ -35,6 +35,7 @@ export type Quotation = {
   commercial_scheme?: string | null;
   status: QuotationStatus;
   current_revision: number;
+  public_token: string;
   created_at: string;
   updated_at: string;
   budget_maximum?: number | null;

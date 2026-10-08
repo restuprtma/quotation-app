@@ -60,7 +60,9 @@
   },
   "rowActions": {
     "viewDetail": "Lihat detail",
-    "edit": "Ubah"
+    "edit": "Ubah",
+    "copyPublicLink": "Salin Link Publik",
+    "openPublicLink": "Buka Link Publik"
   },
   "form": {
     "newTitle": "Quotation baru",
@@ -1098,6 +1100,10 @@
     "waiting": "Mohon tunggu sementara AI menyusun dan memvalidasi draf dokumen..."
   },
   "editor": {
+    "copyPublicLink": "Salin Link Publik",
+    "openPublicLink": "Buka Link Publik",
+    "publicLinkCopied": "Link publik berhasil disalin ke clipboard!",
+    "publicLink": "Link Publik",
     "backToPrompt": "Kembali ke Form Prompt",
     "saveDraft": "Simpan Draf",
     "saving": "Menyimpan...",

@@ -60,7 +60,9 @@
   },
   "rowActions": {
     "viewDetail": "View detail",
-    "edit": "Edit"
+    "edit": "Edit",
+    "copyPublicLink": "Copy Public Link",
+    "openPublicLink": "Open Public Link"
   },
   "form": {
     "newTitle": "New quotation",
@@ -1098,6 +1100,10 @@
     "waiting": "Please wait while the AI generates and validates the draft..."
   },
   "editor": {
+    "copyPublicLink": "Copy Public Link",
+    "openPublicLink": "Open Public Link",
+    "publicLinkCopied": "Public link copied to clipboard!",
+    "publicLink": "Public Link",
     "backToPrompt": "Back to Prompt",
     "saveDraft": "Save Draft",
     "saving": "Saving...",
