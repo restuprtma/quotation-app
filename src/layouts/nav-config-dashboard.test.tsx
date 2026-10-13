@@ -75,6 +75,10 @@ describe('useNavData config structure', () => {
           title: 'Daftar Quotation',
           path: paths.dashboard.quotation.list,
         },
+        {
+          title: 'Tanda Tangan & Stempel',
+          path: paths.dashboard.quotation.signatureSettings,
+        },
       ],
     });
 
@@ -133,6 +137,7 @@ describe('useNavData config structure', () => {
       children: [
         { title: 'Create Quotation', path: paths.dashboard.quotation.prompt },
         { title: 'Quotation List', path: paths.dashboard.quotation.list },
+        { title: 'Signature & Stamp', path: paths.dashboard.quotation.signatureSettings },
       ],
     });
 
@@ -192,6 +197,23 @@ describe('NavSectionVertical with grouped sidebar', () => {
 
     const createQuotationChild = screen.getByRole('link', { name: 'Buat Quotation' });
     expect(createQuotationChild.className).not.toContain('--active');
+  });
+
+  it('activates Quotation parent and Tanda Tangan & Stempel child on "/quotation/settings/signature"', () => {
+    renderNav('/quotation/settings/signature');
+
+    const quotationParent = screen.getByRole('button', { name: 'Quotation' });
+    expect(quotationParent.className).toContain('--active');
+    expect(quotationParent.className).toContain('--open');
+
+    const signatureChild = screen.getByRole('link', { name: 'Tanda Tangan & Stempel' });
+    expect(signatureChild.className).toContain('--active');
+
+    const createQuotationChild = screen.getByRole('link', { name: 'Buat Quotation' });
+    expect(createQuotationChild.className).not.toContain('--active');
+
+    const listQuotationChild = screen.getByRole('link', { name: 'Daftar Quotation' });
+    expect(listQuotationChild.className).not.toContain('--active');
   });
 
   it('activates Blueprint parent and Buat Blueprint child on "/blueprint"', () => {

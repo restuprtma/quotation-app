@@ -42,6 +42,10 @@ export function useNavData(): NavSectionProps['data'] {
                 title: t('quotation_list', { defaultValue: 'Daftar Quotation' }),
                 path: paths.dashboard.quotation.list,
               },
+              {
+                title: t('quotation_signature_settings', { defaultValue: 'Tanda Tangan & Stempel' }),
+                path: paths.dashboard.quotation.signatureSettings,
+              },
             ],
           },
           {
