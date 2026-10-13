@@ -264,6 +264,9 @@ export const endpoints = {
       skills: '/quotation/v1/ai/skills',
       settings: '/quotation/v1/ai/settings',
     },
+    settings: {
+      signature: '/quotation/v1/settings/signature',
+    },
     rateCards: {
       list: '/quotation/v1/rate-cards',
       byId: (id: string) => `/quotation/v1/rate-cards/${id}`,

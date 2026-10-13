@@ -20,6 +20,7 @@ export const paths = {
       list: '/quotation/list',
       edit: (id: string) => `/quotation/${id}/edit`,
       aiSettings: '/quotation/ai-settings',
+      signatureSettings: '/quotation/settings/signature',
       rateCards: '/quotation/rate-cards',
       rateCardDetail: (id: string) => `/quotation/rate-cards/${id}`,
     },

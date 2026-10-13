@@ -55,11 +55,16 @@ vi.mock('src/module/quotation/features/blueprints/pages/editor', () => ({
   default: () => <div data-testid="page-blueprint-editor">Blueprint Editor Page</div>,
 }));
 
+vi.mock('src/module/quotation/features/settings/pages/signature-settings-page', () => ({
+  default: () => <div data-testid="page-signature-settings">Signature Settings Page</div>,
+}));
+
 describe('Dashboard paths', () => {
   it('defines canonical quotation paths', () => {
     expect(paths.dashboard.quotation.root).toBe('/quotation');
     expect(paths.dashboard.quotation.prompt).toBe('/quotation');
     expect(paths.dashboard.quotation.list).toBe('/quotation/list');
+    expect(paths.dashboard.quotation.signatureSettings).toBe('/quotation/settings/signature');
     expect(paths.dashboard.quotation.edit('q-123')).toBe('/quotation/q-123/edit');
   });
 
@@ -98,6 +103,11 @@ describe('Dashboard Router', () => {
   it('renders QuotationListPage on "/quotation/list"', async () => {
     renderRoute('/quotation/list');
     expect(await screen.findByTestId('page-quotation-list')).toBeDefined();
+  });
+
+  it('renders SignatureSettingsPage on "/quotation/settings/signature"', async () => {
+    renderRoute('/quotation/settings/signature');
+    expect(await screen.findByTestId('page-signature-settings')).toBeDefined();
   });
 
   it('renders BlueprintCreatePage on "/blueprint"', async () => {
