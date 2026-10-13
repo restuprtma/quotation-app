@@ -67,29 +67,7 @@ export function SignatureStampPreview({
           </Typography>
         )}
 
-        {/* Company Stamp in background (slightly tilted, multiply blend mode) */}
-        {companyStampData && (
-          <Box
-            component="img"
-            src={companyStampData}
-            alt="Stempel Perusahaan"
-            data-testid="preview-company-stamp"
-            sx={{
-              position: 'absolute',
-              left: 10,
-              top: 0,
-              width: 110,
-              height: 110,
-              objectFit: 'contain',
-              opacity: 0.85,
-              transform: 'rotate(-8deg)',
-              pointerEvents: 'none',
-              mixBlendMode: 'multiply',
-            }}
-          />
-        )}
-
-        {/* Director Signature in foreground */}
+        {/* Director Signature (rendered underneath stamp) */}
         {directorSignatureData && (
           <Box
             component="img"
@@ -99,10 +77,34 @@ export function SignatureStampPreview({
             sx={{
               position: 'absolute',
               left: 0,
-              top: 15,
-              width: 190,
-              height: 85,
+              bottom: 0,
+              maxWidth: 180,
+              maxHeight: 85,
               objectFit: 'contain',
+              zIndex: 1,
+            }}
+          />
+        )}
+
+        {/* Company Stamp Overlay (stamped over signature with multiply blend mode) */}
+        {companyStampData && (
+          <Box
+            component="img"
+            src={companyStampData}
+            alt="Stempel Perusahaan"
+            data-testid="preview-company-stamp"
+            sx={{
+              position: 'absolute',
+              left: 55,
+              top: -5,
+              width: 110,
+              height: 110,
+              objectFit: 'contain',
+              opacity: 0.88,
+              transform: 'rotate(-8deg)',
+              pointerEvents: 'none',
+              mixBlendMode: 'multiply',
+              zIndex: 2,
             }}
           />
         )}

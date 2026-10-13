@@ -29,25 +29,30 @@ function DrawingCanvas({
   const drawingRef = useRef(false);
   const [hasStroke, setHasStroke] = useState(false);
 
+  const configureContext = (ctx: CanvasRenderingContext2D) => {
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = '#1f2937';
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext('2d');
     if (!context) return;
-
-    context.lineCap = 'round';
-    context.lineJoin = 'round';
-    context.lineWidth = 2.5;
-    context.strokeStyle = '#0f172a';
+    configureContext(context);
   }, []);
 
   const getCoordinates = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
+    const scaleX = rect.width ? canvas.width / rect.width : 1;
+    const scaleY = rect.height ? canvas.height / rect.height : 1;
     return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY,
     };
   };
 
@@ -55,6 +60,7 @@ function DrawingCanvas({
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
+    configureContext(ctx);
     canvas.setPointerCapture(e.pointerId);
     const { x, y } = getCoordinates(e);
     ctx.beginPath();
@@ -222,6 +228,16 @@ export function SignatureSettingsView() {
   ) => {
     const file = event.target.files?.[0];
     if (file) {
+      if (file.type !== 'image/png') {
+        toast.error('Berkas harus berupa gambar berformat PNG');
+        event.target.value = '';
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('Ukuran berkas melebihi batas maksimal 2MB');
+        event.target.value = '';
+        return;
+      }
       const reader = new FileReader();
       reader.onload = () => {
         if (typeof reader.result === 'string') {
