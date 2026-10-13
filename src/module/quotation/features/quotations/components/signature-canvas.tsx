@@ -10,6 +10,8 @@ import Typography from '@mui/material/Typography';
 import { useTranslate } from 'src/locales';
 import { Iconify } from 'src/shared/ui/iconify';
 
+import { cropCanvasToBoundingBox } from '../utils/canvas-crop';
+
 type Props = {
   disabled?: boolean;
   onChange?: (dataUrl: string | null) => void;
@@ -36,7 +38,7 @@ export function SignatureCanvas({ disabled = false, onChange, sx }: Props) {
       if (context) {
         context.lineCap = 'round';
         context.lineJoin = 'round';
-        context.lineWidth = 2.5;
+        context.lineWidth = 3.2;
         context.strokeStyle = '#1f2937';
       }
     };
@@ -78,7 +80,9 @@ export function SignatureCanvas({ disabled = false, onChange, sx }: Props) {
   const handlePointerUp = () => {
     if (!drawingRef.current) return;
     drawingRef.current = false;
-    const dataUrl = canvasRef.current?.toDataURL('image/png') ?? null;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dataUrl = cropCanvasToBoundingBox(canvas) ?? canvas.toDataURL('image/png');
     onChange?.(dataUrl);
   };
 

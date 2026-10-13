@@ -1,22 +1,23 @@
-import { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import { useRef, useState, useEffect } from 'react';
+
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
 import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
-import Divider from '@mui/material/Divider';
-import { toast } from 'sonner';
 
+import { cropCanvasToBoundingBox } from '../../quotations/utils/canvas-crop';
+import { SignatureStampPreview } from '../components/signature-stamp-preview';
 import {
   useSignatureSettings,
   useUpdateSignatureSettings,
 } from '../hooks/use-signature-settings';
-import { SignatureStampPreview } from '../components/signature-stamp-preview';
 
 function DrawingCanvas({
   value,
@@ -32,7 +33,7 @@ function DrawingCanvas({
   const configureContext = (ctx: CanvasRenderingContext2D) => {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.lineWidth = 2.5;
+    ctx.lineWidth = 3.2;
     ctx.strokeStyle = '#1f2937';
   };
 
@@ -83,7 +84,7 @@ function DrawingCanvas({
     drawingRef.current = false;
     const canvas = canvasRef.current;
     if (canvas) {
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = cropCanvasToBoundingBox(canvas) ?? canvas.toDataURL('image/png');
       onChange(dataUrl);
     }
   };

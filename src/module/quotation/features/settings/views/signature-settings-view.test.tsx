@@ -1,6 +1,7 @@
+import { it, vi, expect, describe, afterEach, beforeEach } from 'vitest';
 // @vitest-environment happy-dom
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, waitFor, cleanup, fireEvent } from '@testing-library/react';
+
 import { SignatureSettingsView } from './signature-settings-view';
 import { SignatureStampPreview } from '../components/signature-stamp-preview';
 
@@ -22,6 +23,11 @@ expect.extend({
 const mockMutateAsync = vi.fn();
 const mockToastError = vi.fn();
 const mockToastSuccess = vi.fn();
+const mockCropCanvas = vi.fn();
+
+vi.mock('../../quotations/utils/canvas-crop', () => ({
+  cropCanvasToBoundingBox: (...args: unknown[]) => mockCropCanvas(...args),
+}));
 
 vi.mock('sonner', () => ({
   toast: {
@@ -53,6 +59,33 @@ describe('SignatureSettingsView', () => {
     mockMutateAsync.mockResolvedValue({});
     mockToastError.mockReset();
     mockToastSuccess.mockReset();
+    mockCropCanvas.mockReset();
+  });
+
+  it('configures lineWidth to 3.2 and auto-crops when drawing on director signature canvas', () => {
+    const mockContext = {
+      lineCap: '',
+      lineJoin: '',
+      lineWidth: 0,
+      strokeStyle: '',
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      stroke: vi.fn(),
+      clearRect: vi.fn(),
+    };
+    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(mockContext);
+    HTMLCanvasElement.prototype.setPointerCapture = vi.fn();
+    mockCropCanvas.mockReturnValue('data:image/png;base64,cropped_director_sig');
+
+    render(<SignatureSettingsView />);
+    expect(mockContext.lineWidth).toBe(3.2);
+
+    const canvas = screen.getByTestId('signature-canvas-container').querySelector('canvas')!;
+    fireEvent.pointerDown(canvas, { clientX: 10, clientY: 10, pointerId: 1 });
+    fireEvent.pointerUp(canvas);
+
+    expect(mockCropCanvas).toHaveBeenCalled();
   });
 
   it('renders director name, canvas/upload tabs, and stamp upload sections', () => {
