@@ -26,6 +26,7 @@ export function useSignPublicQuotation(token: string) {
       publicQuotationApi.signPublic(token, payload),
     onSuccess: (updatedData) => {
       queryClient.setQueryData(publicQuotationQueryKeys.detail(token), updatedData);
+      queryClient.invalidateQueries({ queryKey: publicQuotationQueryKeys.detail(token) });
     },
   });
 }

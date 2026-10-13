@@ -3,39 +3,38 @@ import type { SignPublicQuotationPayload } from '../types/public';
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 
+import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import FormHelperText from '@mui/material/FormHelperText';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { useTranslate } from 'src/locales';
+import { Iconify } from 'src/shared/ui/iconify';
 
 import { SignatureCanvas } from './signature-canvas';
 
 type FormValues = {
-  signer_name: string;
-  signer_email: string;
   consent: boolean;
 };
 
 type Props = {
+  clientPic?: string;
+  clientCompany?: string;
   onSubmit: (payload: SignPublicQuotationPayload) => Promise<void>;
   isSubmitting?: boolean;
 };
 
-export function SignatureForm({ onSubmit, isSubmitting = false }: Props) {
+export function SignatureForm({ clientPic, clientCompany, onSubmit, isSubmitting = false }: Props) {
   const { t } = useTranslate('quotation');
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const [signatureError, setSignatureError] = useState<string | null>(null);
 
   const { control, handleSubmit } = useForm<FormValues>({
     defaultValues: {
-      signer_name: '',
-      signer_email: '',
       consent: false,
     },
   });
@@ -48,8 +47,6 @@ export function SignatureForm({ onSubmit, isSubmitting = false }: Props) {
     setSignatureError(null);
 
     await onSubmit({
-      signer_name: values.signer_name.trim(),
-      signer_email: values.signer_email.trim(),
       signature_data: signatureData,
       consent: values.consent,
     });
@@ -58,44 +55,14 @@ export function SignatureForm({ onSubmit, isSubmitting = false }: Props) {
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} data-testid="signature-form">
       <Stack spacing={3}>
-        <Controller
-          name="signer_name"
-          control={control}
-          rules={{ required: `${t('public.signerName')} is required` }}
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              label={t('public.signerName')}
-              fullWidth
-              disabled={isSubmitting}
-              error={Boolean(fieldState.error)}
-              helperText={fieldState.error?.message}
-            />
-          )}
-        />
-
-        <Controller
-          name="signer_email"
-          control={control}
-          rules={{
-            required: `${t('public.signerEmail')} is required`,
-            pattern: {
-              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: 'Invalid email address',
-            },
-          }}
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              type="email"
-              label={t('public.signerEmail')}
-              fullWidth
-              disabled={isSubmitting}
-              error={Boolean(fieldState.error)}
-              helperText={fieldState.error?.message}
-            />
-          )}
-        />
+        {(clientPic || clientCompany) && (
+          <Alert severity="info" icon={<Iconify icon="solar:user-id-bold" />}>
+            <Typography variant="subtitle2">Menandatangani sebagai:</Typography>
+            <Typography variant="body2">
+              {[clientPic, clientCompany].filter(Boolean).join(' • ')}
+            </Typography>
+          </Alert>
+        )}
 
         <Stack spacing={1}>
           <Typography variant="subtitle2">{t('public.approval')}</Typography>

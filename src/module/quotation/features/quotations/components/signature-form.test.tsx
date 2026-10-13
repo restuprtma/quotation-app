@@ -8,6 +8,23 @@ afterEach(() => {
   cleanup();
 });
 
+expect.extend({
+  toBeInTheDocument(received) {
+    const pass = received !== null && received !== undefined;
+    return {
+      pass,
+      message: () =>
+        pass
+          ? 'expected element not to be in document'
+          : 'expected element to be in document',
+    };
+  },
+});
+
+vi.mock('src/shared/ui/iconify', () => ({
+  Iconify: ({ icon, ...props }: any) => <span data-testid={`icon-${icon}`} {...props} />,
+}));
+
 vi.mock('./signature-canvas', () => ({
   SignatureCanvas: ({ onChange, disabled }: any) => (
     <div data-testid="mock-signature-canvas">
@@ -51,41 +68,41 @@ vi.mock('src/locales', () => ({
   }),
 }));
 
-describe('SignatureForm', () => {
-  it('renders all form fields and submit button', () => {
-    const handleSubmit = vi.fn();
-    render(<SignatureForm onSubmit={handleSubmit} />);
+describe('SignatureForm Streamlined', () => {
+  it('renders read-only client info and signature pad without name/email inputs', () => {
+    render(
+      <SignatureForm
+        clientPic="Bapak Reza Mahardika"
+        clientCompany="PT Cakrawala Pangan Sejahtera"
+        onSubmit={vi.fn()}
+      />
+    );
 
-    expect(screen.getByLabelText(/Full Name/i)).toBeDefined();
-    expect(screen.getByLabelText(/Email Address/i)).toBeDefined();
-    expect(screen.getByLabelText(/I confirm and agree/i)).toBeDefined();
-    expect(screen.getByRole('button', { name: /Sign Quotation/i })).toBeDefined();
-  });
+    // Verify info is displayed
+    expect(screen.getByText(/Bapak Reza Mahardika/i)).toBeInTheDocument();
+    expect(screen.getByText(/PT Cakrawala Pangan Sejahtera/i)).toBeInTheDocument();
 
-  it('validates required fields before submitting', async () => {
-    const handleSubmit = vi.fn();
-    render(<SignatureForm onSubmit={handleSubmit} />);
+    // Verify no text input for name or email
+    expect(screen.queryByLabelText(/Signer Name|Full Name/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Signer Email|Email Address/i)).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /Sign Quotation/i }));
-
-    await waitFor(() => {
-      expect(screen.getByText(/Full Name is required/i)).toBeDefined();
-      expect(screen.getByText(/Email Address is required/i)).toBeDefined();
-    });
-
-    expect(handleSubmit).not.toHaveBeenCalled();
+    // Verify consent checkbox and submit button exist
+    expect(screen.getByRole('checkbox')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Tanda Tangani Quotation|Sign Quotation/i })
+    ).toBeInTheDocument();
   });
 
   it('requires signature data and consent to submit', async () => {
     const handleSubmit = vi.fn();
-    render(<SignatureForm onSubmit={handleSubmit} />);
+    render(
+      <SignatureForm
+        clientPic="Bapak Reza Mahardika"
+        clientCompany="PT Cakrawala Pangan Sejahtera"
+        onSubmit={handleSubmit}
+      />
+    );
 
-    fireEvent.change(screen.getByLabelText(/Full Name/i), {
-      target: { value: 'Budi Santoso' },
-    });
-    fireEvent.change(screen.getByLabelText(/Email Address/i), {
-      target: { value: 'budi@example.com' },
-    });
     fireEvent.click(screen.getByLabelText(/I confirm and agree/i));
 
     // Submit without drawing signature
@@ -102,8 +119,6 @@ describe('SignatureForm', () => {
 
     await waitFor(() => {
       expect(handleSubmit).toHaveBeenCalledWith({
-        signer_name: 'Budi Santoso',
-        signer_email: 'budi@example.com',
         signature_data:
           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY44YAAAAASUVORK5CYII=',
         consent: true,
@@ -113,10 +128,16 @@ describe('SignatureForm', () => {
 
   it('disables controls while submitting', () => {
     const handleSubmit = vi.fn();
-    render(<SignatureForm onSubmit={handleSubmit} isSubmitting />);
+    render(
+      <SignatureForm
+        clientPic="Bapak Reza Mahardika"
+        clientCompany="PT Cakrawala Pangan Sejahtera"
+        onSubmit={handleSubmit}
+        isSubmitting
+      />
+    );
 
-    expect(screen.getByLabelText(/Full Name/i)).toHaveProperty('disabled', true);
-    expect(screen.getByLabelText(/Email Address/i)).toHaveProperty('disabled', true);
+    expect(screen.getByRole('checkbox')).toHaveProperty('disabled', true);
     expect(screen.getByRole('button', { name: /Signing.../i })).toHaveProperty('disabled', true);
   });
 });

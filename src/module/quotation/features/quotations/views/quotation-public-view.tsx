@@ -145,7 +145,12 @@ export function QuotationPublicView({ token }: { token: string }) {
             <Typography variant="h6" sx={{ mb: 2 }}>
               {t('public.approval')}
             </Typography>
-            <SignatureForm onSubmit={handleSign} isSubmitting={signMutation.isPending} />
+            <SignatureForm
+              clientPic={quotation.client.client_pic || quotation.signer_name || undefined}
+              clientCompany={quotation.client.company_name}
+              onSubmit={handleSign}
+              isSubmitting={signMutation.isPending}
+            />
           </Card>
         )}
       </Stack>

@@ -1,11 +1,16 @@
-import { it, vi, expect, describe } from 'vitest';
+import { it, vi, expect, describe, afterEach } from 'vitest';
 // @vitest-environment happy-dom
-import { render, screen } from '@testing-library/react';
+import { render, screen, cleanup } from '@testing-library/react';
 
 import * as useHooks from '../hooks/use-quotation-public';
 import { QuotationPublicView } from './quotation-public-view';
 
+afterEach(cleanup);
+
 vi.mock('../hooks/use-quotation-public');
+vi.mock('src/shared/ui/iconify', () => ({
+  Iconify: ({ icon, ...props }: any) => <span data-testid={`icon-${icon}`} {...props} />,
+}));
 vi.mock('src/locales', () => ({
   useTranslate: () => ({
     t: (key: string) => {
@@ -81,7 +86,7 @@ describe('QuotationPublicView', () => {
       data: {
         quotation_number: 'VEN/2026/002',
         subject: 'Pending Deal',
-        client: { company_name: 'Client B' },
+        client: { company_name: 'Client B', client_pic: 'Bapak Reza' },
         revision_number: 1,
         content_html: '<p>Pending Document Body</p>',
         published_at: '2026-08-14T00:00:00Z',
@@ -95,5 +100,6 @@ describe('QuotationPublicView', () => {
     render(<QuotationPublicView token="test-token" />);
     expect(screen.getByText('VEN/2026/002')).toBeDefined();
     expect(screen.getByTestId('signature-form')).toBeDefined();
+    expect(screen.getByText(/Bapak Reza/)).toBeDefined();
   });
 });

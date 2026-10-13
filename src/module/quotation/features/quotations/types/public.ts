@@ -1,5 +1,6 @@
 export interface PublicQuotationClient {
   company_name: string;
+  client_pic?: string;
 }
 
 export interface PublicQuotation {
@@ -15,8 +16,9 @@ export interface PublicQuotation {
 }
 
 export interface SignPublicQuotationPayload {
-  signer_name: string;
-  signer_email: string;
   signature_data: string;
   consent: boolean;
+  signer_name?: string;
+  signer_email?: string;
 }
+
