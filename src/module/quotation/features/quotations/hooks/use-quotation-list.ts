@@ -16,12 +16,14 @@ export function useQuotationList(params: QuotationListParams) {
 
   const refresh = useCallback(() => setRefreshKey((current) => current + 1), []);
 
+  const { page, limit, search, status } = params;
+
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError(null);
 
-    listQuotations(params)
+    listQuotations({ page, limit, search, status })
       .then((result) => {
         if (!active) return;
         setData(result.data);
@@ -38,7 +40,7 @@ export function useQuotationList(params: QuotationListParams) {
     return () => {
       active = false;
     };
-  }, [params, refreshKey]);
+  }, [page, limit, search, status, refreshKey]);
 
   return { data, meta, loading, error, refresh };
 }

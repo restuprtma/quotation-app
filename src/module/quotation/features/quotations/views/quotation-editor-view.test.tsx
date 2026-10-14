@@ -8,6 +8,15 @@ import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/re
 import { QuotationEditorView } from './quotation-editor-view';
 import { publishQuotation, createQuotationRevision } from '../api/lifecycle';
 
+const mockNavigate = vi.fn();
+vi.mock('react-router', async () => {
+  const actual = await vi.importActual<any>('react-router');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
 const { quotationDetail } = vi.hoisted(() => ({
   quotationDetail: {
     quotation_id: 'quotation-1',
@@ -114,6 +123,7 @@ describe('QuotationEditorView', () => {
   beforeEach(() => {
     cleanup();
     vi.clearAllMocks();
+    mockNavigate.mockReset();
     quotationDetail.status = 'draft';
     quotationDetail.content_html = '<p>Draft</p>';
     delete (quotationDetail as any).public_token;
@@ -468,5 +478,28 @@ describe('QuotationEditorView', () => {
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('editor.copyFailed');
     });
+  });
+
+  it('navigates to quotation list when back button is clicked', async () => {
+    render(
+      <MemoryRouter>
+        <QuotationEditorView id="quotation-1" />
+      </MemoryRouter>
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', {
+          name: /Kembali ke Daftar Quotation|Back to Quotation List|editor\.backToList/i,
+        })
+      ).toBeTruthy()
+    );
+
+    const backBtn = screen.getByRole('button', {
+      name: /Kembali ke Daftar Quotation|Back to Quotation List|editor\.backToList/i,
+    });
+    fireEvent.click(backBtn);
+
+    expect(mockNavigate).toHaveBeenCalledWith('/quotation/list');
   });
 });

@@ -452,11 +452,11 @@ export function QuotationEditorView({ id = '' }: Props) {
   };
 
   // In-app navigation guard
-  const handleBackToPrompt = () => {
+  const handleBackToList = () => {
     if (session?.isDirty) {
       setIsUnsavedDialogOpen(true);
     } else {
-      navigate(paths.dashboard.quotation.root);
+      navigate(paths.dashboard.quotation.list);
     }
   };
 
@@ -548,9 +548,9 @@ export function QuotationEditorView({ id = '' }: Props) {
               variant="outlined"
               color="inherit"
               startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
-              onClick={handleBackToPrompt}
+              onClick={handleBackToList}
             >
-              {t('editor.backToPrompt')}
+              {t('editor.backToList')}
             </Button>
             <Typography variant="h4">{data?.subject || 'Quotation Editor'}</Typography>
           </Stack>
@@ -864,7 +864,7 @@ export function QuotationEditorView({ id = '' }: Props) {
             color="error"
             onClick={() => {
               setIsUnsavedDialogOpen(false);
-              navigate(paths.dashboard.quotation.root);
+              navigate(paths.dashboard.quotation.list);
             }}
           >
             {t('editor.dialog.unsavedLeave')}

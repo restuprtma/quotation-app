@@ -1081,6 +1081,7 @@ export type RateCardSummary = {
   client_tier?: string;
   currency: string;
   is_active: boolean;
+  is_default?: boolean;
   item_count?: number;
 };
 

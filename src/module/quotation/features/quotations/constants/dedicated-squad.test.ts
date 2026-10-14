@@ -85,7 +85,7 @@ describe('quotation profile helpers', () => {
 });
 
 describe('dedicated squad constants', () => {
-  it('restricts generator cards to the four seeded cards', () => {
+  it('allows all rate card codes in generator', () => {
     expect(GENERATOR_RATE_CARD_CODES).toEqual([
       'DEFAULT',
       'VENTURO-STD-2026',
@@ -93,7 +93,7 @@ describe('dedicated squad constants', () => {
       'VENTURO-INTL-2026',
     ]);
     expect(isGeneratorRateCardCode('DEFAULT')).toBe(true);
-    expect(isGeneratorRateCardCode('CUSTOM-CARD')).toBe(false);
+    expect(isGeneratorRateCardCode('CUSTOM-CARD')).toBe(true);
   });
 
   it('defaults sprint to one payment and projects to three', () => {

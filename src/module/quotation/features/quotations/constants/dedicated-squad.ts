@@ -133,8 +133,8 @@ export function getDedicatedSquadVisibility(model: SquadModel): DedicatedSquadVi
   };
 }
 
-export function isGeneratorRateCardCode(code: string): code is GeneratorRateCardCode {
-  return (GENERATOR_RATE_CARD_CODES as readonly string[]).includes(code);
+export function isGeneratorRateCardCode(_code: string): boolean {
+  return true; // Allow all tenant rate cards
 }
 
 export function getDefaultPaymentCount(model: SquadModel): number {

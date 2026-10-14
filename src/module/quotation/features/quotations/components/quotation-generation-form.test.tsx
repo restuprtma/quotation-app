@@ -16,11 +16,15 @@ vi.mock('../hooks/use-active-skills', () => ({
   useActiveSkills: () => ({ data: [] }),
 }));
 
+const defaultRateCards = {
+  data: [{ id: 'rc-1', code: 'RC-DEV', is_active: true }],
+  isLoading: false,
+};
+
+const mockUseActiveRateCards = vi.fn(() => defaultRateCards);
+
 vi.mock('../hooks/use-active-rate-cards', () => ({
-  useActiveRateCards: () => ({
-    data: [{ id: 'rc-1', code: 'RC-DEV', is_active: true }],
-    isLoading: false,
-  }),
+  useActiveRateCards: () => mockUseActiveRateCards(),
 }));
 
 vi.mock('../hooks/use-quotation-generation', () => ({
@@ -34,6 +38,8 @@ vi.mock('../hooks/use-quotation-generation', () => ({
 
 afterEach(() => {
   cleanup();
+  mockUseActiveRateCards.mockReset();
+  mockUseActiveRateCards.mockReturnValue(defaultRateCards);
 });
 
 describe('QuotationGenerationForm entry identity integration', () => {
@@ -87,3 +93,43 @@ describe('QuotationGenerationForm entry identity integration', () => {
     });
   });
 });
+
+describe('QuotationGenerationForm rate card selection', () => {
+  it('includes custom rate cards (e.g. RC-AI-2026) without filtering them out', () => {
+    mockUseActiveRateCards.mockReturnValue({
+      data: [{ id: 'rc-ai', code: 'RC-AI-2026', name: 'AI Squad Rate Card', is_active: true }],
+      isLoading: false,
+    });
+
+    render(
+      <QuotationGenerationForm
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    const rateCardInput = document.querySelector('input[name="rate_card_id"]') as HTMLInputElement;
+    expect(rateCardInput.value).toBe('rc-ai');
+  });
+
+  it('places default rate card first and auto-selects it when multiple active rate cards exist', () => {
+    mockUseActiveRateCards.mockReturnValue({
+      data: [
+        { id: 'rc-comm', code: 'RC-COMM', name: 'Commercial', is_active: true, is_default: false },
+        { id: 'rc-ai', code: 'RC-AI-2026', name: 'AI Squad', is_active: true, is_default: true },
+      ],
+      isLoading: false,
+    });
+
+    render(
+      <QuotationGenerationForm
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    const rateCardInput = document.querySelector('input[name="rate_card_id"]') as HTMLInputElement;
+    expect(rateCardInput.value).toBe('rc-ai');
+  });
+});
+

@@ -322,7 +322,14 @@ export function QuotationGenerationForm({
   const { data: clients = [] } = useClients();
   const { data: allRateCards = [], isLoading: isLoadingRateCards } = useActiveRateCards();
   const rateCards = useMemo(
-    () => allRateCards.filter((card) => isGeneratorRateCardCode(card.code)),
+    () =>
+      allRateCards
+        .filter((card) => isGeneratorRateCardCode(card.code))
+        .sort((a, b) => {
+          if (a.is_default && !b.is_default) return -1;
+          if (!a.is_default && b.is_default) return 1;
+          return 0;
+        }),
     [allRateCards]
   );
 
