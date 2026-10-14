@@ -78,6 +78,7 @@ export interface RateCard {
   short_term_surcharge_pct: number;
   enterprise_markup_pct: number;
   is_active: boolean;
+  is_default?: boolean;
   effective_from: string;
   effective_until?: string | null;
   items?: RateCardItem[];
@@ -95,6 +96,7 @@ export interface RateCardSummaryResponse {
   client_tier: ClientTier;
   currency: string;
   is_active: boolean;
+  is_default?: boolean;
   item_count: number;
   created_at: string;
 }
@@ -121,6 +123,13 @@ export interface CreateRateCardItemPayload {
   kickoff_fee?: number;
   recruitment_fee?: number;
   onboarding_fee?: number;
+}
+
+export type UpdateRateCardItemPayload = Partial<CreateRateCardItemPayload>;
+
+export interface UpdateRateCardItemArgs {
+  itemId: string;
+  payload: UpdateRateCardItemPayload;
 }
 
 export interface CreateRateCardPayload {

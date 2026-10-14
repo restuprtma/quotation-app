@@ -1,8 +1,11 @@
 import type {
+  RateCardItem,
   RateCardListParams,
   CreateRateCardPayload,
   RateCardDetailResponse,
   RateCardSummaryResponse,
+  CreateRateCardItemPayload,
+  UpdateRateCardItemPayload,
 } from '../types';
 
 import axios, { endpoints } from 'src/shared/lib/axios';
@@ -70,3 +73,29 @@ export function createRateCard(payload: CreateRateCardPayload): Promise<RateCard
 export async function deleteRateCard(id: string): Promise<void> {
   await axios.delete(endpoints.quotation.rateCards.delete(id));
 }
+
+export function setDefaultRateCard(id: string): Promise<RateCardDetailResponse> {
+  return unwrap<RateCardDetailResponse>(axios.post(endpoints.quotation.rateCards.setDefault(id)));
+}
+
+export function createRateCardItem(
+  rateCardId: string,
+  payload: CreateRateCardItemPayload
+): Promise<RateCardItem> {
+  return unwrap<RateCardItem>(axios.post(endpoints.quotation.rateCards.items(rateCardId), payload));
+}
+
+export function updateRateCardItem(
+  rateCardId: string,
+  itemId: string,
+  payload: UpdateRateCardItemPayload
+): Promise<RateCardItem> {
+  return unwrap<RateCardItem>(
+    axios.put(endpoints.quotation.rateCards.itemById(rateCardId, itemId), payload)
+  );
+}
+
+export async function deleteRateCardItem(rateCardId: string, itemId: string): Promise<void> {
+  await axios.delete(endpoints.quotation.rateCards.itemById(rateCardId, itemId));
+}
+

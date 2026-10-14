@@ -273,6 +273,9 @@ export const endpoints = {
       details: (id: string) => `/quotation/v1/rate-cards/${id}/details`,
       create: '/quotation/v1/rate-cards',
       delete: (id: string) => `/quotation/v1/rate-cards/${id}`,
+      setDefault: (id: string) => `/quotation/v1/rate-cards/${id}/set-default`,
+      items: (id: string) => `/quotation/v1/rate-cards/${id}/items`,
+      itemById: (id: string, itemId: string) => `/quotation/v1/rate-cards/${id}/items/${itemId}`,
     },
     blueprints: {
       root: '/quotation/v1/blueprints',
