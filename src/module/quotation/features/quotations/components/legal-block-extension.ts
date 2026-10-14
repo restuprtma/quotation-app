@@ -708,3 +708,78 @@ export const LegalBlockExtension = Node.create<LegalBlockOptions, LegalBlockStor
     ];
   },
 });
+
+export const QuotationImageExtension = Node.create({
+  name: 'quotationImage',
+  inline: true,
+  group: 'inline',
+  draggable: false,
+
+  addAttributes() {
+    return {
+      src: {
+        default: null,
+        parseHTML: (el: HTMLElement) => el.getAttribute('src'),
+        renderHTML: (attrs) => (attrs.src ? { src: attrs.src } : {}),
+      },
+      alt: {
+        default: null,
+        parseHTML: (el: HTMLElement) => el.getAttribute('alt'),
+        renderHTML: (attrs) => (attrs.alt ? { alt: attrs.alt } : {}),
+      },
+      class: {
+        default: null,
+        parseHTML: (el: HTMLElement) => el.getAttribute('class'),
+        renderHTML: (attrs) => (attrs.class ? { class: attrs.class } : {}),
+      },
+      style: {
+        default: null,
+        parseHTML: (el: HTMLElement) => el.getAttribute('style'),
+        renderHTML: (attrs) => (attrs.style ? { style: attrs.style } : {}),
+      },
+    };
+  },
+
+  parseHTML() {
+    return [{ tag: 'img[src]' }];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['img', mergeAttributes(HTMLAttributes)];
+  },
+});
+
+export const QuotationSignatureBoxExtension = Node.create({
+  name: 'quotationSignatureBox',
+  group: 'block',
+  content: 'inline*',
+  defining: true,
+  isolating: true,
+
+  addAttributes() {
+    return {
+      class: {
+        default: null,
+        parseHTML: (el: HTMLElement) => el.getAttribute('class'),
+        renderHTML: (attrs) => (attrs.class ? { class: attrs.class } : {}),
+      },
+      style: {
+        default: null,
+        parseHTML: (el: HTMLElement) => el.getAttribute('style'),
+        renderHTML: (attrs) => (attrs.style ? { style: attrs.style } : {}),
+      },
+    };
+  },
+
+  parseHTML() {
+    return [
+      { tag: 'div.signature-stamp-box' },
+      { tag: 'div.client-signature-box' },
+    ];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes), 0];
+  },
+});
+

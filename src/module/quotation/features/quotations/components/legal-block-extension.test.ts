@@ -8,8 +8,10 @@ import { Selection } from '@tiptap/pm/state';
 
 import {
   LegalBlockExtension,
+  QuotationImageExtension,
   QuotationTableExtension,
   QuotationSectionExtension,
+  QuotationSignatureBoxExtension,
 } from './legal-block-extension';
 
 describe('LegalBlockExtension', () => {
@@ -361,4 +363,66 @@ describe('LegalBlockExtension', () => {
       'data-role': 'hardware_cost_table',
     });
   });
+
+  it('preserves signature images and signature boxes without stripping', () => {
+    const html =
+      '<div class="signature-stamp-box" style="position: relative; width: 220px; height: 110px;"><img src="data:image/png;base64,123" alt="TTD Direksi" class="director-signature-img" style="max-height: 85px;" /></div>';
+    const editor = new Editor({
+      extensions: [StarterKit, QuotationImageExtension, QuotationSignatureBoxExtension],
+      content: html,
+    });
+
+    const outputHtml = editor.getHTML();
+    assert.match(outputHtml, /class="signature-stamp-box"/);
+    assert.match(outputHtml, /class="director-signature-img"/);
+    assert.match(outputHtml, /src="data:image\/png;base64,123"/);
+    assert.match(outputHtml, /alt="TTD Direksi"/);
+    assert.match(outputHtml, /style="[^"]*max-height:\s*85px[^"]*"/);
+    editor.destroy();
+  });
+
+  it('preserves stacked director signature and stamp images inside signature box', () => {
+    const html =
+      '<div class="signature-stamp-box" style="position: relative; width: 220px; height: 110px; margin: 8px 0;"><img src="data:image/png;base64,sig" alt="TTD Direksi" class="director-signature-img" style="position: absolute; left: 0; bottom: 0; max-height: 85px; max-width: 180px; object-fit: contain; z-index: 1;" /><img src="data:image/png;base64,stamp" alt="Stempel Perusahaan" class="director-stamp-img" style="position: absolute; left: 40px; bottom: 0; max-height: 95px; max-width: 120px; object-fit: contain; z-index: 2; opacity: 0.85; pointer-events: none;" /></div>';
+    const editor = new Editor({
+      extensions: [StarterKit, QuotationImageExtension, QuotationSignatureBoxExtension],
+      content: html,
+    });
+
+    const outputHtml = editor.getHTML();
+    assert.match(outputHtml, /class="signature-stamp-box"/);
+    assert.match(outputHtml, /class="director-signature-img"/);
+    assert.match(outputHtml, /class="director-stamp-img"/);
+    assert.match(outputHtml, /src="data:image\/png;base64,sig"/);
+    assert.match(outputHtml, /src="data:image\/png;base64,stamp"/);
+    editor.destroy();
+  });
+
+  it('preserves client signature box with client signature image and empty client box', () => {
+    const signedHtml =
+      '<div class="client-signature-box" style="position: relative; width: 220px; height: 110px; margin: 8px 0; display: flex; align-items: flex-end;"><img src="data:image/png;base64,clientsig" alt="TTD Klien" class="client-signature-img" style="max-height: 85px; max-width: 180px; object-fit: contain;" /></div>';
+    const editor1 = new Editor({
+      extensions: [StarterKit, QuotationImageExtension, QuotationSignatureBoxExtension],
+      content: signedHtml,
+    });
+
+    const output1 = editor1.getHTML();
+    assert.match(output1, /class="client-signature-box"/);
+    assert.match(output1, /class="client-signature-img"/);
+    assert.match(output1, /src="data:image\/png;base64,clientsig"/);
+    assert.match(output1, /alt="TTD Klien"/);
+    editor1.destroy();
+
+    const emptyHtml =
+      '<div class="client-signature-box" style="position: relative; width: 220px; height: 110px; margin: 8px 0; display: flex; align-items: flex-end;"></div>';
+    const editor2 = new Editor({
+      extensions: [StarterKit, QuotationImageExtension, QuotationSignatureBoxExtension],
+      content: emptyHtml,
+    });
+
+    const output2 = editor2.getHTML();
+    assert.match(output2, /class="client-signature-box"/);
+    editor2.destroy();
+  });
 });
+

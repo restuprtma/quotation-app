@@ -19,12 +19,14 @@ import { normalizeQuotationHeaderHTML } from './quotation-header-normalizer';
 import {
   QuotationFieldMark,
   LegalBlockExtension,
+  QuotationImageExtension,
   QuotationTableExtension,
   QuotationSectionExtension,
   QuotationListItemExtension,
   QuotationTableRowExtension,
   QuotationTableCellExtension,
   QuotationTableHeaderExtension,
+  QuotationSignatureBoxExtension,
   QuotationFieldAttributesExtension,
 } from './legal-block-extension';
 
@@ -104,6 +106,8 @@ export function QuotationEditor({
       QuotationSectionExtension,
       QuotationFieldAttributesExtension,
       QuotationFieldMark,
+      QuotationImageExtension,
+      QuotationSignatureBoxExtension,
       Underline,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Link.configure({ openOnClick: false }),
