@@ -31,6 +31,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 import { HistoryPanel } from '../components/HistoryPanel';
 import { PublishDialog } from '../components/PublishDialog';
+import { DocumentCanvas } from '../components/document-canvas';
 import { QuotationEditor } from '../components/quotation-editor';
 import { useQuotationDraft } from '../hooks/use-quotation-draft';
 import { RegenerateDialog } from '../components/regenerate-dialog';
@@ -752,14 +753,23 @@ export function QuotationEditorView({ id = '' }: Props) {
             )}
             <Stack direction={{ xs: 'column', lg: 'row' }} spacing={2} alignItems="stretch">
               <Box sx={{ minWidth: 0, flex: 1 }}>
-                <QuotationEditor
-                  content={currentHtml}
-                  isUnlocked={session.isUnlocked}
-                  disabled={session.isConflict || isReadOnly}
-                  onToggleUnlock={handleToggleUnlock}
-                  onRestoreOfficial={handleRestoreOfficial}
-                  onChange={handleEditorChange}
-                />
+                {isReadOnly ? (
+                  <DocumentCanvas>
+                    <Box
+                      className="ProseMirror"
+                      dangerouslySetInnerHTML={{ __html: session.contentHtml }}
+                    />
+                  </DocumentCanvas>
+                ) : (
+                  <QuotationEditor
+                    content={currentHtml}
+                    isUnlocked={session.isUnlocked}
+                    disabled={session.isConflict || isReadOnly}
+                    onToggleUnlock={handleToggleUnlock}
+                    onRestoreOfficial={handleRestoreOfficial}
+                    onChange={handleEditorChange}
+                  />
+                )}
               </Box>
               {session.promptState && (
                 <PromptEditorWorkspace

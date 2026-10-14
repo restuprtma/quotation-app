@@ -115,6 +115,7 @@ describe('QuotationEditorView', () => {
     cleanup();
     vi.clearAllMocks();
     quotationDetail.status = 'draft';
+    quotationDetail.content_html = '<p>Draft</p>';
     delete (quotationDetail as any).public_token;
   });
 
@@ -230,8 +231,9 @@ describe('QuotationEditorView', () => {
 
     await waitFor(() => expect(screen.getByText('read_only_notice')).toBeTruthy());
 
-    // QuotationEditor receives disabled=true
-    expect(mockQuotationEditor).toHaveBeenCalledWith(expect.objectContaining({ disabled: true }));
+    // QuotationEditor is not mounted; raw DocumentCanvas is rendered
+    expect(screen.queryByTestId('quotation-editor')).toBeNull();
+    expect(document.querySelector('.quotation-document .ProseMirror')).toBeTruthy();
 
     // Save Draft button is disabled
     const saveDraftBtn = screen.getByRole('button', { name: /editor\.saveDraft/i });
@@ -258,8 +260,9 @@ describe('QuotationEditorView', () => {
 
     await waitFor(() => expect(screen.getByText('read_only_notice')).toBeTruthy());
 
-    // QuotationEditor receives disabled=true
-    expect(mockQuotationEditor).toHaveBeenCalledWith(expect.objectContaining({ disabled: true }));
+    // QuotationEditor is not mounted; raw DocumentCanvas is rendered
+    expect(screen.queryByTestId('quotation-editor')).toBeNull();
+    expect(document.querySelector('.quotation-document .ProseMirror')).toBeTruthy();
 
     // Save Draft button is disabled
     const saveDraftBtn = screen.getByRole('button', { name: /editor\.saveDraft/i });
@@ -380,8 +383,9 @@ describe('QuotationEditorView', () => {
 
     await waitFor(() => expect(screen.getByText('read_only_notice')).toBeTruthy());
 
-    // QuotationEditor receives disabled=true
-    expect(mockQuotationEditor).toHaveBeenCalledWith(expect.objectContaining({ disabled: true }));
+    // QuotationEditor is not mounted; raw DocumentCanvas is rendered
+    expect(screen.queryByTestId('quotation-editor')).toBeNull();
+    expect(document.querySelector('.quotation-document .ProseMirror')).toBeTruthy();
 
     // Save Draft button is disabled
     const saveDraftBtn = screen.getByRole('button', { name: /editor\.saveDraft/i });
@@ -398,6 +402,36 @@ describe('QuotationEditorView', () => {
         name: /Buka Link Publik|Open Public Link|editor\.openPublicLink/i,
       })
     ).toBeDefined();
+  });
+
+  it('renders raw DocumentCanvas directly when quotation is signed, showing signatures faithfully without mounting editor', async () => {
+    quotationDetail.status = 'signed';
+    quotationDetail.content_html = `
+      <div class="qtr-signature-section">
+        <div class="qtr-signature-block" data-testid="director-signature">
+          <p>Direktur Utama</p>
+        </div>
+        <div class="qtr-client-signature-overlay" data-testid="client-signature">
+          <p>Client Signature</p>
+        </div>
+      </div>
+    `;
+
+    render(
+      <MemoryRouter>
+        <QuotationEditorView id="quotation-1" />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('director-signature')).toBeTruthy();
+      expect(screen.getByTestId('client-signature')).toBeTruthy();
+    });
+
+    // QuotationEditor should not be rendered
+    expect(screen.queryByTestId('quotation-editor')).toBeNull();
+    // Raw HTML with ProseMirror class inside DocumentCanvas should be present
+    expect(document.querySelector('.quotation-document .ProseMirror')).toBeTruthy();
   });
 
   it('shows error toast when copying public link fails', async () => {
