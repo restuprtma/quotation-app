@@ -4,7 +4,10 @@
   "buttons": {
     "new": "Tambah Rate Card",
     "back": "Kembali ke Daftar",
-    "backToList": "Kembali ke Daftar Rate Card"
+    "backToList": "Kembali ke Daftar Rate Card",
+    "addItem": "Tambah Posisi",
+    "addRole": "Tambah Posisi",
+    "save": "Simpan"
   },
   "toolbar": {
     "searchPlaceholder": "Cari berdasarkan kode atau nama...",
@@ -80,6 +83,42 @@
     "deleteTitle": "Hapus Rate Card",
     "deleteDesc": "Apakah Anda yakin ingin menghapus rate card \"{{code}}\" ({{name}})? Tindakan ini tidak dapat dibatalkan."
   },
+  "itemDialog": {
+    "createTitle": "Tambah Posisi Baru",
+    "editTitle": "Edit Posisi",
+    "displayNameLabel": "Nama Posisi",
+    "displayNamePlaceholder": "misal: Full Stack AI Engineer",
+    "roleLabel": "Pengenal Role (Slug)",
+    "rolePlaceholder": "otomatis dari nama posisi jika kosong",
+    "roleHelper": "Biarkan kosong untuk dibuat otomatis (misal: fullstack_ai_engineer)",
+    "disciplineLabel": "Disiplin",
+    "seniorityLabel": "Senioritas",
+    "termTypeLabel": "Durasi Kerja",
+    "amountPerMonthLabel": "Tarif Bulanan",
+    "advancedCostTitle": "Rincian Biaya Lanjutan",
+    "advancedCostSubtitle": "Komponen breakdown 5 biaya, batas negosiasi, dan biaya persiapan",
+    "baseSalaryLabel": "Gaji Pokok Squad",
+    "techLeadFeeLabel": "Alokasi Tech Lead",
+    "aiRndFeeLabel": "Alokasi AI & R&D",
+    "workspaceFeeLabel": "Ruang Kerja & Perangkat",
+    "managementFeeLabel": "Manajemen Rekayasa",
+    "publishedRateLabel": "Harga Terbitan",
+    "maxDiscountPctLabel": "Diskon Maksimal (%)",
+    "floorRateLabel": "Harga Batas Bawah",
+    "educationReqLabel": "Syarat Pendidikan",
+    "educationReqPlaceholder": "misal: S1 / D4 Teknik Informatika",
+    "experienceReqLabel": "Syarat Pengalaman",
+    "experienceReqPlaceholder": "misal: > 3 tahun",
+    "kickoffFeeLabel": "Biaya Kickoff",
+    "recruitmentFeeLabel": "Biaya Rekrutmen",
+    "onboardingFeeLabel": "Biaya Onboarding",
+    "deleteTitle": "Hapus Posisi",
+    "deleteDesc": "Apakah Anda yakin ingin menghapus posisi \"{{name}}\"? Tindakan ini tidak dapat dibatalkan."
+  },
+  "empty": {
+    "noRolesTitle": "Belum Ada Posisi",
+    "noRolesDesc": "Rate card ini belum memiliki posisi atau tarif. Klik tombol di bawah untuk menambahkan posisi pertama."
+  },
   "actions": {
     "viewDetails": "Lihat Detail",
     "delete": "Hapus",
@@ -91,7 +130,13 @@
     "deleteSuccess": "Rate card berhasil dihapus",
     "deleteFailed": "Gagal menghapus rate card",
     "setDefaultSuccess": "Rate card standar berhasil diperbarui",
-    "setDefaultFailed": "Gagal menjadikan rate card standar"
+    "setDefaultFailed": "Gagal menjadikan rate card standar",
+    "createItemSuccess": "Posisi berhasil ditambahkan",
+    "createItemFailed": "Gagal menambahkan posisi",
+    "updateItemSuccess": "Posisi berhasil diperbarui",
+    "updateItemFailed": "Gagal memperbarui posisi",
+    "deleteItemSuccess": "Posisi berhasil dihapus",
+    "deleteItemFailed": "Gagal menghapus posisi"
   },
   "detail": {
     "title": "Detail Rate Card",

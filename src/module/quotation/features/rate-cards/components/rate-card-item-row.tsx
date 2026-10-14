@@ -24,9 +24,11 @@ import {
 interface Props {
   item: RateCardItem;
   currency?: string;
+  onEdit?: (item: RateCardItem) => void;
+  onDelete?: (item: RateCardItem) => void;
 }
 
-export function RateCardItemRow({ item, currency = 'IDR' }: Props) {
+export function RateCardItemRow({ item, currency = 'IDR', onEdit, onDelete }: Props) {
   const { t } = useTranslate('rate_card');
   const [open, setOpen] = useState(false);
 
@@ -129,13 +131,37 @@ export function RateCardItemRow({ item, currency = 'IDR' }: Props) {
             {formatCurrencyValue(hourlyRate, currency)}
           </Typography>
         </TableCell>
+
+        {/* Actions */}
+        <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+          {onEdit && (
+            <IconButton
+              size="small"
+              color="inherit"
+              onClick={() => onEdit(item)}
+              aria-label="edit role"
+            >
+              <Iconify icon="solar:pen-bold" />
+            </IconButton>
+          )}
+          {onDelete && (
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => onDelete(item)}
+              aria-label="delete role"
+            >
+              <Iconify icon="solar:trash-bin-trash-bold" />
+            </IconButton>
+          )}
+        </TableCell>
       </TableRow>
 
       {/* Expanded Breakdown Row */}
       <TableRow>
         <TableCell
           sx={{ py: 0, px: 2, borderBottom: open ? 1 : 0, borderColor: 'divider' }}
-          colSpan={8}
+          colSpan={9}
         >
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ py: 2 }}>

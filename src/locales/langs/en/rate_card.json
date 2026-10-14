@@ -4,7 +4,10 @@
   "buttons": {
     "new": "New Rate Card",
     "back": "Back to Rate Cards",
-    "backToList": "Back to Rate Card List"
+    "backToList": "Back to Rate Card List",
+    "addItem": "Add Role",
+    "addRole": "Add Role",
+    "save": "Save"
   },
   "toolbar": {
     "searchPlaceholder": "Search by code or name...",
@@ -80,6 +83,42 @@
     "deleteTitle": "Delete Rate Card",
     "deleteDesc": "Are you sure you want to delete rate card \"{{code}}\" ({{name}})? This action cannot be undone."
   },
+  "itemDialog": {
+    "createTitle": "Add New Role",
+    "editTitle": "Edit Role",
+    "displayNameLabel": "Position Name",
+    "displayNamePlaceholder": "e.g. Full Stack AI Engineer",
+    "roleLabel": "Role Identifier (Slug)",
+    "rolePlaceholder": "auto-generated from position name if blank",
+    "roleHelper": "Leave blank to auto-generate (e.g. fullstack_ai_engineer)",
+    "disciplineLabel": "Discipline",
+    "seniorityLabel": "Seniority",
+    "termTypeLabel": "Term Type",
+    "amountPerMonthLabel": "Monthly Rate",
+    "advancedCostTitle": "Advanced Cost Breakdown",
+    "advancedCostSubtitle": "5 cost components, negotiation parameters, and hiring fees",
+    "baseSalaryLabel": "Squad Base Salary",
+    "techLeadFeeLabel": "Tech Lead Allocation",
+    "aiRndFeeLabel": "AI & R&D Fee",
+    "workspaceFeeLabel": "Workspace & Tools",
+    "managementFeeLabel": "Engineering Management",
+    "publishedRateLabel": "Published Rate",
+    "maxDiscountPctLabel": "Max Discount (%)",
+    "floorRateLabel": "Floor Rate",
+    "educationReqLabel": "Education Requirement",
+    "educationReqPlaceholder": "e.g. Bachelor's in CS",
+    "experienceReqLabel": "Experience Requirement",
+    "experienceReqPlaceholder": "e.g. > 3 years",
+    "kickoffFeeLabel": "Kickoff Fee",
+    "recruitmentFeeLabel": "Recruitment Fee",
+    "onboardingFeeLabel": "Onboarding Fee",
+    "deleteTitle": "Delete Role",
+    "deleteDesc": "Are you sure you want to delete role \"{{name}}\"? This action cannot be undone."
+  },
+  "empty": {
+    "noRolesTitle": "No Roles Yet",
+    "noRolesDesc": "This rate card does not have any roles or rates yet. Click below to add the first role."
+  },
   "actions": {
     "viewDetails": "View Details",
     "delete": "Delete",
@@ -91,7 +130,13 @@
     "deleteSuccess": "Rate card deleted successfully",
     "deleteFailed": "Failed to delete rate card",
     "setDefaultSuccess": "Default rate card updated successfully",
-    "setDefaultFailed": "Failed to set default rate card"
+    "setDefaultFailed": "Failed to set default rate card",
+    "createItemSuccess": "Role added successfully",
+    "createItemFailed": "Failed to add role",
+    "updateItemSuccess": "Role updated successfully",
+    "updateItemFailed": "Failed to update role",
+    "deleteItemSuccess": "Role deleted successfully",
+    "deleteItemFailed": "Failed to delete role"
   },
   "detail": {
     "title": "Rate Card Detail",

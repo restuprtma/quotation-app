@@ -1,6 +1,6 @@
-import type { RateCardItem } from '../types';
+import type { RateCardItem, CreateRateCardItemPayload } from '../types';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
@@ -27,28 +27,97 @@ import { useParams, useRouter } from 'src/routes/hooks';
 
 import { useTranslate } from 'src/locales';
 import { Label } from 'src/shared/ui/label';
+import { toast } from 'src/shared/ui/snackbar';
 import { Iconify } from 'src/shared/ui/iconify';
 import { Scrollbar } from 'src/shared/ui/scrollbar';
 import { PageHeader } from 'src/shared/ui/page-header';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { ConfirmDialog } from 'src/shared/ui/confirm-dialog';
 
 import { DISCIPLINES } from '../types';
 import { getClientTierColor } from '../utils/format';
-import { useRateCardDetail } from '../hooks/use-rate-cards';
 import { RateCardItemRow } from '../components/rate-card-item-row';
 import { InfraPackageTable } from '../components/infra-package-table';
 import { OvertimeConfigTable } from '../components/overtime-config-table';
+import { RateCardItemFormDialog } from '../components/rate-card-item-form-dialog';
+import {
+  useRateCardDetail,
+  useCreateRateCardItem,
+  useUpdateRateCardItem,
+  useDeleteRateCardItem,
+} from '../hooks/use-rate-cards';
 
 export default function RateCardDetailPage() {
   const { t } = useTranslate('rate_card');
+  const { t: tCommon } = useTranslate('common');
   const router = useRouter();
   const { id = '' } = useParams();
 
   const { data: rateCard, isLoading, error } = useRateCardDetail(id);
 
+  const createItemMutation = useCreateRateCardItem(id);
+  const updateItemMutation = useUpdateRateCardItem(id);
+  const deleteItemMutation = useDeleteRateCardItem(id);
+
   const [activeMainTab, setActiveMainTab] = useState<'roles' | 'overtime' | 'infra'>('roles');
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>('all');
   const [searchRole, setSearchRole] = useState<string>('');
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<RateCardItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<RateCardItem | null>(null);
+
+  const handleOpenCreate = useCallback(() => {
+    setEditingItem(null);
+    setDialogOpen(true);
+  }, []);
+
+  const handleOpenEdit = useCallback((item: RateCardItem) => {
+    setEditingItem(item);
+    setDialogOpen(true);
+  }, []);
+
+  const handleCloseDialog = useCallback(() => {
+    setEditingItem(null);
+    setDialogOpen(false);
+  }, []);
+
+  const handleOpenDelete = useCallback((item: RateCardItem) => {
+    setDeleteTarget(item);
+  }, []);
+
+  const handleCloseDelete = useCallback(() => {
+    setDeleteTarget(null);
+  }, []);
+
+  const handleSubmitItem = async (payload: CreateRateCardItemPayload) => {
+    try {
+      if (editingItem) {
+        await updateItemMutation.mutateAsync({ itemId: editingItem.id, payload });
+        toast.success(t('messages.updateItemSuccess'));
+      } else {
+        await createItemMutation.mutateAsync(payload);
+        toast.success(t('messages.createItemSuccess'));
+      }
+      handleCloseDialog();
+    } catch (err: any) {
+      const defaultMsg = editingItem
+        ? t('messages.updateItemFailed')
+        : t('messages.createItemFailed');
+      toast.error(err.message || defaultMsg);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteItemMutation.mutateAsync(deleteTarget.id);
+      toast.success(t('messages.deleteItemSuccess'));
+      handleCloseDelete();
+    } catch (err: any) {
+      toast.error(err.message || t('messages.deleteItemFailed'));
+    }
+  };
 
   const items: RateCardItem[] = useMemo(() => rateCard?.items || [], [rateCard]);
 
@@ -332,7 +401,7 @@ export default function RateCardDetailPage() {
       {/* TAB 1: Roles & Rates */}
       {activeMainTab === 'roles' && (
         <>
-          {/* Discipline Sub-tabs & Search Toolbar */}
+          {/* Discipline Sub-tabs & Search / Action Toolbar */}
           <Card sx={{ mb: 3, p: 2 }}>
             <Stack
               direction={{ xs: 'column', md: 'row' }}
@@ -363,73 +432,126 @@ export default function RateCardDetailPage() {
                 ))}
               </Tabs>
 
-              {/* Search Within Roles */}
-              <TextField
-                size="small"
-                value={searchRole}
-                placeholder={t('toolbar.searchRolesPlaceholder')}
-                onChange={(e) => setSearchRole(e.target.value)}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-                sx={{ minWidth: { md: 260 } }}
-              />
+              {/* Search & Add Role Toolbar */}
+              <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap">
+                <TextField
+                  size="small"
+                  value={searchRole}
+                  placeholder={t('toolbar.searchRolesPlaceholder')}
+                  onChange={(e) => setSearchRole(e.target.value)}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  sx={{ minWidth: { md: 240 } }}
+                />
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<Iconify icon="mingcute:add-line" />}
+                  onClick={handleOpenCreate}
+                  sx={{ whiteSpace: 'nowrap' }}
+                >
+                  {t('buttons.addItem', { defaultValue: 'Tambah Posisi' })}
+                </Button>
+              </Stack>
             </Stack>
           </Card>
 
-          {/* Rate Card Items Master Table */}
-          <Card>
-            <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-              <Scrollbar>
-                <Table size="medium" sx={{ minWidth: 960 }}>
-                  <TableHead>
-                    <TableRow sx={{ bgcolor: 'background.neutral' }}>
-                      <TableCell sx={{ width: 48 }} />
-                      <TableCell sx={{ fontWeight: 600 }}>{t('table.role')}</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>{t('table.discipline')}</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>{t('table.seniority')}</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>{t('table.termType')}</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 600 }}>
-                        {t('table.monthlyRate')}
-                      </TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 600 }}>
-                        {t('table.dailyRate')}
-                      </TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 600 }}>
-                        {t('table.hourlyRate')}
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-
-                  <TableBody>
-                    {filteredItems.map((item) => (
-                      <RateCardItemRow
-                        key={item.id || `${item.role}-${item.seniority}-${item.term_type}`}
-                        item={item}
-                        currency={rateCard.currency}
-                      />
-                    ))}
-
-                    {filteredItems.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            {t('table.noMatchingRoles')}
-                          </Typography>
+          {/* Rate Card Items Content */}
+          {items.length === 0 ? (
+            <Card sx={{ p: 6, textAlign: 'center', borderRadius: 2 }}>
+              <Box sx={{ maxWidth: 440, mx: 'auto' }}>
+                <Box
+                  sx={{
+                    mb: 2,
+                    display: 'inline-flex',
+                    p: 2,
+                    borderRadius: '50%',
+                    bgcolor: 'primary.lighter',
+                    color: 'primary.main',
+                  }}
+                >
+                  <Iconify icon="solar:users-group-rounded-bold-duotone" width={48} />
+                </Box>
+                <Typography variant="h6" gutterBottom>
+                  {t('empty.noRolesTitle', { defaultValue: 'Belum Ada Posisi' })}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  {t('empty.noRolesDesc', {
+                    defaultValue:
+                      'Rate card ini belum memiliki posisi atau tarif. Klik tombol di bawah untuk menambahkan posisi pertama.',
+                  })}
+                </Typography>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<Iconify icon="mingcute:add-line" />}
+                  onClick={handleOpenCreate}
+                >
+                  {t('buttons.addItem', { defaultValue: 'Tambah Posisi' })}
+                </Button>
+              </Box>
+            </Card>
+          ) : (
+            <Card>
+              <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+                <Scrollbar>
+                  <Table size="medium" sx={{ minWidth: 960 }}>
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: 'background.neutral' }}>
+                        <TableCell sx={{ width: 48 }} />
+                        <TableCell sx={{ fontWeight: 600 }}>{t('table.role')}</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>{t('table.discipline')}</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>{t('table.seniority')}</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>{t('table.termType')}</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600 }}>
+                          {t('table.monthlyRate')}
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600 }}>
+                          {t('table.dailyRate')}
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600 }}>
+                          {t('table.hourlyRate')}
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600 }}>
+                          {t('table.actions')}
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </Scrollbar>
-            </TableContainer>
-          </Card>
+                    </TableHead>
+
+                    <TableBody>
+                      {filteredItems.map((item) => (
+                        <RateCardItemRow
+                          key={item.id || `${item.role}-${item.seniority}-${item.term_type}`}
+                          item={item}
+                          currency={rateCard.currency}
+                          onEdit={handleOpenEdit}
+                          onDelete={handleOpenDelete}
+                        />
+                      ))}
+
+                      {filteredItems.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={9} align="center" sx={{ py: 6 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              {t('table.noMatchingRoles')}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </Scrollbar>
+              </TableContainer>
+            </Card>
+          )}
         </>
       )}
 
@@ -445,6 +567,29 @@ export default function RateCardDetailPage() {
       {activeMainTab === 'infra' && (
         <InfraPackageTable packages={rateCard.infra_packages || []} currency={rateCard.currency} />
       )}
+
+      {/* Create / Edit Item Dialog */}
+      <RateCardItemFormDialog
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        onSubmit={handleSubmitItem}
+        initialData={editingItem}
+        loading={createItemMutation.isPending || updateItemMutation.isPending}
+      />
+
+      {/* Delete Item Confirmation Dialog */}
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title={t('itemDialog.deleteTitle', { defaultValue: 'Hapus Posisi' })}
+        description={t('itemDialog.deleteDesc', {
+          name: deleteTarget?.display_name || deleteTarget?.role || '',
+        })}
+        confirmLabel={tCommon('actions.delete')}
+        confirmColor="error"
+        loading={deleteItemMutation.isPending}
+        onClose={handleCloseDelete}
+        onConfirm={handleConfirmDelete}
+      />
     </DashboardContent>
   );
 }
