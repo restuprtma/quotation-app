@@ -22,7 +22,12 @@ import { ConfirmDialog } from 'src/shared/ui/confirm-dialog';
 
 import { RateCardTable } from '../components/rate-card-table';
 import { RateCardCreateDialog } from '../components/rate-card-create-dialog';
-import { useRateCards, useCreateRateCard, useDeleteRateCard } from '../hooks/use-rate-cards';
+import {
+  useRateCards,
+  useCreateRateCard,
+  useDeleteRateCard,
+  useSetDefaultRateCard,
+} from '../hooks/use-rate-cards';
 
 export default function RateCardListPage() {
   const { t } = useTranslate('rate_card');
@@ -39,6 +44,7 @@ export default function RateCardListPage() {
   const { data: rateCards = [], isLoading } = useRateCards();
   const createMutation = useCreateRateCard();
   const deleteMutation = useDeleteRateCard();
+  const setDefaultMutation = useSetDefaultRateCard();
 
   // Filtered rows
   const filteredRows = useMemo(
@@ -82,6 +88,18 @@ export default function RateCardListPage() {
       toast.error(err.message || t('messages.deleteFailed'));
     }
   };
+
+  const handleSetDefault = useCallback(
+    async (id: string) => {
+      try {
+        await setDefaultMutation.mutateAsync(id);
+        toast.success(t('messages.setDefaultSuccess'));
+      } catch (err: any) {
+        toast.error(err.message || t('messages.setDefaultFailed'));
+      }
+    },
+    [setDefaultMutation, t]
+  );
 
   const handleCreate = async (payload: any) => {
     try {
@@ -191,6 +209,7 @@ export default function RateCardListPage() {
         onRowsPerPageChange={table.onChangeRowsPerPage}
         onView={handleViewDetail}
         onDelete={handleOpenDelete}
+        onSetDefault={handleSetDefault}
         notFound={!isLoading && filteredRows.length === 0}
       />
 

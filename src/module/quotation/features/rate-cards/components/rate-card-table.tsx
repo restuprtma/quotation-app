@@ -27,6 +27,7 @@ interface Props {
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onView: (id: string) => void;
   onDelete: (row: RateCardSummaryResponse) => void;
+  onSetDefault?: (id: string) => void;
   notFound?: boolean;
 }
 
@@ -39,6 +40,7 @@ export function RateCardTable({
   onRowsPerPageChange,
   onView,
   onDelete,
+  onSetDefault,
   notFound = false,
 }: Props) {
   const { t } = useTranslate('rate_card');
@@ -77,7 +79,13 @@ export function RateCardTable({
               ) : (
                 <>
                   {paginatedRows.map((row) => (
-                    <RateCardTableRow key={row.id} row={row} onView={onView} onDelete={onDelete} />
+                    <RateCardTableRow
+                      key={row.id}
+                      row={row}
+                      onView={onView}
+                      onDelete={onDelete}
+                      onSetDefault={onSetDefault}
+                    />
                   ))}
 
                   <TableNoData

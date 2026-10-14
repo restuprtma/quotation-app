@@ -18,9 +18,10 @@ interface Props {
   row: RateCardSummaryResponse;
   onView: (id: string) => void;
   onDelete: (row: RateCardSummaryResponse) => void;
+  onSetDefault?: (id: string) => void;
 }
 
-export function RateCardTableRow({ row, onView, onDelete }: Props) {
+export function RateCardTableRow({ row, onView, onDelete, onSetDefault }: Props) {
   const { t } = useTranslate('rate_card');
 
   const formatClientTier = (tier: string) => {
@@ -57,7 +58,7 @@ export function RateCardTableRow({ row, onView, onDelete }: Props) {
 
       {/* Name */}
       <TableCell>
-        <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography
             variant="body2"
             fontWeight="600"
@@ -66,6 +67,11 @@ export function RateCardTableRow({ row, onView, onDelete }: Props) {
           >
             {row.name}
           </Typography>
+          {row.is_default && (
+            <Label color="primary" variant="soft">
+              {t('table.default')}
+            </Label>
+          )}
         </Box>
       </TableCell>
 
@@ -111,14 +117,37 @@ export function RateCardTableRow({ row, onView, onDelete }: Props) {
       {/* Actions */}
       <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
         <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+          {!row.is_default && onSetDefault && (
+            <Tooltip title={t('actions.setDefault')}>
+              <IconButton
+                size="small"
+                color="warning"
+                onClick={() => onSetDefault(row.id)}
+                aria-label={t('actions.setDefault')}
+              >
+                <Iconify icon="solar:star-bold" />
+              </IconButton>
+            </Tooltip>
+          )}
+
           <Tooltip title={t('actions.viewDetails')}>
-            <IconButton size="small" color="primary" onClick={() => onView(row.id)}>
+            <IconButton
+              size="small"
+              color="primary"
+              onClick={() => onView(row.id)}
+              aria-label={t('actions.viewDetails')}
+            >
               <Iconify icon="solar:eye-bold" />
             </IconButton>
           </Tooltip>
 
           <Tooltip title={t('actions.delete')}>
-            <IconButton size="small" color="error" onClick={() => onDelete(row)}>
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => onDelete(row)}
+              aria-label={t('actions.delete')}
+            >
               <Iconify icon="solar:trash-bin-trash-bold" />
             </IconButton>
           </Tooltip>

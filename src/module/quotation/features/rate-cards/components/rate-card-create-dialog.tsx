@@ -74,7 +74,7 @@ export function RateCardCreateDialog({ open, onClose, onSubmit, loading = false 
       short_term_surcharge_pct: 40,
       enterprise_markup_pct: 35,
       effective_from: todayStr,
-      seed_standard_roles: true,
+      seed_standard_roles: false,
     },
   });
 
@@ -159,28 +159,6 @@ export function RateCardCreateDialog({ open, onClose, onSubmit, loading = false 
           });
         }
       }
-    } else {
-      // Minimal single item to satisfy API min=1 item constraint
-      items = [
-        {
-          role: 'backend_programmer',
-          display_name: 'Back End Programmer',
-          seniority: 'senior',
-          discipline: 'ENGINEERING',
-          term_type: 'long_term',
-          amount_per_month: 11550000,
-          base_salary: 6800000,
-          tech_lead_fee: 1030000,
-          ai_rnd_fee: 500000,
-          workspace_fee: 500000,
-          management_fee: 2720000,
-          education_requirement: 'S1/D4',
-          experience_requirement: '> 2 th',
-          published_rate: 11550000,
-          max_discount_pct: 5,
-          floor_rate: 10972500,
-        },
-      ];
     }
 
     const payload: CreateRateCardPayload = {

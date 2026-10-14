@@ -22,6 +22,7 @@
     "currency": "Mata Uang",
     "itemCount": "Jumlah Posisi",
     "status": "Status",
+    "default": "DEFAULT",
     "actions": "Aksi",
     "role": "Posisi & Kualifikasi",
     "discipline": "Disiplin",
@@ -81,13 +82,16 @@
   },
   "actions": {
     "viewDetails": "Lihat Detail",
-    "delete": "Hapus"
+    "delete": "Hapus",
+    "setDefault": "Jadikan Standar"
   },
   "messages": {
     "createSuccess": "Rate card berhasil dibuat",
     "createFailed": "Gagal membuat rate card",
     "deleteSuccess": "Rate card berhasil dihapus",
-    "deleteFailed": "Gagal menghapus rate card"
+    "deleteFailed": "Gagal menghapus rate card",
+    "setDefaultSuccess": "Rate card standar berhasil diperbarui",
+    "setDefaultFailed": "Gagal menjadikan rate card standar"
   },
   "detail": {
     "title": "Detail Rate Card",

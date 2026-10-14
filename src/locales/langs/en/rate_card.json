@@ -22,6 +22,7 @@
     "currency": "Currency",
     "itemCount": "Items",
     "status": "Status",
+    "default": "DEFAULT",
     "actions": "Actions",
     "role": "Role & Requirements",
     "discipline": "Discipline",
@@ -81,13 +82,16 @@
   },
   "actions": {
     "viewDetails": "View Details",
-    "delete": "Delete"
+    "delete": "Delete",
+    "setDefault": "Set as Default"
   },
   "messages": {
     "createSuccess": "Rate card created successfully",
     "createFailed": "Failed to create rate card",
     "deleteSuccess": "Rate card deleted successfully",
-    "deleteFailed": "Failed to delete rate card"
+    "deleteFailed": "Failed to delete rate card",
+    "setDefaultSuccess": "Default rate card updated successfully",
+    "setDefaultFailed": "Failed to set default rate card"
   },
   "detail": {
     "title": "Rate Card Detail",
