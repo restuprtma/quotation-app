@@ -1,9 +1,9 @@
-import axios, { endpoints } from 'src/shared/lib/axios';
-
 import type {
   SignatureSettings,
   UpdateSignatureSettingsPayload,
 } from '../types/signature-settings';
+
+import axios, { endpoints } from 'src/shared/lib/axios';
 
 interface BaseResponse<T> {
   success?: boolean;

@@ -1,7 +1,8 @@
+import type { UpdateSignatureSettingsPayload } from '../types/signature-settings';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { signatureSettingsApi } from '../api/signature-settings';
-import type { UpdateSignatureSettingsPayload } from '../types/signature-settings';
 
 export const useSignatureSettings = () =>
   useQuery({
