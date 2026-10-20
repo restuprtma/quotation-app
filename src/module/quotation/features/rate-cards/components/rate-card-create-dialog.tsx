@@ -79,7 +79,7 @@ export function RateCardCreateDialog({ open, onClose, onSubmit, loading = false 
   });
 
   const handleFormSubmit = async (values: FormValues) => {
-    let items: CreateRateCardItemPayload[] = [];
+    const items: CreateRateCardItemPayload[] = [];
 
     if (values.seed_standard_roles) {
       const seniorities: Seniority[] = ['senior', 'intermediate', 'associate'];

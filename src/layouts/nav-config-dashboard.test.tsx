@@ -5,7 +5,7 @@ import i18n from 'i18next';
 import { MemoryRouter } from 'react-router';
 import { it, expect, describe, afterEach } from 'vitest';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
-import { render, screen, cleanup, renderHook } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, renderHook } from '@testing-library/react';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
@@ -275,5 +275,70 @@ describe('NavSectionVertical with grouped sidebar', () => {
 
     const listBlueprintChild = screen.getByRole('link', { name: 'Daftar Blueprint' });
     expect(listBlueprintChild.className).not.toContain('--active');
+  });
+
+  it('activates Rate Cards on "/quotation/rate-cards" without activating Quotation parent', () => {
+    renderNav('/quotation/rate-cards');
+
+    const quotationParent = screen.getByRole('button', { name: 'Quotation' });
+    expect(quotationParent.className).not.toContain('--active');
+    expect(quotationParent.className).not.toContain('--open');
+
+    const rateCards = screen.getByRole('link', { name: 'Rate Card' });
+    expect(rateCards.className).toContain('--active');
+  });
+
+  it('activates Rate Cards on detail "/quotation/rate-cards/rc-123" without activating Quotation parent', () => {
+    renderNav('/quotation/rate-cards/rc-123');
+
+    const quotationParent = screen.getByRole('button', { name: 'Quotation' });
+    expect(quotationParent.className).not.toContain('--active');
+    expect(quotationParent.className).not.toContain('--open');
+
+    const rateCards = screen.getByRole('link', { name: 'Rate Card' });
+    expect(rateCards.className).toContain('--active');
+  });
+
+  it('activates AI Settings on "/quotation/ai-settings" without activating Quotation parent', () => {
+    renderNav('/quotation/ai-settings');
+
+    const quotationParent = screen.getByRole('button', { name: 'Quotation' });
+    expect(quotationParent.className).not.toContain('--active');
+    expect(quotationParent.className).not.toContain('--open');
+
+    const aiSettings = screen.getByRole('link', { name: 'Pengaturan AI' });
+    expect(aiSettings.className).toContain('--active');
+  });
+
+  it('navigates to Blueprint when clicking Blueprint button while on "/quotation/rate-cards"', () => {
+    renderNav('/quotation/rate-cards');
+
+    const blueprintParent = screen.getByRole('button', { name: 'Blueprint' });
+    fireEvent.click(blueprintParent);
+
+    expect(blueprintParent.className).toContain('--active');
+    expect(blueprintParent.className).toContain('--open');
+
+    const createBlueprintChild = screen.getByRole('link', { name: 'Buat Blueprint' });
+    expect(createBlueprintChild.className).toContain('--active');
+
+    const rateCards = screen.getByRole('link', { name: 'Rate Card' });
+    expect(rateCards.className).not.toContain('--active');
+  });
+
+  it('navigates to Quotation when clicking Quotation button while on "/blueprint"', () => {
+    renderNav('/blueprint');
+
+    const quotationParent = screen.getByRole('button', { name: 'Quotation' });
+    fireEvent.click(quotationParent);
+
+    expect(quotationParent.className).toContain('--active');
+    expect(quotationParent.className).toContain('--open');
+
+    const createQuotationChild = screen.getByRole('link', { name: 'Buat Quotation' });
+    expect(createQuotationChild.className).toContain('--active');
+
+    const blueprintParent = screen.getByRole('button', { name: 'Blueprint' });
+    expect(blueprintParent.className).not.toContain('--active');
   });
 });

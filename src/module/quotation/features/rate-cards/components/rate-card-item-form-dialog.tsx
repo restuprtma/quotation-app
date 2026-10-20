@@ -1,7 +1,7 @@
 import type {
-  Discipline,
-  Seniority,
   TermType,
+  Seniority,
+  Discipline,
   RateCardItem,
   CreateRateCardItemPayload,
 } from '../types';
@@ -94,7 +94,7 @@ export function RateCardItemFormDialog({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as any,
     defaultValues: {
       displayName: '',
       role: '',

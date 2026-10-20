@@ -26,7 +26,7 @@ export function ContractsComingSoonView() {
           </Typography>
           <Button
             component={RouterLink}
-            href={paths.dashboard.quotation.root}
+            href={paths.dashboard.quotation.list}
             variant="contained"
             startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
           >

@@ -1,25 +1,17 @@
-import type { NavListProps, NavSubListProps, NavItemDataProps } from '../types';
+import type { NavListProps, NavSubListProps } from '../types';
 
 import { useBoolean } from 'minimal-shared/hooks';
+import { isExternalLink } from 'minimal-shared/utils';
 import { useRef, useEffect, useCallback } from 'react';
-import { isActiveLink, isExternalLink } from 'minimal-shared/utils';
 
-import { usePathname } from 'src/routes/hooks';
+import { useRouter, usePathname } from 'src/routes/hooks';
 
 import { NavItem } from './nav-item';
+import { isNavItemActive } from '../utils';
 import { navSectionClasses } from '../styles';
 import { NavUl, NavLi, NavCollapse } from '../components';
 
 // ----------------------------------------------------------------------
-
-function hasActiveDescendant(pathname: string, items?: NavItemDataProps[]): boolean {
-  if (!items?.length) return false;
-  return items.some(
-    (item) =>
-      isActiveLink(pathname, item.path, item.deepMatch ?? !!item.children) ||
-      hasActiveDescendant(pathname, item.children)
-  );
-}
 
 export function NavList({
   data,
@@ -30,11 +22,10 @@ export function NavList({
   enabledRootRedirect,
 }: NavListProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const navItemRef = useRef<HTMLButtonElement>(null);
 
-  const isActive =
-    isActiveLink(pathname, data.path, data.deepMatch ?? !!data.children) ||
-    hasActiveDescendant(pathname, data.children);
+  const isActive = isNavItemActive(pathname, data);
 
   const { value: open, onTrue: onOpen, onFalse: onClose, onToggle } = useBoolean(isActive);
 
@@ -49,9 +40,17 @@ export function NavList({
 
   const handleToggleMenu = useCallback(() => {
     if (data.children) {
-      onToggle();
+      if (enabledRootRedirect && data.path) {
+        onOpen();
+        router.push(data.path);
+      } else if (!isActive && data.path) {
+        onOpen();
+        router.push(data.path);
+      } else {
+        onToggle();
+      }
     }
-  }, [data.children, onToggle]);
+  }, [data.children, data.path, enabledRootRedirect, isActive, onOpen, onToggle, router]);
 
   const renderNavItem = () => (
     <NavItem

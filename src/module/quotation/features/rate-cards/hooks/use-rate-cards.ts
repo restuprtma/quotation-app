@@ -3,10 +3,9 @@ import type {
   RateCardListParams,
   CreateRateCardPayload,
   RateCardDetailResponse,
+  UpdateRateCardItemArgs,
   RateCardSummaryResponse,
   CreateRateCardItemPayload,
-  UpdateRateCardItemPayload,
-  UpdateRateCardItemArgs,
 } from '../types';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

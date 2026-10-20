@@ -312,9 +312,9 @@ export function BlueprintProgressView({
             <Button
               variant="contained"
               startIcon={<Iconify icon="solar:arrow-left-bold" />}
-              onClick={() => navigate(paths.dashboard.blueprint.root)}
+              onClick={() => navigate(paths.dashboard.blueprint.list)}
             >
-              Kembali ke Generator
+              Kembali ke Daftar Blueprint
             </Button>
           </Card>
         </Box>
@@ -492,9 +492,9 @@ export function BlueprintProgressView({
             <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
               <IconButton
                 size="small"
-                onClick={() => navigate(paths.dashboard.blueprint.root)}
+                onClick={() => navigate(paths.dashboard.blueprint.list)}
                 sx={{ mr: 0.5 }}
-                aria-label="Kembali ke Generator"
+                aria-label="Kembali ke Daftar Blueprint"
               >
                 <Iconify icon="solar:arrow-left-bold" />
               </IconButton>

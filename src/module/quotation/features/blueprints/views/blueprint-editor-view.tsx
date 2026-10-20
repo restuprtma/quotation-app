@@ -496,7 +496,7 @@ export function BlueprintEditorView({
             </Typography>
             <Button
               variant="contained"
-              onClick={() => navigate(paths.dashboard.blueprint.root)}
+              onClick={() => navigate(paths.dashboard.blueprint.list)}
               startIcon={<Iconify icon="solar:arrow-left-bold" />}
             >
               Kembali ke Daftar Blueprint

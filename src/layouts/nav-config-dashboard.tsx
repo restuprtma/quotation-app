@@ -15,9 +15,11 @@ const icon = (name: string) => (
 );
 
 const ICONS = {
-  quotation: icon('ic-file'),
-  blueprint: icon('ic-subpaths'),
-  contract: icon('ic-folder'),
+  quotation: icon('ic-quotation'),
+  blueprint: icon('ic-blueprint'),
+  rateCards: icon('ic-rate-card'),
+  aiSettings: icon('ic-setting'),
+  contract: icon('ic-contract'),
 };
 
 // ----------------------------------------------------------------------
@@ -70,17 +72,20 @@ export function useNavData(): NavSectionProps['data'] {
           {
             title: t('rate_cards', { defaultValue: 'Rate Cards' }),
             path: paths.dashboard.quotation.rateCards,
-            icon: icon('ic-invoice'),
+            icon: ICONS.rateCards,
+            deepMatch: true,
           },
           {
             title: t('ai_settings', { defaultValue: 'AI Settings' }),
             path: paths.dashboard.quotation.aiSettings,
-            icon: icon('ic-setting'),
+            icon: ICONS.aiSettings,
+            deepMatch: true,
           },
           {
             title: t('contract'),
             path: paths.dashboard.contract.root,
             icon: ICONS.contract,
+            deepMatch: true,
           },
         ],
       },
@@ -89,3 +94,4 @@ export function useNavData(): NavSectionProps['data'] {
     return sections;
   }, [t]);
 }
+

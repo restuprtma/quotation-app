@@ -1,12 +1,5 @@
 // @vitest-environment happy-dom
 import type { ReactNode } from 'react';
-
-import { act, renderHook } from '@testing-library/react';
-import { it, vi, expect, describe, beforeEach } from 'vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-import axios, { endpoints } from 'src/shared/lib/axios';
-
 import type {
   RateCardItem,
   RateCardDetailResponse,
@@ -14,6 +7,18 @@ import type {
   UpdateRateCardItemPayload,
 } from '../types';
 
+import { act, renderHook } from '@testing-library/react';
+import { it, vi, expect, describe, beforeEach } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+import axios, { endpoints } from 'src/shared/lib/axios';
+
+import {
+  setDefaultRateCard,
+  createRateCardItem,
+  updateRateCardItem,
+  deleteRateCardItem,
+} from '../api';
 import {
   RATE_CARDS_KEYS,
   useSetDefaultRateCard,
@@ -21,12 +26,6 @@ import {
   useUpdateRateCardItem,
   useDeleteRateCardItem,
 } from './use-rate-cards';
-import {
-  setDefaultRateCard,
-  createRateCardItem,
-  updateRateCardItem,
-  deleteRateCardItem,
-} from '../api';
 
 function createWrapper() {
   const queryClient = new QueryClient({

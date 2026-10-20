@@ -21,7 +21,8 @@ export function BlueprintCreateView() {
   const initialQuotationId = searchParams.get('quotation_id') || '';
   const initialRevisionId = searchParams.get('revision_id') || '';
 
-  const { data: quotationsData } = useQuotationList({ limit: 100 });
+  const quotationParams = useMemo(() => ({ limit: 100 }), []);
+  const { data: quotationsData } = useQuotationList(quotationParams);
 
   const quotationOptions: QuotationOption[] = useMemo(
     () =>

@@ -160,10 +160,10 @@ describe('BlueprintProgressView', () => {
     });
 
     expect(screen.getByText(/Blueprint Tidak Ditemukan/i)).toBeTruthy();
-    const backBtn = screen.getByRole('button', { name: /kembali ke generator/i });
+    const backBtn = screen.getByRole('button', { name: /kembali ke daftar blueprint/i });
     expect(backBtn).toBeTruthy();
     fireEvent.click(backBtn);
-    expect(mockNavigate).toHaveBeenCalledWith('/blueprint');
+    expect(mockNavigate).toHaveBeenCalledWith('/blueprint/list');
   });
 
   it('renders header metadata, status, and starts runner when Mulai Generasi is clicked', async () => {
